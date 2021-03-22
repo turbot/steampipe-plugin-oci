@@ -2,7 +2,7 @@
 name: Feature request - New table
 about: Suggest a new table for this project
 title: Add table oci_<service>_<resource>
-labels: enhancement
+labels: enhancement, new table
 assignees: ''
 
 ---

@@ -116,12 +116,12 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "defined_tags",
-				Description: "Defined tags for user. Defined tags are set up in your tenancy by an administrator. Only users granted permission to work with the defined tags can apply them to resources.",
+				Description: ColumnDescriptionDefinedTags,
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "Free-form tags for user. This tags can be applied by any user with permissions on the resource.",
+				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
 

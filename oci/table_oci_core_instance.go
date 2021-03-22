@@ -153,10 +153,16 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 
 			// Standard Steampipe columns
 			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(instanceTags),
+			},
+			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 
 			// Standard OCI columns
@@ -244,4 +250,49 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	return response.Instance, nil
+}
+
+//// TRANSFORM FUNCTION
+
+// Priority order for tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
+func instanceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	instance := d.HydrateItem.(core.Instance)
+
+	var tags map[string]interface{}
+
+	if instance.FreeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range instance.FreeformTags {
+			tags[k] = v
+		}
+	}
+
+	if instance.DefinedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range instance.DefinedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	if instance.SystemTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range instance.SystemTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	return tags, nil
 }

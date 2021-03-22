@@ -43,6 +43,11 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
+				Name:        "description",
+				Description: "The description assigned to the user.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "lifecycle_state",
 				Description: "The user's current state.",
 				Type:        proto.ColumnType_STRING,

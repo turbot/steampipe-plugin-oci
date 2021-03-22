@@ -120,6 +120,15 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "user_groups",
+				Description: "List of groups associated with the user.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getUserGroups,
+				Transform:   transform.FromValue(),
+			},
+
+			// tags
+			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
 				Type:        proto.ColumnType_JSON,
@@ -218,6 +227,43 @@ func getUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	}
 
 	return response.User, nil
+}
+
+func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	user := h.Item.(identity.User)
+	plugin.Logger(ctx).Trace("getUserGroups")
+	userGroups := []identity.UserGroupMembership{}
+
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	request := identity.ListUserGroupMembershipsRequest{
+		CompartmentId: &session.TenancyID,
+		UserId:        user.Id,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.IdentityClient.ListUserGroupMemberships(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		userGroups = append(userGroups, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return userGroups, nil
 }
 
 //// TRANSFORM FUNCTION

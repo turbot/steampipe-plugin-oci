@@ -28,9 +28,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"oci_identity_user": tableIdentityUser(ctx),
-			"oci_region":        tableIdentityRegion(ctx),
-			"oci_core_instance": tableCoreInstance(ctx),
+			"oci_identity_group": tableIdentityGroup(ctx),
+			"oci_identity_user":  tableIdentityUser(ctx),
+			"oci_region":         tableIdentityRegion(ctx),
+			"oci_core_instance":  tableCoreInstance(ctx),
 		},
 	}
 	return p

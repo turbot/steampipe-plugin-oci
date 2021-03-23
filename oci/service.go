@@ -92,6 +92,46 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData) (*session, err
 	return sess, nil
 }
 
+func coreComputeServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	// if region == "" {
+	// 	return nil, fmt.Errorf("region must be passed ACMService")
+	// }
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("ComputeRegional-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
+	provider, err := oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)})
+	if err != nil {
+		return nil, err
+	}
+	// provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
+	client, err := core.NewComputeClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		ComputeClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // https://github.com/oracle/oci-go-sdk/blob/master/example/helpers/helper.go#L127
 func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 	// how many times to do the retry

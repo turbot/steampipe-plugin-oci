@@ -13,7 +13,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_core_volume;
+  oci_core_volume;
 ```
 
 
@@ -26,13 +26,13 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_core_volume
+  oci_core_volume
 where
   lifecycle_state = 'FAULTY'
 ```
 
 
-### List of volumes with memory size greater tham 1024 Gb
+### List of volumes with memory size greater than 1024 Gb
 
 ```sql
 select
@@ -41,7 +41,7 @@ select
   lifecycle_state,
   size_in_gbs
 from
-  oci_new.oci_core_volume
+  oci_core_volume
 where
   size_in_gbs > 1024
 ```

@@ -78,12 +78,14 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 		return matrix
 	}
 
-	var defaultMatrix []map[string]interface{}
+	defaultMatrix := make([]map[string]interface{}, len(compartments))
 	for j, compartment := range compartments {
+		// plugin.Logger(ctx).Error("BuildCompartementRegionList", "compartment", compartment)
 		defaultMatrix[j] = map[string]interface{}{
-			matrixKeyRegion:      getRegionFromEnvVar,
+			matrixKeyRegion:      getRegionFromEnvVar(),
 			matrixKeyCompartment: *compartment.Id,
 		}
+		plugin.Logger(ctx).Warn("MATRIX", j, defaultMatrix[j])
 	}
 
 	return defaultMatrix
@@ -131,22 +133,6 @@ func getInvalidRegions(regions []string) []string {
 	}
 	return invalidRegions
 }
-
-// // GetDefaultRegion returns the default region used
-// func GetDefaultRegion() string {
-// 	os.Setenv("AWS_SDK_LOAD_CONFIG", "1")
-// 	session, err := session.NewSession(aws.NewConfig())
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	region := *session.Config.Region
-// 	if region == "" {
-// 		// get aws config info
-// 		panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
-// 	}
-// 	return region
-// }
 
 func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *plugin.Connection) ([]identity.Compartment, error) {
 	// Create Session
@@ -200,11 +186,9 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 
 // func getRegionFromEnvVar() (string, error) {
 func getRegionFromEnvVar() string {
-	regionEnvVar := "OCI_REGION"
-	if region, existed := os.LookupEnv(regionEnvVar); existed {
-		return region
-		// return region, nil
+	region := os.Getenv("OCI_REGION")
+	if region == "" {
+		region = getEnvSettingWithBlankDefault("region")
 	}
-	// return "", fmt.Errorf("did not find OCI_REGION env var")
-	return ""
+	return region
 }

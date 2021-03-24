@@ -249,7 +249,6 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	// session, err := coreComputeService(ctx, d)
 	session, err := coreComputeServiceRegional(ctx, d, region)
 	if err != nil {
 		return nil, err

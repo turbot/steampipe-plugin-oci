@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/core"
@@ -17,10 +18,10 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_instance",
 		Description: "OCI Core Instance",
-		// Get: &plugin.GetConfig{
-		// 	KeyColumns: plugin.AnyColumn([]string{"id"}),
-		// 	Hydrate:    getInstance,
-		// },
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getInstance,
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreInstances,
 		},
@@ -240,11 +241,10 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Error("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
 
-	// ➜  steampipe-plugin-oci git:(issue-4) ✗ steampipe query
-	// 	Welcome to Steampipe v0.3.0
-	// 	For more information, type .help
-	// 	> select * from oci_core_instance where id='ocid1.instance.oc1.ap-mumbai-1.anrg6ljr6igdexacgbqlitvrgoq455nhbc3fuim3wpzslnecaqcnfbo4fx4a'
-	// 	Error: get call returned 4 results - the key column is not globally unique
+	// Rstrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 

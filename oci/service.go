@@ -18,6 +18,7 @@ type session struct {
 	TenancyID      string
 	IdentityClient identity.IdentityClient
 	ComputeClient  core.ComputeClient
+	BlockstorageClient core.BlockstorageClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -91,6 +92,41 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData) (*session, err
 
 	return sess, nil
 }
+
+// coreBlockStorageService returns the service client for OCI Core BlockStorage Service
+func coreBlockStorageService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("BlockstoragE-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
+	client, err := core.NewBlockstorageClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantID,
+		BlockstorageClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 
 // https://github.com/oracle/oci-go-sdk/blob/master/example/helpers/helper.go#L127
 func getDefaultRetryPolicy() *oci_common.RetryPolicy {

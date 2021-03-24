@@ -11,8 +11,7 @@ select
   name,
   id,
   lifecycle_state,
-  description,
-  statements
+  description
 from
   oci_identity_policy;
 ```
@@ -22,7 +21,7 @@ from
 ```sql
 select
   name,
-  lifecycle_state,
+  lifecycle_state
 from
   oci_identity_policy
 where lifecycle_state = 'CREATING';

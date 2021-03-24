@@ -199,14 +199,12 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger.Error("listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	// session, err := coreComputeService(ctx, d, region)
 	session, err := coreComputeServiceRegional(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	request := core.ListInstancesRequest{
-		// CompartmentId: &session.TenancyID,
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),

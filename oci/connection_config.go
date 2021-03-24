@@ -6,16 +6,19 @@ import (
 )
 
 type ociConfig struct {
-	Regions            []string `cty:"regions"`
+	// PrivateKey         *string  `cty:"key_file"`
+	// TenancyOCID        *string  `cty:"tenancy"`
+	// UserOCID           *string `cty:"user"`
 	Auth               *string  `cty:"auth"`
 	ConfigPath         *string  `cty:"config_path"`
-	Profile            *string  `cty:"config_file_profile"`
-	TenancyOCID        *string  `cty:"tenancy_ocid"`
-	UserOCID           *string  `cty:"user_ocid"`
 	Fingerprint        *string  `cty:"fingerprint"`
 	PrivateKey         *string  `cty:"private_key"`
-	PrivateKeyPath     *string  `cty:"private_key_path"`
 	PrivateKeyPassword *string  `cty:"private_key_password"`
+	PrivateKeyPath     *string  `cty:"private_key_path"`
+	Profile            *string  `cty:"config_file_profile"`
+	Regions            []string `cty:"regions"`
+	TenancyOCID        *string  `cty:"tenancy_ocid"`
+	UserOCID           *string  `cty:"user_ocid"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
@@ -27,6 +30,7 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"tenancy_ocid": {
+		// "tenancy": {
 		Type: schema.TypeString,
 	},
 	"config_file_profile": {
@@ -36,12 +40,14 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"user_ocid": {
+		// "user": {
 		Type: schema.TypeString,
 	},
 	"fingerprint": {
 		Type: schema.TypeString,
 	},
 	"private_key": {
+		// "key_file": {
 		Type: schema.TypeString,
 	},
 	"private_key_path": {

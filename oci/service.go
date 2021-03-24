@@ -152,10 +152,17 @@ func coreComputeServiceRegional(ctx context.Context, d *plugin.QueryData, region
 func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
-
 	// if provider is already cached, return it
 	if cachedData, ok := d.Cache.Get(cacheKey); ok {
 		return cachedData.(oci_common.ConfigurationProvider), nil
+	}
+
+	if region == "" && &config.Regions != nil && len(config.Regions) > 0 {
+		region = config.Regions[0]
+	}
+
+	if region == "" {
+		region = getRegionFromEnvVar()
 	}
 
 	authType := "ApiKey"

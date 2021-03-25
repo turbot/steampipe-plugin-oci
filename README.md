@@ -13,7 +13,7 @@
 
 ## Query OCI with SQL
 
-Use SQL to query Identity users, Core EC2 instances and more from your OCI Tenant. For example:
+Use SQL to query Identity users, Core Compute instances and more from your OCI Tenant. For example:
 
 ```sql
 select

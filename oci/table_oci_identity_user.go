@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/identity"
@@ -35,6 +36,12 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				Description: "The OCID of the user.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "user_type",
+				Description: "Type of the user. Value can be IDCS or IAM. Oracle Identity Cloud Service(IDCS) users authenticate through single sign-on and can be granted access to all services included in your account. IAM users can access Oracle Cloud Infrastructure services, but not all Cloud Platform services.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(userType),
 			},
 			{
 				Name:        "time_created",
@@ -293,4 +300,14 @@ func userTags(_ context.Context, d *transform.TransformData) (interface{}, error
 	}
 
 	return tags, nil
+}
+
+func userType(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	user := d.HydrateItem.(identity.User)
+
+	if strings.Split(*user.Name, "/")[0] == "oracleidentitycloudservice" {
+		return "IDCS", nil
+	}
+
+	return "IAM", nil
 }

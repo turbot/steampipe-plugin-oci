@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/core"
@@ -24,6 +25,7 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCoreInstances,
 		},
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -170,6 +172,7 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel().Transform(regionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -191,14 +194,19 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Error("listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
+
 	// Create Session
-	session, err := coreComputeService(ctx, d)
+	session, err := coreComputeServiceRegional(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	request := core.ListInstancesRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -228,11 +236,20 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getUser")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Error("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
+
+	// Rstrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := coreComputeService(ctx, d)
+	session, err := coreComputeServiceRegional(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -295,4 +312,19 @@ func instanceTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return tags, nil
+}
+
+// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
+// For all other regions, the full region name is returned.
+func regionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	region := types.SafeString(d.Value)
+
+	switch region {
+	case "iad":
+		return "us-ashburn-1", nil
+	case "phx":
+		return "us-phoenix-1", nil
+	default:
+		return region, nil
+	}
 }

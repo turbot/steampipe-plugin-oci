@@ -16,13 +16,15 @@ from
   oci_identity_user;
 ```
 
-### Groups details to which user belongs
+### Details of identity groups attached to users
 
 ```sql
 select
-  name as user_name,
-  groups ->> 'groupId' as group_id
+  oci_identity_user.name as user_name,
+  oci_identity_group.name as group_name,
+  user_group ->> 'groupId' as group_id
 from
   oci_identity_user,
-  jsonb_array_elements(user_groups) as groups
+  jsonb_array_elements(user_groups) as user_group
+  inner join oci_identity_group ON (oci_identity_group.id = user_group ->> 'groupId' )
 ```

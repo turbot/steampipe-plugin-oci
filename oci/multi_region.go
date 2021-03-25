@@ -52,7 +52,13 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 // BuildCompartementRegionList :: return a list of matrix items, one per region specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 	// get all the compartments in the tenant
-	compartments, _ := listAllCompartments(ctx, pluginQueryData, connection)
+	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	if err != nil {
+		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
+			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		}
+		panic(err)
+	}
 
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
@@ -186,9 +192,11 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 
 // func getRegionFromEnvVar() (string, error) {
 func getRegionFromEnvVar() string {
-	region := os.Getenv("OCI_REGION")
-	if region == "" {
-		region = getEnvSettingWithBlankDefault("region")
+	if region, ok := os.LookupEnv("OCI_REGION"); ok {
+		return region
+	} else if region, ok = os.LookupEnv("OCI_CLI_REGION"); ok {
+		return region
 	}
-	return region
+
+	return getEnvSettingWithBlankDefault("region")
 }

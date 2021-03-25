@@ -413,6 +413,10 @@ func getEnvSettingWithDefault(s string, dv string) string {
 	return dv
 }
 
+func getEnvVariableValue(variableName string) string {
+	return os.Getenv(variableName)
+}
+
 func buildHttpClient() (httpClient *http.Client) {
 	httpClient = &http.Client{
 		Timeout: 0,

@@ -17,7 +17,7 @@ from
 ```
 
 
-### List of volumes which are in faulty state
+### List volumes with faulty state
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
 ```
 
 
-### List of volumes with memory size greater than 1024 Gb
+### List volumes with memory size greater than 1024 Gb
 
 ```sql
 select

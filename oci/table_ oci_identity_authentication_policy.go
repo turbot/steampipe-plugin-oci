@@ -61,7 +61,7 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 			// Network Policy
 			{
 				Name:        "network_source_ids",
-				Description: "List of network source ids.",
+				Description: "List of IP ranges from which users can sign in to the Console.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("NetworkPolicy.NetworkSourceIds"),
 			},

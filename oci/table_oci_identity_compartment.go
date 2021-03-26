@@ -112,6 +112,22 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
+	rootRequest := identity.GetCompartmentRequest{
+		CompartmentId: &session.TenancyID,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	responseRoot, err := session.IdentityClient.GetCompartment(ctx, rootRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	if &responseRoot.Compartment != nil {
+		d.StreamListItem(ctx, responseRoot.Compartment)
+	}
+
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListCompartmentsRequest{
 		CompartmentId:          &session.TenancyID,

@@ -21,6 +21,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
@@ -245,8 +246,15 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 		return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, configProvider, configProviderEnvironmentVariables})
 	}
 
+	var providers []oci_common.ConfigurationProvider
+	providers = append(providers, oci_common.DefaultConfigProvider())
+	cliProvider, _ := getProviderFromCLIEnvironmentVariables()
+	if cliProvider != nil {
+		providers = append(providers, cliProvider)
+	}
+
 	// return default config in case connection config does not contain anything
-	return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{oci_common.DefaultConfigProvider()})
+	return oci_common.ComposingConfigurationProvider(providers)
 }
 
 // Check if all the attributes are available for SecurityToken Authentication
@@ -364,6 +372,68 @@ func getEnvSettingWithDefault(s string, dv string) string {
 		return v
 	}
 	return dv
+}
+
+func getCLIEnvVariables(variableName string) string {
+	v := os.Getenv("OCI_CLI_" + variableName)
+	if v != "" {
+		return v
+	}
+	v = os.Getenv("OCI_" + variableName)
+	if v != "" {
+		return v
+	}
+	return ""
+}
+
+func getProviderFromCLIEnvironmentVariables() (oci_common.ConfigurationProvider, error) {
+	var providers []oci_common.ConfigurationProvider
+	privateKeyPath := getCLIEnvVariables("KEY_FILE")
+	pemFileContent := ""
+	if privateKeyPath != "" {
+		resolvedPath := expandPath(privateKeyPath)
+		pemFileData, err := ioutil.ReadFile(resolvedPath)
+		if err != nil {
+			return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", privateKeyPath, err)
+		}
+		pemFileContent = string(pemFileData)
+	}
+
+	cliApiKeyProvider := oci_common.NewRawConfigurationProvider(
+		getCLIEnvVariables("TENANCY"),
+		getCLIEnvVariables("USER"),
+		getCLIEnvVariables("REGION"),
+		getCLIEnvVariables("FINGERPRINT"),
+		pemFileContent,
+		types.String(""),
+	)
+	if cliApiKeyProvider != nil {
+		providers = append(providers, cliApiKeyProvider)
+	}
+
+	cliFileWithProfileProvider, _ := oci_common.ConfigurationProviderFromFileWithProfile(
+		getCLIEnvVariables("CONFIG_FILE"),
+		getCLIEnvVariables("PROFILE"),
+		getCLIEnvVariables(""),
+	)
+
+	if cliFileWithProfileProvider != nil {
+		providers = append(providers, cliFileWithProfileProvider)
+	}
+
+	cliFromFileProvider, _ := oci_common.ConfigurationProviderFromFile(
+		getCLIEnvVariables("CONFIG_FILE"),
+		getCLIEnvVariables(""),
+	)
+
+	if cliFromFileProvider != nil {
+		providers = append(providers, cliFromFileProvider)
+	}
+
+	if len(providers) > 0 {
+		return oci_common.ComposingConfigurationProvider(providers)
+	}
+	return nil, nil
 }
 
 func buildHttpClient() (httpClient *http.Client) {

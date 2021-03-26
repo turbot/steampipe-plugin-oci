@@ -48,7 +48,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "size_in_mbs",
-				Description: "The size of the volume in MBs. ",
+				Description: "The size of the volume in MBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("SizeInMBs"),
 			},
@@ -94,7 +94,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "auto_tuned_vpus_per_gb",
-				Description: " The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
+				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("AutoTunedVpusPerGB"),
 			},

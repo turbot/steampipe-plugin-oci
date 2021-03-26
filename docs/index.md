@@ -92,19 +92,21 @@ connection "oci" {
 }
 ```
 
+### Order of precedence
+
 The Steampipe OCI plugin respects and applies configurations specified by connection configuration, environment variable, or OCI config file entry in the following order of precedence:
 
 The value specified in the steampipe connection config option.
 The value specified in the environment variable.
 The value specified in the OCI config file.
 
-1. Credentials specified in environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN`, `AWS_ROLE_SESSION_NAME`
-2. Credentials in the credential file (`~/.aws/credentials`) for the profile specified in the `AWS_PROFILE` environment variable
-3. Credentials for the Default profile from the credential file.
-
 If `regions` is not specified, Steampipe will use a single default region using the same resolution order as the credentials:
 
 1. The `OCI_CLI_REGION` or `OCI_REGION` environment variable
 2. The region specified in the profile
 
-Steampipe will require read access in order to query your AWS resources. Attaching the built in `ReadOnlyAccess` policy to your user or role will allow you to query all the tables in this plugin, though you can grant more granular access if you prefer.
+Steampipe will require read access in order to query your OCI resources.
+References:
+
+- [Security Credentials](https://docs.oracle.com/en-us/iaas/Content/General/Concepts/credentials.htm)
+- [Required IAM Policy to Work with Resources in the Tenancy Explorer](https://docs.oracle.com/en-us/iaas/Content/General/Concepts/compartmentexplorer.htm#iampolicy)

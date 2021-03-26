@@ -28,7 +28,7 @@ select
 from
   oci_core_volume
 where
-  lifecycle_state = 'FAULTY'
+  lifecycle_state = 'FAULTY';
 ```
 
 
@@ -43,5 +43,5 @@ select
 from
   oci_core_volume
 where
-  size_in_gbs > 1024
+  size_in_gbs > 1024;
 ```

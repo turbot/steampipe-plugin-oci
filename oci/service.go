@@ -72,42 +72,6 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	return sess, nil
 }
 
-// coreComputeService returns the service client for OCI Core Compute service
-func coreComputeService(ctx context.Context, d *plugin.QueryData) (*session, error) {
-	// if region == "" {
-	// 	return nil, fmt.Errorf("region must be passed ACMService")
-	// }
-	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("Compute-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*session), nil
-	}
-
-	// get oci config info
-	ociConfig := GetConfig(d.Connection)
-
-	provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
-	client, err := core.NewComputeClientWithConfigurationProvider(provider)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantId, err := provider.TenancyOCID()
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &session{
-		TenancyID:     tenantId,
-		ComputeClient: client,
-	}
-
-	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
-
-	return sess, nil
-}
-
 func coreComputeServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	// if region == "" {
@@ -157,7 +121,7 @@ func getProvider(ctx context.Context, d *connection.Manager, region string, conf
 		return cachedData.(oci_common.ConfigurationProvider), nil
 	}
 
-	if region == "" && &config.Regions != nil && len(config.Regions) > 0 {
+	if region == "" && config.Regions != nil && len(config.Regions) > 0 {
 		region = config.Regions[0]
 	}
 
@@ -307,7 +271,7 @@ func getProviderForSecurityToken(region string, config ociConfig) (oci_common.Co
 
 	keyId, err := securityTokenBasedAuthConfigProvider.KeyID()
 	if err != nil || !strings.HasPrefix(keyId, "ST$") {
-		return nil, fmt.Errorf("Security token is invalid ")
+		return nil, fmt.Errorf("security token is invalid")
 	}
 
 	return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, securityTokenBasedAuthConfigProvider})
@@ -374,23 +338,12 @@ func checkProfile(profile string, path string) (err error) {
 	content := string(data)
 	splitContent := strings.Split(content, "\n")
 	for _, line := range splitContent {
-		if match := profileRegex.FindStringSubmatch(line); match != nil && len(match) > 1 && match[1] == profile {
+		if match := profileRegex.FindStringSubmatch(line); len(match) > 1 && match[1] == profile {
 			return nil
 		}
 	}
 
 	return fmt.Errorf("configuration file did not contain profile: %s", profile)
-}
-
-func instancePrincipalAuthClientModifier(client oci_common.HTTPRequestDispatcher) (oci_common.HTTPRequestDispatcher, error) {
-	if acceptLocalCerts := getEnvSettingWithBlankDefault("accept_local_certs"); acceptLocalCerts != "" {
-		if bool, err := strconv.ParseBool(acceptLocalCerts); err == nil {
-			modifiedClient := buildHttpClient()
-			modifiedClient.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = bool
-			return modifiedClient, nil
-		}
-	}
-	return client, nil
 }
 
 func getEnvSettingWithBlankDefault(s string) string {
@@ -411,10 +364,6 @@ func getEnvSettingWithDefault(s string, dv string) string {
 		return v
 	}
 	return dv
-}
-
-func getEnvVariableValue(variableName string) string {
-	return os.Getenv(variableName)
 }
 
 func buildHttpClient() (httpClient *http.Client) {

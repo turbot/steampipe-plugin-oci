@@ -8,7 +8,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
 
-// function which returns an ErrorPredicate for AWS API calls
+// function which returns an ErrorPredicate for OCI API calls
 func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 	return func(err error) bool {
 		if ociErr, ok := err.(oci_common.ServiceError); ok {

@@ -29,7 +29,7 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
 
-	if &ociConfig != nil && ociConfig.Regions != nil {
+	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
 		if len(getInvalidRegions(regions)) > 0 {
@@ -63,7 +63,7 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
 
-	if &ociConfig != nil && ociConfig.Regions != nil {
+	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
 		if len(getInvalidRegions(regions)) > 0 {

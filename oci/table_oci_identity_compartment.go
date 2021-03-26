@@ -130,7 +130,7 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	if &responseRoot.Compartment != nil {
+	if responseRoot.CompartmentId != nil {
 		d.StreamListItem(ctx, responseRoot.Compartment)
 	}
 

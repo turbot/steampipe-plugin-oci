@@ -84,12 +84,6 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
-			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,

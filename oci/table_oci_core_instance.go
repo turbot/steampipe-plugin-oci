@@ -197,7 +197,7 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreComputeServiceRegional(ctx, d, region)
@@ -239,7 +239,7 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

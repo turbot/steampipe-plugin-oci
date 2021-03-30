@@ -1,0 +1,76 @@
+# Table: oci_objectstorage_bucket
+
+## Examples
+
+### Basic info
+
+```sql
+select
+  name,
+  id,
+  namespace,
+  storage_tier,
+  is_read_only
+from
+  oci_objectstorage_bucket;
+```
+
+
+### List public buckets
+
+```sql
+select
+  id,
+  name,
+  namespace,
+  public_access_type
+from
+  oci_objectstorage_bucket
+where
+  public_access_type LIKE 'Object%';
+```
+
+
+### List buckets with versioning disabled
+
+```sql
+select
+  id,
+  name,
+  namespace,
+  versioning
+from
+  oci_objectstorage_bucket
+where
+  versioning = 'Disabled';
+```
+
+
+### List buckets with object events disabled
+
+```sql
+select
+  id,
+  name,
+  namespace,
+  object_events_enabled
+from
+  oci_objectstorage_bucket
+where
+  not object_events_enabled;
+```
+
+
+### List buckets with replication disabled
+
+```sql
+select
+  id,
+  name,
+  namespace,
+  replication_enabled
+from
+  oci_objectstorage_bucket
+where
+  not replication_enabled;
+```

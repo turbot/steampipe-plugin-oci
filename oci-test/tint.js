@@ -400,7 +400,7 @@ const _runGraphqlQuery = function(test, query) {
       q
     ];
 
-    const cmd = spawn("turbot", args, { encoding: "utf8" });
+    const cmd = spawn("steampipe", args, { encoding: "utf8" });
 
     var result = {
       stdout: "",
@@ -429,15 +429,17 @@ const _runGraphqlQuery = function(test, query) {
       } catch (e) {
         result.output = {};
       }
-      if (code) {
+      if (true) {
         var outputStr = JSON.stringify(result.output, null, 2) + "\n";
         var expectedStr = JSON.stringify(JSON.parse(fs.readFileSync(expectedTmp)), null, 2) + "\n";
         var differences = diff.diffLines(outputStr, expectedStr);
         console.log("");
         differences.forEach(part => {
           if (part.added) {
+            result.status = 1
             process.stdout.write(chalk.green(part.value));
           } else if (part.removed) {
+            result.status = 1
             process.stdout.write(chalk.red(part.value));
           } else {
             process.stdout.write(chalk.dim(part.value));
@@ -521,7 +523,7 @@ const _run = async function(tests) {
   var results = _.keyBy(tests, "dir");
 
   // TODO: Do we need prefix to be confiurable?
-  const resourceNamePrefix = "turbottest";
+  const resourceNamePrefix = "steampipetest";
 
   // Use this object to store any data that applies to a test and all of its
   // prereqs

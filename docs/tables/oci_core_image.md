@@ -35,7 +35,7 @@ where
 ```
 
 
-### List of images where EncryptionInTransit is not enabled
+### List of images where EncryptionInTransit is not enable
 
 ```sql
 select

@@ -1,5 +1,5 @@
 {
-  "name": "tbt-test",
+  "name": "oci-test",
   "dependencies": {
     "chalk": "^4.1.0",
     "custom-env": "^2.0.1",

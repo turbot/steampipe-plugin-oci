@@ -172,8 +172,11 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 	// 503	ServiceUnavailable	The service is currently unavailable.	Yes, with backoff.
 	// https: //docs.oracle.com/en-us/iaas/Content/API/References/apierrors.htm
 	retryOnResponseCodes := func(r oci_common.OCIOperationResponse) bool {
-		statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
-		return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
+		if r.Response.HTTPResponse() != nil {
+			statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
+			return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
+		}
+		return false
 	}
 	return getExponentialBackoffRetryPolicy(attempts, retryOnResponseCodes)
 }

@@ -1,13 +1,7 @@
 variable "resource_name" {
   type        = string
-  default     = "turbot-test-20200125-create-update"
+  default     = "steampipetest20200125"
   description = "Name of the resource used throughout the test."
-}
-
-variable "tenancy_ocid" {
-  type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
-  description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
 variable "config_file_profile" {
@@ -16,9 +10,14 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
-variable "oci_ad" {
+variable "tenancy_ocid" {
   type        = string
-  default     = "TvRS:AP-MUMBAI-1-AD-1"
+  description = "OCID of your tenancy."
+}
+
+variable "region" {
+  type        = string
+  default     = "ap-mumbai-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
@@ -28,23 +27,30 @@ variable "policy_description" {
   description = "The description you assign to the policy. Does not have to be unique, and it's changeable. "
 }
 
-variable "policy_statements" {
-  type        = list
-  default     = ["Allow group read_only to manage users in tenancy"]
-  description = "An array of one or more policy statements written in the policy language."
+provider "oci" {
+  tenancy_ocid        = var.tenancy_ocid
+  config_file_profile = var.config_file_profile
+  region              = var.region
 }
 
-provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
-  config_file_profile = var.config_file_profile
+resource "oci_identity_group" "test_group" {
+  #Required
+  compartment_id = var.tenancy_ocid
+  description    = var.resource_name
+  name           = var.resource_name
 }
 
 resource "oci_identity_policy" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    name = var.resource_name
-    description = var.policy_description
-    statements = var.policy_statements
-    freeform_tags = {"Name"= var.resource_name}
+  depends_on = [
+    oci_identity_group.test_group
+  ]
+  compartment_id = var.tenancy_ocid
+  name           = var.resource_name
+  description    = var.policy_description
+  statements = [
+    "Allow group ${var.resource_name} to manage users in tenancy"
+  ]
+  freeform_tags = { "Name" = var.resource_name }
 }
 
 output "resource_name" {
@@ -60,7 +66,9 @@ output "policy_description" {
 }
 
 output "policy_statements" {
-  value = oci_identity_policy.named_test_resource.statements
+  value = [
+    "Allow group ${var.resource_name} to manage users in tenancy"
+  ]
 }
 
 output "freeform_tags" {

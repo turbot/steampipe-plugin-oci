@@ -190,7 +190,7 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 		return nil, err
 	}
 
-	nameSpace, err := getNamespace(ctx, d)
+	nameSpace, err := getNamespace(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -231,19 +231,18 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Error("getObjectStorageBucket", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
 	var bucketName string
 	if h.Item != nil {
 		bucketName = *h.Item.(objectstorage.BucketSummary).Name
 	} else {
 		bucketName = d.KeyColumnQuals["name"].GetStringValue()
+		// Rstrict the api call to only root compartment/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
 	}
 
-	nameSpace, err := getNamespace(ctx, d)
+	nameSpace, err := getNamespace(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -265,6 +264,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	if err != nil {
 		return nil, err
 	}
+
 	return response.Bucket, nil
 }
 

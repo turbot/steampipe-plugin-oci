@@ -27,10 +27,9 @@ type nameSpace struct {
 }
 
 //// listObjectStorageBuckets FUNCTION
-func getNamespace(ctx context.Context, d *plugin.QueryData) (*nameSpace, error) {
+func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nameSpace, error) {
 	plugin.Logger(ctx).Trace("getNamespace")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Error("getNamespace", "Compartment", compartment, "OCI_REGION", region)
 

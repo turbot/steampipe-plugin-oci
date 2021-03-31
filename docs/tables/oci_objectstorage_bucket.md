@@ -1,5 +1,7 @@
 # Table: oci_objectstorage_bucket
 
+The Oracle Cloud Infrastructure Object Storage service is an internet-scale, high-performance storage platform that offers reliable and cost-efficient data durability
+
 ## Examples
 
 ### Basic info

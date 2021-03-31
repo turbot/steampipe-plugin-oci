@@ -117,7 +117,7 @@ func objectStorageService(ctx context.Context, d *plugin.QueryData, region strin
 	// 	return nil, fmt.Errorf("region must be passed ACMService")
 	// }
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("ObjectStorage-%s", "region")
+	serviceCacheKey := fmt.Sprintf("ObjectStorage-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -130,7 +130,7 @@ func objectStorageService(ctx context.Context, d *plugin.QueryData, region strin
 		logger.Error("objectStorageService", "getProvider.Error", err)
 		return nil, err
 	}
-	
+
 	client, err := objectstorage.NewObjectStorageClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err

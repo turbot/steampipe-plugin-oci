@@ -25,6 +25,7 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listPolicy,
 		},
 		Columns: []*plugin.Column{
+			// top columns
 			{
 				Name:        "name",
 				Description: "The name you assign to the policy during creation. The name must be unique across all policies in the tenancy and cannot be changed.",
@@ -37,24 +38,26 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "statements",
-				Description: "An array of one or more policy statements written in the policy language.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "description",
-				Description: "The description you assign to the policy. Does not have to be unique, and it's changeable.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "time_created",
-				Description: "Date and time the policy was created, in the format defined by RFC3339.",
+				Description: "Date and time the policy was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The policy's current state. After creating a policy, make sure its `lifecycleState` changes from CREATING to ACTIVE before using it.",
+				Description: "The policy's current state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "statements",
+				Description: "An array of one or more policy statements written in the policy language.",
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// other columns
+			{
+				Name:        "description",
+				Description: "The description you assign to the policy. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -68,6 +71,8 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("VersionDate.Time"),
 			},
+
+			// tags
 			{
 				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,

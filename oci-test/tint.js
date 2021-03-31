@@ -9,11 +9,10 @@ const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
 const envVariable = require("custom-env");
-const json_diff = require("json-diff");
 
 const TMP_DIR = os.tmpdir();
 
-const _targetGlobs = function () {
+const _targetGlobs = function() {
   var args = process.argv.slice(2);
   if (args.length == 0) {
     args.push("*");
@@ -34,14 +33,14 @@ const _targetGlobs = function () {
   return targets;
 };
 
-const _targetDirs = function (targetGlobs) {
+const _targetDirs = function(targetGlobs) {
   var targetDirs = targetGlobs.map(i => {
     return i.split("/")[0];
   });
   return [...new Set(targetDirs)];
 };
 
-const _availableTests = function (targetDirs) {
+const _availableTests = function(targetDirs) {
   var result = [];
   for (const d of targetDirs) {
     result = result.concat(
@@ -53,7 +52,7 @@ const _availableTests = function (targetDirs) {
   return result;
 };
 
-const _testPrerequisites = function (testDir) {
+const _testPrerequisites = function(testDir) {
   var dependenciesSrc;
   try {
     dependenciesSrc = fs.readFileSync(testDir + "/dependencies.txt", "utf8");
@@ -72,7 +71,7 @@ const _testPrerequisites = function (testDir) {
   return prereqs;
 };
 
-const _testsWithPrerequisites = function (tests) {
+const _testsWithPrerequisites = function(tests) {
   var result = [];
   for (const t of tests) {
     var prereqs = _testPrerequisites(t);
@@ -95,12 +94,7 @@ const _testsWithPrerequisites = function (tests) {
   return [...new Set(flatResult)];
 };
 
-const _renderToTmp = function (
-  test,
-  sourcePath,
-  defaultRendered = null,
-  tmpDir = null
-) {
+const _renderToTmp = function(test, sourcePath, defaultRendered = null, tmpDir = null) {
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
   var template, tmpPath, rendered;
   tmpPath = path.resolve(tmpDir || test.tmpDir, path.basename(sourcePath));
@@ -120,7 +114,7 @@ const _renderToTmp = function (
   return tmpPath;
 };
 
-const _runTerraformInit = async function (test, phase) {
+const _runTerraformInit = async function(test, phase) {
   return new Promise((resolve, reject) => {
     const tfDir = path.resolve(test.tmpDir, "terraform", phase);
     const args = ["init"];
@@ -168,7 +162,7 @@ const _runTerraformInit = async function (test, phase) {
   });
 };
 
-const _runTerraformApply = function (test, phase) {
+const _runTerraformApply = function(test, phase) {
   return new Promise((resolve, reject) => {
     const tfDir = path.resolve(test.tmpDir, "terraform", phase);
 
@@ -177,6 +171,7 @@ const _runTerraformApply = function (test, phase) {
       TF_VAR_resource_name_1: process.env.TURBOT_TEST_RESOURCE_NAME_1,
       TF_VAR_resource_name_2: process.env.TURBOT_TEST_RESOURCE_NAME_2
     });
+
     const args = ["apply", "-auto-approve", "-no-color"];
     const cmd = spawn("terraform", args, {
       encoding: "utf8",
@@ -226,10 +221,17 @@ const _runTerraformApply = function (test, phase) {
   });
 };
 
-const _runTerraformDestroy = function (test, phase = "test") {
+const _runTerraformDestroy = function(test, phase = "test") {
   return new Promise((resolve, reject) => {
     const tfDir = path.resolve(test.tmpDir, "terraform", phase);
     console.log("");
+
+    // TODO: Why do we enter this function if there is no Terraform tmp dir?
+    if (!fs.existsSync(tfDir)) {
+      console.log(chalk.yellow(`Terraform tmp directory does not exist for ${test.dir} for ${phase} phase`));
+      resolve(test);
+    }
+
     const args = ["destroy", "-auto-approve", "-no-color"];
 
     const cmd = spawn("terraform", args, {
@@ -279,7 +281,7 @@ const _runTerraformDestroy = function (test, phase = "test") {
   });
 };
 
-const _runTerraformOutput = async function (test, phase) {
+const _runTerraformOutput = async function(test, phase) {
   return new Promise((resolve, reject) => {
     const tfDir = path.resolve(test.tmpDir, "terraform", phase);
     const args = ["output", "--json"];
@@ -308,18 +310,10 @@ const _runTerraformOutput = async function (test, phase) {
       result.status = code;
       try {
         let terraformOutput = JSON.parse(result.stdout);
-        Object.assign(test.output, {
-          resourceId: _.get(terraformOutput, "resource_id.value", "")
-        });
-        Object.assign(test.output, {
-          resourceName: _.get(terraformOutput, "resource_name.value", "")
-        });
-        Object.assign(test, {
-          resourceId: _.get(terraformOutput, "resource_id.value", "")
-        });
-        Object.assign(test, {
-          resourceName: _.get(terraformOutput, "resource_name.value", "")
-        });
+        Object.assign(test.output, { resourceId: _.get(terraformOutput, "resource_id.value", "") });
+        Object.assign(test.output, { resourceName: _.get(terraformOutput, "resource_name.value", "") });
+        Object.assign(test, { resourceId: _.get(terraformOutput, "resource_id.value", "") });
+        Object.assign(test, { resourceName: _.get(terraformOutput, "resource_name.value", "") });
         Object.assign(test.output, terraformOutput);
       } catch (e) {
         result.output = {};
@@ -337,7 +331,7 @@ const _runTerraformOutput = async function (test, phase) {
   });
 };
 
-const _runTerraformApplyForTestPhase = async function (test, phase) {
+const _runTerraformApplyForTestPhase = async function(test, phase) {
   const files = fs
     .readdirSync(test.dir)
     .sort()
@@ -368,7 +362,7 @@ const _runTerraformApplyForTestPhase = async function (test, phase) {
       _renderToTmp(test, path.resolve(".", testDirWithFile), null, tfDir);
     }
   } catch (e) {
-    console.log(chalk.red(`Template rendering error in: ${test.dir}`));
+    console.log(chalk.red(`Terraform template rendering error in: ${test.dir}`));
     console.log(chalk.red(e.message));
     throw e;
   }
@@ -380,38 +374,20 @@ const _runTerraformApplyForTestPhase = async function (test, phase) {
   return test;
 };
 
-const _runGraphqlQuery = function (test, query) {
+const _runGraphqlQuery = function(test, query) {
   return new Promise((resolve, reject) => {
     try {
       var queryTmp = _renderToTmp(test, query.query);
-      var variablesTmp = _renderToTmp(test, query.variables, {});
+      var variablesTmp = _renderToTmp(test, query.variables, "{}");
       var expectedTmp = _renderToTmp(test, query.expected);
     } catch (e) {
-      console.log(chalk.red(`Template Error: ${e.sourcePath}`));
+      console.log(chalk.red(`Template rendering error in: ${test.dir}`));
       console.log(chalk.red(e.message));
+      console.log(chalk.red(`Error source path: ${e.sourcePath}`));
       throw e;
     }
 
-    console.log(
-      chalk.yellow(`\nRunning SQL query: ${path.basename(query.query)}`)
-    );
-
-    /*
-    const args = [
-      "graphql",
-      "--query",
-      queryTmp,
-      "--variables",
-      variablesTmp,
-      "--expected",
-      expectedTmp,
-      "--format",
-      "json",
-      "--timeout",
-      process.env.TURBOT_TEST_EXPECTED_TIMEOUT || 180
-    ];
-    const cmd = spawn("turbot", args, { encoding: "utf8" });
-    */
+    console.log(chalk.yellow(`\nRunning SQL query: ${path.basename(query.query)}`));
 
     q = fs.readFileSync(queryTmp, { encoding: "utf8" });
     q = q.replace(/\n/, " ");
@@ -422,8 +398,8 @@ const _runGraphqlQuery = function (test, query) {
       "--output",
       "json",
       q
-      //"select name from aws_s3_bucket whe order by name"
     ];
+
     const cmd = spawn("steampipe", args, { encoding: "utf8" });
 
     var result = {
@@ -454,13 +430,10 @@ const _runGraphqlQuery = function (test, query) {
         result.output = {};
       }
       if (true) {
-        // if (code) { <<<< WHY?
         var outputStr = JSON.stringify(result.output, null, 2) + "\n";
-        var expectedStr =
-          JSON.stringify(JSON.parse(fs.readFileSync(expectedTmp)), null, 2) +
-          "\n";
-        var differences = diff.diffJson(outputStr, expectedStr);
-
+        var expectedStr = JSON.stringify(JSON.parse(fs.readFileSync(expectedTmp)), null, 2) + "\n";
+        var differences = diff.diffLines(outputStr, expectedStr);
+        console.log("");
         differences.forEach(part => {
           if (part.added) {
             result.status = 1
@@ -486,11 +459,7 @@ const _runGraphqlQuery = function (test, query) {
   });
 };
 
-const _runGraphqlQueriesForTestPhase = async function (
-  test,
-  phase,
-  terraformSuccessful
-) {
+const _runGraphqlQueriesForTestPhase = async function(test, phase, terraformSuccessful) {
   const queries = fs
     .readdirSync(test.dir)
     .sort()
@@ -518,23 +487,20 @@ const _runGraphqlQueriesForTestPhase = async function (
     })
     .filter(i => !!i);
 
-  // console.log({queries: queries})
-  for (const q of queries) {
+    // console.log({queries: queries})
+    for (const q of queries) {
     var queryResult;
     // Skip running GraphQL to avoid wasting time if the Terraform run
     // wasn't successful
     if (terraformSuccessful) {
       queryResult = await _runGraphqlQuery(test, q);
     } else {
-      console.log(
-        chalk.redBright.bold("Terraform run failed, skipping SQL queries")
-      );
+      console.log(chalk.redBright.bold("Terraform run failed, skipping SQL queries"));
       // TODO: Do we need additional info in the queryResult object?
       queryResult = {
         status: 1
       };
     }
-    // console.log({status: queryResult.status})
     if (queryResult.status) {
       // If any of the queries in the test fail, then the test has failed
       // and should not run further steps.
@@ -552,38 +518,33 @@ const _runGraphqlQueriesForTestPhase = async function (
   return test;
 };
 
-const _run = async function (tests) {
+const _run = async function(tests) {
   var testNames = tests.map(i => i.dir);
   var results = _.keyBy(tests, "dir");
 
-  // Set the test resource names before running any steps to allow same name
-  // use during consecutive tests
-  process.env.TURBOT_TEST_RESOURCE_NAME_PREFIX =
-    process.env.TURBOT_TEST_RESOURCE_NAME_PREFIX || "turbottest";
-  process.env.TURBOT_TEST_RESOURCE_NAME =
-    process.env.TURBOT_TEST_RESOURCE_NAME ||
-    process.env.TURBOT_TEST_RESOURCE_NAME_PREFIX + _.random(100000);
-  process.env.TURBOT_TEST_RESOURCE_NAME_1 =
-    process.env.TURBOT_TEST_RESOURCE_NAME_1 ||
-    process.env.TURBOT_TEST_RESOURCE_NAME_PREFIX + _.random(100000);
-  process.env.TURBOT_TEST_RESOURCE_NAME_2 =
-    process.env.TURBOT_TEST_RESOURCE_NAME_2 ||
-    process.env.TURBOT_TEST_RESOURCE_NAME_PREFIX + _.random(100000);
+  // TODO: Do we need prefix to be confiurable?
+  const resourceNamePrefix = "steampipetest";
+
+  // Use this object to store any data that applies to a test and all of its
+  // prereqs
+  const setupData = {
+    resourceName: resourceNamePrefix + _.random(10000),
+    resourceName1: resourceNamePrefix + _.random(10000),
+    resourceName2: resourceNamePrefix + _.random(10000)
+  };
+
+  console.log("Test names:", testNames);
 
   try {
     for (const t of testNames) {
-      results[t] = await _runSetup(results[t]);
+      results[t] = await _runSetup(results[t], setupData);
       const phases = ["pretest", "test", "posttest"];
       for (const phase of phases) {
         results[t] = await _runTestPhase(results[t], phase);
       }
     }
   } catch (e) {
-    console.log(
-      chalk.bold.red(
-        "\nERROR DETECTED: Stopping test run and entering teardown phase."
-      )
-    );
+    console.log(chalk.bold.red("\nERROR DETECTED: Stopping test run and entering teardown phase."));
     console.log(chalk.bold.red(e.message));
     if (process.env.TURBOT_TEST_LOG_LEVEL == "debug") {
       console.log(e);
@@ -597,7 +558,7 @@ const _run = async function (tests) {
   return results;
 };
 
-const _runSetup = async function (test) {
+const _runSetup = async function(test, setupData) {
   /**
    * Set the environment variable from the env file
    *
@@ -605,10 +566,17 @@ const _runSetup = async function (test) {
    * extension ".env.staging"
    */
   envVariable.env("staging", `${test.dir}`);
-  console.log(
-    "customEnv TURBOT_TEST_EXPECTED_TIMEOUT",
-    process.env.TURBOT_TEST_EXPECTED_TIMEOUT
-  );
+  for (const [name, value] of Object.entries(process.env)) {
+    if (name.startsWith("TURBOT_TEST_")) {
+      console.log(`Custom env variable ${name}=${value}`);
+    }
+  }
+
+  // Set this after the env file has been loaded since any env variables in the
+  // custom env file wil NOT override existing env variable values
+  process.env.TURBOT_TEST_RESOURCE_NAME = process.env.TURBOT_TEST_RESOURCE_NAME || setupData.resourceName;
+  process.env.TURBOT_TEST_RESOURCE_NAME_1 = process.env.TURBOT_TEST_RESOURCE_NAME_1 || setupData.resourceName1;
+  process.env.TURBOT_TEST_RESOURCE_NAME_2 = process.env.TURBOT_TEST_RESOURCE_NAME_2 || setupData.resourceName2;
 
   if (test.failed) {
     return test;
@@ -618,23 +586,40 @@ const _runSetup = async function (test) {
   return test;
 };
 
-const _runTestPhase = async function (test, phase) {
+const _runTestPhase = async function(test, phase) {
   if (test.failed) {
     return test;
   }
+
   console.log(chalk.bold(`\n${phase.toUpperCase()}: ${test.dir}`));
-  test = await _runTerraformApplyForTestPhase(test, phase);
+
+  try {
+    test = await _runTerraformApplyForTestPhase(test, phase);
+  } catch (e) {
+    test.failed = true;
+    console.log(chalk.red(`Error running Terraform applying in ${test.dir} for ${phase} phase`));
+    console.log(chalk.red(e.message));
+    throw e;
+  }
+
   let terraformSuccessful = true;
   // Default to 0 if there is no status because this phase didn't have
   // Terraform to run
   terraformSuccessful =
-    _.get(test, "test.terraform.init.status", 0) === 0 &&
-    _.get(test, "test.terraform.apply.status", 0) === 0;
-  test = await _runGraphqlQueriesForTestPhase(test, phase, terraformSuccessful);
+    _.get(test, "test.terraform.init.status", 0) === 0 && _.get(test, "test.terraform.apply.status", 0) === 0;
+
+  try {
+    test = await _runGraphqlQueriesForTestPhase(test, phase, terraformSuccessful);
+  } catch (e) {
+    test.failed = true;
+    console.log(chalk.red(`Error running SQL queries in ${test.dir} for ${phase} phase`));
+    console.log(chalk.red(e.message));
+    throw e;
+  }
   return test;
 };
 
-const _runTeardown = async function (test) {
+const _runTeardown = async function(test) {
   console.log(chalk.bold(`\nTEARDOWN: ${test.dir}`));
   // Check for pretest / test / posttest keys
   let getKeys = Object.keys(test);
@@ -657,16 +642,19 @@ async function main() {
   const availableTests = _availableTests(targetDirs);
   const targets = mm(availableTests, targetGlobs);
   const resolvedTargets = _testsWithPrerequisites(targets);
+
   if (!resolvedTargets.length) {
     return console.log("No matching targets. Stopping.");
   }
+
   var result = await _run(resolvedTargets);
+
   if (process.env.TURBOT_TEST_LOG_LEVEL == "debug") {
     console.log(JSON.stringify(result, null, 2));
   }
+
   var numTests = resolvedTargets.length;
-  var numTestsPassing = _.filter(result, testResult => !testResult.failed)
-    .length;
+  var numTestsPassing = _.filter(result, testResult => !testResult.failed).length;
   var failingTests = _.chain(result)
     .map(i => {
       return i.failed ? i : null;
@@ -674,19 +662,24 @@ async function main() {
     .compact()
     .value();
   var numTestsFailing = failingTests.length;
+
   console.log(chalk.bold("SUMMARY:"));
+
   if (numTestsFailing) {
     console.log("");
     for (let i of failingTests) {
       console.log(chalk.red(`✘ ${i.dir} failed.`));
     }
   }
+
   var summaryColor = "redBright";
+
   if (numTestsPassing == numTests) {
     summaryColor = "greenBright";
   } else if (numTestsPassing) {
     summaryColor = "yellowBright";
   }
+
   console.log("");
   console.log(chalk[summaryColor](`${numTestsPassing}/${numTests} passed.`));
   console.log();

@@ -21,6 +21,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
@@ -65,42 +66,6 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	sess := &session{
 		TenancyID:      tenantId,
 		IdentityClient: client,
-	}
-
-	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
-
-	return sess, nil
-}
-
-// coreComputeService returns the service client for OCI Core Compute service
-func coreComputeService(ctx context.Context, d *plugin.QueryData) (*session, error) {
-	// if region == "" {
-	// 	return nil, fmt.Errorf("region must be passed ACMService")
-	// }
-	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("Compute-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*session), nil
-	}
-
-	// get oci config info
-	ociConfig := GetConfig(d.Connection)
-
-	provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
-	client, err := core.NewComputeClientWithConfigurationProvider(provider)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantId, err := provider.TenancyOCID()
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &session{
-		TenancyID:     tenantId,
-		ComputeClient: client,
 	}
 
 	// save session in cache
@@ -192,7 +157,7 @@ func getProvider(ctx context.Context, d *connection.Manager, region string, conf
 		return cachedData.(oci_common.ConfigurationProvider), nil
 	}
 
-	if region == "" && &config.Regions != nil && len(config.Regions) > 0 {
+	if region == "" && config.Regions != nil && len(config.Regions) > 0 {
 		region = config.Regions[0]
 	}
 
@@ -242,8 +207,11 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 	// 503	ServiceUnavailable	The service is currently unavailable.	Yes, with backoff.
 	// https: //docs.oracle.com/en-us/iaas/Content/API/References/apierrors.htm
 	retryOnResponseCodes := func(r oci_common.OCIOperationResponse) bool {
-		statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
-		return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
+		if r.Response.HTTPResponse() != nil {
+			statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
+			return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
+		}
+		return false
 	}
 	return getExponentialBackoffRetryPolicy(attempts, retryOnResponseCodes)
 }
@@ -316,8 +284,15 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 		return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, configProvider, configProviderEnvironmentVariables})
 	}
 
+	var providers []oci_common.ConfigurationProvider
+	providers = append(providers, oci_common.DefaultConfigProvider())
+	cliProvider, _ := getProviderFromCLIEnvironmentVariables()
+	if cliProvider != nil {
+		providers = append(providers, cliProvider)
+	}
+
 	// return default config in case connection config does not contain anything
-	return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{oci_common.DefaultConfigProvider()})
+	return oci_common.ComposingConfigurationProvider(providers)
 }
 
 // Check if all the attributes are available for SecurityToken Authentication
@@ -342,7 +317,7 @@ func getProviderForSecurityToken(region string, config ociConfig) (oci_common.Co
 
 	keyId, err := securityTokenBasedAuthConfigProvider.KeyID()
 	if err != nil || !strings.HasPrefix(keyId, "ST$") {
-		return nil, fmt.Errorf("Security token is invalid ")
+		return nil, fmt.Errorf("security token is invalid")
 	}
 
 	return oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, securityTokenBasedAuthConfigProvider})
@@ -409,23 +384,12 @@ func checkProfile(profile string, path string) (err error) {
 	content := string(data)
 	splitContent := strings.Split(content, "\n")
 	for _, line := range splitContent {
-		if match := profileRegex.FindStringSubmatch(line); match != nil && len(match) > 1 && match[1] == profile {
+		if match := profileRegex.FindStringSubmatch(line); len(match) > 1 && match[1] == profile {
 			return nil
 		}
 	}
 
 	return fmt.Errorf("configuration file did not contain profile: %s", profile)
-}
-
-func instancePrincipalAuthClientModifier(client oci_common.HTTPRequestDispatcher) (oci_common.HTTPRequestDispatcher, error) {
-	if acceptLocalCerts := getEnvSettingWithBlankDefault("accept_local_certs"); acceptLocalCerts != "" {
-		if bool, err := strconv.ParseBool(acceptLocalCerts); err == nil {
-			modifiedClient := buildHttpClient()
-			modifiedClient.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = bool
-			return modifiedClient, nil
-		}
-	}
-	return client, nil
 }
 
 func getEnvSettingWithBlankDefault(s string) string {
@@ -448,8 +412,66 @@ func getEnvSettingWithDefault(s string, dv string) string {
 	return dv
 }
 
-func getEnvVariableValue(variableName string) string {
-	return os.Getenv(variableName)
+func getCLIEnvVariables(variableName string) string {
+	v := os.Getenv("OCI_CLI_" + variableName)
+	if v != "" {
+		return v
+	}
+	v = os.Getenv("OCI_" + variableName)
+	if v != "" {
+		return v
+	}
+	return ""
+}
+
+func getProviderFromCLIEnvironmentVariables() (oci_common.ConfigurationProvider, error) {
+	var providers []oci_common.ConfigurationProvider
+	privateKeyPath := getCLIEnvVariables("KEY_FILE")
+	pemFileContent := ""
+	if privateKeyPath != "" {
+		resolvedPath := expandPath(privateKeyPath)
+		pemFileData, err := ioutil.ReadFile(resolvedPath)
+		if err != nil {
+			return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", privateKeyPath, err)
+		}
+		pemFileContent = string(pemFileData)
+	}
+
+	cliApiKeyProvider := oci_common.NewRawConfigurationProvider(
+		getCLIEnvVariables("TENANCY"),
+		getCLIEnvVariables("USER"),
+		getCLIEnvVariables("REGION"),
+		getCLIEnvVariables("FINGERPRINT"),
+		pemFileContent,
+		types.String(""),
+	)
+	if cliApiKeyProvider != nil {
+		providers = append(providers, cliApiKeyProvider)
+	}
+
+	cliFileWithProfileProvider, _ := oci_common.ConfigurationProviderFromFileWithProfile(
+		getCLIEnvVariables("CONFIG_FILE"),
+		getCLIEnvVariables("PROFILE"),
+		getCLIEnvVariables(""),
+	)
+
+	if cliFileWithProfileProvider != nil {
+		providers = append(providers, cliFileWithProfileProvider)
+	}
+
+	cliFromFileProvider, _ := oci_common.ConfigurationProviderFromFile(
+		getCLIEnvVariables("CONFIG_FILE"),
+		getCLIEnvVariables(""),
+	)
+
+	if cliFromFileProvider != nil {
+		providers = append(providers, cliFromFileProvider)
+	}
+
+	if len(providers) > 0 {
+		return oci_common.ComposingConfigurationProvider(providers)
+	}
+	return nil, nil
 }
 
 func buildHttpClient() (httpClient *http.Client) {

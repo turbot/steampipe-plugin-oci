@@ -30,9 +30,21 @@ Connection configurations are defined using HCL in one or more Steampipe config 
 
 ### Scope
 
-Each OCI connection is scoped to a single OCI Tenant/Account, with a single set of credentials. You may configure multiple OCI connections if desired, with each connecting to a different tenant. Each OCI connection may be configured for multiple regions.
+Each OCI connection is scoped to a single OCI Tenant, with a single set of credentials. You may configure multiple OCI connections if desired, with each connecting to a different tenant. Each OCI connection may be configured for multiple regions.
 
 ### Configuration Arguments
+
+The plugin needs to be configured with credentials for the Oracle Cloud Infrastructure account.
+
+Default connection configuration:
+
+```hcl
+connection "oci" {
+  plugin      = "oci"
+}
+```
+
+Plugin also supports below set of configuration arguments:
 
 1. The OCI plugin allows you set static credentials with the `tenancy_ocid`, `user_ocid`, `fingerprint` and `private_key_path` arguments. You may select one or more regions with the `regions` argument.
 
@@ -42,11 +54,11 @@ Each OCI connection is scoped to a single OCI Tenant/Account, with a single set 
    # credentials via user API Key pair
    connection "oci_tenant_x" {
      plugin            = "oci"
-     tenancy_ocid      = "dummy-tenant"
-     user_ocid         = "dummy-user"
-     fingerprint       = "dummy-fingerprint"
-     private_key_path  = "~/.ssh/oci_private.pem"
-     regions           = ["ap-mumbai-1" , "us-ashburn-1"]
+     tenancy_ocid      = "ocid1.tenancy.oc1..aaaaaaaa111111111bbbbbbbetci3yjjnjqmfkr4pab12cd45gh56hm76cyljaq"
+     user_ocid         = "ocid1.user.oc1..aaaaaaaa111111111bbbbbbb2oixpabcd7a3jkl6yife75v7a7o6c5d6wclrsjia"
+     fingerprint       = "9a:a1:b2:c3:d4:e5:6f:7g:89:33:5f:ed:ab:ec:de:11"
+     private_key_path  = "~/.ssh/oci_private.pem"           # Path to user's private key
+     regions           = ["ap-mumbai-1" , "us-ashburn-1"]   # List of regions to query resources
    }
    ```
 
@@ -56,19 +68,19 @@ Each OCI connection is scoped to a single OCI Tenant/Account, with a single set 
    # credentials via profile
    connection "oci_tenant_y" {
      plugin                = "oci"
-     config_file_profile   = "DEFAULT"
-     config_path           = "~/.oci/config"
-     regions               = ["ap-mumbai-1" , "us-ashburn-1"]
+     config_file_profile   = "DEFAULT"          # Name of the profile in the OCI config file
+     config_path           = "~/.oci/config"    # Path to config file
+     regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions to query resources
    }
    ```
 
 3. Using a named profile containing security token
 
    ```hcl
-   connection "oci_token" {
+   connection "oci_tenant_z" {
      plugin              =	"oci"
-     auth                =	"SecurityToken"
-     config_file_profile =	"token"
+     auth                =	"SecurityToken"   # Type of authentication.
+     config_file_profile =	"profile_with_token" # OCI Profile containing the details of the token
      regions             = ["ap-mumbai-1"]
    }
    ```
@@ -79,11 +91,11 @@ Each OCI connection is scoped to a single OCI Tenant/Account, with a single set 
    ```hcl
    connection "oci" {
      plugin  =  "oci"
-     auth    =  "InstancePrincipal"
+     auth    =  "InstancePrincipal"   # Type of authentication.
    }
    ```
 
-If no credentials are specified, the plugin will use the OCI credentials resolver to get the current credentials in the same manner as the CLI (as used in the OCI Default Connection):
+If no credentials are specified, the plugin will use the OCI Default Connection:
 
 ```hcl
 # default
@@ -106,7 +118,8 @@ If `regions` is not specified, Steampipe will use a single default region using 
 2. The region specified in the profile
 
 Steampipe will require read access in order to query your OCI resources.
-References:
+
+#### References:
 
 - [Security Credentials](https://docs.oracle.com/en-us/iaas/Content/General/Concepts/credentials.htm)
 - [Required IAM Policy to Work with Resources in the Tenancy Explorer](https://docs.oracle.com/en-us/iaas/Content/General/Concepts/compartmentexplorer.htm#iampolicy)

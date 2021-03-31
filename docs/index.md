@@ -79,7 +79,7 @@ Plugin also supports below set of configuration arguments:
    ```hcl
    connection "oci_tenant_z" {
      plugin              =	"oci"
-     auth                =	"SecurityToken"   # Type of authentication.
+     auth                =	"SecurityToken"   # Type of authentication
      config_file_profile =	"profile_with_token" # OCI Profile containing the details of the token
      regions             = ["ap-mumbai-1"]
    }
@@ -91,7 +91,7 @@ Plugin also supports below set of configuration arguments:
    ```hcl
    connection "oci" {
      plugin  =  "oci"
-     auth    =  "InstancePrincipal"   # Type of authentication.
+     auth    =  "InstancePrincipal"   # Type of authentication
    }
    ```
 

@@ -1,13 +1,50 @@
 package oci
 
 import (
+	"context"
 	"math"
 	"strconv"
 	"time"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
+
+type nameSpace struct {
+	Value string
+}
+
+//// LIST FUNCTION
+func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nameSpace, error) {
+	plugin.Logger(ctx).Trace("getNamespace")
+
+	cacheKey := "ObjectStorageNamespace"
+
+	// check if the namespace is already saved in cache
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.(*nameSpace), nil
+	}
+
+	// Create Session
+	session, err := objectStorageService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+	request := objectstorage.GetNamespaceRequest{}
+
+	response, err := session.ObjectStorageClient.GetNamespace(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	name := &nameSpace{
+		Value: *response.Value,
+	}
+	d.ConnectionManager.Cache.Set(cacheKey, name)
+
+	return name, err
+}
 
 // https://github.com/oracle/oci-go-sdk/blob/master/example/helpers/helper.go#L127
 func getDefaultRetryPolicy() *oci_common.RetryPolicy {
@@ -24,7 +61,7 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 		https: //docs.oracle.com/en-us/iaas/Content/API/References/apierrors.htm
 	*/
 	retryOnResponseCodes := func(r oci_common.OCIOperationResponse) bool {
-		if r.Response.HTTPResponse() != nil {
+		if r.Response != nil && r.Response.HTTPResponse() != nil {
 			statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
 			return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
 		}

@@ -1,0 +1,11 @@
+[
+  {
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "name": "{{ resourceName }}",
+    "namespace":"{{ output.namespace.value }}",
+    "versioning": "Disabled"
+  }
+]

@@ -16,7 +16,7 @@ type nameSpace struct {
 	Value string
 }
 
-//// listObjectStorageBuckets FUNCTION
+//// LIST FUNCTION
 func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nameSpace, error) {
 	plugin.Logger(ctx).Trace("getNamespace")
 

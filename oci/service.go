@@ -215,7 +215,7 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 	}
 
 	var providers []oci_common.ConfigurationProvider
-	providers = append(providers, oci_common.DefaultConfigProvider())
+	providers = append(providers, regionInfo, oci_common.DefaultConfigProvider())
 	cliProvider, _ := getProviderFromCLIEnvironmentVariables()
 	if cliProvider != nil {
 		providers = append(providers, cliProvider)

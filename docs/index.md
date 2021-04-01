@@ -83,7 +83,7 @@ connection "oci_tenant_y" {
 
 ## Advanced configuration options
 
-If you have an OCI profile setup for using the [OCI CLI](https://docs.oracle.com/en-us/iaas/tools/oci-cli/2.9.1/oci_cli_docs/oci.html) Steampipe will just work with that connection.
+If you have an OCI profile setup for using the [OCI CLI](https://docs.oracle.com/en-us/iaas/tools/oci-cli/2.9.1/oci_cli_docs/oci.html), Steampipe will just work with that connection.
 
 For users with multiple accounts and more complex authentication use cases, here are some examples of advanced configuration options:
 

@@ -18,11 +18,12 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_objectstorage_bucket",
 		Description: "OCI ObjectStorage Bucket",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("name"),
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
-			Hydrate:    getObjectStorageBucket,
-		},
+		// Bucket can have same name in two different compartments, leads to duplicate result in get call
+		// Get: &plugin.GetConfig{
+		// 	KeyColumns:        plugin.SingleColumn("name"),
+		// 	ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+		// 	Hydrate:           getObjectStorageBucket,
+		// },
 		List: &plugin.ListConfig{
 			Hydrate: listObjectStorageBuckets,
 		},
@@ -161,6 +162,11 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -177,7 +183,13 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 	}
 }
 
-//// listObjectStorageBuckets FUNCTION
+type bucketInfo struct {
+	Region string
+	objectstorage.BucketSummary
+}
+
+//// LIST FUNCTION
+
 func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
@@ -211,7 +223,7 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 		}
 
 		for _, bucketSummary := range response.Items {
-			d.StreamListItem(ctx, bucketSummary)
+			d.StreamListItem(ctx, bucketInfo{region, bucketSummary})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -229,22 +241,32 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("getObjectStorageBucket", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getObjectStorageBucket", "Compartment", compartment, "OCI_REGION", region)
 
-	var bucketName string
+	var bucketName, nameSpace string
 	if h.Item != nil {
-		bucketName = *h.Item.(objectstorage.BucketSummary).Name
+		bucket := h.Item.(bucketInfo)
+		bucketName = *bucket.Name
+		nameSpace = *bucket.Namespace
 	} else {
 		bucketName = d.KeyColumnQuals["name"].GetStringValue()
-		// Rstrict the api call to only root compartment/ per region
+		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
 	}
 
-	nameSpace, err := getNamespace(ctx, d, region)
-	if err != nil {
-		return nil, err
+	// handle empty bucket name in get call
+	if bucketName == "" {
+		return nil, nil
+	}
+
+	if nameSpace == "" {
+		bucketNamespace, err := getNamespace(ctx, d, region)
+		if err != nil {
+			return nil, err
+		}
+		nameSpace = bucketNamespace.Value
 	}
 
 	// Create Session
@@ -254,7 +276,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	request := objectstorage.GetBucketRequest{
-		NamespaceName: &nameSpace.Value,
+		NamespaceName: &nameSpace,
 		BucketName:    &bucketName,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -275,41 +297,21 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 // 2. Defined Tags
 // 3. Free-form tags
 func bucketTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	var bucket objectstorage.Bucket
-	var bucketSummary objectstorage.BucketSummary
-
-	switch d.HydrateItem.(type) {
-	case objectstorage.Bucket:
-		bucket = d.HydrateItem.(objectstorage.Bucket)
-	case objectstorage.BucketSummary:
-		bucketSummary = d.HydrateItem.(objectstorage.BucketSummary)
-	}
-
-	var freeTags map[string]string
-	var definedtags map[string]map[string]interface{}
-
-	if bucket.Name != nil {
-		freeTags = bucket.FreeformTags
-		definedtags = bucket.DefinedTags
-	} else {
-		freeTags = bucketSummary.FreeformTags
-		definedtags = bucketSummary.DefinedTags
-	}
+	bucket := d.HydrateItem.(objectstorage.Bucket)
 
 	var tags map[string]interface{}
-
-	if freeTags != nil {
+	if bucket.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range freeTags {
+		for k, v := range bucket.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if definedtags != nil {
+	if bucket.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range definedtags {
+		for _, v := range bucket.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -319,4 +321,3 @@ func bucketTags(ctx context.Context, d *transform.TransformData) (interface{}, e
 
 	return tags, nil
 }
-

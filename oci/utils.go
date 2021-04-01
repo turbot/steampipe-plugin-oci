@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -20,22 +19,20 @@ type nameSpace struct {
 //// listObjectStorageBuckets FUNCTION
 func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nameSpace, error) {
 	plugin.Logger(ctx).Trace("getNamespace")
-	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("getNamespace", "Compartment", compartment, "OCI_REGION", region)
 
-	serviceCacheKey := fmt.Sprintf("Namespace-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	cacheKey := "ObjectStorageNamespace"
+
+	// check if the namespace is already saved in cache
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.(*nameSpace), nil
 	}
+
 	// Create Session
 	session, err := objectStorageService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
-	request := objectstorage.GetNamespaceRequest{
-		CompartmentId: &session.TenancyID,
-	}
+	request := objectstorage.GetNamespaceRequest{}
 
 	response, err := session.ObjectStorageClient.GetNamespace(ctx, request)
 	if err != nil {
@@ -44,7 +41,7 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 	name := &nameSpace{
 		Value: *response.Value,
 	}
-	d.ConnectionManager.Cache.Set(serviceCacheKey, name)
+	d.ConnectionManager.Cache.Set(cacheKey, name)
 
 	return name, err
 }
@@ -64,7 +61,7 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 		https: //docs.oracle.com/en-us/iaas/Content/API/References/apierrors.htm
 	*/
 	retryOnResponseCodes := func(r oci_common.OCIOperationResponse) bool {
-		if r.Response.HTTPResponse() != nil {
+		if r.Response != nil && r.Response.HTTPResponse() != nil {
 			statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
 			return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
 		}

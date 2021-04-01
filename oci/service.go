@@ -75,10 +75,11 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 }
 
 // coreBlockStorageService returns the service client for OCI Core BlockStorage Service
-func coreBlockStorageService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("BlockstoragE-%s", "region")
+	serviceCacheKey := fmt.Sprintf("BlockStorage-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -86,19 +87,24 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData) (*session
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("coreBlockStorageService", "getProvider.Error", err)
+		return nil, err
+	}
+
 	client, err := core.NewBlockstorageClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	tenantID, err := provider.TenancyOCID()
+	tenantId, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err
 	}
 
 	sess := &session{
-		TenancyID:     tenantID,
+		TenancyID:     tenantId,
 		BlockstorageClient: client,
 	}
 

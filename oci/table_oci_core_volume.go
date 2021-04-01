@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/core"
@@ -19,11 +20,12 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 		Description: "OCI Core Volume",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getVolume,
+			Hydrate:    getCoreVolume,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreVolumes,
 		},
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -32,13 +34,8 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "availability_domain",
-				Description: "The availability domain of the volume.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "display_name",
-				Description: " A user-friendly name.",
+				Description: "A user-friendly name.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -47,15 +44,20 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "size_in_mbs",
-				Description: "The size of the volume in MBs.",
+				Name:        "auto_tuned_vpus_per_gb",
+				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SizeInMBs"),
+				Transform:   transform.FromField("AutoTunedVpusPerGB"),
 			},
 			{
-				Name:        "time_created",
-				Description: " The date and time the volume was created.",
+				Name:        "availability_domain",
+				Description: "The availability domain of the volume.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "is_auto_tune_enabled",
+				Description: "Specifies whether the auto-tune performance is enabled for this volume.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "is_hydrated",
@@ -69,40 +71,38 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "size_in_gbs",
+				Description: "The size of the volume in GBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInGBs"),
+			},
+			{
+				Name:        "size_in_mbs",
+				Description: "The size of the volume in MBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInMBs"),
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the volume was created.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "vpus_per_gb",
 				Description: "The number of volume performance units (VPUs) that will be applied to this volume per GB,representing the Block Volume service's elastic performance options.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("VpusPerGB"),
 			},
 			{
-				Name:        "size_in_gbs",
-				Description: "The size of the volume in GBs.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SizeInGBs"),
-			},
-
-			{
 				Name:        "volume_group_id",
 				Description: "The OCID of the source volume group.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
-			{
-				Name:        "is_auto_tune_enabled",
-				Description: "Specifies whether the auto-tune performance is enabled for this volume.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "auto_tuned_vpus_per_gb",
-				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("AutoTunedVpusPerGB"),
-			},
-
 			// json fields
 			{
 				Name:        "source_details",
-				Description: "The size of the volume in GBs.",
+				Description: "The volume source, either an existing volume in the same availability domain or a volume backup.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -158,14 +158,19 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Error("listCoreVolumes", "Compartment", compartment, "OCI_REGION", region)
+
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d)
+	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	request := core.ListVolumesRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId:  types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -193,13 +198,22 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 //// HYDRATE FUNCTION
 
-func getVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getVolume")
+func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreVolume")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Error("getCoreVolume", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d)
+	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

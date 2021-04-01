@@ -182,7 +182,7 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 			configPath = *config.ConfigPath
 		}
 
-		// If the ~/.steampipe/config/oci.spc contains a profile, get the provider for the it
+		// If the ~/.steampipe/config/oci.spc contains a profile, gets provider for it
 		configProvider := oci_common.CustomProfileConfigProvider(configPath, *config.Profile)
 		configProviderEnvironmentVariables := oci_common.ConfigurationProviderEnvironmentVariables("OCI_", "")
 

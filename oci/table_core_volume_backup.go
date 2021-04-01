@@ -29,7 +29,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
-				Description: "The OCID of the volume.",
+				Description: "The OCID of the volume backup.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -41,7 +41,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "display_name",
-				Description: "The availability domain of the volume.",
+				Description: "A user-friendly name for the volume backup.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -57,7 +57,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "kms_key_id",
-				Description: "The OCID of the Key Management key which is the master encryption key for the volume backup",
+				Description: "The OCID of the Key Management key which is the master encryption key for the volume backup.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -74,13 +74,13 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "size_in_mbs",
-				Description: "The size of the volume in MBs. The value must be a multiple of 1024",
+				Description: "The size of the volume in MBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("SizeInMBs"),
 			},
 			{
 				Name:        "source_type",
-				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
+				Description: "Specifies whether the backup was created manually, or via scheduled backup policy.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -95,17 +95,17 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "type",
-				Description: "The type of a volume backup..",
+				Description: "The type of a volume backup.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_request_received",
-				Description: "The size used by the backup, in GBs.",
+				Description: "The date and time the request to create the volume backup was received.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "unique_size_in_gbs",
-				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
+				Description: "The size used by the backup, in GBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("UniqueSizeInGBs"),
 			},

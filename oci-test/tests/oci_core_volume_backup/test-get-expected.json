@@ -1,0 +1,10 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "free_form_tags": "<null>",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE",
+    "size_in_mbs": 51200,
+    "volume_id": "{{ output.volume_id.value }}"
+  }
+]

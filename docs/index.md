@@ -79,3 +79,67 @@ connection "oci_tenant_y" {
 
 * Open source: https://github.com/turbot/steampipe-plugin-oci
 * Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
+
+
+## Advanced configuration options
+
+If you have an OCI profile setup for using the [OCI CLI](https://docs.oracle.com/en-us/iaas/tools/oci-cli/2.9.1/oci_cli_docs/oci.html) Steampipe will just work with that connection.
+
+For users with multiple accounts and more complex authentication use cases, here are some examples of advanced configuration options:
+
+
+### Use static credentials
+The OCI plugin allows you set static credentials with the tenancy_ocid, user_ocid, fingerprint and private_key_path arguments. You may select one or more regions with the regions argument.
+
+```hcl
+connection "oci_tenant_x" {
+  plugin            = "oci"
+  tenancy_ocid      = "ocid1.tenancy.oc1..aaaaaaaa111111111bbbbbbbetci3yjjnjqmfkr4pab12cd45gh56hm76cyljaq"
+  user_ocid         = "ocid1.user.oc1..aaaaaaaa111111111bbbbbbb2oixpabcd7a3jkl6yife75v7a7o6c5d6wclrsjia"
+  fingerprint       = "9a:a1:b2:c3:d4:e5:6f:7g:89:33:5f:ed:ab:ec:de:11"
+  private_key_path  = "~/.ssh/oci_private.pem"           # Path to user's private key
+  regions           = ["ap-mumbai-1" , "us-ashburn-1"]   # List of regions to query resources
+}
+```
+
+### Using a named profile 
+
+If you have an OCI config file(~/.oci/config) with multiple profiles setup, you can set the config_file_profile argument:
+
+```hcl
+connection "oci" {
+  plugin                = "oci"
+  config_file_profile   = "DEFAULT"          # Name of the profile in the OCI config file
+  config_path           = "~/.oci/config"    # Path to config file
+  regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions to query resources
+}
+
+connection "oci_tenant_x" {
+  plugin                = "oci"
+  config_file_profile   = "tenant_x"         # Name of the profile in the OCI config file
+  config_path           = "~/.oci/config"    # Path to config file
+  regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions to query resources
+}
+```
+
+### Using a named profile containing security token
+
+```hcl
+connection "oci_tenant_z" {
+  plugin              =	"oci"
+  auth                =	"SecurityToken"   # Type of authentication
+  config_file_profile =	"tenant_z"        # OCI Profile containing the details of the token
+  regions             = ["ap-mumbai-1"]
+}
+```
+
+### Instance principal based authentication
+
+This configuration will only work when run from an OCI instance. More information on using [Instance Principals](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm):
+
+```hcl
+connection "oci" {
+  plugin  =  "oci"
+  auth    =  "InstancePrincipal"   # Type of authentication
+}
+```

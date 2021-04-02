@@ -86,7 +86,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The date and time the volume was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.time"),
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "volume_group_id",

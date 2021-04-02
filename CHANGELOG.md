@@ -1,3 +1,9 @@
+## v0.0.2 [2021-04-02]
+
+_Bug fixes_
+
+- Fixed: `Table definitions & examples` link now points to the correct location ([#35](https://github.com/turbot/steampipe-plugin-oci/pull/35))
+
 ## v0.0.1 [2021-04-01]
 
 _What's new?_

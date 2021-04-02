@@ -10,13 +10,15 @@ The backups feature of the Oracle Cloud Infrastructure Block Volume service lets
 select
   id,
   display_name,
+  volume_id,
   source_type,
   time_created,
   type,
   lifecycle_state as state
 from
-  oci_new.oci_core_volume_backup;
+  oci_core_volume_backup;
 ```
+
 
 ### List manual volume backup
 
@@ -29,7 +31,7 @@ select
   type,
   lifecycle_state as state
 from
-  oci_new.oci_core_volume_backup
+  oci_core_volume_backup
 where
   source_type = 'MANUAL';
 ```

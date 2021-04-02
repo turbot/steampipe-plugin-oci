@@ -34,12 +34,6 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "data",
-				Description: "The OCID of the volume.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromValue(),
-			},
-			{
 				Name:        "display_name",
 				Description: "A user-friendly name for the volume backup.",
 				Type:        proto.ColumnType_STRING,

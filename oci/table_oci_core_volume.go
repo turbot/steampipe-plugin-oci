@@ -85,13 +85,8 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The date and time the volume was created.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "vpus_per_gb",
-				Description: "The number of volume performance units (VPUs) that will be applied to this volume per GB,representing the Block Volume service's elastic performance options.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("VpusPerGB"),
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.time"),
 			},
 			{
 				Name:        "volume_group_id",
@@ -99,6 +94,13 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
+			{
+				Name:        "vpus_per_gb",
+				Description: "The number of volume performance units (VPUs) that will be applied to this volume per GB,representing the Block Volume service's elastic performance options.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("VpusPerGB"),
+			},
+
 			// json fields
 			{
 				Name:        "source_details",
@@ -113,7 +115,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "fee_form_tags",
+				Name:       "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},

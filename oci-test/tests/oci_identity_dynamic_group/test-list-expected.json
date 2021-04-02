@@ -1,0 +1,11 @@
+[
+  {
+    "description": "{{ output.policy_description.value }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "ACTIVE",
+    "name": "{{ resourceName }}"
+  }
+]

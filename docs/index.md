@@ -14,7 +14,7 @@ og_image: "/images/plugins/turbot/oci-social-graphic.png"
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-[Oracle Cloud](https://oci.amazon.com/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
+[Oracle Cloud](https://www.oracle.com/cloud/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
 
 For example:
 

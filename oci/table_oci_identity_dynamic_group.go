@@ -60,7 +60,8 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "Date and time the group was created, in the format defined by RFC3339.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// tags

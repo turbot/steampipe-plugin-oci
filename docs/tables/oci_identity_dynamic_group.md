@@ -14,11 +14,11 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_identity_dynamic_group;
+  oci_identity_dynamic_group;
 ```
 
 
-### List dynamic group which are not in active state
+### List dynamic groups which are not in active state
 
 ```sql
 select
@@ -26,8 +26,7 @@ select
   id,
   lifecycle_state
 from
-  oci_new.oci_identity_dynamic_group
+  oci_identity_dynamic_group
 where
   lifecycle_state <> 'ACTIVE';
 ```
-

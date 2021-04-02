@@ -27,9 +27,10 @@ import (
 )
 
 type session struct {
-	TenancyID      string
-	IdentityClient identity.IdentityClient
-	ComputeClient  core.ComputeClient
+	TenancyID            string
+	IdentityClient       identity.IdentityClient
+	ComputeClient        core.ComputeClient
+	VirtualNetworkClient core.VirtualNetworkClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -106,6 +107,47 @@ func coreComputeServiceRegional(ctx context.Context, d *plugin.QueryData, region
 	sess := &session{
 		TenancyID:     tenantId,
 		ComputeClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// virtualNetworkClient returns the service client for OCI VirtualNetwork service
+func virtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	// if region == "" {
+	// 	return nil, fmt.Errorf("region must be passed ACMService")
+	// }
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("Identity-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// provider := oci_common.CustomProfileConfigProvider(*ociConfig.ConfigPath, *ociConfig.Profile)
+	client, err := core.NewVirtualNetworkClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:            tenantId,
+		VirtualNetworkClient: client,
 	}
 
 	// save session in cache

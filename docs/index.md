@@ -41,7 +41,7 @@ from
 
 ## Documentation
 
-- **[Table definitions & examples →](oci/tables)**
+- **[Table definitions & examples →](/plugins/turbot/oci/tables)**
 
 ## Get started
 

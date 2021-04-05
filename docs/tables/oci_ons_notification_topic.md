@@ -24,7 +24,7 @@ select
   topic_id,
   lifecycle_state,
   description,
-  freefrom_tags
+  freeform_tags
 from
   oci_ons_notification_topic
 where

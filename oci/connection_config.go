@@ -6,9 +6,6 @@ import (
 )
 
 type ociConfig struct {
-	// PrivateKey         *string  `cty:"key_file"`
-	// TenancyOCID        *string  `cty:"tenancy"`
-	// UserOCID           *string `cty:"user"`
 	Auth               *string  `cty:"auth"`
 	ConfigPath         *string  `cty:"config_path"`
 	Fingerprint        *string  `cty:"fingerprint"`
@@ -30,7 +27,6 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"tenancy_ocid": {
-		// "tenancy": {
 		Type: schema.TypeString,
 	},
 	"config_file_profile": {
@@ -40,14 +36,12 @@ var ConfigSchema = map[string]*schema.Attribute{
 		Type: schema.TypeString,
 	},
 	"user_ocid": {
-		// "user": {
 		Type: schema.TypeString,
 	},
 	"fingerprint": {
 		Type: schema.TypeString,
 	},
 	"private_key": {
-		// "key_file": {
 		Type: schema.TypeString,
 	},
 	"private_key_path": {

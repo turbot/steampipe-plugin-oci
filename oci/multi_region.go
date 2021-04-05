@@ -29,7 +29,7 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
 
-	if &ociConfig != nil && ociConfig.Regions != nil {
+	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
 		if len(getInvalidRegions(regions)) > 0 {
@@ -49,8 +49,16 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	}
 }
 
-// BuildCompartementRegionList :: return a list of matrix items, one per region specified in the connection config
+// BuildCompartementRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+
+	// cache compartment region matrix
+	cacheKey := "CompartementRegionList"
+
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]map[string]interface{})
+	}
+
 	// get all the compartments in the tenant
 	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
 	if err != nil {
@@ -63,11 +71,11 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
 
-	if &ociConfig != nil && ociConfig.Regions != nil {
+	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
 		if len(getInvalidRegions(regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ","))
+			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
 		}
 
 		// validate regions list
@@ -78,21 +86,26 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 					matrixKeyRegion:      region,
 					matrixKeyCompartment: *compartment.Id,
 				}
-				plugin.Logger(ctx).Warn("MATRIX", (len(compartments)*i)+j, matrix[len(compartments)*i+j])
+				plugin.Logger(ctx).Debug("listAllCompartments Matrix", (len(compartments)*i)+j, matrix[len(compartments)*i+j])
 			}
 		}
+
+		// set CompartementRegionList cache
+		pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
 		return matrix
 	}
 
 	defaultMatrix := make([]map[string]interface{}, len(compartments))
 	for j, compartment := range compartments {
-		// plugin.Logger(ctx).Error("BuildCompartementRegionList", "compartment", compartment)
 		defaultMatrix[j] = map[string]interface{}{
 			matrixKeyRegion:      getRegionFromEnvVar(),
 			matrixKeyCompartment: *compartment.Id,
 		}
-		plugin.Logger(ctx).Warn("MATRIX", j, defaultMatrix[j])
+		plugin.Logger(ctx).Debug("listAllCompartments MATRIX", j, defaultMatrix[j])
 	}
+
+	// set CompartementRegionList cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, defaultMatrix)
 
 	return defaultMatrix
 }

@@ -37,11 +37,18 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "lifecycle_state",
+				Description: "The compartment's current state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "time_created",
 				Description: "Date and time the user was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// other columns
 			{
 				Name:        "description",
 				Description: "The description you assign to the compartment.",
@@ -58,7 +65,6 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 				Name:        "is_accessible",
 				Description: "Indicates whether or not the compartment is accessible for the user making the request.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("IsAccessible"),
 			},
 			{
 				Name:        "defined_tags",
@@ -110,6 +116,22 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	session, err := identityService(ctx, d)
 	if err != nil {
 		return nil, err
+	}
+
+	rootRequest := identity.GetCompartmentRequest{
+		CompartmentId: &session.TenancyID,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	responseRoot, err := session.IdentityClient.GetCompartment(ctx, rootRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	if responseRoot.CompartmentId != nil {
+		d.StreamListItem(ctx, responseRoot.Compartment)
 	}
 
 	// The OCID of the tenancy containing the compartment.

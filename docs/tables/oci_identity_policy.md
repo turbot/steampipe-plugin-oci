@@ -4,7 +4,7 @@ A policy is a document that specifies who can access which Oracle Cloud Infrastr
 
 ## Examples
 
-### List all policies
+### Basic info
 
 ```sql
 select
@@ -30,7 +30,7 @@ where
   id = 'ocid1.policy.oc1..aaaaaaaa6nsa2ia2bkr7bx7olpkjuj42yk3rpalwuwvm7fjc7kz7o5wz5pmq';
 ```
 
-### List of policies where life cycle state is not active
+### List inactive policies
 
 ```sql
 select
@@ -38,7 +38,7 @@ select
   lifecycle_state
 from
   oci_identity_policy
-where lifecycle_state = 'CREATING';
+where lifecycle_state <> 'ACTIVE';
 ```
 
 ### List of policy statements

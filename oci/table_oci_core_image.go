@@ -40,6 +40,17 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "lifecycle_state",
+				Description: "The image's current state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the image was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "size_in_mbs",
 				Description: "The boot volume size for an instance launched from this image.",
 				Type:        proto.ColumnType_INT,
@@ -49,11 +60,6 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "create_image_allowed",
 				Description: "Indicates whether instances launched with this image can be used to create new images.",
 				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "lifecycle_state",
-				Description: "The image's current state.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "operating_system",
@@ -69,12 +75,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "base_image_id",
 				Description: "The OCID of the image originally used to launch the instance.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "time_created",
-				Description: "The date and time the image was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "launch_mode",
@@ -120,6 +121,12 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
@@ -138,7 +145,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	logger.Error("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := coreComputeServiceRegional(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +194,7 @@ func getImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := coreComputeServiceRegional(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

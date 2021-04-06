@@ -1,0 +1,245 @@
+package oci
+
+import (
+	"context"
+	"strings"
+
+	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/ons"
+	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+)
+
+//// TABLE DEFINITION
+
+func tableOnsSubscription(_ context.Context) *plugin.Table {
+	return &plugin.Table{
+		Name:        "oci_ons_subscription",
+		Description: "OCI Ons Subscription",
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getOnsSubscription,
+		},
+		List: &plugin.ListConfig{
+			Hydrate: listOnsSubscriptions,
+		},
+		GetMatrixItem: BuildCompartementRegionList,
+		Columns: []*plugin.Column{
+			{
+				Name:        "id",
+				Description: "The OCID of the subscription.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The lifecycle state of the subscription.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "created_time",
+				Description: "The time when this subscription was created.",
+				Type:        proto.ColumnType_INT,
+			},
+
+			// other columns
+			{
+				Name:        "delivery_policy",
+				Description: "Delivery Policy of the subscription.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "endpoint",
+				Description: "A locator that corresponds to the subscription protocol.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "etag",
+				Description: "For optimistic concurrency control.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "protocol",
+				Description: "The protocol used for the subscription.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "topic_id",
+				Description: "The OCID of the associated topic.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+
+			// tags
+			{
+				Name:        "defined_tags",
+				Description: ColumnDescriptionDefinedTags,
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "freeform_tags",
+				Description: ColumnDescriptionFreefromTags,
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// Standard Steampipe columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(subscriptionTags),
+			},
+
+			// Standard OCI columns
+			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenant,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
+			},
+		},
+	}
+}
+
+//// LIST FUNCTION
+
+func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.listOnsSubscriptions", "Compartment", compartment, "OCI_REGION", region)
+
+	// Create Session
+	session, err := notificationDataPlaneService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := ons.ListSubscriptionsRequest{
+		CompartmentId: types.String(compartment),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NotificationDataPlaneClient.ListSubscriptions(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, subscription := range response.Items {
+			d.StreamListItem(ctx, subscription)
+		}
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return nil, err
+}
+
+//// HYDRATE FUNCTION
+
+func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getOnsSubscription")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(ons.SubscriptionSummary).TopicId
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	// Create Session
+	session, err := notificationDataPlaneService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := ons.GetSubscriptionRequest{
+		SubscriptionId: types.String(id),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.NotificationDataPlaneClient.GetSubscription(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Subscription, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := subscriptionFreeformTags(d.HydrateItem)
+
+	var tags map[string]interface{}
+
+	if freeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range freeformTags {
+			tags[k] = v
+		}
+	}
+
+	definedTags := subscriptionDefinedTags(d.HydrateItem)
+
+	if definedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	return tags, nil
+}
+
+func subscriptionFreeformTags(item interface{}) map[string]string {
+	switch item.(type) {
+	case ons.Subscription:
+		return item.(ons.Subscription).FreeformTags
+	case ons.SubscriptionSummary:
+		return item.(ons.SubscriptionSummary).FreeformTags
+	}
+	return nil
+}
+
+func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{} {
+	switch item.(type) {
+	case ons.Subscription:
+		return item.(ons.Subscription).DefinedTags
+	case ons.SubscriptionSummary:
+		return item.(ons.SubscriptionSummary).DefinedTags
+	}
+	return nil
+}

@@ -17,7 +17,7 @@ from
 ```
 
 
-### List internet gateway which are disabled
+### List disabled internet gateways
 
 ```sql
 select

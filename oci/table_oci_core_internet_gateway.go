@@ -40,6 +40,12 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the internet gateway belongs to.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
 				Name:        "is_enabled",
 				Description: "Whether the gateway is enabled.",
 				Type:        proto.ColumnType_BOOL,
@@ -52,13 +58,8 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The date and time the internet gateway was created.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "vcn_id",
-				Description: "The OCID of the VCN the internet gateway belongs to.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// tags
@@ -89,6 +90,11 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -105,13 +111,18 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 	}
 }
 
+type internetGatewayInfo struct {
+	core.InternetGateway
+	Region string
+}
+
 //// LIST FUNCTION
 
 func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreInternetGateways", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreInternetGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -134,7 +145,7 @@ func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugi
 		}
 
 		for _, internetGateway := range response.Items {
-			d.StreamListItem(ctx, internetGateway)
+			d.StreamListItem(ctx,  internetGatewayInfo{internetGateway, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -153,7 +164,7 @@ func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("getCoreInternetGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreInternetGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -161,6 +172,11 @@ func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty internet gateway id in get call
+	if id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -180,7 +196,7 @@ func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	return response.InternetGateway, nil
+	return internetGatewayInfo{response.InternetGateway, region}, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -190,22 +206,22 @@ func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.
 // 2. Defined Tags
 // 3. Free-form tags
 func internetGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(core.InternetGateway)
+	internetGateway := d.HydrateItem.(internetGatewayInfo).InternetGateway
 
 	var tags map[string]interface{}
 
-	if instance.FreeformTags != nil {
+	if internetGateway.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range instance.FreeformTags {
+		for k, v := range internetGateway.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if instance.DefinedTags != nil {
+	if internetGateway.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range instance.DefinedTags {
+		for _, v := range internetGateway.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

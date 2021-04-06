@@ -28,7 +28,7 @@ select
 from
   oci_ons_notification_topic
 where
-  id = 'ocid1.onstopic.oc1.ap-mumbai-1.aaaaaaaaopa22qgc2er4lc52ulajxwapd2c2kfs5lupvl57lejzjgh8qsdcf';
+  topic_id = 'ocid1.onstopic.oc1.ap-mumbai-1.aaaaaaaaopa22qgc2er4lc52ulajxwapd2c2kfs5lupvl57lejzjgh8qsdcf';
 ```
 
 ### List inactive topic

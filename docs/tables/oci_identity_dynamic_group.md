@@ -40,5 +40,5 @@ select
   id,
   matching_rule
 from
-  oci_new.oci_identity_dynamic_group
+  oci_identity_dynamic_group;
 ```

@@ -47,7 +47,8 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			{
 				Name:        "expiration_time",
 				Description: "The date and time the volume backup will expire and be automatically deleted.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("ExpirationTime.Time"),
 			},
 			{
 				Name:        "kms_key_id",
@@ -85,7 +86,8 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The date and time the volume backup was created.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "type",
@@ -95,7 +97,8 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_request_received",
 				Description: "The date and time the request to create the volume backup was received.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeRequestReceived.Time"),
 			},
 			{
 				Name:        "unique_size_in_gbs",
@@ -143,6 +146,11 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+	  	},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -159,13 +167,18 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 	}
 }
 
+type volumneBackupInfo struct {
+	core.VolumeBackup
+	Region string
+}
+
 //// LIST FUNCTION
 
 func listCoreVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreVolumeBackups", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreVolumeBackups", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -188,7 +201,7 @@ func listCoreVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 
 		for _, volumeBackups := range response.Items {
-			d.StreamListItem(ctx, volumeBackups )
+			d.StreamListItem(ctx, volumneBackupInfo{volumeBackups, region} )
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -207,7 +220,7 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("getCoreInternetGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getVolumeBackup", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -215,6 +228,11 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty volume backup id in get call
+	if id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -234,7 +252,7 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	return response.VolumeBackup, nil
+	return volumneBackupInfo{response.VolumeBackup, region}, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -244,22 +262,22 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 // 2. Defined Tags
 // 3. Free-form tags
 func volumeBackupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volume := d.HydrateItem.(core.VolumeBackup)
+	volumeBackup := d.HydrateItem.(volumneBackupInfo).VolumeBackup
 
 	var tags map[string]interface{}
 
-	if volume.FreeformTags != nil {
+	if volumeBackup.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range volume.FreeformTags {
+		for k, v := range volumeBackup.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if volume.DefinedTags != nil {
+	if volumeBackup.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range volume.DefinedTags {
+		for _, v := range volumeBackup.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -267,11 +285,11 @@ func volumeBackupTags(_ context.Context, d *transform.TransformData) (interface{
 		}
 	}
 
-	if volume.SystemTags != nil {
+	if volumeBackup.SystemTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range volume.SystemTags {
+		for _, v := range volumeBackup.SystemTags {
 			for key, value := range v {
 				tags[key] = value
 			}

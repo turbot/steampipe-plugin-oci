@@ -49,7 +49,7 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	}
 }
 
-// BuildCompartementRegionList :: return a list of matrix items, one per region specified in the connection config
+// BuildCompartementRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 
 	// cache compartment region matrix

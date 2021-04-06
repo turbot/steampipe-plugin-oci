@@ -45,3 +45,18 @@ from
 where
   size_in_gbs > 1024;
 ```
+
+
+### List volumes with oracle managed encryption
+
+```sql
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_volume
+where
+  kms_key_id is null;
+```

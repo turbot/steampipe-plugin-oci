@@ -44,15 +44,29 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "auto_tuned_vpus_per_gb",
-				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("AutoTunedVpusPerGB"),
+				Name:        "volume_group_id",
+				Description: "The OCID of the source volume group.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "availability_domain",
 				Description: "The availability domain of the volume.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the volume was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+
+			// other columns
+			{
+				Name:        "auto_tuned_vpus_per_gb",
+				Description: "The number of Volume Performance Units per GB that this volume is effectively tuned to when it's idle.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("AutoTunedVpusPerGB"),
 			},
 			{
 				Name:        "is_auto_tune_enabled",
@@ -81,18 +95,6 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Description: "The size of the volume in MBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("SizeInMBs"),
-			},
-			{
-				Name:        "time_created",
-				Description: "The date and time the volume was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
-				Name:        "volume_group_id",
-				Description: "The OCID of the source volume group.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "vpus_per_gb",
@@ -141,6 +143,11 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: "ColumnDescriptionCompartment",
 				Type:        proto.ColumnType_STRING,
@@ -157,13 +164,19 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 	}
 }
 
+type volumneInfo struct {
+	core.Volume
+	Region string
+}
+
+
 //// LIST FUNCTION
 
 func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreVolumes", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreVolumes", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -186,7 +199,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, volumes := range response.Items {
-			d.StreamListItem(ctx, volumes)
+			d.StreamListItem(ctx,  volumneInfo{volumes, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -205,7 +218,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("getCoreVolume", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreVolume", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -213,6 +226,11 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty volume id in get call
+	if id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -232,7 +250,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	return response.Volume, nil
+	return volumneInfo{response.Volume, region},  nil
 }
 
 //// TRANSFORM FUNCTION
@@ -242,7 +260,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 // 2. Defined Tags
 // 3. Free-form tags
 func volumeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volume := d.HydrateItem.(core.Volume)
+	volume := d.HydrateItem.(volumneInfo).Volume
 
 	var tags map[string]interface{}
 

@@ -154,11 +154,6 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 // coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
 func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	// if region == "" {
-	// 	return nil, fmt.Errorf("region must be passed ACMService")
-	// }
-	// have we already created and cached the service?
-
 	serviceCacheKey := fmt.Sprintf("VirtualNetwork-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil

@@ -1,6 +1,6 @@
 [
   {
-    "description": "{{ output.policy_description.value }}",
+    "description": "{{ output.description.value }}",
     "freeform_tags": {
       "Department": "Finance"
     },

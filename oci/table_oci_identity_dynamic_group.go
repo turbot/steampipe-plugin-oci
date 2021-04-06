@@ -145,6 +145,11 @@ func getIdentityDynamicGroup(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty dynamic group id in get call
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {

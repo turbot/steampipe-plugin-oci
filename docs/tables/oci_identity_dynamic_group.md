@@ -30,3 +30,15 @@ from
 where
   lifecycle_state <> 'ACTIVE';
 ```
+
+
+### Get matching rule details of dynamic groups
+
+```sql
+select
+  name,
+  id,
+  matching_rule
+from
+  oci_new.oci_identity_dynamic_group
+```

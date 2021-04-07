@@ -151,7 +151,7 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := virtualNetworkService(ctx, d, region)
@@ -189,11 +189,11 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 //// HYDRATE FUNCTION
 
 func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getUser")
+	plugin.Logger(ctx).Trace("getVcn")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

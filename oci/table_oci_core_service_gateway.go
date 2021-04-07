@@ -1,0 +1,243 @@
+package oci
+
+import (
+	"context"
+	"strings"
+
+	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+)
+
+//// TABLE DEFINITION
+
+func tableCoreServiceGateway(_ context.Context) *plugin.Table {
+	return &plugin.Table{
+		Name:        "oci_core_service_gateway",
+		Description: "OCI Core Service Gateway",
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getCoreServiceGateway,
+		},
+		List: &plugin.ListConfig{
+			Hydrate: listCoreServiceGateways,
+		},
+		GetMatrixItem: BuildCompartementRegionList,
+		Columns: []*plugin.Column{
+			{
+				Name:        "id",
+				Description: "The OCID of the service gateway.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "display_name",
+				Description: "A user-friendly name of the service gateway.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the service gateway was created",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The service gateway's current state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the service gateway belongs to.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "route_table_id",
+				Description: "The OCID of the route table the service gateway is using.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "block_traffic",
+				Description: "Specifies whether the service gateway blocks traffic through it.",
+				Type:        proto.ColumnType_BOOL,
+			},
+
+			// json columns
+			{
+				Name:        "services",
+				Description: "List of the Service objects enabled for this service gateway.",
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// tags
+			{
+				Name:        "defined_tags",
+				Description: ColumnDescriptionDefinedTags,
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "freeform_tags",
+				Description: ColumnDescriptionFreefromTags,
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// Standard Steampipe columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(serviceGatewayTags),
+			},
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+			},
+
+			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(serviceGatewayRegion),
+			},
+			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenant,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
+			},
+		},
+	}
+}
+
+//// LIST FUNCTION
+
+func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.listCoreNatGateways", "Compartment", compartment, "OCI_REGION", region)
+
+	// Create Session
+	session, err := coreVirtualNetworkService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := core.ListServiceGatewaysRequest{
+		CompartmentId: types.String(compartment),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.VirtualNetworkClient.ListServiceGateways(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, serviceGateways := range response.Items {
+			d.StreamListItem(ctx, serviceGateways)
+		}
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return nil, err
+}
+
+//// HYDRATE FUNCTION
+
+func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getUser")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
+
+	// Rstrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := coreVirtualNetworkService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := core.GetServiceGatewayRequest{
+		ServiceGatewayId: types.String(id),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.VirtualNetworkClient.GetServiceGateway(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.ServiceGateway, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	serviceGateway := d.HydrateItem.(core.ServiceGateway)
+
+	var tags map[string]interface{}
+
+	if serviceGateway.FreeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range serviceGateway.FreeformTags {
+			tags[k] = v
+		}
+	}
+
+	if serviceGateway.DefinedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range serviceGateway.DefinedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+		}
+	}
+
+	return tags, nil
+}
+
+func serviceGatewayRegion(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	serviceGateway := d.HydrateItem.(core.ServiceGateway)
+
+	region := strings.Split(*serviceGateway.Id, ".")[3]
+
+	return region, nil
+}

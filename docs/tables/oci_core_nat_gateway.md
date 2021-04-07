@@ -22,7 +22,8 @@ from
 
 ```sql
 select
-  display_name id,
+  display_name,
+  id,
   block_traffic
 from
   oci_core_nat_gateway inst

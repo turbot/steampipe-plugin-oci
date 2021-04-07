@@ -17,13 +17,13 @@ import (
 func tableCoreNatGateway(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_nat_gateway",
-		Description: "OCI Core Instance",
+		Description: "OCI Core Nat Gateway",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getNatGateway,
+			Hydrate:    getCoreNatGateway,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreNatGateway,
+			Hydrate: listCoreNatGateways,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -63,7 +63,7 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "public_ip_id",
-				Description: "The IP address associated with the NAT gateway.",
+				Description: "The OCID of the public IP address associated with the NAT gateway.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -101,6 +101,12 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(natGatewayRegion),
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -119,11 +125,11 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCoreNatGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -160,12 +166,12 @@ func listCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTION
 
-func getNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getUser")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getNatGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -173,6 +179,10 @@ func getNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -221,4 +231,12 @@ func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{},
 	}
 
 	return tags, nil
+}
+
+func natGatewayRegion(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	natGateway := d.HydrateItem.(core.NatGateway)
+
+	region := strings.Split(*natGateway.Id, ".")[3]
+
+	return region, nil
 }

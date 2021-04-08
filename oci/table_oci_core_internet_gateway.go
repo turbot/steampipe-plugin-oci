@@ -14,53 +14,52 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreRouteTable(_ context.Context) *plugin.Table {
+func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_route_table",
-		Description: "OCI Core Route Table",
+		Name:        "oci_core_internet_gateway",
+		Description: "OCI Core Internet Gateway",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getCoreRouteTable,
+			Hydrate:    getCoreInternetGateway,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreRouteTables,
+			Hydrate: listCoreInternetGateways,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "id",
+				Description: "The internet gateway's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "id",
-				Description: "The route table's Oracle ID (OCID).",
+				Name:        "display_name",
+				Description: "A user-friendly name.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "vcn_id",
-				Description: "The OCID of the VCN the route table list belongs to.",
+				Description: "The OCID of the VCN the internet gateway belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "is_enabled",
+				Description: "Whether the gateway is enabled.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
 				Name:        "lifecycle_state",
-				Description: "The route table's current state.",
+				Description: "The internet gateway's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the route table was created.",
+				Description: "The date and time the internet gateway was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-
-			// json fields
-			{
-				Name:        "route_rules",
-				Description: "The collection of rules for routing destination IPs to network devices.",
-				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -80,7 +79,7 @@ func tableCoreRouteTable(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(routeTableTags),
+				Transform:   transform.From(internetGatewayTags),
 			},
 			{
 				Name:        "title",
@@ -112,18 +111,18 @@ func tableCoreRouteTable(_ context.Context) *plugin.Table {
 	}
 }
 
-type routeTableInfo struct {
-	core.RouteTable
+type internetGatewayInfo struct {
+	core.InternetGateway
 	Region string
 }
 
 //// LIST FUNCTION
 
-func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreRouteTables", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreInternetGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -131,7 +130,7 @@ func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	request := core.ListRouteTablesRequest{
+	request := core.ListInternetGatewaysRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -140,13 +139,13 @@ func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListRouteTables(ctx, request)
+		response, err := session.VirtualNetworkClient.ListInternetGateways(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, routeTable := range response.Items {
-			d.StreamListItem(ctx,  routeTableInfo{routeTable, region})
+		for _, internetGateway := range response.Items {
+			d.StreamListItem(ctx,  internetGatewayInfo{internetGateway, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -160,12 +159,12 @@ func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 //// HYDRATE FUNCTION
 
-func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getCoreRouteTable")
+func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreInternetGateway")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCoreRouteTable", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreInternetGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -174,7 +173,7 @@ func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty route table id in get call
+	// handle empty internet gateway id in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -185,40 +184,44 @@ func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	request := core.GetRouteTableRequest{
-		RtId: types.String(id),
+	request := core.GetInternetGatewayRequest{
+		IgId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetRouteTable(ctx, request)
+	response, err := session.VirtualNetworkClient.GetInternetGateway(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return routeTableInfo{response.RouteTable, region}, nil
+	return internetGatewayInfo{response.InternetGateway, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func routeTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	routeTable := d.HydrateItem.(routeTableInfo).RouteTable
+// Priority order for tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
+func internetGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	internetGateway := d.HydrateItem.(internetGatewayInfo).InternetGateway
 
 	var tags map[string]interface{}
 
-	if routeTable.FreeformTags != nil {
+	if internetGateway.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range routeTable.FreeformTags {
+		for k, v := range internetGateway.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if routeTable.DefinedTags != nil {
+	if internetGateway.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range routeTable.DefinedTags {
+		for _, v := range internetGateway.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

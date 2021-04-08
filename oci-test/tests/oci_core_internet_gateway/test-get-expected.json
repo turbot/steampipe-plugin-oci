@@ -1,0 +1,8 @@
+[
+  {
+    "display_name": "{{ output.display_name.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "is_enabled": true,
+    "lifecycle_state": "AVAILABLE"
+  }
+]

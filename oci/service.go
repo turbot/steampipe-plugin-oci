@@ -25,9 +25,9 @@ import (
 )
 
 type session struct {
-	TenancyID           string
-	IdentityClient       identity.IdentityClient
+	TenancyID            string
 	ComputeClient        core.ComputeClient
+	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
 }
@@ -151,8 +151,8 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// virtualNetworkClient returns the service client for OCI VirtualNetwork service
-func virtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
+func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("VirtualNetwork-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
@@ -164,7 +164,7 @@ func virtualNetworkService(ctx context.Context, d *plugin.QueryData, region stri
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("virtualNetworkService", "getProvider.Error", err)
+		logger.Error("coreVirtualNetworkService", "getProvider.Error", err)
 		return nil, err
 	}
 
@@ -173,13 +173,13 @@ func virtualNetworkService(ctx context.Context, d *plugin.QueryData, region stri
 		return nil, err
 	}
 
-	tenantId, err := provider.TenancyOCID()
+	tenantID, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err
 	}
 
 	sess := &session{
-		TenancyID:            tenantId,
+		TenancyID:            tenantID,
 		VirtualNetworkClient: client,
 	}
 

@@ -11,8 +11,7 @@ select
   display_name,
   id,
   time_created,
-  vcn_id
-  lifecycle_state as state,
+  vcn_id lifecycle_state,
   region
 from
   oci_core_service_gateway;
@@ -36,7 +35,7 @@ select
   display_name,
   id,
   s -> 'serviceId' as service_id,
-  s -> 'serviceName' as service_name,
+  s -> 'serviceName' as service_name
 from
   oci_core_service_gateway,
   jsonb_array_elements(services) as s;
@@ -52,7 +51,8 @@ select
   block_traffic
 from
   oci_core_service_gateway
-where block_traffic;
+where
+  block_traffic;
 ```
 
 
@@ -61,7 +61,8 @@ where block_traffic;
 ```sql
 select
   display_name,
-  id
+  id,
+  tags
 from
   oci_core_service_gateway
 where

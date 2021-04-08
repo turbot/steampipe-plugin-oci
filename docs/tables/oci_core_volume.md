@@ -1,6 +1,6 @@
 # Table: oci_core_volume
 
-The Oracle Cloud Infrastructure Block Volume service lets you dynamically provision and manage block storage volume
+The Oracle Cloud Infrastructure Block Volume service lets you dynamically provision and manage block storage volume.
 
 ## Examples
 
@@ -17,7 +17,7 @@ from
 ```
 
 
-### List volumes with faulty state
+### List volumes with a faulty state
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
 ```
 
 
-### List volumes with memory size greater than 1024 Gb
+### List volumes with a memory size greater than 1024 GB
 
 ```sql
 select
@@ -47,7 +47,7 @@ where
 ```
 
 
-### List volumes with oracle managed encryption( kms_key_id null here indicates that data will be encrypted at rest with an encryption key whose lifecycle management is controlled by Oracle.)
+### List volumes with Oracle managed encryption (volumes are encrypted by default with Oracled managed encryption keys)
 
 ```sql
 select

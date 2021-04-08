@@ -29,6 +29,7 @@ type session struct {
 	IdentityClient      identity.IdentityClient
 	ComputeClient       core.ComputeClient
 	ObjectStorageClient objectstorage.ObjectStorageClient
+	VCNClient           core.VirtualNetworkClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -465,4 +466,42 @@ func buildHttpClient() (httpClient *http.Client) {
 		},
 	}
 	return
+}
+
+// VCNService returns the service client for Virtual Cloud Networks service
+func VCNService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("VCN-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("VCNService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := core.NewVirtualNetworkClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		VCNClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }

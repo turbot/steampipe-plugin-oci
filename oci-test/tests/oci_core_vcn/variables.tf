@@ -6,8 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
-  description = "OCI credentials profile used for the test. Default is to use the default profile."
+  description = "OCID of your tenancy."
 }
 
 variable "config_file_profile" {
@@ -18,7 +17,7 @@ variable "config_file_profile" {
 
 variable "oci_ad" {
   type        = string
-  default     = "TvRS:AP-MUMBAI-1-AD-1"
+  default     = "ap-mumbai-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 

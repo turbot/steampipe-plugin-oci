@@ -4,7 +4,7 @@ A virtual private network that you set up in Oracle data centers. It closely res
 
 ## Examples
 
-### List all vcn
+### Basic info
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
   id = 'ocid1.vcn.oc1.ap-mumbai-1.amaaaaaa6igdexaasn5aalvhjyqctaiykwy2bg3xjqeza6muotvya1wdrf4v';
 ```
 
-### List of vcn where state is not available
+### List unavailable virtual cloud networks
 
 ```sql
 select
@@ -42,5 +42,5 @@ select
 from
   oci_core_vcn
 where
-  lifecycle_state != 'AVAILABLE';
+  lifecycle_state <> 'AVAILABLE';
 ```

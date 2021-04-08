@@ -129,6 +129,11 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -143,6 +148,11 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type vcnInfo struct {
+	core.Vcn
+	Region string
 }
 
 //// LIST FUNCTION
@@ -174,7 +184,7 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 
 		for _, network := range response.Items {
-			d.StreamListItem(ctx, network)
+			d.StreamListItem(ctx, vcnInfo{network, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -220,13 +230,13 @@ func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (in
 		return nil, err
 	}
 
-	return response.Vcn, nil
+	return vcnInfo{response.Vcn, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vcn := d.HydrateItem.(core.Vcn)
+	vcn := d.HydrateItem.(vcnInfo).Vcn
 
 	var tags map[string]interface{}
 

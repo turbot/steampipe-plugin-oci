@@ -25,14 +25,14 @@ from
 select
   display_name,
   id,
-  rr ->> 'cidrBlock' as cidr_block,
-  rr ->> 'description' as description,
-  rr ->> 'destination' as destination,
-  rr ->> 'destinationType' as destination_type,
-  rr ->> 'networkEntityId' as network_entity_id
+  rt ->> 'cidrBlock' as cidr_block,
+  rt ->> 'description' as description,
+  rt ->> 'destination' as destination,
+  rt ->> 'destinationType' as destination_type,
+  rt ->> 'networkEntityId' as network_entity_id
 from
   oci_core_route_table,
-  jsonb_array_elements(route_rules) as rr;
+  jsonb_array_elements(route_rules) as rt;
 ```
 
 
@@ -42,10 +42,10 @@ from
 select
   display_name,
   id,
-  rr ->> 'destination' as destination
+  rt ->> 'destination' as destination
 from
   oci_core_route_table,
-  jsonb_array_elements(route_rules) as rr
+  jsonb_array_elements(route_rules) as rt
 where
-  rr ->> 'destination' = '0.0.0.0/0'
+  rt ->> 'destination' = '0.0.0.0/0'
 ```

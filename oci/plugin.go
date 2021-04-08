@@ -36,6 +36,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_user":                  tableIdentityUser(ctx),
 			"oci_objectstorage_bucket":           tableObjectStorageBucket(ctx),
 			"oci_region":                         tableIdentityRegion(ctx),
+			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
 		},
 	}
 	return p

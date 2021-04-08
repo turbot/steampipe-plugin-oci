@@ -25,11 +25,12 @@ import (
 )
 
 type session struct {
-	TenancyID      string
-	IdentityClient identity.IdentityClient
-	ComputeClient  core.ComputeClient
-	BlockstorageClient core.BlockstorageClient
-	ObjectStorageClient objectstorage.ObjectStorageClient
+	TenancyID            string
+  BlockstorageClient   core.BlockstorageClient
+	ComputeClient        core.ComputeClient
+	IdentityClient       identity.IdentityClient
+	ObjectStorageClient  objectstorage.ObjectStorageClient
+	VirtualNetworkClient core.VirtualNetworkClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -63,6 +64,46 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	sess := &session{
 		TenancyID:      tenantId,
 		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// coreBlockStorageService returns the service client for OCI Core BlockStorage Service
+func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("BlockStorage-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("coreBlockStorageService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := core.NewBlockstorageClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		BlockstorageClient: client,
 	}
 
 	// save session in cache
@@ -151,16 +192,10 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// coreBlockStorageService returns the service client for OCI Core BlockStorage Service
-func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
+func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	// if region == "" {
-	// 	return nil, fmt.Errorf("region must be passed ACMService")
-	// }
-	// have we already created and cached the service?
-
-	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("BlockStorage-%s", region)
+	serviceCacheKey := fmt.Sprintf("VirtualNetwork-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -170,23 +205,23 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("coreBlockStorageService", "getProvider.Error", err)
+		logger.Error("coreVirtualNetworkService", "getProvider.Error", err)
 		return nil, err
 	}
 
-	client, err := core.NewBlockstorageClientWithConfigurationProvider(provider)
+	client, err := core.NewVirtualNetworkClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	tenantId, err := provider.TenancyOCID()
+	tenantID, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
-		BlockstorageClient: client,
+		TenancyID:            tenantID,
+		VirtualNetworkClient: client,
 	}
 
 	// save session in cache

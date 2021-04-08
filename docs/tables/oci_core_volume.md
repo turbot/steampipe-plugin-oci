@@ -75,3 +75,19 @@ from
 where
   kms_key_id is not null;
 ```
+
+
+### List volumes created in the root compartment
+
+```sql
+select
+  id as volume_id,
+  display_name,
+  lifecycle_state,
+  tenant_id,
+  compartment_id
+from
+  oci_core_volume
+where
+  compartment_id = tenant_id;
+```

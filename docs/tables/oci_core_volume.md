@@ -8,7 +8,7 @@ The Oracle Cloud Infrastructure Block Volume service lets you dynamically provis
 
 ```sql
 select
-  id,
+  id as volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -21,7 +21,7 @@ from
 
 ```sql
 select
-  id,
+  id as volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -36,7 +36,7 @@ where
 
 ```sql
 select
-  id,
+  id as volume_id,
   display_name,
   lifecycle_state,
   size_in_gbs
@@ -47,11 +47,11 @@ where
 ```
 
 
-### List volumes with oracle managed encryption
+### List volumes with oracle managed encryption( kms_key_id null here indicates that data will be encrypted at rest with an encryption key whose lifecycle management is controlled by Oracle.)
 
 ```sql
 select
-  id,
+  id as volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -59,4 +59,19 @@ from
   oci_core_volume
 where
   kms_key_id is null;
+```
+
+
+### List volumes with customer managed encryption
+
+```sql
+select
+  id as volume_id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_volume
+where
+  kms_key_id is not null;
 ```

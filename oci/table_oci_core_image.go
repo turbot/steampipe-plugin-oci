@@ -51,15 +51,25 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "size_in_mbs",
-				Description: "The boot volume size for an instance launched from this image.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SizeInMBs"),
+				Name:        "base_image_id",
+				Description: "The OCID of the image originally used to launch the instance.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "create_image_allowed",
 				Description: "Indicates whether instances launched with this image can be used to create new images.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "launch_mode",
+				Description: "Specifies the configuration mode for launching virtual machine (VM) instances.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "launch_options",
+				Description: "LaunchOptions Options for tuning the compatibility and performance of VM shapes.",
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "operating_system",
@@ -72,20 +82,10 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "base_image_id",
-				Description: "The OCID of the image originally used to launch the instance.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-			{
-				Name:        "launch_mode",
-				Description: "Specifies the configuration mode for launching virtual machine (VM) instances.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "launch_options",
-				Description: "LaunchOptions Options for tuning the compatibility and performance of VM shapes.",
-				Type:        proto.ColumnType_JSON,
+				Name:        "size_in_mbs",
+				Description: "The boot volume size for an instance launched from this image.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInMBs"),
 			},
 			{
 				Name:        "agent_features",

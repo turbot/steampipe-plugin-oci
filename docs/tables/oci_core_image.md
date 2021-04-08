@@ -47,3 +47,16 @@ from
 where
   launch_options ->> 'isPvEncryptionInTransitEnabled'  = 'false';
 ```
+
+### List all custom images
+
+```sql
+select
+  display_name,
+  id,
+  lifecycle_state
+from
+  oci_core_image
+where
+  tenant_id is not null;
+```

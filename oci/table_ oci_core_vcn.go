@@ -44,6 +44,12 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "time_created",
+				Description: "The date and time the VCN was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "cidr_block",
 				Description: "The first CIDR IP address from cidrBlocks.",
 				Type:        proto.ColumnType_STRING,
@@ -88,12 +94,6 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Name:        "vcn_domain_name",
 				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "time_created",
-				Description: "The date and time the VCN was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "cidr_blocks",

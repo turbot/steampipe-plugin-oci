@@ -1,6 +1,6 @@
-# Table: oci_identity_policy
+# Table: oci_core_subnet
 
-A policy is a document that specifies who can access which Oracle Cloud Infrastructure resources that your company has, and how. A policy simply allows a group to work in certain ways with specific types of resources in a particular compartment.
+A logical subdivision of a VCN. Each subnet consists of a contiguous range of IP addresses that do not overlap with other subnets in the VCN.
 
 ## Examples
 

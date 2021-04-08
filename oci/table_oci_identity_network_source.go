@@ -22,7 +22,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 			Hydrate:    getIdentityNetworkSource,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listIdentityNetworkSource,
+			Hydrate: listIdentityNetworkSources,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -118,7 +118,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -163,6 +163,11 @@ func getIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = *h.Item.(identity.NetworkSourcesSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	// handle empty network source id in get call
+	if id == "" {
+		return nil, nil
 	}
 
 	// Create Session

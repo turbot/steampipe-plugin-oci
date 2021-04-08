@@ -1,6 +1,6 @@
 # Table: oci_core_route_table
 
-A collection of RouteRule objects, which are used to route packets based on destination IP to a particular network entity
+A route table is a collection of RouteRule objects, which are used to route packets based on destination IP to a particular network entity.
 
 ## Examples
 
@@ -19,7 +19,7 @@ from
 ```
 
 
-### Get routing details of route table
+### Get routing details for each route table
 
 ```sql
 select
@@ -36,7 +36,7 @@ from
 ```
 
 
-### List route tables whose routes are directed to the internet
+### List route tables with routes directed to the Internet
 
 ```sql
 select

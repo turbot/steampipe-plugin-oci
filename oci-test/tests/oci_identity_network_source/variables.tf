@@ -6,26 +6,18 @@ variable "resource_name" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "OCI"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
-}
-
-variable "region" {
-  type        = string
-  default     = "ap-mumbai-1"
-  description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
 provider "oci" {
   tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
-  region              = var.region
 }
 
 resource "oci_identity_group" "test_group" {
@@ -34,7 +26,6 @@ resource "oci_identity_group" "test_group" {
   description    = var.resource_name
   name           = var.resource_name
 }
-
 
 resource "oci_identity_network_source" "named_test_resource" {
   compartment_id = var.tenancy_ocid

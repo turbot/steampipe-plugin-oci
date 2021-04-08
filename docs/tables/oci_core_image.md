@@ -4,7 +4,7 @@ An image is a template of a virtual hard drive. The image determines the operati
 
 ## Examples
 
-### List all images
+### Basic info
 
 ```sql
 select
@@ -48,7 +48,7 @@ where
   launch_options ->> 'isPvEncryptionInTransitEnabled'  = 'false';
 ```
 
-### List all custom images
+### List custom images
 
 ```sql
 select

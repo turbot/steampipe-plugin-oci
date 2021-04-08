@@ -20,8 +20,8 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 		Description: "OCI Core Image",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AnyColumn([]string{"id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getImage,
+			ShouldIgnoreError: isNotFoundError([]string{"404","400"}),
+			Hydrate:           getCoreImage,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreImages,
@@ -121,6 +121,11 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -134,6 +139,11 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type imageInfo struct {
+	core.Image
+	Region string
 }
 
 //// LIST FUNCTION
@@ -164,8 +174,8 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 			return nil, err
 		}
 
-		for _, instance := range response.Items {
-			d.StreamListItem(ctx, instance)
+		for _, image := range response.Items {
+			d.StreamListItem(ctx, imageInfo{image, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -179,7 +189,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 //// HYDRATE FUNCTION
 
-func getImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getImage")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
@@ -211,13 +221,13 @@ func getImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (
 		return nil, err
 	}
 
-	return response.Image, nil
+	return imageInfo{response.Image, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(core.Image)
+	instance := d.HydrateItem.(imageInfo).Image
 
 	var tags map[string]interface{}
 

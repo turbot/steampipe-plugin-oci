@@ -12,6 +12,7 @@ select
   id,
   time_created,
   lifecycle_state as state,
+  region,
   tags
 from
   oci_core_nat_gateway;

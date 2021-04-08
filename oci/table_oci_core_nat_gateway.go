@@ -39,12 +39,6 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "time_created",
-				Description: "The date and time the NAT gateway was created",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
 				Name:        "lifecycle_state",
 				Description: "The NAT gateway's current state.",
 				Type:        proto.ColumnType_STRING,
@@ -54,6 +48,12 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 				Description: "The OCID of the VCN the NAT gateway belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the NAT gateway was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "nat_ip",
@@ -104,7 +104,6 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(natGatewayRegion),
 			},
 			{
 				Name:        "compartment_id",
@@ -121,6 +120,11 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type natGatewayInfo = struct {
+	core.NatGateway
+	Region string
 }
 
 //// LIST FUNCTION
@@ -151,8 +155,8 @@ func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 			return nil, err
 		}
 
-		for _, natGateways := range response.Items {
-			d.StreamListItem(ctx, natGateways)
+		for _, natGateway := range response.Items {
+			d.StreamListItem(ctx, natGatewayInfo{natGateway, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -202,13 +206,13 @@ func getCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	return response.NatGateway, nil
+	return natGatewayInfo{response.NatGateway, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	natGateway := d.HydrateItem.(core.NatGateway)
+	natGateway := d.HydrateItem.(natGatewayInfo).NatGateway
 
 	var tags map[string]interface{}
 
@@ -231,12 +235,4 @@ func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{},
 	}
 
 	return tags, nil
-}
-
-func natGatewayRegion(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	natGateway := d.HydrateItem.(core.NatGateway)
-
-	region := strings.Split(*natGateway.Id, ".")[3]
-
-	return region, nil
 }

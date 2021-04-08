@@ -157,6 +157,11 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -171,6 +176,11 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type subnetInfo struct {
+	core.Subnet
+	Region string
 }
 
 //// LIST FUNCTION
@@ -202,7 +212,7 @@ func listCoreSubnets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, subnet := range response.Items {
-			d.StreamListItem(ctx, subnet)
+			d.StreamListItem(ctx, subnetInfo{subnet, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -248,13 +258,13 @@ func getSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		return nil, err
 	}
 
-	return response.Subnet, nil
+	return subnetInfo{response.Subnet, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func subnetTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	subnet := d.HydrateItem.(core.Subnet)
+	subnet := d.HydrateItem.(subnetInfo).Subnet
 
 	var tags map[string]interface{}
 

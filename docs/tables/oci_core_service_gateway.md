@@ -11,7 +11,8 @@ select
   display_name,
   id,
   time_created,
-  vcn_id lifecycle_state,
+  vcn_id,
+  lifecycle_state,
   region
 from
   oci_core_service_gateway;
@@ -28,7 +29,7 @@ from
   oci_core_service_gateway;
 ```
 
-### Services info that enabled for Service gateways
+### List services which are enabled for service gateways
 
 ```sql
 select
@@ -56,7 +57,7 @@ where
 ```
 
 
-### List of Service gateways without application tag key
+### List Service gateways without application tag key
 
 ```sql
 select

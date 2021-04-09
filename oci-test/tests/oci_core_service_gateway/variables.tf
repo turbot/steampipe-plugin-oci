@@ -15,8 +15,6 @@ variable "tenancy_ocid" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
-
-
 variable "region" {
   type        = string
   default     = "ap-mumbai-1"
@@ -57,18 +55,6 @@ resource "oci_core_route_table" "named_test_resource" {
   #Required
   compartment_id = var.tenancy_ocid
   vcn_id         = oci_core_vcn.named_test_resource.id
-
-  # route_rules {
-  #   #Required
-  #   network_entity_id = oci_core_internet_gateway.test_internet_gateway.id
-  #   destination       = "10.0.0.0/16"
-  # }
-}
-
-resource "oci_core_internet_gateway" "test_internet_gateway" {
-  #Required
-  compartment_id = var.tenancy_ocid
-  vcn_id         = oci_core_vcn.named_test_resource.id
 }
 
 data "oci_core_services" "named_test_resource" {
@@ -86,7 +72,6 @@ output "region" {
   value = var.region
 }
 
-
 output "freeform_tags" {
   value = oci_core_service_gateway.named_test_resource.freeform_tags
 }
@@ -103,7 +88,6 @@ output "state" {
   value = oci_core_service_gateway.named_test_resource.state
 }
 
-
 output "vcn_id" {
   value = oci_core_service_gateway.named_test_resource.vcn_id
 }
@@ -111,4 +95,3 @@ output "vcn_id" {
 output "block_traffic" {
   value = oci_core_service_gateway.named_test_resource.block_traffic
 }
-

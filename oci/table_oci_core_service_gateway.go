@@ -39,12 +39,6 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "time_created",
-				Description: "The date and time the service gateway was created",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
 				Name:        "lifecycle_state",
 				Description: "The service gateway's current state.",
 				Type:        proto.ColumnType_STRING,
@@ -60,6 +54,12 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 				Description: "The OCID of the route table the service gateway is using.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time the service gateway was created",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "block_traffic",
@@ -105,7 +105,6 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.From(serviceGatewayRegion),
 			},
 			{
 				Name:        "compartment_id",
@@ -124,13 +123,18 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 	}
 }
 
+type serviceGatewayInfo struct {
+	core.ServiceGateway
+	Region string
+}
+
 //// LIST FUNCTION
 
 func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCoreNatGateways", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCoreServiceGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -152,8 +156,11 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 			return nil, err
 		}
 
-		for _, serviceGateways := range response.Items {
-			d.StreamListItem(ctx, serviceGateways)
+		for _, serviceGateway := range response.Items {
+			d.StreamListItem(ctx, serviceGatewayInfo{
+				serviceGateway,
+				region,
+			})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -168,11 +175,11 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 //// HYDRATE FUNCTION
 
 func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getUser")
+	plugin.Logger(ctx).Trace("getCoreServiceGateway")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreServiceGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -203,13 +210,13 @@ func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	return response.ServiceGateway, nil
+	return serviceGatewayInfo{response.ServiceGateway, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	serviceGateway := d.HydrateItem.(core.ServiceGateway)
+	serviceGateway := d.HydrateItem.(serviceGatewayInfo).ServiceGateway
 
 	var tags map[string]interface{}
 
@@ -232,12 +239,4 @@ func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interfac
 	}
 
 	return tags, nil
-}
-
-func serviceGatewayRegion(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	serviceGateway := d.HydrateItem.(core.ServiceGateway)
-
-	region := strings.Split(*serviceGateway.Id, ".")[3]
-
-	return region, nil
 }

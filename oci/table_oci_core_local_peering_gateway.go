@@ -19,11 +19,11 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 		Name:        "oci_core_local_peering_gateway",
 		Description: "OCI Core Local Peering Gateway",
 		List: &plugin.ListConfig{
-			Hydrate: listPeeringGateway,
+			Hydrate: listCorePeeringGateways,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getPeeringGateway,
+			Hydrate:    getCorePeeringGateway,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -66,7 +66,7 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			{
 				Name:        "peer_advertised_cidr",
 				Description: "The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN at the other end of the peering from this LPG.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_IPADDR,
 			},
 			{
 				Name:        "peering_status_details",
@@ -79,13 +79,13 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
-
-			// json fields
 			{
 				Name:        "peering_status",
 				Description: "Whether the LPG is peered with another LPG.",
-				Type:        proto.ColumnType_JSON,
+				Type:        proto.ColumnType_STRING,
 			},
+
+			// json fields
 			{
 				Name:        "peer_advertised_cidr_details",
 				Description: "The specific ranges of IP addresses available on or via the VCN at the other end of the peering from this LPG.",
@@ -109,7 +109,7 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gatewayTags),
+				Transform:   transform.From(localPeeringGatewayTags),
 			},
 			{
 				Name:        "title",
@@ -119,6 +119,12 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
@@ -138,11 +144,11 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCorePeeringGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listPeeringGateway", "Compartment", compartment, "VCN", region)
+	logger.Debug("oci.listCorePeeringGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -179,11 +185,11 @@ func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCorePeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getPeeringGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCorePeeringGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -221,7 +227,7 @@ func getPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 // Priority order for tags
 // 2. Defined Tags
 // 3. Free-form tags
-func gatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func localPeeringGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	localPeeringGateway := d.HydrateItem.(core.LocalPeeringGateway)
 
 	var tags map[string]interface{}

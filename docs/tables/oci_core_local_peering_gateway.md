@@ -41,5 +41,5 @@ select
 from
   oci_core_local_peering_gateway
 where
-  peering_status_details = 'Not connected to a peer.';
+  peering_status = 'NEW';
 ```

@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreVcn(_ context.Context) *plugin.Table {
+func tableCoreRouteTable(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_vcn",
-		Description: "OCI Core VCN",
+		Name:        "oci_core_route_table",
+		Description: "OCI Core Route Table",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getVcn,
+			Hydrate:    getCoreRouteTable,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreVcns,
+			Hydrate: listCoreRouteTables,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -34,70 +34,32 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "The VCN's Oracle ID (OCID).",
+				Description: "The route table's Oracle ID (OCID).",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the route table list belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The VCN's current state.",
+				Description: "The route table's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the VCN was created.",
+				Description: "The date and time the route table was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// json fields
 			{
-				Name:        "cidr_block",
-				Description: "The first CIDR IP address from cidrBlocks.",
-				Type:        proto.ColumnType_CIDR,
-			},
-			{
-				Name:        "default_dhcp_options_id",
-				Description: "The OCID for the VCN's default set of DHCP options.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultDhcpOptionsId"),
-			},
-			{
-				Name:        "default_route_table_id",
-				Description: "The OCID of the instance.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultRouteTableId"),
-			},
-			{
-				Name:        "default_security_list_id",
-				Description: "The OCID for the VCN's default security list.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultSecurityListId"),
-			},
-			{
-				Name:        "dns_label",
-				Description: "A DNS label for the VCN, used in conjunction with the VNIC's hostname and subnet's DNS label to form a fully qualified domain name (FQDN) for each VNIC within this subnet.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DnsLabel"),
-			},
-			{
-				Name:        "ipv6_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
-				Type:        proto.ColumnType_CIDR,
-				Transform:   transform.FromField("Ipv6CidrBlock"),
-			},
-			{
-				Name:        "ipv6_public_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
-			},
-			{
-				Name:        "vcn_domain_name",
-				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "cidr_blocks",
-				Description: "The list of IPv4 CIDR blocks the VCN will use.",
+				Name:        "route_rules",
+				Description: "The collection of rules for routing destination IPs to network devices.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -118,7 +80,7 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(vcnTags),
+				Transform:   transform.From(routeTableTags),
 			},
 			{
 				Name:        "title",
@@ -150,18 +112,18 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 	}
 }
 
-type vcnInfo struct {
-	core.Vcn
+type routeTableInfo struct {
+	core.RouteTable
 	Region string
 }
 
 //// LIST FUNCTION
 
-func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreRouteTables", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -169,7 +131,7 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	request := core.ListVcnsRequest{
+	request := core.ListRouteTablesRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -178,13 +140,13 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListVcns(ctx, request)
+		response, err := session.VirtualNetworkClient.ListRouteTables(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, network := range response.Items {
-			d.StreamListItem(ctx, vcnInfo{network, region})
+		for _, routeTable := range response.Items {
+			d.StreamListItem(ctx,  routeTableInfo{routeTable, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -198,12 +160,12 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 //// HYDRATE FUNCTION
 
-func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getVcn")
+func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreRouteTable")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreRouteTable", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -212,46 +174,51 @@ func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (in
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty route table id in get call
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetVcnRequest{
-		VcnId: types.String(id),
+	request := core.GetRouteTableRequest{
+		RtId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetVcn(ctx, request)
+	response, err := session.VirtualNetworkClient.GetRouteTable(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return vcnInfo{response.Vcn, region}, nil
+	return routeTableInfo{response.RouteTable, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vcn := d.HydrateItem.(vcnInfo).Vcn
+func routeTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	routeTable := d.HydrateItem.(routeTableInfo).RouteTable
 
 	var tags map[string]interface{}
 
-	if vcn.FreeformTags != nil {
+	if routeTable.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range vcn.FreeformTags {
+		for k, v := range routeTable.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if vcn.DefinedTags != nil {
+	if routeTable.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range vcn.DefinedTags {
+		for _, v := range routeTable.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

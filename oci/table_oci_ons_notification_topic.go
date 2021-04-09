@@ -102,6 +102,12 @@ func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("TopicId").Transform(ociRegionName),
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -127,7 +133,7 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 	logger.Debug("oci.listOnsNotificationTopics", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := notificationService(ctx, d, region)
+	session, err := onsNotificationService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -173,15 +179,14 @@ func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin
 		return nil, nil
 	}
 
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(ons.NotificationTopicSummary).TopicId
-	} else {
-		id = d.KeyColumnQuals["topic_id"].GetStringValue()
+	id := d.KeyColumnQuals["topic_id"].GetStringValue()
+
+	if id == "" {
+		return nil, nil
 	}
 
 	// Create Session
-	session, err := notificationService(ctx, d, region)
+	session, err := onsNotificationService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

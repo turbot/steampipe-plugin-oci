@@ -153,7 +153,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 }
 
 // notificationService returns the service client for OCI Core Notification service
-func notificationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+func onsNotificationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?

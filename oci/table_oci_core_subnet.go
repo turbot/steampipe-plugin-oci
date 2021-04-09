@@ -20,7 +20,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 		Description: "OCI Core Subnet",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getSubnet,
+			Hydrate:    getCoreSubnet,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreSubnets,
@@ -44,6 +44,18 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "route_table_id",
+				Description: "The OCID of the route table that the subnet uses.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the subnet is in.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
 				Name:        "time_created",
 				Description: "The date and time the subnet was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -57,7 +69,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			{
 				Name:        "cidr_block",
 				Description: "The subnet's CIDR block.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 			},
 			{
 				Name:        "dhcp_options_id",
@@ -74,7 +86,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			{
 				Name:        "ipv6_cidr_block",
 				Description: "For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's private IP address space.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 				Transform:   transform.FromField("Ipv6CidrBlock"),
 			},
 			{
@@ -96,21 +108,9 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "route_table_id",
-				Description: "The OCID of the route table that the subnet uses.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-			{
 				Name:        "subnet_domain_name",
 				Description: "The subnet's domain name, which consists of the subnet's DNS label.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "vcn_id",
-				Description: "The OCID of the VCN the subnet is in.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "virtual_router_ip",
@@ -125,7 +125,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "security_list_ids",
-				Description: "he OCIDs of the security list or lists that the subnet uses.",
+				Description: "The OCIDs of the security list or lists that the subnet uses.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -192,7 +192,7 @@ func listCoreSubnets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	logger.Debug("listCoreSubnets", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := virtualNetworkService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -226,12 +226,12 @@ func listCoreSubnets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 //// HYDRATE FUNCTION
 
-func getSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getSubnet")
+func getCoreSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreSubnet")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getSubnet", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreSubnet", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -240,8 +240,12 @@ func getSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
-	session, err := virtualNetworkService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

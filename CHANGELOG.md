@@ -1,3 +1,12 @@
+## v0.0.3 [2021-04-08]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_internet_gateway](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_internet_gateway) ([#21](https://github.com/turbot/steampipe-plugin-oci/pull/21))
+  - [oci_core_route_table](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_route_table) ([#44](https://github.com/turbot/steampipe-plugin-oci/pull/44))
+  - [oci_core_volume](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume) ([#10](https://github.com/turbot/steampipe-plugin-oci/pull/10))
+
 ## v0.0.2 [2021-04-02]
 
 _Bug fixes_

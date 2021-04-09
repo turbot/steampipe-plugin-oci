@@ -29,7 +29,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"oci_core_instance":                  tableCoreInstance(ctx),
+			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
+			"oci_core_route_table":               tableCoreRouteTable(ctx),
 			"oci_core_subnet":                    tableCoreSubnet(ctx),
+			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),
 			"oci_identity_group":                 tableIdentityGroup(ctx),

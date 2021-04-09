@@ -22,7 +22,7 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			Hydrate: listPeeringGateway,
 		},
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getPeeringGateway,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -62,11 +62,6 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 				Name:        "is_cross_tenancy_peering",
 				Description: "Whether the VCN at the other end of the peering is in a different tenancy.",
 				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
-				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "peer_advertised_cidr",

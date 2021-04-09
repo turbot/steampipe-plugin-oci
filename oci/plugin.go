@@ -29,7 +29,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"oci_core_instance":                  tableCoreInstance(ctx),
+			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
 			"oci_core_nat_gateway":               tableCoreNatGateway(ctx),
+			"oci_core_route_table":               tableCoreRouteTable(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),
 			"oci_identity_group":                 tableIdentityGroup(ctx),
@@ -37,6 +39,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_user":                  tableIdentityUser(ctx),
 			"oci_objectstorage_bucket":           tableObjectStorageBucket(ctx),
 			"oci_region":                         tableIdentityRegion(ctx),
+			"oci_core_volume":                    tableCoreVolume(ctx),
 		},
 	}
 	return p

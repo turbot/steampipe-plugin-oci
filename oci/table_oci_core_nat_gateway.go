@@ -58,7 +58,7 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 			{
 				Name:        "nat_ip",
 				Description: "The IP address associated with the NAT gateway.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_IPADDR,
 				Transform:   transform.FromCamel(),
 			},
 			{

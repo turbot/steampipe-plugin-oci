@@ -14,82 +14,52 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
+func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_local_peering_gateway",
-		Description: "OCI Core Local Peering Gateway",
-		List: &plugin.ListConfig{
-			Hydrate: listPeeringGateway,
-		},
+		Name:        "oci_core_internet_gateway",
+		Description: "OCI Core Internet Gateway",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getPeeringGateway,
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getCoreInternetGateway,
+		},
+		List: &plugin.ListConfig{
+			Hydrate: listCoreInternetGateways,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "id",
+				Description: "The internet gateway's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "id",
-				Description: "The LPG's Oracle ID",
+				Name:        "display_name",
+				Description: "A user-friendly name.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "vcn_id",
-				Description: "The OCID of the VCN that uses the LPG.",
+				Description: "The OCID of the VCN the internet gateway belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "is_enabled",
+				Description: "Whether the gateway is enabled.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
 				Name:        "lifecycle_state",
-				Description: "The LPG's current lifecycle state.",
+				Description: "The internet gateway's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the LPG was created.",
+				Description: "The date and time the internet gateway was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-
-			// other columns
-			{
-				Name:        "is_cross_tenancy_peering",
-				Description: "Whether the VCN at the other end of the peering is in a different tenancy.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "peer_advertised_cidr",
-				Description: "The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN at the other end of the peering from this LPG.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "peering_status_details",
-				Description: "Additional information regarding the peering status.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "route_table_id",
-				Description: "The OCID of the route table the LPG is using.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-
-			// json fields
-			{
-				Name:        "peering_status",
-				Description: "Whether the LPG is peered with another LPG.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "peer_advertised_cidr_details",
-				Description: "The specific ranges of IP addresses available on or via the VCN at the other end of the peering from this LPG.",
-				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -109,7 +79,7 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(gatewayTags),
+				Transform:   transform.From(internetGatewayTags),
 			},
 			{
 				Name:        "title",
@@ -119,6 +89,11 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
@@ -136,13 +111,18 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 	}
 }
 
+type internetGatewayInfo struct {
+	core.InternetGateway
+	Region string
+}
+
 //// LIST FUNCTION
 
-func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listPeeringGateway", "Compartment", compartment, "VCN", region)
+	logger.Debug("listCoreInternetGateways", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -150,7 +130,7 @@ func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	request := core.ListLocalPeeringGatewaysRequest{
+	request := core.ListInternetGatewaysRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -159,16 +139,16 @@ func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	pagesLeft := true
 	for pagesLeft {
-		gateways, err := session.VirtualNetworkClient.ListLocalPeeringGateways(ctx, request)
+		response, err := session.VirtualNetworkClient.ListInternetGateways(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, gateway := range gateways.Items {
-			d.StreamListItem(ctx, gateway)
+		for _, internetGateway := range response.Items {
+			d.StreamListItem(ctx,  internetGatewayInfo{internetGateway, region})
 		}
-		if gateways.OpcNextPage != nil {
-			request.Page = gateways.OpcNextPage
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
 		} else {
 			pagesLeft = false
 		}
@@ -177,67 +157,71 @@ func listPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, err
 }
 
-//// HYDRATE FUNCTIONS
+//// HYDRATE FUNCTION
 
-func getPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreInternetGateway")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getPeeringGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreInternetGateway", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	if len(id) == 0 {
+	// handle empty internet gateway id in get call
+	if id == "" {
 		return nil, nil
 	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetLocalPeeringGatewayRequest{
-		LocalPeeringGatewayId: types.String(id),
+	request := core.GetInternetGatewayRequest{
+		IgId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetLocalPeeringGateway(ctx, request)
+	response, err := session.VirtualNetworkClient.GetInternetGateway(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.LocalPeeringGateway, nil
+	return internetGatewayInfo{response.InternetGateway, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
+// 1. System Tags
 // 2. Defined Tags
 // 3. Free-form tags
-func gatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	localPeeringGateway := d.HydrateItem.(core.LocalPeeringGateway)
+func internetGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	internetGateway := d.HydrateItem.(internetGatewayInfo).InternetGateway
 
 	var tags map[string]interface{}
 
-	if localPeeringGateway.FreeformTags != nil {
+	if internetGateway.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range localPeeringGateway.FreeformTags {
+		for k, v := range internetGateway.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if localPeeringGateway.DefinedTags != nil {
+	if internetGateway.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range localPeeringGateway.DefinedTags {
+		for _, v := range internetGateway.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

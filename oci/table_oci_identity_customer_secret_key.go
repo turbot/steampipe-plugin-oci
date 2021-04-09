@@ -1,0 +1,115 @@
+package oci
+
+import (
+	"context"
+
+	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/identity"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+)
+
+//// TABLE DEFINITION
+
+func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
+	return &plugin.Table{
+		Name:        "oci_identity_customer_secret_key",
+		Description: "OCI Identity Customer Secret Key",
+		List: &plugin.ListConfig{
+			ParentHydrate: listUsers,
+			Hydrate: listIdentitCustomerSecretKeys,
+		},
+		Columns: []*plugin.Column{
+			{
+				Name:        "id",
+				Description: "The OCID of the secret key.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "user_id",
+				Description: "The OCID of the user the password belongs to.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "display_name",
+				Description: "The displayName you assign to the secret key.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The secret key's current state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "Date and time the CustomerSecretKey object was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "time_expires",
+				Description: "Date and time when this password will expire.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeExpires.Time"),
+			},
+			{
+				Name:        "inactive_status",
+				Description: "The detailed status of INACTIVE lifecycleState.",
+				Type:        proto.ColumnType_INT,
+			},
+
+			// Standard Steampipe columns
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+			},
+
+			// Standard OCI columns
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenant,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
+			},
+		},
+	}
+}
+
+//// LIST FUNCTION
+
+func listIdentitCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+
+	user := h.Item.(identity.User)
+
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	// The OCID of the tenancy containing the compartment.
+	request := identity.ListCustomerSecretKeysRequest{
+			UserId:        user.Id,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+		// List IAM user access keys
+		item, err := session.IdentityClient.ListCustomerSecretKeys(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, authorizer := range item.Items {
+			d.StreamLeafListItem(ctx, authorizer)
+		}
+
+	return nil, nil
+}

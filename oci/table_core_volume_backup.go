@@ -82,6 +82,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 				Name:        "source_volume_backup_id",
 				Description: "The OCID of the source volume backup.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -149,6 +150,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 	  	},
 			{
 				Name:        "compartment_id",
@@ -165,11 +167,6 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type volumneBackupInfo struct {
-	core.VolumeBackup
-	Region string
 }
 
 //// LIST FUNCTION
@@ -201,7 +198,7 @@ func listCoreVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		}
 
 		for _, volumeBackups := range response.Items {
-			d.StreamListItem(ctx, volumneBackupInfo{volumeBackups, region} )
+			d.StreamListItem(ctx, volumeBackups)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -252,7 +249,7 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	return volumneBackupInfo{response.VolumeBackup, region}, nil
+	return response.VolumeBackup, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -262,7 +259,7 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 // 2. Defined Tags
 // 3. Free-form tags
 func volumeBackupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volumeBackup := d.HydrateItem.(volumneBackupInfo).VolumeBackup
+	volumeBackup := d.HydrateItem.(core.VolumeBackup)
 
 	var tags map[string]interface{}
 

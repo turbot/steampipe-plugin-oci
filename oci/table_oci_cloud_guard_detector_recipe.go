@@ -53,14 +53,21 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
+				Name:        "description",
+				Description: "Detector recipe description.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "time_created",
 				Description: "The date and time the detector recipe was created.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated").Transform(convertDateToTime),
 			},
 			{
 				Name:        "time_updated",
 				Description: "The date and time the detector recipe was updated.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated").Transform(convertDateToTime),
 			},
 			{
 				Name:        "owner",
@@ -72,21 +79,16 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 				Description: "Type of detector.",
 				Type:        proto.ColumnType_STRING,
 			},
-			{
-				Name:        "description",
-				Description: "Detector recipe description.",
-				Type:        proto.ColumnType_STRING,
-			},
 
 			// json fields
 			{
 				Name:        "detector_rules",
-				Description: "List of detetor rules for the detector type for recipe.",
+				Description: "List of detector rules for the detector type for recipe.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "effective_detector_rules",
-				Description: "List of detetor rules for the detector type for recipe.",
+				Description: "List of detector rules for the detector type for recipe.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCloudGuardDetectorRecipe,
 			},
@@ -123,12 +125,6 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
-			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel().Transform(regionName),
-			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,

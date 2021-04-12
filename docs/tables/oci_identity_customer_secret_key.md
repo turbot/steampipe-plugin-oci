@@ -27,7 +27,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_identity_customer_secret_key
+  oci_identity_customer_secret_key
 where
   lifecycle_state = 'INACTIVE';
 ```

@@ -104,6 +104,7 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -120,11 +121,6 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type natGatewayInfo = struct {
-	core.NatGateway
-	Region string
 }
 
 //// LIST FUNCTION
@@ -156,7 +152,7 @@ func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		}
 
 		for _, natGateway := range response.Items {
-			d.StreamListItem(ctx, natGatewayInfo{natGateway, region})
+			d.StreamListItem(ctx, natGateway)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -206,13 +202,13 @@ func getCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	return natGatewayInfo{response.NatGateway, region}, nil
+	return response.NatGateway, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	natGateway := d.HydrateItem.(natGatewayInfo).NatGateway
+	natGateway := d.HydrateItem.(core.NatGateway)
 
 	var tags map[string]interface{}
 
@@ -235,4 +231,12 @@ func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{},
 	}
 
 	return tags, nil
+}
+
+// Extract OCI region name from the resource id
+func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	id := types.SafeString(d.Value)
+	splittedId := strings.Split(id, ".")
+	regionName := oci_common.StringToRegion(types.SafeString(splittedId[3]))
+	return regionName, nil
 }

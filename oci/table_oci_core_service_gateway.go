@@ -233,11 +233,3 @@ func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interfac
 
 	return tags, nil
 }
-
-// Extract OCI region name from the resource id
-func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	id := types.SafeString(d.Value)
-	splittedId := strings.Split(id, ".")
-	regionName := oci_common.StringToRegion(types.SafeString(splittedId[3]))
-	return regionName, nil
-}

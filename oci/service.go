@@ -18,6 +18,7 @@ import (
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/identity"
+	"github.com/oracle/oci-go-sdk/v36/logging"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
@@ -25,12 +26,13 @@ import (
 )
 
 type session struct {
-	TenancyID            string
-      BlockstorageClient   core.BlockstorageClient
-	ComputeClient        core.ComputeClient
-	IdentityClient       identity.IdentityClient
-	ObjectStorageClient  objectstorage.ObjectStorageClient
-	VirtualNetworkClient core.VirtualNetworkClient
+	TenancyID               string
+  BlockstorageClient      core.BlockstorageClient
+	ComputeClient           core.ComputeClient
+	IdentityClient          identity.IdentityClient
+	LoggingManagementClient logging.LoggingManagementClient
+	ObjectStorageClient     objectstorage.ObjectStorageClient
+	VirtualNetworkClient    core.VirtualNetworkClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -64,6 +66,46 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	sess := &session{
 		TenancyID:      tenantId,
 		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// loggingManagementService returns the service client for OCI Logging Management Service
+func loggingManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("loggingManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := logging.NewLoggingManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		LoggingManagementClient: client,
 	}
 
 	// save session in cache

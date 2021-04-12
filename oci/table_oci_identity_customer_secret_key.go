@@ -95,20 +95,20 @@ func listIdentitCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListCustomerSecretKeysRequest{
-			UserId:        user.Id,
+		UserId:        user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-		// List IAM user access keys
+		// List user's customer secret key
 		item, err := session.IdentityClient.ListCustomerSecretKeys(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, authorizer := range item.Items {
-			d.StreamLeafListItem(ctx, authorizer)
+		for _, secretKey := range item.Items {
+			d.StreamLeafListItem(ctx, secretKey)
 		}
 
 	return nil, nil

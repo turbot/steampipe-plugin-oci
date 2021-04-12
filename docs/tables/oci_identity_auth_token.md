@@ -1,0 +1,44 @@
+# Table: oci_identity_auth_token
+
+An AuthToken is an Oracle-generated token string that you can use to authenticate with third-party APIs that do not support Oracle Cloud Infrastructure’s signature-based authentication.
+
+## Examples
+
+### List auth tokens with their corresponding user and date of creation
+
+```sql
+select
+  id,
+  user_id,
+  time_created
+from
+  oci_identity_auth_token;
+```
+
+
+### List auth token keys which are inactive
+
+```sql
+select
+  id,
+  user_id,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_auth_token
+where
+  lifecycle_state = 'INACTIVE';
+```
+
+
+### Auth tokens count per user
+
+```sql
+select
+  user_id,
+  count (id) as auth_token_count
+from
+  oci_identity_auth_token
+group by
+  user_id;
+```

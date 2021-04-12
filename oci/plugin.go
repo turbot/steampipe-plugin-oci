@@ -33,6 +33,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_route_table":               tableCoreRouteTable(ctx),
 			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
+			"oci_identity_auth_token":            tableIdentityAuthToken(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),
 			"oci_identity_group":                 tableIdentityGroup(ctx),
 			"oci_identity_policy":                tableIdentityPolicy(ctx),

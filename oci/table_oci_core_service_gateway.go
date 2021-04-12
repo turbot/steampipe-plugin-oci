@@ -105,6 +105,7 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -121,11 +122,6 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type serviceGatewayInfo struct {
-	core.ServiceGateway
-	Region string
 }
 
 //// LIST FUNCTION
@@ -157,10 +153,7 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 		}
 
 		for _, serviceGateway := range response.Items {
-			d.StreamListItem(ctx, serviceGatewayInfo{
-				serviceGateway,
-				region,
-			})
+			d.StreamListItem(ctx, serviceGateway)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -210,13 +203,13 @@ func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	return serviceGatewayInfo{response.ServiceGateway, region}, nil
+	return response.ServiceGateway, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	serviceGateway := d.HydrateItem.(serviceGatewayInfo).ServiceGateway
+	serviceGateway := d.HydrateItem.(core.ServiceGateway)
 
 	var tags map[string]interface{}
 
@@ -239,4 +232,12 @@ func serviceGatewayTags(_ context.Context, d *transform.TransformData) (interfac
 	}
 
 	return tags, nil
+}
+
+// Extract OCI region name from the resource id
+func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	id := types.SafeString(d.Value)
+	splittedId := strings.Split(id, ".")
+	regionName := oci_common.StringToRegion(types.SafeString(splittedId[3]))
+	return regionName, nil
 }

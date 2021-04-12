@@ -35,8 +35,8 @@ from
 select
   display_name,
   id,
-  s -> 'serviceId' as service_id,
-  s -> 'serviceName' as service_name
+  s ->> 'serviceId' as service_id,
+  s ->> 'serviceName' as service_name
 from
   oci_core_service_gateway,
   jsonb_array_elements(services) as s;

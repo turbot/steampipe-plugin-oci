@@ -19,7 +19,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 		Name:        "oci_cloud_guard_detector_recipe",
 		Description: "OCI Cloud Guard Detector Recipe",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCloudGuardDetectorRecipe,
 		},
 		List: &plugin.ListConfig{
@@ -55,12 +55,12 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The date and time the detector recipe was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_updated",
 				Description: "The date and time the detector recipe was updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "owner",
@@ -173,8 +173,8 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 		if err != nil {
 			return nil, err
 		}
-		for _, problem := range response.Items {
-			d.StreamListItem(ctx, problem)
+		for _, detectorRecipe := range response.Items {
+			d.StreamListItem(ctx, detectorRecipe)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -188,7 +188,7 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 
 //// HYDRATE FUNCTION
 
-func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -198,8 +198,12 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, _ *pl
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(cloudguard.DetectorRecipeSummary).Id
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
 
 	// Create Session
 	session, err := cloudGuardService(ctx, d, region)
@@ -229,22 +233,38 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, _ *pl
 // 2. Defined Tags
 // 3. Free-form tags
 func cloudGuardDetectorRecipeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	detectorRecipe := d.HydrateItem.(cloudguard.DetectorRecipe)
+
+	var freeformTags map[string]string
+	var definedTags map[string]map[string]interface{}
+	var systemTags map[string]map[string]interface{}
+
+	switch d.HydrateItem.(type) {
+	case cloudguard.DetectorRecipeSummary:
+		detectorRecipe := d.HydrateItem.(cloudguard.DetectorRecipeSummary)
+		freeformTags = detectorRecipe.FreeformTags
+		definedTags = detectorRecipe.DefinedTags
+		systemTags = detectorRecipe.SystemTags
+	case cloudguard.DetectorRecipe:
+		detectorRecipe := d.HydrateItem.(cloudguard.DetectorRecipe)
+		freeformTags = detectorRecipe.FreeformTags
+		definedTags = detectorRecipe.DefinedTags
+		systemTags = detectorRecipe.SystemTags
+	}
 
 	var tags map[string]interface{}
 
-	if detectorRecipe.FreeformTags != nil {
+	if freeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range detectorRecipe.FreeformTags {
+		for k, v := range freeformTags {
 			tags[k] = v
 		}
 	}
 
-	if detectorRecipe.DefinedTags != nil {
+	if definedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range detectorRecipe.DefinedTags {
+		for _, v := range definedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -252,11 +272,11 @@ func cloudGuardDetectorRecipeTags(_ context.Context, d *transform.TransformData)
 		}
 	}
 
-	if detectorRecipe.SystemTags != nil {
+	if systemTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range detectorRecipe.SystemTags {
+		for _, v := range systemTags {
 			for key, value := range v {
 				tags[key] = value
 			}

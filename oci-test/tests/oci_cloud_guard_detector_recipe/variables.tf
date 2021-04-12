@@ -11,7 +11,7 @@ variable "tenancy_ocid" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "Default"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -24,12 +24,11 @@ variable "region" {
 provider "oci" {
   tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
-  region              = var.region
 }
 
 resource "oci_cloud_guard_detector_recipe" "named_test_resource" {
     #Required
-    compartment_id = var.compartment_id
+    compartment_id = var.tenancy_ocid
     display_name = var.resource_name
     source_detector_recipe_id = oci_cloud_guard_detector_recipe.named_test_resource.id
 }

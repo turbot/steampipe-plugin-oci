@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v36/common"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/helpers"
@@ -88,17 +87,4 @@ func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, 
 	id := types.SafeString(d.Value)
 	splittedID := strings.Split(id, ".")
 	return oci_common.StringToRegion(types.SafeString(splittedID[3])), nil
-}
-
-func convertDateToTime(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	dateValue := d.Value.(*common.SDKTime)
-
-	if dateValue != nil {
-		// convert from *common.SDKTime to *date.Time
-		timeValue := dateValue.Time
-
-		return timeValue, nil
-	}
-
-	return nil, nil
 }

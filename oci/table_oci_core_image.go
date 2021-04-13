@@ -20,7 +20,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 		Description: "OCI Core Image",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AnyColumn([]string{"id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"404","400"}),
+			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 			Hydrate:           getCoreImage,
 		},
 		List: &plugin.ListConfig{
@@ -124,6 +124,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -139,11 +140,6 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type imageInfo struct {
-	core.Image
-	Region string
 }
 
 //// LIST FUNCTION
@@ -175,7 +171,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 
 		for _, image := range response.Items {
-			d.StreamListItem(ctx, imageInfo{image, region})
+			d.StreamListItem(ctx, image)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -196,7 +192,7 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Error("oci.getImage", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
@@ -221,13 +217,13 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	return imageInfo{response.Image, region}, nil
+	return response.Image, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(imageInfo).Image
+	instance := d.HydrateItem.(core.Image)
 
 	var tags map[string]interface{}
 

@@ -26,9 +26,9 @@ import (
 
 type session struct {
 	TenancyID            string
-	IdentityClient       identity.IdentityClient
-	ComputeClient        core.ComputeClient
 	BlockstorageClient   core.BlockstorageClient
+	ComputeClient        core.ComputeClient
+	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
 }

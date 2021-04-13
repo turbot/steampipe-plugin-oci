@@ -12,6 +12,7 @@ select
   id,
   time_created,
   lifecycle_state as state,
+  public_ip_id,
   region,
   tags
 from
@@ -30,18 +31,6 @@ from
   oci_core_nat_gateway inst
 where
   block_traffic;
-```
-
-
-### Get the public IP address associated with NAT Gateway
-
-```sql
-select
-  display_name,
-  id,
-  public_ip_id
-from
-  oci_core_nat_gateway;
 ```
 
 

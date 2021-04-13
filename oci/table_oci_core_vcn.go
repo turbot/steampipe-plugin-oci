@@ -132,6 +132,7 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -148,11 +149,6 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type vcnInfo struct {
-	core.Vcn
-	Region string
 }
 
 //// LIST FUNCTION
@@ -184,7 +180,7 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 
 		for _, network := range response.Items {
-			d.StreamListItem(ctx, vcnInfo{network, region})
+			d.StreamListItem(ctx, network)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -230,13 +226,13 @@ func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (in
 		return nil, err
 	}
 
-	return vcnInfo{response.Vcn, region}, nil
+	return response.Vcn, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vcn := d.HydrateItem.(vcnInfo).Vcn
+	vcn := d.HydrateItem.(core.Vcn)
 
 	var tags map[string]interface{}
 

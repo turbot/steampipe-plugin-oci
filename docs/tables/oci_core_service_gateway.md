@@ -18,7 +18,7 @@ from
   oci_core_service_gateway;
 ```
 
-### List Route tables that Service gateways use
+### List Service gateways that use Route tables
 
 ```sql
 select
@@ -26,7 +26,9 @@ select
   id,
   route_table_id
 from
-  oci_core_service_gateway;
+  oci_core_service_gateway
+where
+  route_table_id is not null;
 ```
 
 ### List services which are enabled for service gateways
@@ -54,18 +56,4 @@ from
   oci_core_service_gateway
 where
   block_traffic;
-```
-
-
-### List Service gateways without application tag key
-
-```sql
-select
-  display_name,
-  id,
-  tags
-from
-  oci_core_service_gateway
-where
-  not tags :: JSONB ? 'application';
 ```

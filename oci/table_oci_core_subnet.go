@@ -92,13 +92,13 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			{
 				Name:        "ipv6_public_cidr_block",
 				Description: "For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's public IP address space.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_CIDR,
 				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
 			},
 			{
 				Name:        "ipv6_virtual_router_ip",
 				Description: "For an IPv6-enabled subnet, this is the IPv6 address of the virtual router.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_IPADDR,
 				Transform:   transform.FromField("Ipv6VirtualRouterIp"),
 			},
 			{
@@ -115,7 +115,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			{
 				Name:        "virtual_router_ip",
 				Description: "The IP address of the virtual router.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_IPADDR,
 				Transform:   transform.FromCamel(),
 			},
 			{
@@ -160,6 +160,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -176,11 +177,6 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type subnetInfo struct {
-	core.Subnet
-	Region string
 }
 
 //// LIST FUNCTION
@@ -212,7 +208,7 @@ func listCoreSubnets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, subnet := range response.Items {
-			d.StreamListItem(ctx, subnetInfo{subnet, region})
+			d.StreamListItem(ctx, subnet)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -262,13 +258,13 @@ func getCoreSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	return subnetInfo{response.Subnet, region}, nil
+	return response.Subnet, nil
 }
 
 //// TRANSFORM FUNCTION
 
 func subnetTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	subnet := d.HydrateItem.(subnetInfo).Subnet
+	subnet := d.HydrateItem.(core.Subnet)
 
 	var tags map[string]interface{}
 

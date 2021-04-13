@@ -17,21 +17,6 @@ from
   oci_core_subnet;
 ```
 
-### Get details of specific subnet
-
-```sql
-select
-  display_name,
-  id,
-  time_created,
-  dns_label,
-  cidr_block
-from
-  oci_core_subnet
-where
-  id = 'ocid1.subnet.oc1.ap-mumbai-1.aaaaaaaa2rn43msfyjb7k5orwfbypbsuur72xlnv3qybxss5ukherfv5sdfb';
-```
-
 ### OCIDs of the security list that the subnet uses
 
 ```sql

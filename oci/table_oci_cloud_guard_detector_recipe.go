@@ -61,13 +61,13 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The date and time the detector recipe was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated").Transform(convertDateToTime),
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "time_updated",
 				Description: "The date and time the detector recipe was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeUpdated").Transform(convertDateToTime),
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "owner",
@@ -125,6 +125,12 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,

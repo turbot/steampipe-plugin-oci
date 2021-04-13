@@ -62,6 +62,7 @@ func tableCoreDhcpOptions(_ context.Context) *plugin.Table {
 				Description: "The collection of individual DHCP options.",
 				Type:        proto.ColumnType_JSON,
 			},
+			
 			// tags
 			{
 				Name:        "defined_tags",

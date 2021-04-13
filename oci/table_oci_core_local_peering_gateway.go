@@ -59,21 +59,6 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "is_cross_tenancy_peering",
-				Description: "Whether the VCN at the other end of the peering is in a different tenancy.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "peer_advertised_cidr",
-				Description: "The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN at the other end of the peering from this LPG.",
-				Type:        proto.ColumnType_IPADDR,
-			},
-			{
-				Name:        "peering_status_details",
-				Description: "Additional information regarding the peering status.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "route_table_id",
 				Description: "The OCID of the route table the LPG is using.",
 				Type:        proto.ColumnType_STRING,
@@ -82,6 +67,21 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			{
 				Name:        "peering_status",
 				Description: "Whether the LPG is peered with another LPG.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "is_cross_tenancy_peering",
+				Description: "Whether the VCN at the other end of the peering is in a different tenancy.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "peer_advertised_cidr",
+				Description: "The smallest aggregate CIDR that contains all the CIDR routes advertised by the VCN at the other end of the peering from this LPG.",
+				Type:        proto.ColumnType_CIDR,
+			},
+			{
+				Name:        "peering_status_details",
+				Description: "Additional information regarding the peering status.",
 				Type:        proto.ColumnType_STRING,
 			},
 

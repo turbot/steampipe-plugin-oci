@@ -4,12 +4,13 @@ import (
 	"context"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v36/common"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/helpers"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -81,15 +82,9 @@ func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationR
 	return &policy
 }
 
-func convertDateToTime(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-	dateValue := d.Value.(*common.SDKTime)
-
-	if dateValue != nil {
-		// convert from *common.SDKTime to *date.Time
-		timeValue := dateValue.Time
-
-		return timeValue, nil
-	}
-
-	return nil, nil
+// Extract oci region name from resource oci id
+func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	id := types.SafeString(d.Value)
+	splittedID := strings.Split(id, ".")
+	return oci_common.StringToRegion(types.SafeString(splittedID[3])), nil
 }

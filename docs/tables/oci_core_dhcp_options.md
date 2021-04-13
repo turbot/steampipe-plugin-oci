@@ -1,4 +1,4 @@
-# Table: oci_core_dhcp_option
+# Table: oci_core_dhcp_options
 
 The Networking service provides DHCP options to let you control certain types of configuration on the instances in VCN. Each subnet in a VCN can have a single set of DHCP options associated with it.
 
@@ -14,7 +14,7 @@ select
   lifecycle_state as state,
   region
 from
-  oci_core_dhcp_option;
+  oci_core_dhcp_options;
 ```
 
 
@@ -29,7 +29,7 @@ select
   o ->> 'serverType' as server_type,
   o ->> 'type' as type
 from
-  oci_core_dhcp_option,
+  oci_core_dhcp_options,
   jsonb_array_elements(options) as o;
 ```
 
@@ -41,7 +41,7 @@ select
   vcn_id,
   count(*) dhcp_option_count
 from
-  oci_core_dhcp_option
+  oci_core_dhcp_options
 group by
   vcn_id;
 ```

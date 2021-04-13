@@ -14,9 +14,9 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreDhcpOption(_ context.Context) *plugin.Table {
+func tableCoreDhcpOptions(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_dhcp_option",
+		Name:        "oci_core_dhcp_options",
 		Description: "OCI Core DHCP Option",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),

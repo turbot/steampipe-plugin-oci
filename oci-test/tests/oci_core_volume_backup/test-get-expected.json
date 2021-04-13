@@ -1,0 +1,12 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE",
+    "size_in_mbs": 51200,
+    "volume_id": "{{ output.volume_id.value }}"
+  }
+]

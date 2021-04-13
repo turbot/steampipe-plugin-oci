@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreSecurityList(_ context.Context) *plugin.Table {
+func tableCoreRouteTable(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_security_list",
-		Description: "OCI Core Security List",
+		Name:        "oci_core_route_table",
+		Description: "OCI Core Route Table",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getCoreSecurityList,
+			Hydrate:    getCoreRouteTable,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreSecurityLists,
+			Hydrate: listCoreRouteTables,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -34,35 +34,32 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "The security list's Oracle Cloud ID (OCID).",
+				Description: "The route table's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "vcn_id",
-				Description: "The OCID of the VCN the security list belongs to.",
+				Description: "The OCID of the VCN the route table list belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The security list's current state.",
+				Description: "The route table's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the security list was created.",
+				Description: "The date and time the route table was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// json fields
 			{
-				Name:        "egress_security_rules",
-				Description: "Rules for allowing egress IP packets.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "ingress_security_rules",
-				Description: "Rules for allowing ingress IP packets.",
+				Name:        "route_rules",
+				Description: "The collection of rules for routing destination IPs to network devices.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -83,7 +80,7 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(securityListTags),
+				Transform:   transform.From(routeTableTags),
 			},
 			{
 				Name:        "title",
@@ -97,7 +94,6 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -116,13 +112,18 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 	}
 }
 
+type routeTableInfo struct {
+	core.RouteTable
+	Region string
+}
+
 //// LIST FUNCTION
 
-func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreSecurityLists", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreRouteTables", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -130,7 +131,7 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	request := core.ListSecurityListsRequest{
+	request := core.ListRouteTablesRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -139,13 +140,13 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListSecurityLists(ctx, request)
+		response, err := session.VirtualNetworkClient.ListRouteTables(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, securityList := range response.Items {
-			d.StreamListItem(ctx, securityList)
+		for _, routeTable := range response.Items {
+			d.StreamListItem(ctx,  routeTableInfo{routeTable, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -159,12 +160,12 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 //// HYDRATE FUNCTION
 
-func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getCoreSecurityList")
+func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreRouteTable")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCoreSecurityList", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreRouteTable", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -173,46 +174,51 @@ func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty route table id in get call
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetSecurityListRequest{
-		SecurityListId: types.String(id),
+	request := core.GetRouteTableRequest{
+		RtId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetSecurityList(ctx, request)
+	response, err := session.VirtualNetworkClient.GetRouteTable(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.SecurityList, nil
+	return routeTableInfo{response.RouteTable, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func securityListTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	securityList := d.HydrateItem.(core.SecurityList)
+func routeTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	routeTable := d.HydrateItem.(routeTableInfo).RouteTable
 
 	var tags map[string]interface{}
 
-	if securityList.FreeformTags != nil {
+	if routeTable.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range securityList.FreeformTags {
+		for k, v := range routeTable.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if securityList.DefinedTags != nil {
+	if routeTable.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range securityList.DefinedTags {
+		for _, v := range routeTable.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

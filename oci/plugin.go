@@ -31,6 +31,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_instance":                  tableCoreInstance(ctx),
 			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
 			"oci_core_route_table":               tableCoreRouteTable(ctx),
+			"oci_core_volume_backup":             tableCoreVolumeBackup(ctx),
 			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),

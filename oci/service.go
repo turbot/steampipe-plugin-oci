@@ -102,7 +102,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:          tenantId,
 		BlockstorageClient: client,
 	}
 

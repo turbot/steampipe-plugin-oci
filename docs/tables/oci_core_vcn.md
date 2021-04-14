@@ -17,21 +17,6 @@ from
   oci_core_vcn;
 ```
 
-### Get a specific vcn
-
-```sql
-select
-  display_name,
-  id,
-  lifecycle_state,
-  cidr_block,
-  dns_label
-from
-  oci_core_vcn
-where
-  id = 'ocid1.vcn.oc1.ap-mumbai-1.amaaaaaa6igdexaasn5aalvhjyqctaiykwy2bg3xjqeza6muotvya1wdrf4v';
-```
-
 ### List unavailable virtual cloud networks
 
 ```sql

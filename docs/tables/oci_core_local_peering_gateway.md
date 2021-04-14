@@ -16,7 +16,7 @@ from
   oci_core_local_peering_gateway;
 ```
 
-### List LPG's which are available
+### List available LPGs
 
 ```sql
 select
@@ -30,7 +30,7 @@ where
   lifecycle_state = 'AVAILABLE';
 ```
 
-### List LPG's which are not connected to any peer
+### List LPGs which are not connected to any peer
 
 ```sql
 select

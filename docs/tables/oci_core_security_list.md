@@ -17,21 +17,6 @@ from
   oci_core_security_list;
 ```
 
-### Get a specific security list
-
-```sql
-select
-  display_name,
-  id,
-  lifecycle_state,
-  egress_security_rules,
-  ingress_security_rules
-from
-  oci_core_security_list
-where
-  id = 'ocid1.securitylist.oc1.ap-mumbai-1.aaaaaaaak6haggimwbffytlr72267dwzgv3pbps2t467winmu4erfg5wsdcv';
-```
-
 
 ### Details of egress security rules
 

@@ -17,7 +17,7 @@ import (
 func tableCoreDhcpOptions(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_dhcp_options",
-		Description: "OCI Core DHCP Option",
+		Description: "OCI Core DHCP Options",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
 			Hydrate:    getCoreDhcpOption,
@@ -62,7 +62,7 @@ func tableCoreDhcpOptions(_ context.Context) *plugin.Table {
 				Description: "The collection of individual DHCP options.",
 				Type:        proto.ColumnType_JSON,
 			},
-			
+
 			// tags
 			{
 				Name:        "defined_tags",

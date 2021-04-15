@@ -14,82 +14,52 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreImage(_ context.Context) *plugin.Table {
+func tableCoreRouteTable(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_image",
-		Description: "OCI Core Image",
+		Name:        "oci_core_route_table",
+		Description: "OCI Core Route Table",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AnyColumn([]string{"id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
-			Hydrate:           getCoreImage,
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getCoreRouteTable,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreImages,
+			Hydrate: listCoreRouteTables,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name for the image. It does not have to be unique, and it's changeable.",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the image.",
+				Description: "The route table's Oracle ID (OCID).",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the route table list belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The image's current state.",
+				Description: "The route table's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the image was created.",
+				Description: "The date and time the route table was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// json fields
 			{
-				Name:        "base_image_id",
-				Description: "The OCID of the image originally used to launch the instance.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-			{
-				Name:        "create_image_allowed",
-				Description: "Indicates whether instances launched with this image can be used to create new images.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "launch_mode",
-				Description: "Specifies the configuration mode for launching virtual machine (VM) instances.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "launch_options",
-				Description: "LaunchOptions Options for tuning the compatibility and performance of VM shapes.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "operating_system",
-				Description: "The image's operating system.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "operating_system_version",
-				Description: "The image's operating system version.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "size_in_mbs",
-				Description: "The boot volume size for an instance launched from this image.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SizeInMBs"),
-			},
-			{
-				Name:        "agent_features",
-				Description: "Oracle Cloud Agent features supported on the image.",
+				Name:        "route_rules",
+				Description: "The collection of rules for routing destination IPs to network devices.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -110,7 +80,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(imageTags),
+				Transform:   transform.From(routeTableTags),
 			},
 			{
 				Name:        "title",
@@ -124,7 +94,6 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -136,27 +105,33 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
 }
 
+type routeTableInfo struct {
+	core.RouteTable
+	Region string
+}
+
 //// LIST FUNCTION
 
-func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreRouteTables", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := coreComputeService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListImagesRequest{
+	request := core.ListRouteTablesRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -165,13 +140,13 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ComputeClient.ListImages(ctx, request)
+		response, err := session.VirtualNetworkClient.ListRouteTables(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, image := range response.Items {
-			d.StreamListItem(ctx, image)
+		for _, routeTable := range response.Items {
+			d.StreamListItem(ctx,  routeTableInfo{routeTable, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -185,12 +160,12 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 //// HYDRATE FUNCTION
 
-func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getImage")
+func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreRouteTable")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreRouteTable", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -199,51 +174,51 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty image id in get call
-	if strings.TrimSpace(id) == "" {
+	// handle empty route table id in get call
+	if id == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreComputeService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetImageRequest{
-		ImageId: types.String(id),
+	request := core.GetRouteTableRequest{
+		RtId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.ComputeClient.GetImage(ctx, request)
+	response, err := session.VirtualNetworkClient.GetRouteTable(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Image, nil
+	return routeTableInfo{response.RouteTable, region}, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(core.Image)
+func routeTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	routeTable := d.HydrateItem.(routeTableInfo).RouteTable
 
 	var tags map[string]interface{}
 
-	if instance.FreeformTags != nil {
+	if routeTable.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range instance.FreeformTags {
+		for k, v := range routeTable.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if instance.DefinedTags != nil {
+	if routeTable.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range instance.DefinedTags {
+		for _, v := range routeTable.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

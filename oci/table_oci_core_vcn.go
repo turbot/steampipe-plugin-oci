@@ -14,82 +14,90 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreImage(_ context.Context) *plugin.Table {
+func tableCoreVcn(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_image",
-		Description: "OCI Core Image",
+		Name:        "oci_core_vcn",
+		Description: "OCI Core VCN",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AnyColumn([]string{"id"}),
-			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
-			Hydrate:           getCoreImage,
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getVcn,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreImages,
+			Hydrate: listCoreVcns,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name for the image. It does not have to be unique, and it's changeable.",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the image.",
+				Description: "The VCN's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The image's current state.",
+				Description: "The VCN's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the image was created.",
+				Description: "The date and time the VCN was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "base_image_id",
-				Description: "The OCID of the image originally used to launch the instance.",
+				Name:        "cidr_block",
+				Description: "The first CIDR IP address from cidrBlocks.",
+				Type:        proto.ColumnType_CIDR,
+			},
+			{
+				Name:        "default_dhcp_options_id",
+				Description: "The OCID for the VCN's default set of DHCP options.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Transform:   transform.FromField("DefaultDhcpOptionsId"),
 			},
 			{
-				Name:        "create_image_allowed",
-				Description: "Indicates whether instances launched with this image can be used to create new images.",
-				Type:        proto.ColumnType_BOOL,
+				Name:        "default_route_table_id",
+				Description: "The OCID of the instance.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DefaultRouteTableId"),
 			},
 			{
-				Name:        "launch_mode",
-				Description: "Specifies the configuration mode for launching virtual machine (VM) instances.",
+				Name:        "default_security_list_id",
+				Description: "The OCID for the VCN's default security list.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DefaultSecurityListId"),
+			},
+			{
+				Name:        "dns_label",
+				Description: "A DNS label for the VCN, used in conjunction with the VNIC's hostname and subnet's DNS label to form a fully qualified domain name (FQDN) for each VNIC within this subnet.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DnsLabel"),
+			},
+			{
+				Name:        "ipv6_cidr_block",
+				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
+				Type:        proto.ColumnType_CIDR,
+				Transform:   transform.FromField("Ipv6CidrBlock"),
+			},
+			{
+				Name:        "ipv6_public_cidr_block",
+				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
+			},
+			{
+				Name:        "vcn_domain_name",
+				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "launch_options",
-				Description: "LaunchOptions Options for tuning the compatibility and performance of VM shapes.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "operating_system",
-				Description: "The image's operating system.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "operating_system_version",
-				Description: "The image's operating system version.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "size_in_mbs",
-				Description: "The boot volume size for an instance launched from this image.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("SizeInMBs"),
-			},
-			{
-				Name:        "agent_features",
-				Description: "Oracle Cloud Agent features supported on the image.",
+				Name:        "cidr_blocks",
+				Description: "The list of IPv4 CIDR blocks the VCN will use.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -110,7 +118,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(imageTags),
+				Transform:   transform.From(vcnTags),
 			},
 			{
 				Name:        "title",
@@ -136,7 +144,8 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -144,19 +153,19 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := coreComputeService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListImagesRequest{
+	request := core.ListVcnsRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -165,13 +174,13 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ComputeClient.ListImages(ctx, request)
+		response, err := session.VirtualNetworkClient.ListVcns(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, image := range response.Items {
-			d.StreamListItem(ctx, image)
+		for _, network := range response.Items {
+			d.StreamListItem(ctx, network)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -185,12 +194,12 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 //// HYDRATE FUNCTION
 
-func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getImage")
+func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getVcn")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -199,51 +208,46 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty image id in get call
-	if strings.TrimSpace(id) == "" {
-		return nil, nil
-	}
-
 	// Create Session
-	session, err := coreComputeService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetImageRequest{
-		ImageId: types.String(id),
+	request := core.GetVcnRequest{
+		VcnId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.ComputeClient.GetImage(ctx, request)
+	response, err := session.VirtualNetworkClient.GetVcn(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Image, nil
+	return response.Vcn, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(core.Image)
+func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	vcn := d.HydrateItem.(core.Vcn)
 
 	var tags map[string]interface{}
 
-	if instance.FreeformTags != nil {
+	if vcn.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range instance.FreeformTags {
+		for k, v := range vcn.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if instance.DefinedTags != nil {
+	if vcn.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range instance.DefinedTags {
+		for _, v := range vcn.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

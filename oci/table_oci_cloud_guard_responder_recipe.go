@@ -14,34 +14,34 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
+func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_cloud_guard_detector_recipe",
-		Description: "OCI Cloud Guard Detector Recipe",
+		Name:        "oci_cloud_guard_responder_recipe",
+		Description: "OCI Cloud Guard Responder Recipe",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getCloudGuardDetectorRecipe,
+			Hydrate:    getCloudGuardResponderRecipe,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCloudGuardDetectorRecipes,
+			Hydrate: listCloudGuardResponderRecipes,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "DisplayName of detector recipe.",
+				Description: "DisplayName of responder recipe.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "id",
-				Description: "Ocid for detector recipe.",
+				Description: "Ocid for responder recipe.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "source_detector_recipe_id",
-				Description: "Recipe Ocid of the Source Recipe to be cloned.",
+				Name:        "source_Responder_recipe_id",
+				Description: "Recipe Ocid of the Source recipe to be cloned.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -54,43 +54,43 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			// other columns
 			{
 				Name:        "description",
-				Description: "Detector recipe description.",
+				Description: "Responder recipe description.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the detector recipe was created.",
+				Description: "The date and time the responder recipe was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "time_updated",
-				Description: "The date and time the detector recipe was updated.",
+				Description: "The date and time the responder recipe was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "owner",
-				Description: "Owner of detector recipe.",
+				Description: "Owner of responder recipe.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "detector",
-				Description: "Type of detector.",
+				Name:        "lifecycle_details",
+				Description: "A message describing the current state in more detail.",
 				Type:        proto.ColumnType_STRING,
 			},
 
 			// json fields
 			{
-				Name:        "detector_rules",
-				Description: "List of detector rules for the detector type for recipe.",
+				Name:        "Responder_rules",
+				Description: "List of responder rules for the responder type for recipe.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "effective_detector_rules",
-				Description: "List of detector rules for the detector type for recipe.",
+				Name:        "effective_Responder_rules",
+				Description: "List of responder rules for the responder type for recipe.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getCloudGuardDetectorRecipe,
+				Hydrate:     getCloudGuardResponderRecipe,
 			},
 
 			// tags
@@ -115,7 +115,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(cloudGuardDetectorRecipeTags),
+				Transform:   transform.From(cloudGuardResponderRecipeTags),
 			},
 			{
 				Name:        "title",
@@ -150,11 +150,11 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCloudGuardDetectorRecipes", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCloudGuardResponderRecipes", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := cloudGuardService(ctx, d, region)
@@ -162,7 +162,7 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 		return nil, err
 	}
 
-	request := cloudguard.ListDetectorRecipesRequest{
+	request := cloudguard.ListResponderRecipesRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -171,12 +171,12 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.CloudGuardClient.ListDetectorRecipes(ctx, request)
+		response, err := session.CloudGuardClient.ListResponderRecipes(ctx, request)
 		if err != nil {
 			return nil, err
 		}
-		for _, detectorRecipe := range response.Items {
-			d.StreamListItem(ctx, detectorRecipe)
+		for _, responderRecipe := range response.Items {
+			d.StreamListItem(ctx, responderRecipe)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -190,11 +190,11 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 
 //// HYDRATE FUNCTION
 
-func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCloudGuardDetectorRecipe", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCloudGuardResponderRecipe", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -202,7 +202,7 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 	var id string
 	if h.Item != nil {
-		id = *h.Item.(cloudguard.DetectorRecipeSummary).Id
+		id = *h.Item.(cloudguard.ResponderRecipeSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
@@ -213,19 +213,19 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	request := cloudguard.GetDetectorRecipeRequest{
-		DetectorRecipeId: types.String(id),
+	request := cloudguard.GetResponderRecipeRequest{
+		ResponderRecipeId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.CloudGuardClient.GetDetectorRecipe(ctx, request)
+	response, err := session.CloudGuardClient.GetResponderRecipe(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.DetectorRecipe, nil
+	return response.ResponderRecipe, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -234,23 +234,23 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 // 1. System Tags
 // 2. Defined Tags
 // 3. Free-form tags
-func cloudGuardDetectorRecipeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func cloudGuardResponderRecipeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	var systemTags map[string]map[string]interface{}
 
 	switch d.HydrateItem.(type) {
-	case cloudguard.DetectorRecipeSummary:
-		detectorRecipe := d.HydrateItem.(cloudguard.DetectorRecipeSummary)
-		freeformTags = detectorRecipe.FreeformTags
-		definedTags = detectorRecipe.DefinedTags
-		systemTags = detectorRecipe.SystemTags
-	case cloudguard.DetectorRecipe:
-		detectorRecipe := d.HydrateItem.(cloudguard.DetectorRecipe)
-		freeformTags = detectorRecipe.FreeformTags
-		definedTags = detectorRecipe.DefinedTags
-		systemTags = detectorRecipe.SystemTags
+	case cloudguard.ResponderRecipeSummary:
+		ResponderRecipe := d.HydrateItem.(cloudguard.ResponderRecipeSummary)
+		freeformTags = ResponderRecipe.FreeformTags
+		definedTags = ResponderRecipe.DefinedTags
+		systemTags = ResponderRecipe.SystemTags
+	case cloudguard.ResponderRecipe:
+		ResponderRecipe := d.HydrateItem.(cloudguard.ResponderRecipe)
+		freeformTags = ResponderRecipe.FreeformTags
+		definedTags = ResponderRecipe.DefinedTags
+		systemTags = ResponderRecipe.SystemTags
 	}
 
 	var tags map[string]interface{}

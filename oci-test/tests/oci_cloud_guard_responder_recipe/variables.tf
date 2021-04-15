@@ -26,11 +26,11 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_detector_recipe" "named_test_resource" {
+resource "oci_cloud_guard_responder_recipe" "named_test_resource" {
     #Required
     compartment_id = var.tenancy_ocid
     display_name = var.resource_name
-    source_detector_recipe_id = oci_cloud_guard_detector_recipe.named_test_resource.id
+    source_responder_recipe_id = oci_cloud_guard_responder_recipe.named_test_resource.id
 }
 
 output "resource_name" {
@@ -42,5 +42,5 @@ output "tenancy_ocid" {
 }
 
 output "resource_id" {
-  value = oci_cloud_guard_detector_recipe.named_test_resource.id
+  value = oci_cloud_guard_responder_recipe.named_test_resource.id
 }

@@ -1,12 +1,7 @@
 variable "resource_name" {
   type        = string
-  default     = "turbot-test-20200125-create-update"
+  default     = "steampipetest20200125"
   description = "Name of the resource used throughout the test."
-}
-
-variable "tenancy_ocid" {
-  type        = string
-  description = "OCID of your tenancy."
 }
 
 variable "config_file_profile" {
@@ -15,47 +10,46 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
-variable "oci_ad" {
+variable "tenancy_ocid" {
+  type        = string
+  description = "OCID of your tenancy."
+}
+
+variable "region" {
   type        = string
   default     = "ap-mumbai-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
+  region              = var.region
 }
 
 resource "oci_core_vcn" "named_test_resource" {
+    #Required
     compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    cidr_block = "10.0.0.0/16"
+    display_name   = var.resource_name
+    cidr_block = "10.0.0.0/24"
 }
 
-resource "oci_core_subnet" "named_test_resource" {
+resource "oci_core_local_peering_gateway" "named_test_resource" {
+    #Required
     compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    cidr_block = "10.0.0.0/16"
     vcn_id = oci_core_vcn.named_test_resource.id
-    freeform_tags = {"Name"= var.resource_name}
+    display_name   = var.resource_name
 }
 
 output "resource_name" {
   value = var.resource_name
 }
 
-output "region" {
-  value = var.oci_ad
-}
-
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "cidr_block" {
-  value = oci_core_subnet.named_test_resource.cidr_block
+output "resource_id" {
+  value = oci_core_local_peering_gateway.named_test_resource.id
 }
 
-output "resource_id" {
-  value = oci_core_subnet.named_test_resource.id
-}

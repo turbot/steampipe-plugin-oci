@@ -30,13 +30,6 @@ resource "oci_core_vcn" "named_test_resource" {
     compartment_id = var.tenancy_ocid
     display_name = var.resource_name
     cidr_block = "10.0.0.0/16"
-}
-
-resource "oci_core_subnet" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    cidr_block = "10.0.0.0/16"
-    vcn_id = oci_core_vcn.named_test_resource.id
     freeform_tags = {"Name"= var.resource_name}
 }
 
@@ -44,18 +37,14 @@ output "resource_name" {
   value = var.resource_name
 }
 
-output "region" {
-  value = var.oci_ad
-}
-
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
 output "cidr_block" {
-  value = oci_core_subnet.named_test_resource.cidr_block
+  value = oci_core_vcn.named_test_resource.cidr_block
 }
 
 output "resource_id" {
-  value = oci_core_subnet.named_test_resource.id
+  value = oci_core_vcn.named_test_resource.id
 }

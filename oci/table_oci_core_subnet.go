@@ -109,7 +109,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "subnet_domain_name",
-				Description: "The subnet's domain name, which consists of the subnet's DNS label.",
+				Description: "The subnet's domain name, which consists of the subnet's DNS label, the VCN's DNS label, and the `oraclevcn.com` domain.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

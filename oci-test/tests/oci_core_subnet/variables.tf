@@ -15,7 +15,7 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
-variable "oci_ad" {
+variable "region" {
   type        = string
   default     = "ap-mumbai-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
@@ -45,7 +45,7 @@ output "resource_name" {
 }
 
 output "region" {
-  value = var.oci_ad
+  value = var.region
 }
 
 output "tenancy_ocid" {

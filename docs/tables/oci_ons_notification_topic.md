@@ -16,20 +16,6 @@ from
   oci_ons_notification_topic;
 ```
 
-### Get a specific topic
-
-```sql
-select
-  name,
-  topic_id,
-  lifecycle_state,
-  description,
-  freeform_tags
-from
-  oci_ons_notification_topic
-where
-  topic_id = 'ocid1.onstopic.oc1.ap-mumbai-1.aaaaaaaaopa22qgc2er4lc52ulajxwapd2c2kfs5lupvl57lejzjgh8qsdcf';
-```
 
 ### List inactive topic
 

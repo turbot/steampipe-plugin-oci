@@ -21,23 +21,24 @@ variable "region" {
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
-variable "notification_topic_description" {
-  type        = string
-  default     = "Terraform testing resource"
-  description = "The description of the topic."
-}
-
 provider "oci" {
   tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
   region              = var.region
 }
 
-resource "oci_ons_notification_topic" "named_test_resource" {
-  compartment_id = var.tenancy_ocid
-  name           = var.resource_name
-  description    = var.notification_topic_description
-  freeform_tags = { "Name" = var.resource_name }
+resource "oci_core_vcn" "named_test_resource" {
+    #Required
+    compartment_id = var.tenancy_ocid
+    display_name   = var.resource_name
+    cidr_block = "10.0.0.0/24"
+}
+
+resource "oci_core_local_peering_gateway" "named_test_resource" {
+    #Required
+    compartment_id = var.tenancy_ocid
+    vcn_id = oci_core_vcn.named_test_resource.id
+    display_name   = var.resource_name
 }
 
 output "resource_name" {
@@ -49,9 +50,6 @@ output "tenancy_ocid" {
 }
 
 output "resource_id" {
-  value = oci_ons_notification_topic.named_test_resource.topic_id
+  value = oci_core_local_peering_gateway.named_test_resource.id
 }
 
-output "description" {
-  value = oci_ons_notification_topic.named_test_resource.description
-}

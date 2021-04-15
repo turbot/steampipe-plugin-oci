@@ -21,10 +21,10 @@ variable "region" {
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
-variable "notification_topic_description" {
+variable "oci_ad" {
   type        = string
-  default     = "Terraform testing resource"
-  description = "The description of the topic."
+  default     = "TvRS:AP-MUMBAI-1-AD-1"
+  description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
 provider "oci" {
@@ -33,11 +33,16 @@ provider "oci" {
   region              = var.region
 }
 
-resource "oci_ons_notification_topic" "named_test_resource" {
+resource "oci_core_volume" "test_volume" {
+  availability_domain = var.oci_ad
   compartment_id = var.tenancy_ocid
-  name           = var.resource_name
-  description    = var.notification_topic_description
-  freeform_tags = { "Name" = var.resource_name }
+}
+
+resource "oci_core_volume_backup" "test_volume_backup" {
+  depends_on  = [oci_core_volume.test_volume]
+  volume_id = oci_core_volume.test_volume.id
+  display_name = var.resource_name
+  freeform_tags = {"Department"= "Finance"}
 }
 
 output "resource_name" {
@@ -48,10 +53,15 @@ output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "resource_id" {
-  value = oci_ons_notification_topic.named_test_resource.topic_id
+output "freeform_tags" {
+  value = oci_core_volume_backup.test_volume_backup.freeform_tags
 }
 
-output "description" {
-  value = oci_ons_notification_topic.named_test_resource.description
+output "resource_id" {
+  value = oci_core_volume_backup.test_volume_backup.id
 }
+
+output "volume_id" {
+  value = oci_core_volume.test_volume.id
+}
+

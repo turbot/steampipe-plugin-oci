@@ -181,7 +181,7 @@ func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	id := d.KeyColumnQuals["topic_id"].GetStringValue()
 
-	// handle empty rule id in get call
+	// handle empty topic id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

@@ -59,7 +59,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "etag",
-				Description: "For optimistic concurrency control.",
+				Description: "Used for optimistic concurrency control.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

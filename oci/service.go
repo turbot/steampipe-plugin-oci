@@ -26,7 +26,7 @@ import (
 
 type session struct {
 	TenancyID            string
-      BlockstorageClient   core.BlockstorageClient
+	BlockstorageClient   core.BlockstorageClient
 	ComputeClient        core.ComputeClient
 	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
@@ -102,7 +102,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:          tenantId,
 		BlockstorageClient: client,
 	}
 

@@ -34,7 +34,7 @@ where
 ```
 
 
-### List of vaults where vault type us virtual private
+### List of vaults where vault type is virtual private
 
 ```sql
 select

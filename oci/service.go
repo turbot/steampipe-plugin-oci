@@ -114,7 +114,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	return sess, nil
 }
 
-// kmsVaultService returns the service client for OCI KmsVault Service
+// kmsVaultService returns the service client for OCI Kms Vault Service
 func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("KmsVault-%s", region)

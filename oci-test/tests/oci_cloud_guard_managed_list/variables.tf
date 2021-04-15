@@ -27,9 +27,9 @@ provider "oci" {
 }
 
 resource "oci_cloud_guard_managed_list" "named_test_resource" {
-    #Required
     compartment_id = var.tenancy_ocid
     display_name = var.resource_name
+    source_managed_list_id = oci_cloud_guard_managed_list.named_test_resource.id
 }
 
 output "resource_name" {

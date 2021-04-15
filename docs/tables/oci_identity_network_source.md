@@ -1,6 +1,6 @@
 # Table: oci_identity_network_source
 
-A group of IP addresses that are allowed to access resources in your tenancy.
+A network source is a set of defined IP addresses. The IP addresses can be public IP addresses or IP addresses from VCNs within your tenancy. After you create the network source, you can reference it in policy or in your tenancy's authentication settings to control access based on the originating IP address.
 
 ## Examples
 
@@ -31,7 +31,7 @@ where
 ```
 
 
-### List network sources which support public ip address
+### List network sources that include public IP addresses
 
 ```sql
 select
@@ -45,7 +45,7 @@ where
 ```
 
 
-### Get list of allowed VCN OCID and IP range pairs for network sources
+### Get allowed VCN OCIDs and IP range pairs for each network source
 
 ```sql
 select

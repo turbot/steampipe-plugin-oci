@@ -15,3 +15,17 @@ select
 from
   oci_cloud_guard_responder_recipe;
 ```
+
+### List of responder recipe which are active
+
+```sql
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_responder_recipe
+where
+  lifecycle_state = 'ACTIVE';
+```

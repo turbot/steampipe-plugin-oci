@@ -15,3 +15,17 @@ select
 from
   oci_cloud_guard_detector_recipe;
 ```
+
+### List detector recipe which are active
+
+```sql
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_detector_recipe
+where
+  lifecycle_state = 'ACTIVE';
+```

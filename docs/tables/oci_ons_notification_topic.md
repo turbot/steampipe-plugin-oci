@@ -10,12 +10,13 @@ A topic is a communication channel for sending messages to its subscriptions. A 
 select
   name,
   topic_id,
+  api_endpoint,
+  short_topic_id,
   lifecycle_state,
   description
 from
   oci_ons_notification_topic;
 ```
-
 
 ### List inactive topic
 

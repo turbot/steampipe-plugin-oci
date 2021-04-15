@@ -64,7 +64,7 @@ func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "etag",
-				Description: "For optimistic concurrency control.",
+				Description: "Used for optimistic concurrency control.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -181,7 +181,8 @@ func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	id := d.KeyColumnQuals["topic_id"].GetStringValue()
 
-	if id == "" {
+	// handle empty rule id in get call
+	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
 

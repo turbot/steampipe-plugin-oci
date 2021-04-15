@@ -18,22 +18,6 @@ from
   oci_ons_subscription;
 ```
 
-### Get details of specific subscription
-
-```sql
-select
-  id,
-  topic_id,
-  lifecycle_state,
-  etag,
-  freeform_tags,
-  delivery_policy
-from
-  oci_ons_subscription
-where
-  id = 'ocid1.onssubscription.oc1.ap-mumbai-1.aaaaaaaap57juvblbjgzcddis37gxummh3voqsou54n7eoymkz38uyhbgfdc';
-```
-
 
 ### List of subscription where state is pending
 

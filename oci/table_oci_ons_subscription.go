@@ -19,8 +19,9 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 		Name:        "oci_ons_subscription",
 		Description: "OCI Ons Subscription",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getOnsSubscription,
+			KeyColumns:        plugin.AnyColumn([]string{"id"}),
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			Hydrate:           getOnsSubscription,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listOnsSubscriptions,
@@ -39,17 +40,18 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "topic_id",
+				Description: "The OCID of the associated topic.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
 				Name:        "created_time",
 				Description: "The time when this subscription was created.",
 				Type:        proto.ColumnType_INT,
 			},
 
 			// other columns
-			{
-				Name:        "delivery_policy",
-				Description: "Delivery Policy of the subscription.",
-				Type:        proto.ColumnType_JSON,
-			},
 			{
 				Name:        "endpoint",
 				Description: "A locator that corresponds to the subscription protocol.",
@@ -66,10 +68,9 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "topic_id",
-				Description: "The OCID of the associated topic.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Name:        "delivery_policy",
+				Description: "Delivery Policy of the subscription.",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -93,6 +94,12 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
@@ -119,7 +126,7 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	logger.Debug("oci.listOnsSubscriptions", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := notificationDataPlaneService(ctx, d, region)
+	session, err := onsNotificationDataPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -165,15 +172,15 @@ func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, nil
 	}
 
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(ons.SubscriptionSummary).TopicId
-	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
+	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty subscription id in get call
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
 	}
 
 	// Create Session
-	session, err := notificationDataPlaneService(ctx, d, region)
+	session, err := onsNotificationDataPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

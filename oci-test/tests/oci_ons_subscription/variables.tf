@@ -33,17 +33,7 @@ provider "oci" {
   region              = var.region
 }
 
-resource "oci_identity_group" "test_group" {
-  #Required
-  compartment_id = var.tenancy_ocid
-  description    = var.resource_name
-  name           = var.resource_name
-}
-
 resource "oci_ons_notification_topic" "named_test_resource" {
-  depends_on = [
-    oci_identity_group.test_group
-  ]
   compartment_id = var.tenancy_ocid
   name           = var.resource_name
   description    = var.notification_topic_description
@@ -63,6 +53,10 @@ output "resource_name" {
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
+}
+
+output "region" {
+  value = var.region
 }
 
 output "resource_id" {

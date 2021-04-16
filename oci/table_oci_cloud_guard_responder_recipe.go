@@ -29,25 +29,25 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "DisplayName of responder recipe.",
+				Description: "Display name of responder recipe.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "id",
-				Description: "Ocid for responder recipe.",
+				Description: "OCID for responder recipe.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "source_Responder_recipe_id",
-				Description: "Recipe Ocid of the Source recipe to be cloned.",
+				Description: "Recipe OCID of the source recipe to be cloned.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the resource.",
+				Description: "The current state of the responder recipe.",
 				Type:        proto.ColumnType_STRING,
 			},
 

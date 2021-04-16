@@ -232,7 +232,7 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	return sess, nil
 }
 
-// cloudGuardService returns the service client for OCI Security Cloud Guard Service
+// cloudGuardService returns the service client for OCI Cloud Guard Service
 func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("CloudGuard-%s", region)

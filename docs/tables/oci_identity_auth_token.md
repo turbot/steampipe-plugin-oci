@@ -27,7 +27,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_identity_auth_token
+  oci_identity_auth_token
 where
   lifecycle_state = 'INACTIVE';
 ```

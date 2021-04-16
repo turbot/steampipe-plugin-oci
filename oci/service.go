@@ -119,7 +119,7 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("Notification-%s", region)
+	serviceCacheKey := fmt.Sprintf("NotificationControlPlane-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -129,7 +129,7 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("notificationService", "getProvider.Error", err)
+		logger.Error("onsNotificationControlPlaneService", "getProvider.Error", err)
 		return nil, err
 	}
 

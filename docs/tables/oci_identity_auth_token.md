@@ -38,9 +38,11 @@ where
 ```sql
 select
   user_id,
+  user_name,
   count (id) as auth_token_count
 from
   oci_identity_auth_token
 group by
+  user_name,
   user_id;
 ```

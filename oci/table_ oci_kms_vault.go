@@ -1,0 +1,250 @@
+package oci
+
+import (
+	"context"
+	"strings"
+
+	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/keymanagement"
+	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+)
+
+//// TABLE DEFINITION
+
+func tableKmsVault(_ context.Context) *plugin.Table {
+	return &plugin.Table{
+		Name:        "oci_kms_vault",
+		Description: "OCI KMS Vault",
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			Hydrate:    getKmsVault,
+		},
+		List: &plugin.ListConfig{
+			Hydrate: listKmsVaults,
+		},
+		GetMatrixItem: BuildCompartementRegionList,
+		Columns: []*plugin.Column{
+			{
+				Name:        "display_name",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "id",
+				Description: "The OCID of a vault.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "A vault's current lifecycle state.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "The date and time a vault was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "crypto_endpoint",
+				Description: "The service endpoint to perform cryptographic operations against.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "management_endpoint",
+				Description: "The service endpoint to perform management operations against.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "vault_type",
+				Description: "The type of vault. Each type of vault stores keys with different degrees of isolation and has different options and pricing.",
+				Type:        proto.ColumnType_STRING,
+			},
+
+			// tags
+			{
+				Name:        "defined_tags",
+				Description: ColumnDescriptionDefinedTags,
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "freeform_tags",
+				Description: ColumnDescriptionFreefromTags,
+				Type:        proto.ColumnType_JSON,
+			},
+
+			// Standard Steampipe columns
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(vaultTags),
+			},
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+			},
+
+			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
+			},
+			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenant,
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
+			},
+		},
+	}
+}
+
+//// LIST FUNCTION
+
+func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("listKmsVaults", "Compartment", compartment, "OCI_REGION", region)
+
+	// Create Session
+	session, err := kmsVaultService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := keymanagement.ListVaultsRequest{
+		CompartmentId: types.String(compartment),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.KmsVaultClient.ListVaults(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, vault := range response.Items {
+			d.StreamListItem(ctx, vault)
+		}
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return nil, err
+}
+
+//// HYDRATE FUNCTION
+
+func getKmsVault(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getKmsVault")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getKmsVault", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty vault id in get call
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := kmsVaultService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := keymanagement.GetVaultRequest{
+		VaultId: types.String(id),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.KmsVaultClient.GetVault(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Vault, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := vaultFreeformTags(d.HydrateItem)
+
+	var tags map[string]interface{}
+
+	if freeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range freeformTags {
+			tags[k] = v
+		}
+	}
+
+	definedTags := vaultDefinedTags(d.HydrateItem)
+
+	if definedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	return tags, nil
+}
+
+func vaultFreeformTags(item interface{}) map[string]string {
+	switch item.(type) {
+	case keymanagement.Vault:
+		return item.(keymanagement.Vault).FreeformTags
+	case keymanagement.VaultSummary:
+		return item.(keymanagement.VaultSummary).FreeformTags
+	}
+	return nil
+}
+
+func vaultDefinedTags(item interface{}) map[string]map[string]interface{} {
+	switch item.(type) {
+	case keymanagement.Vault:
+		return item.(keymanagement.Vault).DefinedTags
+	case keymanagement.VaultSummary:
+		return item.(keymanagement.VaultSummary).DefinedTags
+	}
+	return nil
+}

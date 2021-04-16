@@ -47,7 +47,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the resource.",
+				Description: "The current state of the detector recipe.",
 				Type:        proto.ColumnType_STRING,
 			},
 

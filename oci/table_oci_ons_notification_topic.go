@@ -17,7 +17,7 @@ import (
 func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_ons_notification_topic",
-		Description: "OCI Ons Notification Topic",
+		Description: "A communication channel for sending messages to the subscriptions.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"topic_id"}),
 			Hydrate:    getOnsNotificationTopic,

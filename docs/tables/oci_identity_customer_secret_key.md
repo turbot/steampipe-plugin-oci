@@ -11,6 +11,7 @@ select
   id,
   display_name,
   user_id,
+  user_name,
   time_created
 from
   oci_identity_customer_secret_key;
@@ -24,6 +25,7 @@ select
   id,
   display_name,
   user_id,
+  user_name,
   lifecycle_state,
   time_created
 from

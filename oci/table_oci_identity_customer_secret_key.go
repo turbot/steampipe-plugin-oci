@@ -18,7 +18,7 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 		Description: "OCI Identity Customer Secret Key",
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
-			Hydrate: listIdentitCustomerSecretKeys,
+			Hydrate:       listIdentitCustomerSecretKeys,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -28,14 +28,19 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "display_name",
+				Description: "The displayName you assign to the secret key.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "user_id",
 				Description: "The OCID of the user the password belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "display_name",
-				Description: "The displayName you assign to the secret key.",
+				Name:        "user_name",
+				Description: "The name of the user the password belongs to.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -81,6 +86,11 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 	}
 }
 
+type customerSecretKeyInfo struct {
+	identity.CustomerSecretKeySummary
+	UserName string
+}
+
 //// LIST FUNCTION
 
 func listIdentitCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -101,15 +111,15 @@ func listIdentitCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *
 		},
 	}
 
-		// List user's customer secret key
-		item, err := session.IdentityClient.ListCustomerSecretKeys(ctx, request)
-		if err != nil {
-			return nil, err
-		}
+	// List user's customer secret key
+	item, err := session.IdentityClient.ListCustomerSecretKeys(ctx, request)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, secretKey := range item.Items {
-			d.StreamLeafListItem(ctx, secretKey)
-		}
+	for _, secretKey := range item.Items {
+		d.StreamLeafListItem(ctx, customerSecretKeyInfo{secretKey, *user.Name})
+	}
 
 	return nil, nil
 }

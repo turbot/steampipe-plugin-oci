@@ -52,3 +52,29 @@ from
   oci_core_security_list,
   jsonb_array_elements(ingress_security_rules) as p;
 ```
+
+
+### Count of security list by VCN ID
+
+```sql
+select
+ vcn_id,
+ count(id) as security_list_count
+from
+  oci_core_security_list
+group by
+  vcn_id;
+```
+
+
+### List of default security list
+
+```sql
+select
+  display_name,
+  id
+from
+  oci_core_security_list
+where
+  display_name like '%Default Security%';
+```

@@ -17,7 +17,7 @@ import (
 func tableCoreSecurityList(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_security_list",
-		Description: "OCI Core Security List",
+		Description: "A security list is a virtual firewall for an instance, with ingress and egress rules that specify the types of traffic allowed in and out.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
 			Hydrate:    getCoreSecurityList,

@@ -18,6 +18,7 @@ import (
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/identity"
+	"github.com/oracle/oci-go-sdk/v36/keymanagement"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
@@ -29,6 +30,7 @@ type session struct {
 	BlockstorageClient   core.BlockstorageClient
 	ComputeClient        core.ComputeClient
 	IdentityClient       identity.IdentityClient
+	KmsVaultClient       keymanagement.KmsVaultClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
 }
@@ -104,6 +106,44 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	sess := &session{
 		TenancyID:          tenantId,
 		BlockstorageClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// kmsVaultService returns the service client for OCI Kms Vault Service
+func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("KmsVault-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("kmsVaultService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := keymanagement.NewKmsVaultClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantId,
+		KmsVaultClient: client,
 	}
 
 	// save session in cache

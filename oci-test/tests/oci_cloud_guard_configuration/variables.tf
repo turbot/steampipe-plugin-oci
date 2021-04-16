@@ -26,21 +26,21 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_responder_recipe" "named_test_resource" {
+resource "oci_cloud_guard_cloud_guard_configuration" "named_test_resource" {
     #Required
     compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    source_responder_recipe_id = oci_cloud_guard_responder_recipe.named_test_resource.id
+    reporting_region = var.region
+    status = "ENABLED"
 }
 
-output "resource_name" {
-  value = var.resource_name
+output "reporting_region" {
+  value = var.region
 }
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "resource_id" {
-  value = oci_cloud_guard_responder_recipe.named_test_resource.id
+output "self_manage_resources" {
+  value = oci_cloud_guard_cloud_guard_configuration.named_test_resource.self_manage_resources
 }

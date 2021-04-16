@@ -35,15 +35,15 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "lifecycle_state",
-				Description: "The lifecycle state of the subscription.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "topic_id",
 				Description: "The OCID of the associated topic.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The lifecycle state of the subscription.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "created_time",

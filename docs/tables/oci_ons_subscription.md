@@ -19,7 +19,7 @@ from
 ```
 
 
-### List of subscription where state is pending
+### List subscriptions in pending state
 
 ```sql
 select
@@ -31,4 +31,16 @@ from
   oci_ons_subscription
 where
   lifecycle_state = 'PENDING';
+```
+
+### Subscriptions count by topic id
+
+```sql
+select
+  topic_id,
+  count(id) as subscription_count
+from
+  oci_ons_subscription
+group by
+  topic_id;
 ```

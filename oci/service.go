@@ -114,7 +114,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	return sess, nil
 }
 
-// onsNotificationDataPlaneService returns the service client for OCI Core Notification service
+// onsNotificationDataPlaneService returns the service client for OCI Notification Data Plane service
 func onsNotificationDataPlaneService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 

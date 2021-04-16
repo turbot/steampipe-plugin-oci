@@ -20,7 +20,6 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardConfigurations,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "reporting_region",
@@ -59,32 +58,24 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudGuardConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCloudGuardConfigurations", "Compartment", compartment, "OCI_REGION", region)
-
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d, "")
 	if err != nil {
 		return nil, err
 	}
 
 	request := cloudguard.GetConfigurationRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.CloudGuardClient.GetConfiguration(ctx, request)
-		if err != nil {
-			return nil, err
-		}
-		d.StreamListItem(ctx, response.Configuration)
-		pagesLeft = false
+
+	response, err := session.CloudGuardClient.GetConfiguration(ctx, request)
+	if err != nil {
+		return nil, err
 	}
+	d.StreamListItem(ctx, response.Configuration)
 
 	return nil, err
 }

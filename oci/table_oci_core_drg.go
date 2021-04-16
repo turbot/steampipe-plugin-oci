@@ -23,7 +23,7 @@ func tableCoreDrg(_ context.Context) *plugin.Table {
 			Hydrate:    getDrg,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreDrg,
+			Hydrate: listCoreDrgs,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -102,11 +102,11 @@ func tableCoreDrg(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreDrgs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreDrg", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCoreDrgs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)

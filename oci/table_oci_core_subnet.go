@@ -39,6 +39,12 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "vcn_id",
+				Description: "The OCID of the VCN the subnet is in.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
 				Name:        "lifecycle_state",
 				Description: "The subnet's current state.",
 				Type:        proto.ColumnType_STRING,
@@ -46,12 +52,6 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			{
 				Name:        "route_table_id",
 				Description: "The OCID of the route table that the subnet uses.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-			{
-				Name:        "vcn_id",
-				Description: "The OCID of the VCN the subnet is in.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},

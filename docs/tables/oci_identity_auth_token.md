@@ -10,6 +10,7 @@ An AuthToken is an Oracle-generated token string that you can use to authenticat
 select
   id,
   user_id,
+  user_name,
   time_created
 from
   oci_identity_auth_token;
@@ -22,10 +23,11 @@ from
 select
   id,
   user_id,
+  user_name,
   lifecycle_state,
   time_created
 from
-  oci_identity_auth_token
+  oci_new.oci_identity_auth_token
 where
   lifecycle_state = 'INACTIVE';
 ```

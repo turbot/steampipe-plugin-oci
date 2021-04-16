@@ -18,7 +18,7 @@ func tableIdentityAuthToken(_ context.Context) *plugin.Table {
 		Description: "OCI Identity Auth Token",
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
-			Hydrate: listIdentityAuthTokens,
+			Hydrate:       listIdentityAuthTokens,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -32,6 +32,11 @@ func tableIdentityAuthToken(_ context.Context) *plugin.Table {
 				Description: "The OCID of the user the auth token belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "user_name",
+				Description: "The name of the user the auth token belongs to.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "token",
@@ -88,6 +93,11 @@ func tableIdentityAuthToken(_ context.Context) *plugin.Table {
 	}
 }
 
+type authTokenInfo struct {
+	identity.AuthToken
+	UserName string
+}
+
 //// LIST FUNCTION
 
 func listIdentityAuthTokens(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -102,21 +112,21 @@ func listIdentityAuthTokens(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListAuthTokensRequest{
-		UserId:          user.Id,
+		UserId: user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-		// List user auth tokens
-		item, err := session.IdentityClient.ListAuthTokens(ctx, request)
-		if err != nil {
-			return nil, err
-		}
+	// List user auth tokens
+	item, err := session.IdentityClient.ListAuthTokens(ctx, request)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, authToken := range item.Items {
-			d.StreamLeafListItem(ctx, authToken)
-		}
+	for _, authToken := range item.Items {
+		d.StreamLeafListItem(ctx, authTokenInfo{authToken, *user.Name})
+	}
 
 	return nil, nil
 }

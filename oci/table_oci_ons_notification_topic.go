@@ -133,7 +133,7 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 	logger.Debug("oci.listOnsNotificationTopics", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := onsNotificationService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	// Create Session
-	session, err := onsNotificationService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

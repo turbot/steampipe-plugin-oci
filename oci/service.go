@@ -114,8 +114,8 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	return sess, nil
 }
 
-// onsNotificationService returns the service client for OCI Core Notification service
-func onsNotificationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// onsNotificationControlPlaneService returns the service client for OCI Notification service
+func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?

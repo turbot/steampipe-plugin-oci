@@ -35,26 +35,26 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "Ocid for managed list.",
+				Description: "OCID for managed list.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "source_managed_list_id",
-				Description: "OCID of the Source ManagedList.",
+				Description: "OCID of the source managed list.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the resource.",
+				Description: "The current state of the managed list.",
 				Type:        proto.ColumnType_STRING,
 			},
 
 			// other columns
 			{
 				Name:        "description",
-				Description: "ManagedList description.",
+				Description: "Managed list description.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -93,7 +93,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 			// json fields
 			{
 				Name:        "list_items",
-				Description: "List of ManagedListItem.",
+				Description: "List of managed list item.",
 				Type:        proto.ColumnType_JSON,
 			},
 

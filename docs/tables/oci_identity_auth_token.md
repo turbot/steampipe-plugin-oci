@@ -17,7 +17,7 @@ from
 ```
 
 
-### List auth token keys which are inactive
+### List auth tokens which are inactive
 
 ```sql
 select
@@ -45,4 +45,22 @@ from
 group by
   user_name,
   user_id;
+```
+
+
+### List auth tokens older than 90 days
+
+```sql
+select
+  id,
+  user_id,
+  user_name,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_auth_token
+where
+  time_created <= (current_date - interval '90' day)
+order by
+  time_created;
 ```

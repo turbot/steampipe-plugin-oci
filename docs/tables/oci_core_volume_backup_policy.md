@@ -58,8 +58,7 @@ from
 select
   id,
   display_name,
-  s ->> 'backupType' as backup_type,
-  s ->> 'backupType' as backup_type,
+  s ->> 'backupType' as backup_type
 from
   oci_core_volume_backup_policy,
   jsonb_array_elements(schedules) as s

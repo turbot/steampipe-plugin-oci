@@ -8,7 +8,7 @@ Oracle Cloud Infrastructure Vault is a managed service that lets you centrally m
 
 ```sql
 select
-  id ,
+  id,
   display_name,
   lifecycle_state,
   time_created,
@@ -19,7 +19,7 @@ from
   oci_kms_vault;
 ```
 
-### List of vaults where state is not active
+### List vaults whose state is not active
 
 ```sql
 select
@@ -34,7 +34,7 @@ where
 ```
 
 
-### List of vaults where vault type is virtual private
+### List vaults with vault type as virtual private
 
 ```sql
 select

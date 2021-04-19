@@ -60,9 +60,30 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "restored_from_vault_id",
+				Description: "The OCID of the vault from which this vault was restored, if it was restored from a backup file.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+				Hydrate:     getKmsVault,
+			},
+			{
+				Name:        "time_of_deletion",
+				Description: "An optional property to indicate when to delete the vault.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeOfDeletion.Time"),
+				Hydrate:     getKmsVault,
+			},
+			{
 				Name:        "vault_type",
 				Description: "The type of vault. Each type of vault stores keys with different degrees of isolation and has different options and pricing.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "wrappingkey_id",
+				Description: "The OCID of the vault's wrapping key.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+				Hydrate:     getKmsVault,
 			},
 
 			// tags
@@ -158,7 +179,7 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 //// HYDRATE FUNCTION
 
-func getKmsVault(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getKmsVault(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getKmsVault")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
@@ -170,7 +191,13 @@ func getKmsVault(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, nil
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	var id string
+	if h.Item != nil {
+		i := h.Item.(keymanagement.VaultSummary)
+		id = *i.Id
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
 
 	// handle empty vault id in get call
 	if strings.TrimSpace(id) == "" {

@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v36/audit"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
@@ -31,6 +32,7 @@ type session struct {
 	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
+	AuditClient          audit.AuditClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -222,6 +224,44 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	sess := &session{
 		TenancyID:            tenantID,
 		VirtualNetworkClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
+func auditService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("Audit-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("auditService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := audit.NewAuditClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantID,
+		AuditClient: client,
 	}
 
 	// save session in cache

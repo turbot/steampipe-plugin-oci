@@ -59,7 +59,7 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 
 func listCloudGuardConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Session
-	session, err := cloudGuardService(ctx, d, "")
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

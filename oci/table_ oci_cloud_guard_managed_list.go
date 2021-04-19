@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
@@ -25,7 +24,6 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardManagedLists,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -155,19 +153,14 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCloudGuardManagedLists", "Compartment", compartment, "OCI_REGION", region)
-
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	request := cloudguard.ListManagedListsRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -195,20 +188,10 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTION
 
 func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCloudGuardManagedList", "Compartment", compartment, "OCI_REGION", region)
-
-	// Rstrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

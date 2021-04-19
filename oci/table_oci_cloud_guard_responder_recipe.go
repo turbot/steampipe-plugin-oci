@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
@@ -24,6 +25,7 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardResponderRecipes,
 		},
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -143,6 +145,10 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.listCloudGuardResponderRecipes", "Compartment", compartment)
+
 	// Create Session
 	session, err := cloudGuardService(ctx, d)
 	if err != nil {
@@ -150,7 +156,7 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 	}
 
 	request := cloudguard.ListResponderRecipesRequest{
-		CompartmentId: types.String(session.TenancyID),
+		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -178,6 +184,14 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 //// HYDRATE FUNCTION
 
 func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getCloudGuardResponderRecipe", "Compartment", compartment)
+
+	// Rstrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(cloudguard.ResponderRecipeSummary).Id

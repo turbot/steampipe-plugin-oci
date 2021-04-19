@@ -17,10 +17,10 @@ import (
 func tableCoreDrg(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_drg",
-		Description: "OCI Core DRG",
+		Description: "OCI Core Dynamic Routing Gateway",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getDrg,
+			Hydrate:    getCoreDrg,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreDrgs,
@@ -143,12 +143,12 @@ func listCoreDrgs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 //// HYDRATE FUNCTION
 
-func getDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getDrg")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getDrg", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreDrg", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

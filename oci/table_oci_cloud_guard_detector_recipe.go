@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
@@ -25,7 +24,6 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardDetectorRecipes,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -126,12 +124,6 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
-			},
-			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -151,19 +143,14 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCloudGuardDetectorRecipes", "Compartment", compartment, "OCI_REGION", region)
-
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	request := cloudguard.ListDetectorRecipesRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -191,15 +178,6 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 //// HYDRATE FUNCTION
 
 func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCloudGuardDetectorRecipe", "Compartment", compartment, "OCI_REGION", region)
-
-	// Rstrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(cloudguard.DetectorRecipeSummary).Id
@@ -208,7 +186,7 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

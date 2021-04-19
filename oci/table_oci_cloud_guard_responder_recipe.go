@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
@@ -25,7 +24,6 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardResponderRecipes,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -151,19 +149,14 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCloudGuardResponderRecipes", "Compartment", compartment, "OCI_REGION", region)
-
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	request := cloudguard.ListResponderRecipesRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -191,15 +184,6 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 //// HYDRATE FUNCTION
 
 func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCloudGuardResponderRecipe", "Compartment", compartment, "OCI_REGION", region)
-
-	// Rstrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(cloudguard.ResponderRecipeSummary).Id
@@ -208,7 +192,7 @@ func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d, region)
+	session, err := cloudGuardService(ctx, d)
 	if err != nil {
 		return nil, err
 	}

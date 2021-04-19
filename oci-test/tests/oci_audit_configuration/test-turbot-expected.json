@@ -1,0 +1,5 @@
+[
+  {
+    "tenant_id": "{{ output.tenancy_ocid.value }}"
+  }
+]

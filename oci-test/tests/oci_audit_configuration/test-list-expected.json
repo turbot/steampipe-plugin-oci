@@ -1,0 +1,6 @@
+[
+  {
+    "retention_period_days": 365,
+    "tenant_id": "{{ output.tenancy_ocid.value }}"
+  }
+]

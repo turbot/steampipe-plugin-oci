@@ -189,7 +189,7 @@ func listCoreVirtualCircuits(ctx context.Context, d *plugin.QueryData, _ *plugin
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listCoreVirtualCircuits", "Compartment", compartment, "OCI_REGION", region)
+	logger.Error("core.listCoreVirtualCircuits", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -227,11 +227,11 @@ func listCoreVirtualCircuits(ctx context.Context, d *plugin.QueryData, _ *plugin
 //// HYDRATE FUNCTION
 
 func getVirtualCircuit(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getUser")
+	plugin.Logger(ctx).Trace("getVirtualCircuit")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
+	logger.Error("oci.getVirtualCircuit", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

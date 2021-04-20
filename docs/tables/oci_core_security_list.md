@@ -54,6 +54,43 @@ from
 ```
 
 
+### List security list whose SSH and RDP access is not restricted from the internet
+
+```sql
+ select
+  display_name,
+  p ->> 'description' as description,
+  p ->> 'icmpOptions' as icmp_options,
+  p ->> 'isStateless' as is_stateless,
+  p ->> 'protocol' as protocol,
+  p ->> 'source' as source,
+  p ->> 'sourceType' as source_type,
+  p -> 'tcpOptions' -> 'destinationPortRange' ->> 'max' as min_port_range,
+  p -> 'tcpOptions' -> 'destinationPortRange' ->> 'min' as max_port_range,
+  p ->> 'udpOptions' as udp_options
+from
+  oci_core_security_list,
+  jsonb_array_elements(ingress_security_rules) as p
+where
+  p ->> 'source' = '0.0.0.0/0'
+  and (
+    (
+      p ->> 'protocol' = 'all'
+      and (p -> 'tcpOptions' -> 'destinationPortRange' -> 'min') is null
+    )
+    or (
+      (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 22
+      and (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 22
+    )
+    or (
+      (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'min')::integer <= 3389
+      and (p -> 'tcpOptions' -> 'destinationPortRange' ->> 'max')::integer >= 3389
+    )
+  );
+```
+
+
+
 ### Count of security list by VCN ID
 
 ```sql

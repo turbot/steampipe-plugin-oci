@@ -25,7 +25,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardManagedLists,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",

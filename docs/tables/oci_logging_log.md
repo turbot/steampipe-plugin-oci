@@ -25,7 +25,19 @@ select
   lifecycle_state as state,
   time_created
 from
-  oci_logging_log_
+  oci_logging_log
 where
   lifecycle_state = 'INACTIVE';
+```
+
+### List VCN Subnets where flow log is enabled
+
+```sql
+select
+  configuration -> 'source' ->> 'resource' as subnet_id
+from
+  oci_logging_log
+where
+  configuration -> 'source' ->> 'service' = 'flowlogs'
+  and lifecycle_state = 'ACTIVE';
 ```

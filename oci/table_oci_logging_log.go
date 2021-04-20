@@ -80,7 +80,7 @@ func tableLoggingLog(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "configuration",
-				Description: "",
+				Description: "Log object configuration.",
 				Type:        proto.ColumnType_JSON,
 			},
 

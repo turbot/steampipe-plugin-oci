@@ -17,6 +17,7 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v36/dns"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/types"
@@ -31,6 +32,7 @@ type session struct {
 	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
+	DNSClient            dns.DnsClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -222,6 +224,44 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	sess := &session{
 		TenancyID:            tenantID,
 		VirtualNetworkClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// DNSService returns the service client for OCI DNS Service
+func DNSService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("DNS-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("DNSService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := dns.NewDnsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantID,
+		DNSClient: client,
 	}
 
 	// save session in cache

@@ -16,7 +16,7 @@ from
   oci_dns_zone;
 ```
 
-### List active LPGs
+### List active DNS zones
 
 ```sql
 select

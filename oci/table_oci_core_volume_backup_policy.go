@@ -95,7 +95,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "compartment_id",
-				Description: "ColumnDescriptionCompartment",
+				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
@@ -167,7 +167,7 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume id in get call
+	// handle empty volume backup policy id in get call
 	if id == "" {
 		return nil, nil
 	}

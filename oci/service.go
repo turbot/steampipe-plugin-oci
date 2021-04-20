@@ -17,6 +17,7 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v36/dns"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/turbot/go-kit/types"
@@ -31,6 +32,7 @@ type session struct {
 	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
+	DnsClient            dns.DnsClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -222,6 +224,48 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	sess := &session{
 		TenancyID:            tenantID,
 		VirtualNetworkClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// dnsService returns the service client for OCI Dns Service
+func dnsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("ComputeRegional-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("coreComputeServiceRegional", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get compute service client
+	client, err := dns.NewDnsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		DnsClient: client,
 	}
 
 	// save session in cache

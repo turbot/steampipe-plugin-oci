@@ -35,7 +35,7 @@ resource "oci_dns_zone" "named_test_resource" {
 }
 
 output "resource_name" {
-  value = "turbot.com"
+  value = oci_dns_zone.named_test_resource.name
 }
 
 output "tenancy_ocid" {

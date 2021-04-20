@@ -25,7 +25,7 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getDnsZone,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -57,14 +57,14 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "scope",
-				Description: "The scope of the zone.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "is_protected",
 				Description: "A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "scope",
+				Description: "The scope of the zone.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "serial",
@@ -156,12 +156,11 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 
 func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listDnsZones", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listDnsZones", "Compartment", compartment)
 
 	// Create Session
-	session, err := DNSService(ctx, d, region)
+	session, err := dnsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +174,7 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	pagesLeft := true
 	for pagesLeft {
-		zones, err := session.DNSClient.ListZones(ctx, request)
+		zones, err := session.DnsClient.ListZones(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -197,9 +196,8 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getDnsZone", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getDnsZone", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -216,7 +214,7 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		return nil, nil
 	}
 	// Create Session
-	session, err := DNSService(ctx, d, region)
+	session, err := dnsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +226,7 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		},
 	}
 
-	response, err := session.DNSClient.GetZone(ctx, request)
+	response, err := session.DnsClient.GetZone(ctx, request)
 	if err != nil {
 		return nil, err
 	}

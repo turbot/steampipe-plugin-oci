@@ -32,7 +32,7 @@ type session struct {
 	IdentityClient       identity.IdentityClient
 	ObjectStorageClient  objectstorage.ObjectStorageClient
 	VirtualNetworkClient core.VirtualNetworkClient
-	DNSClient            dns.DnsClient
+	DnsClient            dns.DnsClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -232,10 +232,10 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	return sess, nil
 }
 
-// DNSService returns the service client for OCI DNS Service
-func DNSService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// dnsService returns the service client for OCI DNS Service
+func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("DNS-%s", region)
+	serviceCacheKey := fmt.Sprintf("dns-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -243,7 +243,7 @@ func DNSService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
 	if err != nil {
 		logger.Error("DNSService", "getProvider.Error", err)
 		return nil, err
@@ -261,7 +261,7 @@ func DNSService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 
 	sess := &session{
 		TenancyID: tenantID,
-		DNSClient: client,
+		DnsClient: client,
 	}
 
 	// save session in cache

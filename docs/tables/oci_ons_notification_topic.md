@@ -18,7 +18,7 @@ from
   oci_ons_notification_topic;
 ```
 
-### List inactive topic
+### List inactive topics
 
 ```sql
 select
@@ -26,5 +26,6 @@ select
   lifecycle_state
 from
   oci_ons_notification_topic
-where lifecycle_state <> 'ACTIVE';
+where
+  lifecycle_state <> 'ACTIVE';
 ```

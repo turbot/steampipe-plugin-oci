@@ -135,12 +135,10 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listKmsKeys", "Compartment", compartment, "OCI_REGION", region)
 
-	vaultData := h.Item.(keymanagement.VaultSummary)
-	endpoint := *vaultData.ManagementEndpoint
+	endpoint := *h.Item.(keymanagement.VaultSummary).ManagementEndpoint
 
 	// Create Session
 	session, err := kmsManagementService(ctx, d, region, endpoint)
-
 	if err != nil {
 		return nil, err
 	}
@@ -186,11 +184,17 @@ func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 		return nil, nil
 	}
 
-	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	var endpoint, id string
+	if h.Item != nil {
+		endpoint = h.Item.(keyInfo).ManagementEndpoint
+		id = *h.Item.(keyInfo).Id
+	} else {
+		endpoint = d.KeyColumnQuals["management_endpoint"].GetStringValue()
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
 
 	// handle empty key id in get call
-	if strings.TrimSpace(id) == "" {
+	if strings.TrimSpace(id) == "" || strings.TrimSpace(endpoint) == "" {
 		return nil, nil
 	}
 

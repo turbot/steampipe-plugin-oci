@@ -18,24 +18,7 @@ from
   oci_core_image;
 ```
 
-
-### Get a specific image
-
-```sql
-select
-  display_name,
-  id,
-  operating_system,
-  operating_system_version,
-  freeform_tags
-from
-  oci_core_image
-where
-  id = 'ocid1.image.oc1.ap-mumbai-1.aaaaaaaaggwqe5ivg7iayjfko4s3hscukycvvtcsb2gvu2ggeyz7hr3eb1st';
-```
-
-
-### List of images where EncryptionInTransit is not enable
+### List images with encryption in transit disabled
 
 ```sql
 select

@@ -18,10 +18,10 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_kms_key",
 		Description: "OCI KMS Key",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"management_endpoint", "id"}),
-			Hydrate:    getKmsKey,
-		},
+		// Get: &plugin.GetConfig{
+		// 	KeyColumns: plugin.AllColumns([]string{"management_endpoint", "id"}),
+		// 	Hydrate:    getKmsKey,
+		// },
 		List: &plugin.ListConfig{
 			ParentHydrate: listKmsVaults,
 			Hydrate:       listKmsKeys,
@@ -131,15 +131,19 @@ type keyInfo = struct {
 
 func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listKmsKeys", "Compartment", compartment, "OCI_REGION", region)
+	//region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	//compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	//logger.Debug("listKmsKeys", "Compartment", compartment, "OCI_REGION", region)
 
 	vaultData := h.Item.(keymanagement.VaultSummary)
+	compartment := *vaultData.CompartmentId
 	endpoint := *vaultData.ManagementEndpoint
+	regionAA := strings.Split(endpoint, ".")[2]
+
+	logger.Debug("##############", "kmsEndpoint", endpoint)
 
 	// Create Session
-	session, err := kmsManagementService(ctx, d, region, endpoint)
+	session, err := kmsManagementService(ctx, d, regionAA, endpoint)
 
 	if err != nil {
 		return nil, err
@@ -158,9 +162,10 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		if err != nil {
 			return nil, err
 		}
+		logger.Warn("KmsResponse", "Items", response.Items)
 
 		for _, key := range response.Items {
-			d.StreamListItem(ctx, keyInfo{key, endpoint})
+			d.StreamLeafListItem(ctx, key)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -174,43 +179,43 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 //// HYDRATE FUNCTION
 
-func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKmsKey")
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getKmsKey", "Compartment", compartment, "OCI_REGION", region)
+// func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+// 	plugin.Logger(ctx).Trace("getKmsKey")
+// 	logger := plugin.Logger(ctx)
+// 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+// 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+// 	logger.Debug("oci.getKmsKey", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
+// 	// Restrict the api call to only root compartment/ per region
+// 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+// 		return nil, nil
+// 	}
 
-	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
-	id := d.KeyColumnQuals["id"].GetStringValue()
+// 	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
+// 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty key id in get call
-	if strings.TrimSpace(id) == "" {
-		return nil, nil
-	}
+// 	// handle empty key id in get call
+// 	if strings.TrimSpace(id) == "" {
+// 		return nil, nil
+// 	}
 
-	// Create Session
-	session, err := kmsManagementService(ctx, d, region, endpoint)
-	if err != nil {
-		return nil, err
-	}
+// 	// Create Session
+// 	session, err := kmsManagementService(ctx, d, region, endpoint)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	request := keymanagement.GetKeyRequest{
-		KeyId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
+// 	request := keymanagement.GetKeyRequest{
+// 		KeyId: types.String(id),
+// 		RequestMetadata: oci_common.RequestMetadata{
+// 			RetryPolicy: getDefaultRetryPolicy(),
+// 		},
+// 	}
 
-	response, err := session.KmsManagementClient.GetKey(ctx, request)
-	if err != nil {
-		return nil, err
-	}
+// 	response, err := session.KmsManagementClient.GetKey(ctx, request)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return response.Key, nil
-}
+// 	return response.Key, nil
+// }

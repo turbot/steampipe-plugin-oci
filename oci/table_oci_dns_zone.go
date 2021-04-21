@@ -133,7 +133,7 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
+				Transform:   transform.FromField("Self").Transform(ociRegionFromSelf),
 			},
 			{
 				Name:        "compartment_id",
@@ -276,4 +276,8 @@ func dnsZoneTags(_ context.Context, d *transform.TransformData) (interface{}, er
 	}
 
 	return tags, nil
+}
+
+func ociRegionFromSelf(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	return oci_common.StringToRegion(strings.Split(types.SafeString(d.Value), ".")[1]), nil
 }

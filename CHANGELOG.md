@@ -1,3 +1,13 @@
+## v0.0.4 [2021-04-15]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_local_peering_gateway](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_local_peering_gateway) ([#58](https://github.com/turbot/steampipe-plugin-oci/pull/58))
+  - [oci_core_vcn](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_vcn) ([#23](https://github.com/turbot/steampipe-plugin-oci/pull/23))
+  - [oci_core_volume_backup](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_backup) ([#31](https://github.com/turbot/steampipe-plugin-oci/pull/31))
+  - [oci_identity_network_source](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_network_source) ([#39](https://github.com/turbot/steampipe-plugin-oci/pull/39))
+
 ## v0.0.3 [2021-04-08]
 
 _What's new?_

@@ -85,7 +85,7 @@ func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationR
 // Extract OCI region name from the resource id
 func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	id := types.SafeString(d.Value)
-	splittedId := strings.Split(id, ".")
-	regionName := oci_common.StringToRegion(types.SafeString(splittedId[3]))
+	splittedID := strings.Split(id, ".")
+	regionName := oci_common.StringToRegion(types.SafeString(splittedID[3]))
 	return regionName, nil
 }

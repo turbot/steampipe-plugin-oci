@@ -18,8 +18,7 @@ from
   oci_ons_subscription;
 ```
 
-
-### List subscriptions in pending state
+### List subscriptions in a pending state
 
 ```sql
 select
@@ -33,7 +32,7 @@ where
   lifecycle_state = 'PENDING';
 ```
 
-### Subscriptions count by topic id
+### Get subscription count by topic ID
 
 ```sql
 select
@@ -45,36 +44,7 @@ group by
   topic_id;
 ```
 
-
-### List subscriptions by protocol type
-
-```sql
-select
-  id,
-  protocol,
-  endpoint
-from
-  oci_ons_subscription
-where
-  protocol = 'EMAIL';
-```
-
-
-### List subscriptions for which the Endpoint email domain is not 'xyz.com'
-
-```sql
-select
-  id,
-  protocol,
-  endpoint
-from
-  oci_ons_subscription
-where
-  endpoint not like '%xyz.com%';
-```
-
-
-### Subscriptions count by protocol
+### Get subscription count by protocol
 
 ```sql
 select

@@ -41,6 +41,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_subnet":                    tableCoreSubnet(ctx),
 			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_core_volume_backup":             tableCoreVolumeBackup(ctx),
+			"oci_events_rule":                    tableEventsRule(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_auth_token":            tableIdentityAuthToken(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),

@@ -14,47 +14,52 @@ import (
 
 //// TABLE DEFINITION
 
-func tableOnsSubscription(_ context.Context) *plugin.Table {
+func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_ons_subscription",
-		Description: "OCI Ons Subscription",
+		Name:        "oci_ons_notification_topic",
+		Description: "A communication channel for sending messages to the subscriptions.",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
-			Hydrate:           getOnsSubscription,
+			KeyColumns: plugin.AnyColumn([]string{"topic_id"}),
+			Hydrate:    getOnsNotificationTopic,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listOnsSubscriptions,
+			Hydrate: listOnsNotificationTopics,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "id",
-				Description: "The OCID of the subscription.",
+				Name:        "name",
+				Description: "The name of the topic.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "topic_id",
-				Description: "The OCID of the associated topic.",
+				Description: "The OCID of the topic.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The lifecycle state of the subscription.",
+				Description: "The lifecycle state of the topic.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "created_time",
-				Description: "The time when this subscription was created.",
-				Type:        proto.ColumnType_INT,
+				Name:        "time_created",
+				Description: "The time the topic was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// other columns
 			{
-				Name:        "endpoint",
-				Description: "A locator that corresponds to the subscription protocol.",
+				Name:        "api_endpoint",
+				Description: "The endpoint for managing subscriptions or publishing messages to the topic.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "description",
+				Description: "The description of the topic.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -63,14 +68,10 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "protocol",
-				Description: "The protocol used for the subscription.",
+				Name:        "short_topic_id",
+				Description: "A unique short topic Id. This is used only for SMS subscriptions.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "delivery_policy",
-				Description: "Delivery Policy of the subscription.",
-				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromCamel(),
 			},
 
 			// tags
@@ -90,7 +91,13 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(subscriptionTags),
+				Transform:   transform.From(topicTags),
+			},
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name"),
 			},
 
 			// Standard OCI columns
@@ -98,7 +105,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
+				Transform:   transform.FromField("TopicId").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -119,19 +126,19 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listOnsSubscriptions", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listOnsNotificationTopics", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := onsNotificationDataPlaneService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := ons.ListSubscriptionsRequest{
+	request := ons.ListTopicsRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -140,13 +147,13 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.NotificationDataPlaneClient.ListSubscriptions(ctx, request)
+		response, err := session.NotificationControlPlaneClient.ListTopics(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, subscription := range response.Items {
-			d.StreamListItem(ctx, subscription)
+		for _, topic := range response.Items {
+			d.StreamListItem(ctx, topic)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -160,50 +167,50 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 //// HYDRATE FUNCTION
 
-func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getOnsSubscription")
+func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getOnsNotificationTopic")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getOnsNotificationTopic", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	id := d.KeyColumnQuals["topic_id"].GetStringValue()
 
-	// handle empty subscription id in get call
+	// handle empty topic id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := onsNotificationDataPlaneService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := ons.GetSubscriptionRequest{
-		SubscriptionId: types.String(id),
+	request := ons.GetTopicRequest{
+		TopicId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.NotificationDataPlaneClient.GetSubscription(ctx, request)
+	response, err := session.NotificationControlPlaneClient.GetTopic(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Subscription, nil
+	return response.NotificationTopic, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := subscriptionFreeformTags(d.HydrateItem)
+func topicTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := topicFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -214,7 +221,7 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 		}
 	}
 
-	definedTags := subscriptionDefinedTags(d.HydrateItem)
+	definedTags := topicDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -231,22 +238,22 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 	return tags, nil
 }
 
-func subscriptionFreeformTags(item interface{}) map[string]string {
+func topicFreeformTags(item interface{}) map[string]string {
 	switch item.(type) {
-	case ons.Subscription:
-		return item.(ons.Subscription).FreeformTags
-	case ons.SubscriptionSummary:
-		return item.(ons.SubscriptionSummary).FreeformTags
+	case ons.NotificationTopic:
+		return item.(ons.NotificationTopic).FreeformTags
+	case ons.NotificationTopicSummary:
+		return item.(ons.NotificationTopicSummary).FreeformTags
 	}
 	return nil
 }
 
-func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{} {
+func topicDefinedTags(item interface{}) map[string]map[string]interface{} {
 	switch item.(type) {
-	case ons.Subscription:
-		return item.(ons.Subscription).DefinedTags
-	case ons.SubscriptionSummary:
-		return item.(ons.SubscriptionSummary).DefinedTags
+	case ons.NotificationTopic:
+		return item.(ons.NotificationTopic).DefinedTags
+	case ons.NotificationTopicSummary:
+		return item.(ons.NotificationTopicSummary).DefinedTags
 	}
 	return nil
 }

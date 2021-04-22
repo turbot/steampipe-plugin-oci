@@ -18,7 +18,7 @@ from
 ```
 
 
-### Details of egress security rules
+### Get egress security rules for each security list
 
 ```sql
 select
@@ -35,7 +35,7 @@ from
   jsonb_array_elements(egress_security_rules) as p;
 ```
 
-### Details of ingress security rules
+### Get ingress security rules for each security list
 
 ```sql
 select
@@ -54,7 +54,7 @@ from
 ```
 
 
-### List security list whose SSH and RDP access is not restricted from the internet
+### List security lists that do not restrict SSH and RDP access from the internet
 
 ```sql
  select
@@ -90,21 +90,7 @@ where
 ```
 
 
-
-### Count of security list by VCN ID
-
-```sql
-select
- vcn_id,
- count(id) as security_list_count
-from
-  oci_core_security_list
-group by
-  vcn_id;
-```
-
-
-### List of default security list
+### List default security lists
 
 ```sql
 select

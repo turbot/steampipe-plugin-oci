@@ -28,6 +28,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"oci_core_dhcp_options":              tableCoreDhcpOptions(ctx),
 			"oci_core_image":                     tableCoreImage(ctx),
 			"oci_core_instance":                  tableCoreInstance(ctx),
 			"oci_core_vcn":                       tableCoreVcn(ctx),

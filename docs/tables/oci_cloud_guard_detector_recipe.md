@@ -29,3 +29,18 @@ from
 where
   lifecycle_state = 'ACTIVE';
 ```
+
+### List detector recipes where password related rules are enabled or disabled
+
+```sql
+select
+  name,
+  e ->> 'detectorRuleId' as Rule_name,
+  e -> 'details' ->> 'isEnabled' as status
+from
+  oci_cloud_guard_detector_recipe,
+  jsonb_array_elements(effective_detector_rules) as e
+where
+  e ->> 'detectorRuleId' = 'PASSWORD_TOO_OLD'
+  or e ->> 'detectorRuleId' = 'PASSWORD_POLICY_NOT_COMPLEX';
+```

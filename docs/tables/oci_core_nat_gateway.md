@@ -20,7 +20,7 @@ from
 ```
 
 
-### List NAT Gateways that block traffics
+### List NAT Gateways that blocks traffic
 
 ```sql
 select
@@ -28,13 +28,13 @@ select
   id,
   block_traffic
 from
-  oci_core_nat_gateway inst
+  oci_core_nat_gateway
 where
   block_traffic;
 ```
 
 
-### Count of NAT gateways per VCN
+### Count NAT gateways by VCN
 
 ```sql
 select

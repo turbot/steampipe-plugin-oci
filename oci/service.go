@@ -31,6 +31,7 @@ type session struct {
 	ComputeClient                  core.ComputeClient
 	IdentityClient                 identity.IdentityClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
+	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
@@ -148,6 +149,48 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 	sess := &session{
 		TenancyID:                      tenantId,
 		NotificationControlPlaneClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// onsNotificationDataPlaneService returns the service client for OCI Notification Data Plane service
+func onsNotificationDataPlaneService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("NotificationDataPlane-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("notificationDataPlaneService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get notification data plane service client
+	client, err := ons.NewNotificationDataPlaneClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                   tenantId,
+		NotificationDataPlaneClient: client,
 	}
 
 	// save session in cache

@@ -18,7 +18,7 @@ from
   oci_core_service_gateway;
 ```
 
-### List Service gateways that use Route tables
+### List service gateways that use route tables
 
 ```sql
 select
@@ -31,7 +31,7 @@ where
   route_table_id is not null;
 ```
 
-### List services which are enabled for service gateways
+### Get enabled services for each service gateway
 
 ```sql
 select
@@ -44,8 +44,7 @@ from
   jsonb_array_elements(services) as s;
 ```
 
-
-### List Service gateways that block traffics
+### List service gateways that block traffic
 
 ```sql
 select

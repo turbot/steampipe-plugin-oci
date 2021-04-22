@@ -18,7 +18,7 @@ from
 ```
 
 
-### List dynamic groups which are not in active state
+### List inactive dynamic groups
 
 ```sql
 select
@@ -29,16 +29,4 @@ from
   oci_identity_dynamic_group
 where
   lifecycle_state <> 'ACTIVE';
-```
-
-
-### Get matching rule details of dynamic groups
-
-```sql
-select
-  name,
-  id,
-  matching_rule
-from
-  oci_identity_dynamic_group;
 ```

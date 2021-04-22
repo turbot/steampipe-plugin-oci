@@ -18,7 +18,7 @@ from
 ```
 
 
-### DHCP options configuration parameters info
+### Get configuration info for each DHCP option
 
 ```sql
 select
@@ -34,7 +34,7 @@ from
 ```
 
 
-### Count of DHCP options per VCN
+### Count the number of DHCP options by VCN
 
 ```sql
 select

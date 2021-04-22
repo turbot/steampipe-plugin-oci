@@ -1,0 +1,8 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "id": "{{ output.resource_id.value }}",
+    "operating_system": "{{ output.operating_system.value }}",
+    "operating_system_version": "{{ output.operating_system_version.value }}"
+  }
+]

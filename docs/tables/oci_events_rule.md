@@ -20,7 +20,7 @@ from
 ```
 
 
-### List rules which are currently enabled
+### List enabled rules
 
 ```sql
 select
@@ -52,7 +52,7 @@ where
 ```
 
 
-### Get action details of each rule with action type as oracle notification service topic
+### Get action details for rules that have the Oracle Notification Service action type
 
 ```sql
 select
@@ -72,7 +72,7 @@ where
 ```
 
 
-### Get action details of each rule with action type as oracle streaming service
+### Get action details for rules that have the Oracle Streaming Service action type
 
 ```sql
 select
@@ -92,7 +92,7 @@ where
 ```
 
 
-### Get event type details under which rule is triggered
+### Get event type details for each rule
 
 ```sql
 select

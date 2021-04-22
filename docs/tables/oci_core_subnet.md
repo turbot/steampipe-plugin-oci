@@ -18,7 +18,7 @@ from
 ```
 
 
-### OCIDs of the security list that the subnet uses
+### Get the OCIDs of the security list for each subnet
 
 ```sql
 select
@@ -30,7 +30,7 @@ from
 ```
 
 
-### Subnet count by VCN ID
+### Count of subnets by VCN ID
 
 ```sql
 select
@@ -43,7 +43,7 @@ group by
 ```
 
 
-### Find the number of available IP address in each subnet
+### Get the number of available IP address in each subnet
 
 ```sql
 select

@@ -1,10 +1,10 @@
 # Table: oci_identity_customer_secret_key
 
-A CustomerSecretKey is an Oracle-provided key for using the Object Storage Service's Amazon S3 compatible API. The key consists of a secret key/access key pair. A user can have up to two secret keys at a time.
+A customer secret key is an Oracle-provided key for using the Object Storage Service's Amazon S3 compatible API. The key consists of a secret key/access key pair. A user can have up to two secret keys at a time.
 
 ## Examples
 
-### List of customer secret keys with their corresponding user and date of creation
+### Basic info
 
 ```sql
 select
@@ -18,7 +18,7 @@ from
 ```
 
 
-### List customer secret keys which are inactive
+### List inactive customer secret keys
 
 ```sql
 select
@@ -35,7 +35,7 @@ where
 ```
 
 
-### customer secret keys count per user
+### Count customer secret keys by user
 
 ```sql
 select

@@ -18,7 +18,7 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 		Description: "OCI Identity Customer Secret Key",
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
-			Hydrate:       listIdentitCustomerSecretKeys,
+			Hydrate:       listIdentityCustomerSecretKeys,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -93,7 +93,7 @@ type customerSecretKeyInfo struct {
 
 //// LIST FUNCTION
 
-func listIdentitCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listIdentityCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	user := h.Item.(identity.User)
 

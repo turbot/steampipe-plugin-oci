@@ -41,6 +41,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume_backup":             tableCoreVolumeBackup(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),
+			"oci_identity_customer_secret_key":   tableIdentityCustomerSecretKey(ctx),
 			"oci_identity_dynamic_group":         tableIdentityDynamicGroup(ctx),
 			"oci_identity_group":                 tableIdentityGroup(ctx),
 			"oci_identity_network_source":        tableIdentityNetworkSource(ctx),

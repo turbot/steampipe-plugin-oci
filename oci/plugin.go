@@ -33,6 +33,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_vcn":                       tableCoreVcn(ctx),
 			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
 			"oci_core_local_peering_gateway":     tableCoreLocalPeeringGateway(ctx),
+			"oci_core_nat_gateway":               tableCoreNatGateway(ctx),
 			"oci_core_route_table":               tableCoreRouteTable(ctx),
 			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_core_volume_backup":             tableCoreVolumeBackup(ctx),

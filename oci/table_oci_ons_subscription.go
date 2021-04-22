@@ -48,7 +48,8 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 			{
 				Name:        "created_time",
 				Description: "The time when this subscription was created.",
-				Type:        proto.ColumnType_INT,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromCamel().Transform(transform.UnixMsToTimestamp),
 			},
 
 			// other columns

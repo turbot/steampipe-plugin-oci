@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/keymanagement"
+	"github.com/oracle/oci-go-sdk/v36/ons"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -14,76 +14,64 @@ import (
 
 //// TABLE DEFINITION
 
-func tableKmsVault(_ context.Context) *plugin.Table {
+func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_kms_vault",
-		Description: "OCI KMS Vault",
+		Name:        "oci_ons_notification_topic",
+		Description: "A communication channel for sending messages to the subscriptions.",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getKmsVault,
+			KeyColumns: plugin.AnyColumn([]string{"topic_id"}),
+			Hydrate:    getOnsNotificationTopic,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listKmsVaults,
+			Hydrate: listOnsNotificationTopics,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "name",
+				Description: "The name of the topic.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "id",
-				Description: "The OCID of a vault.",
+				Name:        "topic_id",
+				Description: "The OCID of the topic.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "A vault's current lifecycle state.",
+				Description: "The lifecycle state of the topic.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time a vault was created.",
+				Description: "The time the topic was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// other columns
 			{
-				Name:        "crypto_endpoint",
-				Description: "The service endpoint to perform cryptographic operations against.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "management_endpoint",
-				Description: "The service endpoint to perform management operations against.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "restored_from_vault_id",
-				Description: "The OCID of the vault from which this vault was restored, if it was restored from a backup file.",
+				Name:        "api_endpoint",
+				Description: "The endpoint for managing subscriptions or publishing messages to the topic.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getKmsVault,
 			},
 			{
-				Name:        "time_of_deletion",
-				Description: "An optional property to indicate when to delete the vault.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeOfDeletion.Time"),
-				Hydrate:     getKmsVault,
-			},
-			{
-				Name:        "vault_type",
-				Description: "The type of vault. Each type of vault stores keys with different degrees of isolation and has different options and pricing.",
+				Name:        "description",
+				Description: "The description of the topic.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "wrappingkey_id",
-				Description: "The OCID of the vault's wrapping key.",
+				Name:        "etag",
+				Description: "Used for optimistic concurrency control.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "short_topic_id",
+				Description: "A unique short topic Id. This is used only for SMS subscriptions.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getKmsVault,
 			},
 
 			// tags
@@ -103,13 +91,13 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(vaultTags),
+				Transform:   transform.From(topicTags),
 			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromField("Name"),
 			},
 
 			// Standard OCI columns
@@ -117,7 +105,7 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
+				Transform:   transform.FromField("TopicId").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -138,19 +126,19 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listKmsVaults", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listOnsNotificationTopics", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := kmsVaultService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := keymanagement.ListVaultsRequest{
+	request := ons.ListTopicsRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -159,13 +147,13 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.KmsVaultClient.ListVaults(ctx, request)
+		response, err := session.NotificationControlPlaneClient.ListTopics(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, vault := range response.Items {
-			d.StreamListItem(ctx, vault)
+		for _, topic := range response.Items {
+			d.StreamListItem(ctx, topic)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -179,56 +167,50 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 //// HYDRATE FUNCTION
 
-func getKmsVault(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKmsVault")
+func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getOnsNotificationTopic")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getKmsVault", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getOnsNotificationTopic", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
-	var id string
-	if h.Item != nil {
-		i := h.Item.(keymanagement.VaultSummary)
-		id = *i.Id
-	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
-	}
+	id := d.KeyColumnQuals["topic_id"].GetStringValue()
 
-	// handle empty vault id in get call
+	// handle empty topic id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := kmsVaultService(ctx, d, region)
+	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := keymanagement.GetVaultRequest{
-		VaultId: types.String(id),
+	request := ons.GetTopicRequest{
+		TopicId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.KmsVaultClient.GetVault(ctx, request)
+	response, err := session.NotificationControlPlaneClient.GetTopic(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Vault, nil
+	return response.NotificationTopic, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := vaultFreeformTags(d.HydrateItem)
+func topicTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := topicFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -239,7 +221,7 @@ func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 		}
 	}
 
-	definedTags := vaultDefinedTags(d.HydrateItem)
+	definedTags := topicDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -256,22 +238,22 @@ func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 	return tags, nil
 }
 
-func vaultFreeformTags(item interface{}) map[string]string {
+func topicFreeformTags(item interface{}) map[string]string {
 	switch item.(type) {
-	case keymanagement.Vault:
-		return item.(keymanagement.Vault).FreeformTags
-	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).FreeformTags
+	case ons.NotificationTopic:
+		return item.(ons.NotificationTopic).FreeformTags
+	case ons.NotificationTopicSummary:
+		return item.(ons.NotificationTopicSummary).FreeformTags
 	}
 	return nil
 }
 
-func vaultDefinedTags(item interface{}) map[string]map[string]interface{} {
+func topicDefinedTags(item interface{}) map[string]map[string]interface{} {
 	switch item.(type) {
-	case keymanagement.Vault:
-		return item.(keymanagement.Vault).DefinedTags
-	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).DefinedTags
+	case ons.NotificationTopic:
+		return item.(ons.NotificationTopic).DefinedTags
+	case ons.NotificationTopicSummary:
+		return item.(ons.NotificationTopicSummary).DefinedTags
 	}
 	return nil
 }

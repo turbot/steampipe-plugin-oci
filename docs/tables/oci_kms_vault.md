@@ -19,7 +19,7 @@ from
   oci_kms_vault;
 ```
 
-### List vaults whose state is not active
+### List inactive vaults
 
 ```sql
 select
@@ -34,7 +34,7 @@ where
 ```
 
 
-### List vaults with vault type as virtual private
+### List virtual private type of vaults
 
 ```sql
 select

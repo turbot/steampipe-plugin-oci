@@ -28,6 +28,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"oci_core_image":                     tableCoreImage(ctx),
 			"oci_core_instance":                  tableCoreInstance(ctx),
 			"oci_core_vcn":                       tableCoreVcn(ctx),
 			"oci_core_internet_gateway":          tableCoreInternetGateway(ctx),
@@ -43,6 +44,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_user":                  tableIdentityUser(ctx),
 			"oci_kms_vault":                      tableKmsVault(ctx),
 			"oci_objectstorage_bucket":           tableObjectStorageBucket(ctx),
+			"oci_ons_notification_topic":         tableOnsNotificationTopic(ctx),
 			"oci_region":                         tableIdentityRegion(ctx),
 		},
 	}

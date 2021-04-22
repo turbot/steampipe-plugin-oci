@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/keymanagement"
+	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -14,76 +14,83 @@ import (
 
 //// TABLE DEFINITION
 
-func tableKmsVault(_ context.Context) *plugin.Table {
+func tableCoreImage(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_kms_vault",
-		Description: "OCI KMS Vault",
+		Name:        "oci_core_image",
+		Description: "OCI Core Image",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getKmsVault,
+			KeyColumns:        plugin.AnyColumn([]string{"id"}),
+			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
+			Hydrate:           getCoreImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listKmsVaults,
+			Hydrate: listCoreImages,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Description: "A user-friendly name for the image. It does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of a vault.",
+				Description: "The OCID of the image.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "A vault's current lifecycle state.",
+				Description: "The image's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time a vault was created.",
+				Description: "The date and time the image was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "crypto_endpoint",
-				Description: "The service endpoint to perform cryptographic operations against.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "management_endpoint",
-				Description: "The service endpoint to perform management operations against.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "restored_from_vault_id",
-				Description: "The OCID of the vault from which this vault was restored, if it was restored from a backup file.",
+				Name:        "base_image_id",
+				Description: "The OCID of the image originally used to launch the instance.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getKmsVault,
 			},
 			{
-				Name:        "time_of_deletion",
-				Description: "An optional property to indicate when to delete the vault.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeOfDeletion.Time"),
-				Hydrate:     getKmsVault,
+				Name:        "create_image_allowed",
+				Description: "Indicates whether instances launched with this image can be used to create new images.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "vault_type",
-				Description: "The type of vault. Each type of vault stores keys with different degrees of isolation and has different options and pricing.",
+				Name:        "launch_mode",
+				Description: "Specifies the configuration mode for launching virtual machine (VM) instances.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "wrappingkey_id",
-				Description: "The OCID of the vault's wrapping key.",
+				Name:        "launch_options",
+				Description: "LaunchOptions Options for tuning the compatibility and performance of VM shapes.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "operating_system",
+				Description: "The image's operating system.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-				Hydrate:     getKmsVault,
+			},
+			{
+				Name:        "operating_system_version",
+				Description: "The image's operating system version.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "size_in_mbs",
+				Description: "The boot volume size for an instance launched from this image.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInMBs"),
+			},
+			{
+				Name:        "agent_features",
+				Description: "Oracle Cloud Agent features supported on the image.",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -103,7 +110,7 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(vaultTags),
+				Transform:   transform.From(imageTags),
 			},
 			{
 				Name:        "title",
@@ -129,8 +136,7 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("CompartmentId"),
 			},
 		},
 	}
@@ -138,19 +144,19 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listKmsVaults", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := kmsVaultService(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := keymanagement.ListVaultsRequest{
+	request := core.ListImagesRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -159,13 +165,13 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.KmsVaultClient.ListVaults(ctx, request)
+		response, err := session.ComputeClient.ListImages(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, vault := range response.Items {
-			d.StreamListItem(ctx, vault)
+		for _, image := range response.Items {
+			d.StreamListItem(ctx, image)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -179,73 +185,65 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 //// HYDRATE FUNCTION
 
-func getKmsVault(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getKmsVault")
+func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getImage")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getKmsVault", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getImage", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
-	var id string
-	if h.Item != nil {
-		i := h.Item.(keymanagement.VaultSummary)
-		id = *i.Id
-	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
-	}
+	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty vault id in get call
+	// handle empty image id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := kmsVaultService(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := keymanagement.GetVaultRequest{
-		VaultId: types.String(id),
+	request := core.GetImageRequest{
+		ImageId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.KmsVaultClient.GetVault(ctx, request)
+	response, err := session.ComputeClient.GetImage(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Vault, nil
+	return response.Image, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := vaultFreeformTags(d.HydrateItem)
+func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	instance := d.HydrateItem.(core.Image)
 
 	var tags map[string]interface{}
 
-	if freeformTags != nil {
+	if instance.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range freeformTags {
+		for k, v := range instance.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	definedTags := vaultDefinedTags(d.HydrateItem)
-
-	if definedTags != nil {
+	if instance.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range definedTags {
+		for _, v := range instance.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -254,24 +252,4 @@ func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 	}
 
 	return tags, nil
-}
-
-func vaultFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
-	case keymanagement.Vault:
-		return item.(keymanagement.Vault).FreeformTags
-	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).FreeformTags
-	}
-	return nil
-}
-
-func vaultDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
-	case keymanagement.Vault:
-		return item.(keymanagement.Vault).DefinedTags
-	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).DefinedTags
-	}
-	return nil
 }

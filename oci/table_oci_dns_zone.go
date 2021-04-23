@@ -17,15 +17,15 @@ import (
 func tableDnsZone(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_dns_zone",
-		Description: "OCI Dns Zone",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getDnsZone,
-		},
+		Description: "OCI DNS Zone",
 		List: &plugin.ListConfig{
 			Hydrate: listDnsZones,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getDnsZone,
+		},
+		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -39,13 +39,13 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "zone_type",
-				Description: "The type of the zone.",
+				Name:        "lifecycle_state",
+				Description: "The current state of the zone resource.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "lifecycle_tate",
-				Description: "The current state of the zone resource.",
+				Name:        "zone_type",
+				Description: "The type of the zone. Must be either `PRIMARY` or `SECONDARY`. `SECONDARY` is only supported for GLOBAL zones.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -54,10 +54,12 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// other columns
 			{
-				Name:        "self",
-				Description: "The canonical absolute URL of the resource.",
-				Type:        proto.ColumnType_STRING,
+				Name:        "is_protected",
+				Description: "A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "scope",
@@ -65,26 +67,39 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "version",
-				Description: "Version of the zone.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "serial",
-				Description: "The current serial of the zone.",
+				Description: "The current serial of the zone. As seen in the zone's SOA record.",
+				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "self",
+				Description: "The canonical absolute URL of the resource.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "is_protected",
-				Description: "A Boolean flag indicating whether or not parts of the resource are unable to be explicitly managed.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromField("DefaultSecurityListId"),
+				Name:        "version",
+				Description: "Version is the never-repeating, totally-orderable, version of the zone, from which the serial field of the zone's SOA record is derived.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "view_id",
 				Description: "The OCID of the private view containing the zone.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DnsLabel"),
+				Transform:   transform.FromCamel(),
+			},
+
+			// json fields
+			{
+				Name:        "external_masters",
+				Description: "External master servers for the zone.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getDnsZone,
+			},
+			{
+				Name:        "nameservers",
+				Description: "The authoritative nameservers for the zone.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getDnsZone,
 			},
 
 			// tags
@@ -118,7 +133,7 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
+				Transform:   transform.FromField("Self").Transform(ociRegionFromSelf),
 			},
 			{
 				Name:        "compartment_id",
@@ -141,12 +156,11 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 
 func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("dns.listDnsZones", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listDnsZones", "Compartment", compartment)
 
 	// Create Session
-	session, err := dnsService(ctx, d, region)
+	session, err := dnsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -160,16 +174,16 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.DnsClient.ListZones(ctx, request)
+		zones, err := session.DnsClient.ListZones(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, zone := range response.Items {
+		for _, zone := range zones.Items {
 			d.StreamListItem(ctx, zone)
 		}
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
+		if zones.OpcNextPage != nil {
+			request.Page = zones.OpcNextPage
 		} else {
 			pagesLeft = false
 		}
@@ -178,24 +192,29 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
-func getDnsZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getVcn")
+func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("dns.getDnsZone", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getDnsZone", "Compartment", compartment)
 
-	// Restrict the api call to only root compartment/ per region
+	// Rstrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(dns.ZoneSummary).Id
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-
+	if len(id) == 0 {
+		return nil, nil
+	}
 	// Create Session
-	session, err := dnsService(ctx, d, region)
+	session, err := dnsService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
@@ -217,23 +236,38 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 //// TRANSFORM FUNCTION
 
+// Priority order for tags
+// 2. Defined Tags
+// 3. Free-form tags
 func dnsZoneTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	zone := d.HydrateItem.(dns.ZoneSummary)
+	var freeformTags map[string]string
+	var definedTags map[string]map[string]interface{}
+
+	switch d.HydrateItem.(type) {
+	case dns.Zone:
+		zone := d.HydrateItem.(dns.Zone)
+		freeformTags = zone.FreeformTags
+		definedTags = zone.DefinedTags
+	case dns.ZoneSummary:
+		zone := d.HydrateItem.(dns.ZoneSummary)
+		freeformTags = zone.FreeformTags
+		definedTags = zone.DefinedTags
+	}
 
 	var tags map[string]interface{}
 
-	if zone.FreeformTags != nil {
+	if freeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range zone.FreeformTags {
+		for k, v := range freeformTags {
 			tags[k] = v
 		}
 	}
 
-	if zone.DefinedTags != nil {
+	if definedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range zone.DefinedTags {
+		for _, v := range definedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -242,4 +276,8 @@ func dnsZoneTags(_ context.Context, d *transform.TransformData) (interface{}, er
 	}
 
 	return tags, nil
+}
+
+func ociRegionFromSelf(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	return oci_common.StringToRegion(strings.Split(types.SafeString(d.Value), ".")[1]), nil
 }

@@ -49,6 +49,35 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	}
 }
 
+// BuildCompartmentList :: return a list of matrix items, one per compartment specified in the connection config
+func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+	// cache compartment matrix
+	cacheKey := "CompartementList"
+
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]map[string]interface{})
+	}
+
+	// get all the compartments in the tenant
+	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	if err != nil {
+		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
+			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		}
+		panic(err)
+	}
+
+	// validate compartment list
+	matrix := make([]map[string]interface{}, len(compartments))
+	for i, compartment := range compartments {
+		matrix[i] = map[string]interface{}{matrixKeyCompartment: *compartment.Id}
+	}
+	// set CompartementList cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+
+	return matrix
+}
+
 // BuildCompartementRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 

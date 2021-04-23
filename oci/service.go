@@ -232,39 +232,35 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	return sess, nil
 }
 
-// dnsService returns the service client for OCI Dns Service
-func dnsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// dnsService returns the service client for OCI DNS Service
+func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
-
-	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("ComputeRegional-%s", region)
+	serviceCacheKey := fmt.Sprintf("dns-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
-	// get oci config info from steampipe connection
+	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
 	if err != nil {
-		logger.Error("coreComputeServiceRegional", "getProvider.Error", err)
+		logger.Error("DNSService", "getProvider.Error", err)
 		return nil, err
 	}
 
-	// get compute service client
 	client, err := dns.NewDnsClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
 	}
 
-	// get tenant ocid from provider
-	tenantId, err := provider.TenancyOCID()
+	tenantID, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err
 	}
 
 	sess := &session{
-		TenancyID: tenantId,
+		TenancyID: tenantID,
 		DnsClient: client,
 	}
 
@@ -273,6 +269,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 
 	return sess, nil
 }
+
 
 // get the configurtion provider for the OCI plugin connection to intract with API's
 func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {

@@ -1,0 +1,80 @@
+variable "resource_name" {
+  type        = string
+  default     = "steampipetest"
+  description = "Name of the resource used throughout the test."
+}
+
+variable "config_file_profile" {
+  type        = string
+  default     = "OCI"
+  description = "OCI credentials profile used for the test. Default is to use the default profile."
+}
+
+variable "tenancy_ocid" {
+  type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
+  description = "OCID of your tenancy."
+}
+
+variable "region" {
+  type        = string
+  default     = "ap-mumbai-1"
+  description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
+}
+
+variable "oci_ad" {
+  type        = string
+  default     = "ap-mumbai-1"
+  description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
+}
+
+provider "oci" {
+  tenancy_ocid        = var.tenancy_ocid
+  config_file_profile = var.config_file_profile
+  region              = var.region
+}
+
+resource "oci_dns_zone" "named_test_resource" {
+  #Required
+  compartment_id = var.tenancy_ocid
+  name           = "steampipetest.com"
+  zone_type      = "PRIMARY"
+  scope          = "GLOBAL"
+  freeform_tags  = { "Name" = "steampipetest" }
+}
+
+resource "oci_dns_record" "named_test_resource" {
+  #Required
+  zone_name_or_id = oci_dns_zone.named_test_resource.name
+  domain          = "test"
+  rdata           = "ns3.p68.dns.oraclecloud.net."
+  rtype           = "NS"
+
+  #Optional
+  compartment_id = var.tenancy_ocid
+  ttl            = 300
+}
+
+output "domain" {
+  value = oci_dns_record.named_test_resource.domain
+}
+
+output "is_protected" {
+  value = oci_dns_record.named_test_resource.is_protected
+}
+
+output "ttl" {
+  value = oci_dns_record.named_test_resource.ttl
+}
+
+output "rtype" {
+  value = oci_dns_record.named_test_resource.rtype
+}
+
+output "record_hash" {
+  value = oci_dns_record.named_test_resource.record_hash
+}
+
+output "tenancy_ocid" {
+  value = var.tenancy_ocid
+}

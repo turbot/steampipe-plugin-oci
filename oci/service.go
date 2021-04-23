@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
@@ -36,6 +37,7 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+	CloudGuardClient               cloudguard.CloudGuardClient
 }
 
 // identityService returns the service client for OCI Identity service
@@ -147,8 +149,8 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
-		EventsClient:  client,
+		TenancyID:    tenantId,
+		EventsClient: client,
 	}
 
 	// save session in cache
@@ -351,6 +353,44 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	sess := &session{
 		TenancyID:            tenantID,
 		VirtualNetworkClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// cloudGuardService returns the service client for OCI Cloud Guard Service
+func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("CloudGuard-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		logger.Error("cloudGuardService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := cloudguard.NewCloudGuardClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:        tenantID,
+		CloudGuardClient: client,
 	}
 
 	// save session in cache

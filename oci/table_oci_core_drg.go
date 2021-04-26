@@ -19,7 +19,7 @@ func tableCoreDrg(_ context.Context) *plugin.Table {
 		Name:        "oci_core_drg",
 		Description: "OCI Core Dynamic Routing Gateway",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreDrg,
 		},
 		List: &plugin.ListConfig{
@@ -156,6 +156,10 @@ func getCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)

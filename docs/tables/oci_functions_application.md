@@ -32,7 +32,7 @@ where
 ```
 
 
-### Get configurtion details of each applications
+### Get configuration details of each application
 
 ```sql
 select

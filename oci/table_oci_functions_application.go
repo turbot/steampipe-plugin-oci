@@ -19,7 +19,7 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 		Name:        "oci_functions_application",
 		Description: "OCI Functions Application",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getFunctionsApplication,
 		},
 		List: &plugin.ListConfig{

@@ -27,7 +27,7 @@ import (
 
 type session struct {
 	TenancyID               string
-        BlockstorageClient      core.BlockstorageClient
+	BlockstorageClient      core.BlockstorageClient
 	ComputeClient           core.ComputeClient
 	IdentityClient          identity.IdentityClient
 	LoggingManagementClient logging.LoggingManagementClient

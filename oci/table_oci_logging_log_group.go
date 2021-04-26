@@ -19,7 +19,7 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 		Name:        "oci_logging_log_group",
 		Description: "OCI Logging Log Group",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getLoggingLogGroup,
 		},
 		List: &plugin.ListConfig{

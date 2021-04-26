@@ -157,6 +157,7 @@ func getCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

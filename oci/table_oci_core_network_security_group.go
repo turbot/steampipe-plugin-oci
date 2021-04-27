@@ -55,6 +55,13 @@ func tableCoreNetworkSecurityGroup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+			{
+				Name:        "rules",
+				Description: "Lists of security rules in the specified network security group.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     listCoreNetworkSecurityGroupRules,
+				Transform:   transform.FromValue(),
+			},
 
 			// tags
 			{
@@ -189,6 +196,46 @@ func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *pl
 	return response.NetworkSecurityGroup, nil
 }
 
+func listCoreNetworkSecurityGroupRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	logger.Debug("listCoreNetworkSecurityGroupRules", "OCI_REGION", region)
+
+	// Create Session
+	session, err := coreVirtualNetworkService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	NetworkSecurityGroup := h.Item.(core.NetworkSecurityGroup)
+	NetworkSecurityGroupID := *NetworkSecurityGroup.Id
+
+	request := core.ListNetworkSecurityGroupSecurityRulesRequest{
+		NetworkSecurityGroupId: types.String(NetworkSecurityGroupID),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	var items []core.SecurityRule
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.VirtualNetworkClient.ListNetworkSecurityGroupSecurityRules(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return items, nil
+}
+
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
@@ -221,3 +268,5 @@ func networkSecurityGroupTags(_ context.Context, d *transform.TransformData) (in
 
 	return tags, nil
 }
+
+

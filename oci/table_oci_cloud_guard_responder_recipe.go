@@ -40,7 +40,7 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "source_Responder_recipe_id",
+				Name:        "source_responder_recipe_id",
 				Description: "Recipe OCID of the source recipe to be cloned.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
@@ -82,12 +82,12 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 
 			// json fields
 			{
-				Name:        "Responder_rules",
+				Name:        "responder_rules",
 				Description: "List of responder rules for the responder type for recipe.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "effective_Responder_rules",
+				Name:        "effective_responder_rules",
 				Description: "List of responder rules for the responder type for recipe.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCloudGuardResponderRecipe,
@@ -197,6 +197,11 @@ func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *p
 		id = *h.Item.(cloudguard.ResponderRecipeSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	// handle empty recipe id in get call
+	if id == "" {
+		return nil, nil
 	}
 
 	// Create Session

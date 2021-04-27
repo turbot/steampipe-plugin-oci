@@ -16,7 +16,7 @@ from
   oci_cloud_guard_responder_recipe;
 ```
 
-### List of responder recipe which are active
+### List responder recipes which are active
 
 ```sql
 select

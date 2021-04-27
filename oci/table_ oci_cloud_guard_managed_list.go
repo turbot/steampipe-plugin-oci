@@ -199,6 +199,10 @@ func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
 	// Create Session
 	session, err := cloudGuardService(ctx, d)
 	if err != nil {

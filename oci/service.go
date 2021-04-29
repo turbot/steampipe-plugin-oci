@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
+	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/events"
 	"github.com/oracle/oci-go-sdk/v36/functions"
@@ -32,6 +33,7 @@ import (
 
 type session struct {
 	TenancyID                      string
+        AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
@@ -44,6 +46,46 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+}
+
+// autoScalingService returns the service client for OCI Auto Scaling Service
+func autoScalingService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("AutoScaling-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("autoScalingService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := autoscaling.NewAutoScalingClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		AutoScalingClient:  client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // identityService returns the service client for OCI Identity service

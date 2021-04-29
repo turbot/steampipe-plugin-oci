@@ -33,8 +33,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-
-### List virtual private type of vaults
+### List virtual private vaults
 
 ```sql
 select

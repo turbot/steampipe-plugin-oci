@@ -1,11 +1,6 @@
 # Table: oci_functions_application
 
-In Oracle Functions, an application is:
-
-- a logical grouping of functions
-- a way to allocate and configure resources for all functions in the application
-- a common context to store configuration variables that are available to all functions in the application
-- a way to ensure function runtime isolation
+In Oracle Functions, an application is both a unit of function runtime isolation and a logical grouping of related functions. It provides a context to store network configuration and environment variables that are available to all functions in the application.
 
 ## Examples
 
@@ -23,7 +18,7 @@ from
 ```
 
 
-### List applications which are not in active state
+### List applications not in the active state
 
 ```sql
 select
@@ -37,7 +32,7 @@ where
 ```
 
 
-### Get configuration details of each application
+### Get configuration details for each application
 
 ```sql
 select

@@ -33,7 +33,7 @@ where
 ```
 
 
-### Get autoscaling configuration policy details
+### Get policy details for each autoscaling configuration
 
 ```sql
 select
@@ -51,7 +51,7 @@ from
 ```
 
 
-### Get autoscaling configuration resource details
+### Get resource details for each autoscaling configuration
 
 ```sql
 select

@@ -33,6 +33,7 @@ import (
 type session struct {
 	TenancyID                      string
 	BlockstorageClient             core.BlockstorageClient
+	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
 	EventsClient                   events.EventsClient
 	FunctionsManagementClient      functions.FunctionsManagementClient
@@ -43,7 +44,6 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
-	CloudGuardClient               cloudguard.CloudGuardClient
 }
 
 // identityService returns the service client for OCI Identity service

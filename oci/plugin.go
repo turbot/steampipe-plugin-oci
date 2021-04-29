@@ -28,6 +28,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"oci_cloud_guard_configuration":      tableCloudGuardConfiguration(ctx),
 			"oci_cloud_guard_detector_recipe":    tableCloudGuardDetectorRecipe(ctx),
 			"oci_cloud_guard_responder_recipe":   tableCloudGuardResponderRecipe(ctx),
 			"oci_core_dhcp_options":              tableCoreDhcpOptions(ctx),

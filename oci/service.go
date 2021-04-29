@@ -33,7 +33,7 @@ import (
 
 type session struct {
 	TenancyID                      string
-  AutoScalingClient              autoscaling.AutoScalingClient
+        AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient

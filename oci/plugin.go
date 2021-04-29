@@ -52,6 +52,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_network_source":        tableIdentityNetworkSource(ctx),
 			"oci_identity_policy":                tableIdentityPolicy(ctx),
 			"oci_identity_user":                  tableIdentityUser(ctx),
+			"oci_logging_log_group":              tableLoggingLogGroup(ctx),
 			"oci_objectstorage_bucket":           tableObjectStorageBucket(ctx),
 			"oci_ons_notification_topic":         tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":               tableOnsSubscription(ctx),

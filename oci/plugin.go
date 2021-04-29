@@ -29,6 +29,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		},
 		TableMap: map[string]*plugin.Table{
 			"oci_cloud_guard_detector_recipe":    tableCloudGuardDetectorRecipe(ctx),
+			"oci_cloud_guard_responder_recipe":   tableCloudGuardResponderRecipe(ctx),
 			"oci_core_dhcp_options":              tableCoreDhcpOptions(ctx),
 			"oci_core_image":                     tableCoreImage(ctx),
 			"oci_core_instance":                  tableCoreInstance(ctx),
@@ -43,6 +44,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume":                    tableCoreVolume(ctx),
 			"oci_core_volume_backup":             tableCoreVolumeBackup(ctx),
 			"oci_events_rule":                    tableEventsRule(ctx),
+			"oci_functions_application":          tableFunctionsApplication(ctx),
 			"oci_identity_auth_token":            tableIdentityAuthToken(ctx),
 			"oci_identity_authentication_policy": tableIdentityAuthenticationPolicy(ctx),
 			"oci_identity_compartment":           tableIdentityCompartment(ctx),
@@ -53,6 +55,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_policy":                tableIdentityPolicy(ctx),
 			"oci_identity_user":                  tableIdentityUser(ctx),
 			"oci_kms_vault":                      tableKmsVault(ctx),
+			"oci_logging_log_group":              tableLoggingLogGroup(ctx),
 			"oci_objectstorage_bucket":           tableObjectStorageBucket(ctx),
 			"oci_ons_notification_topic":         tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":               tableOnsSubscription(ctx),

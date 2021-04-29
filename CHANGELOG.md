@@ -1,3 +1,31 @@
+## v0.0.5 [2021-04-22]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_dhcp_options](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_dhcp_options) ([#75](https://github.com/turbot/steampipe-plugin-oci/pull/75))
+  - [oci_core_image](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_image) ([#15](https://github.com/turbot/steampipe-plugin-oci/pull/15))
+  - [oci_core_nat_gateway](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_nat_gateway) ([#45](https://github.com/turbot/steampipe-plugin-oci/pull/45))
+  - [oci_core_security_list](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_security_list) ([#65](https://github.com/turbot/steampipe-plugin-oci/pull/65))
+  - [oci_core_service_gateway](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_service_gateway) ([#49](https://github.com/turbot/steampipe-plugin-oci/pull/49))
+  - [oci_core_subnet](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_subnet) ([#52](https://github.com/turbot/steampipe-plugin-oci/pull/52))
+  - [oci_events_rule](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_events_rule) ([#79](https://github.com/turbot/steampipe-plugin-oci/pull/79))
+  - [oci_identity_auth_token](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_auth_token) ([#68](https://github.com/turbot/steampipe-plugin-oci/pull/68))
+  - [oci_identity_customer_secret_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_customer_secret_key) ([#66](https://github.com/turbot/steampipe-plugin-oci/pull/66))
+  - [oci_identity_dynamic_group](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_dynamic_group) ([#34](https://github.com/turbot/steampipe-plugin-oci/pull/34))
+  - [oci_ons_notification_topic](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ons_notification_topic) ([#37](https://github.com/turbot/steampipe-plugin-oci/pull/37))
+  - [oci_ons_subscription](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ons_subscription) ([#43](https://github.com/turbot/steampipe-plugin-oci/pull/43))
+
+## v0.0.4 [2021-04-15]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_local_peering_gateway](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_local_peering_gateway) ([#58](https://github.com/turbot/steampipe-plugin-oci/pull/58))
+  - [oci_core_vcn](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_vcn) ([#23](https://github.com/turbot/steampipe-plugin-oci/pull/23))
+  - [oci_core_volume_backup](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_backup) ([#31](https://github.com/turbot/steampipe-plugin-oci/pull/31))
+  - [oci_identity_network_source](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_network_source) ([#39](https://github.com/turbot/steampipe-plugin-oci/pull/39))
+
 ## v0.0.3 [2021-04-08]
 
 _What's new?_

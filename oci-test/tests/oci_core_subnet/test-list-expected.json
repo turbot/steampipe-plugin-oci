@@ -1,0 +1,11 @@
+[
+  {
+    "cidr_block": "{{ output.cidr_block.value }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Name": "{{ resourceName }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE"
+  }
+]

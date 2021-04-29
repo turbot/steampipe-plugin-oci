@@ -17,7 +17,7 @@ from
 ```
 
 
-### List log groups which are inactive
+### List inactive log groups
 
 ```sql
 select

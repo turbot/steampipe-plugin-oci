@@ -1,3 +1,16 @@
+## v0.0.6 [2021-04-29]
+
+_What's new?_
+
+- New tables added
+  - [oci_autoscaling_auto_scaling_configuration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_autoscaling_auto_scaling_configuration) ([#91](https://github.com/turbot/steampipe-plugin-oci/pull/91))
+  - [oci_cloud_guard_configuration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_configuration) ([#88](https://github.com/turbot/steampipe-plugin-oci/pull/88))
+  - [oci_cloud_guard_detector_recipe](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_detector_recipe) ([#74](https://github.com/turbot/steampipe-plugin-oci/pull/74))
+  - [oci_cloud_guard_responder_recipe](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_responder_recipe) ([#81](https://github.com/turbot/steampipe-plugin-oci/pull/81))
+  - [oci_functions_application](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_functions_application) ([#82](https://github.com/turbot/steampipe-plugin-oci/pull/82))
+  - [oci_kms_vault](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_kms_vault) ([#86](https://github.com/turbot/steampipe-plugin-oci/pull/86))
+  - [oci_logging_log_group](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_logging_log_group) ([#76](https://github.com/turbot/steampipe-plugin-oci/pull/76))
+
 ## v0.0.5 [2021-04-22]
 
 _What's new?_

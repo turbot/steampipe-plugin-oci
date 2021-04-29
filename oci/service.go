@@ -19,6 +19,7 @@ import (
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/events"
+	"github.com/oracle/oci-go-sdk/v36/functions"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/oracle/oci-go-sdk/v36/logging"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
@@ -33,6 +34,7 @@ type session struct {
 	BlockstorageClient             core.BlockstorageClient
 	ComputeClient                  core.ComputeClient
 	EventsClient                   events.EventsClient
+	FunctionsManagementClient      functions.FunctionsManagementClient
 	IdentityClient                 identity.IdentityClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
@@ -193,6 +195,44 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	sess := &session{
 		TenancyID:    tenantId,
 		EventsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// functionsManagementService returns the service client for OCI Core VirtualNetwork Service
+func functionsManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("FunctionsManagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("functionsManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := functions.NewFunctionsManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:            tenantID,
+		FunctionsManagementClient: client,
 	}
 
 	// save session in cache

@@ -1,0 +1,23 @@
+[
+  {
+    "actions": [
+      {
+        "actionType": "ONS",
+        "description": null,
+        "id": "{{ output.action_id.value }}",
+        "isEnabled": true,
+        "lifecycleMessage": null,
+        "lifecycleState": "ACTIVE",
+        "topicId": "{{ output.topic_id.value }}"
+      }
+    ],
+    "description": "{{ resourceName }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "is_enabled": true,
+    "lifecycle_state": "ACTIVE"
+  }
+]

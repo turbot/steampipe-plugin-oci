@@ -19,7 +19,6 @@ from
   oci_events_rule;
 ```
 
-
 ### List enabled rules
 
 ```sql
@@ -35,7 +34,6 @@ where
   is_enabled;
 ```
 
-
 ### List failed rules
 
 ```sql
@@ -50,7 +48,6 @@ from
 where
   lifecycle_state = 'FAILED';
 ```
-
 
 ### Get action details for rules that have the Oracle Notification Service action type
 
@@ -71,7 +68,6 @@ where
   a ->> 'actionType'  = 'ONS'
 ```
 
-
 ### Get action details for rules that have the Oracle Streaming Service action type
 
 ```sql
@@ -91,7 +87,6 @@ where
   a ->> 'actionType'  = 'OSS'
 ```
 
-
 ### Get event type details for each rule
 
 ```sql
@@ -100,5 +95,5 @@ select
   display_name,
   condition ->> 'eventType' as event_type
 from
-  oci_new.oci_events_rule;
+  oci_events_rule;
 ```

@@ -8,7 +8,8 @@ By default, Audit logs are retained for 90 days. You can configure log retention
 
 ```sql
 select
-  retention_period_days
+  retention_period_days,
+  tenant_id
 from
   oci_audit_configuration;
 ```

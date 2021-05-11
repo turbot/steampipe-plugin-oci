@@ -18,7 +18,7 @@ func tableAuditConfiguration(_ context.Context) *plugin.Table {
 		Name:        "oci_audit_configuration",
 		Description: "OCI Audit Configuration",
 		List: &plugin.ListConfig{
-			Hydrate: getAuditConfiguration,
+			Hydrate: listAuditConfiguration,
 		},
 		Columns: []*plugin.Column{
 			{
@@ -41,7 +41,7 @@ func tableAuditConfiguration(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func getAuditConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listAuditConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	// Create Session
 	session, err := auditService(ctx, d)
 	if err != nil {

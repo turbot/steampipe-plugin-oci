@@ -232,7 +232,7 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	return sess, nil
 }
 
-// coreVirtualNetworkService returns the service client for OCI Audit Service
+// auditService returns the service client for OCI Audit Service
 func auditService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("Audit-%s", "region")

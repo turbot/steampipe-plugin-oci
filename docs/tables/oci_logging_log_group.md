@@ -16,7 +16,6 @@ from
   oci_new.oci_logging_log_group;
 ```
 
-
 ### List log groups which are inactive
 
 ```sql

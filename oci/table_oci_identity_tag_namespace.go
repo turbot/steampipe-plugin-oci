@@ -51,15 +51,15 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 
 			// Other columns
 			{
+				Name:        "time_created",
+				Description: "Date and time the tagNamespace was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "description",
 				Description: "The description you assign to the tag namespace.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "time_created",
-				Description: "Date and time the tagNamespace was created",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// Tags

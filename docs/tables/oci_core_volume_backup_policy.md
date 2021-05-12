@@ -18,7 +18,7 @@ from
 ```
 
 
-### List the destination regions of volume backup policy
+### Get the destination region for each volume backup policy
 
 ```sql
 select
@@ -30,7 +30,7 @@ from
 ```
 
 
-### List schedule info of volume backup policy
+### Get schedule info for each volume backup policy
 
 ```sql
 select
@@ -52,7 +52,7 @@ from
 ```
 
 
-### List full backup types volume backup policy
+### List volume back policies that create full backups
 
 ```sql
 select

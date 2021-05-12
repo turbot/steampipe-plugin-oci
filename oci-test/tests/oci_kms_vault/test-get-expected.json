@@ -1,0 +1,9 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "ACTIVE",
+    "management_endpoint": "{{ output.management_endpoint.value }}",
+    "vault_type": "{{ output.vault_type.value }}"
+  }
+]

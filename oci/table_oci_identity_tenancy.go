@@ -49,7 +49,7 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "upi_id_cs_compatibility_layer_endpoint",
+				Name:        "upi_idcs_compatibility_layer_endpoint",
 				Description: "Url which refers to the UPI IDCS compatibility layer endpoint configured for this Tenant's home region.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("UpiIdcsCompatibilityLayerEndpoint"),

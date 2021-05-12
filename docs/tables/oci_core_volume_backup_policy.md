@@ -18,7 +18,7 @@ from
 ```
 
 
-### List the destination regions of volume back up policy
+### List the destination regions of volume backup policy
 
 ```sql
 select

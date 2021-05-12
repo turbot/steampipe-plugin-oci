@@ -19,7 +19,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 		Name:        "oci_core_volume_backup_policy",
 		Description: "OCI Core Volume Backup Policy",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreVolumeBackupPolicy,
 		},
 		List: &plugin.ListConfig{

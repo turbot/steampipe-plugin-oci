@@ -60,7 +60,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 			{
 				Name:        "is_protected",
 				Description: "A Boolean flag indicating whether or not parts of the record are unable to be explicitly managed.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_BOOL,
 			},
 
 			// Standard Steampipe columns

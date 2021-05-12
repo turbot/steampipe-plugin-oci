@@ -6,13 +6,12 @@ variable "resource_name" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "OCI"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -43,36 +42,22 @@ resource "oci_dns_zone" "named_test_resource" {
   freeform_tags  = { "Name" = "steampipetest" }
 }
 
-resource "oci_dns_record" "named_test_resource" {
+resource "oci_dns_rrset" "named_test_resource" {
   #Required
   zone_name_or_id = oci_dns_zone.named_test_resource.name
   domain          = "test"
-  rdata           = "ns3.p68.dns.oraclecloud.net."
   rtype           = "NS"
 
   #Optional
   compartment_id = var.tenancy_ocid
-  ttl            = 300
 }
 
 output "domain" {
-  value = oci_dns_record.named_test_resource.domain
-}
-
-output "is_protected" {
-  value = oci_dns_record.named_test_resource.is_protected
-}
-
-output "ttl" {
-  value = oci_dns_record.named_test_resource.ttl
+  value = oci_dns_zone.named_test_resource.name
 }
 
 output "rtype" {
-  value = oci_dns_record.named_test_resource.rtype
-}
-
-output "record_hash" {
-  value = oci_dns_record.named_test_resource.record_hash
+  value = oci_dns_rrset.named_test_resource.rtype
 }
 
 output "tenancy_ocid" {

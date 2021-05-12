@@ -1,6 +1,6 @@
-# Table: oci_dns_zone
+# Table: oci_dns_record
 
-A DNS zone is where DNS records for a specific DNS domain are kept.
+DNS or Domain Name System basically translates those domain names into IP addresses. A domain name and its matching IP address is called a “DNS record”.
 
 ## Examples
 
@@ -8,54 +8,36 @@ A DNS zone is where DNS records for a specific DNS domain are kept.
 
 ```sql
 select
-  name,
-  id,
-  lifecycle_state,
-  self,
-  version,
-  serial
-from
-  oci_dns_zone;
-```
-
-
-### List global scoped DNS zones
-
-```sql
-select
-  name,
-  id,
-  scope
-from
-  oci_dns_zone
-where
-  scope = 'GLOBAL';
-```
-
-
-### List DNS zones which are not protected
-
-```sql
-select
-  name,
-  id,
+  domain,
+  rtype,
+  r_data,
+  ttl,
   is_protected
 from
-  oci_dns_zone
+  oci_dns_record;
+```
+
+### List DNS records which are not protected
+
+```sql
+select
+  domain,
+  rtype,
+  is_protected
+from
+  oci_dns_record
 where
   not is_protected;
 ```
 
-
-### List primary DNS zones
+### List name server type DNS records
 
 ```sql
 select
-  name,
-  id,
-  zone_type
+  domain,
+  rtype
 from
-  oci_dns_zone
+  oci_dns_record
 where
-  zone_type = 'PRIMARY';
+  rtype ='NS';
 ```

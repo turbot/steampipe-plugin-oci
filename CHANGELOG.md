@@ -1,3 +1,19 @@
+## v0.0.7 [2021-05-13]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_drg](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_drg) ([#90](https://github.com/turbot/steampipe-plugin-oci/pull/90))
+  - [oci_core_volume_backup_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_backup_policy) ([#99](https://github.com/turbot/steampipe-plugin-oci/pull/99))
+
+_Enhancements_
+
+- Updated: README.md and docs/index.md now contain links to our Slack community ([#114](https://github.com/turbot/steampipe-plugin-oci/pull/114))
+
+_Bug fixes_
+
+- Fixed: Remove connection name in `oci_events_rule` table doc example query ([#109](https://github.com/turbot/steampipe-plugin-oci/pull/109))
+
 ## v0.0.6 [2021-04-29]
 
 _What's new?_

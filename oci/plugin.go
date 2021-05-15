@@ -46,6 +46,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume":                            tableCoreVolume(ctx),
 			"oci_core_volume_backup":                     tableCoreVolumeBackup(ctx),
 			"oci_events_rule":                            tableEventsRule(ctx),
+			"oci_file_storage_file_system":    	          tableFileStorageFileSystem(ctx),
 			"oci_functions_application":                  tableFunctionsApplication(ctx),
 			"oci_identity_auth_token":                    tableIdentityAuthToken(ctx),
 			"oci_identity_authentication_policy":         tableIdentityAuthenticationPolicy(ctx),

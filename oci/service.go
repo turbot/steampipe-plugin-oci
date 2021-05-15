@@ -19,6 +19,7 @@ import (
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v36/filestorage"
 	"github.com/oracle/oci-go-sdk/v36/events"
 	"github.com/oracle/oci-go-sdk/v36/functions"
 	"github.com/oracle/oci-go-sdk/v36/identity"
@@ -46,6 +47,7 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+	FileStorageClient              filestorage.FileStorageClient
 }
 
 // autoScalingService returns the service client for OCI Auto Scaling Service
@@ -126,6 +128,47 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 
 	return sess, nil
 }
+
+// identityServiceRegional returns the service client for OCI Logging Management Service
+func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("loggingManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := identity.NewIdentityClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 
 // loggingManagementService returns the service client for OCI Logging Management Service
 func loggingManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
@@ -555,6 +598,45 @@ func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	sess := &session{
 		TenancyID:        tenantID,
 		CloudGuardClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// fileStorageService returns the service client for OCI File Storage Service
+func fileStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+  logger := plugin.Logger(ctx)
+
+  // have we already created and cached the service?
+  serviceCacheKey := fmt.Sprintf("FileStorage-%s", region)
+  if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+    return cachedData.(*session), nil
+  }
+
+  // get oci config info
+  ociConfig := GetConfig(d.Connection)
+
+  provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+  if err != nil {
+    logger.Error("fileStorageService", "getProvider.Error", err)
+    return nil, err
+	}
+	client, err := filestorage.NewFileStorageClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:            tenantID,
+		FileStorageClient: client,
 	}
 
 	// save session in cache

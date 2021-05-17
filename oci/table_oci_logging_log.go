@@ -225,20 +225,7 @@ func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 // 2. Defined Tags
 // 3. Free-form tags
 func logTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-
-	var freeformTags map[string]string
-	var definedTags map[string]map[string]interface{}
-
-	switch d.HydrateItem.(type) {
-	case logging.LogGroup:
-		log := d.HydrateItem.(logging.Log)
-		freeformTags = log.FreeformTags
-		definedTags = log.DefinedTags
-	case logging.LogGroupSummary:
-		log := d.HydrateItem.(logging.LogSummary)
-		freeformTags = log.FreeformTags
-		definedTags = log.DefinedTags
-	}
+	freeformTags := logFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -248,6 +235,8 @@ func logTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 			tags[k] = v
 		}
 	}
+
+	definedTags := logDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -262,4 +251,24 @@ func logTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 	}
 
 	return tags, nil
+}
+
+func logFreeformTags(item interface{}) map[string]string {
+	switch item.(type) {
+	case logging.Log:
+		return item.(logging.Log).FreeformTags
+	case logging.LogSummary:
+		return item.(logging.LogSummary).FreeformTags
+	}
+	return nil
+}
+
+func logDefinedTags(item interface{}) map[string]map[string]interface{} {
+	switch item.(type) {
+	case logging.Log:
+		return item.(logging.Log).DefinedTags
+	case logging.LogSummary:
+		return item.(logging.LogSummary).DefinedTags
+	}
+	return nil
 }

@@ -9,6 +9,7 @@ The Oracle Cloud Infrastructure Logging service is a highly scalable and fully m
 ```sql
 select
   id,
+  log_group_id,
   name,
   lifecycle_state,
   time_created
@@ -34,7 +35,9 @@ where
 
 ```sql
 select
-  configuration -> 'source' ->> 'resource' as subnet_id
+  configuration -> 'source' ->> 'resource' as subnet_id,
+  configuration -> 'source' ->> 'service' as service,
+  lifecycle_state
 from
   oci_logging_log
 where

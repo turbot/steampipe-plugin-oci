@@ -1,0 +1,13 @@
+[
+  {
+    "display_name": "{{ output.display_name.value }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "ACTIVE",
+    "subnet_ids": [
+      "{{ output.subnet_id.value }}"
+    ]
+  }
+]

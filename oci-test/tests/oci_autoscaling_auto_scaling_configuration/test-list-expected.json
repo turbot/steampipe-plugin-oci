@@ -1,0 +1,11 @@
+[
+  {
+    "cool_down_in_seconds": 300,
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "is_enabled": true
+  }
+]

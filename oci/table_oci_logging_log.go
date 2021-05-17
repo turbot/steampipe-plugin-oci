@@ -24,7 +24,7 @@ func tableLoggingLog(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listLoggingLogGroups,
-			Hydrate:       listLoggingLog,
+			Hydrate:       listLoggingLogs,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -136,11 +136,11 @@ func tableLoggingLog(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listLoggingLog(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listLoggingLog", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listLoggingLogs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := loggingManagementService(ctx, d, region)
@@ -192,7 +192,7 @@ func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	id := d.KeyColumnQuals["id"].GetStringValue()
 	logGroupId := d.KeyColumnQuals["log_group_id"].GetStringValue()
 
-	// handle empty internet gateway id in get call
+	// handle empty log and log group id in get call
 	if id == "" || logGroupId == "" {
 		return nil, nil
 	}

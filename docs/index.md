@@ -6,7 +6,7 @@ brand_color: "#F80000"
 display_name: "Oracle Cloud Infrastructure"
 short_name: "oci"
 description: "Steampipe plugin for Oracle Cloud Infrastructure services and resource types."
-og_description: Query Oracle Cloud with SQL! Open source CLI. No DB required. 
+og_description: "Query Oracle Cloud with SQL! Open source CLI. No DB required." 
 og_image: "/images/plugins/turbot/oci-social-graphic.png"
 ---
 
@@ -78,7 +78,7 @@ connection "oci_tenant_y" {
 ## Get involved
 
 * Open source: https://github.com/turbot/steampipe-plugin-oci
-* Community: [Discussion forums](https://github.com/turbot/steampipe/discussions)
+* Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 
 
 ## Advanced configuration options

@@ -240,9 +240,11 @@ type zoneInfo struct {
 
 func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.Connection) ([]zoneInfo, error) {
 
-	zonessss := []zoneInfo{}
+	zonesList := []zoneInfo{}
 
 	regions := GetConfig(connection).Regions
+
+	if regions != nil {
 	for _, region := range regions {
 		session, err := identityServiceRegional(ctx, pluginQueryData, region)
 		if err != nil {
@@ -263,11 +265,34 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 		}
 
 		for _, zones := range response.Items {
-			zonessss = 	append(zonessss, zoneInfo{zones, region})
+			zonesList = 	append(zonesList, zoneInfo{zones, region})
 		}
 	}
+	return zonesList, nil
+}
+ region:= getRegionFromEnvVar()
+	session, err := identityServiceRegional(ctx, pluginQueryData, region)
+	if err != nil {
+		return nil, err
+	}
 
-	return zonessss, nil
+	// The OCID of the tenancy containing the compartment.
+	request := identity.ListAvailabilityDomainsRequest{
+		CompartmentId: &session.TenancyID,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.IdentityClient.ListAvailabilityDomains(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, zones := range response.Items {
+		zonesList = 	append(zonesList, zoneInfo{zones, region})
+	}
+	return zonesList, nil
 }
 
 // BuildCompartementZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config

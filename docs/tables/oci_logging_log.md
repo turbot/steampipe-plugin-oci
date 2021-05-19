@@ -17,7 +17,7 @@ from
   oci_logging_log;
 ```
 
-### List logs which are inactive
+### List inactive logs
 
 ```sql
 select
@@ -31,7 +31,7 @@ where
   lifecycle_state = 'INACTIVE';
 ```
 
-### List VCN Subnets where flow log is enabled
+### List VCN subnets with flow logging enabled
 
 ```sql
 select

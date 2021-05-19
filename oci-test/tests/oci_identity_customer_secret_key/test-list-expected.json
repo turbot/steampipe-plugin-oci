@@ -1,0 +1,9 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "ACTIVE",
+    "title": "{{ resourceName }}",
+    "user_id": "{{ output.user_id.value }}"
+  }
+]

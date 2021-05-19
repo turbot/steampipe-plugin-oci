@@ -14,10 +14,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
-	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/events"
 	"github.com/oracle/oci-go-sdk/v36/functions"
@@ -33,7 +33,7 @@ import (
 
 type session struct {
 	TenancyID                      string
-        AutoScalingClient              autoscaling.AutoScalingClient
+	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
@@ -78,8 +78,8 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	sess := &session{
-		TenancyID:          tenantId,
-		AutoScalingClient:  client,
+		TenancyID:         tenantId,
+		AutoScalingClient: client,
 	}
 
 	// save session in cache
@@ -157,7 +157,7 @@ func loggingManagementService(ctx context.Context, d *plugin.QueryData, region s
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:               tenantId,
 		LoggingManagementClient: client,
 	}
 
@@ -275,7 +275,7 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	}
 
 	sess := &session{
-		TenancyID:            tenantID,
+		TenancyID:                 tenantID,
 		FunctionsManagementClient: client,
 	}
 

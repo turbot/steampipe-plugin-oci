@@ -60,6 +60,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_tag_namespace":                 tableIdentityTagNamespace(ctx),
 			"oci_identity_user":                          tableIdentityUser(ctx),
 			"oci_kms_vault":                              tableKmsVault(ctx),
+			"oci_logging_log":                            tableLoggingLog(ctx),
 			"oci_logging_log_group":                      tableLoggingLogGroup(ctx),
 			"oci_objectstorage_bucket":                   tableObjectStorageBucket(ctx),
 			"oci_ons_notification_topic":                 tableOnsNotificationTopic(ctx),

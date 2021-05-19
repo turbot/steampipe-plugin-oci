@@ -18,7 +18,7 @@ from
 ```
 
 
-### List NSG which are not in availabe state
+### List NSGs that are not available
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
 ```
 
 
-### Count of rules per NSG
+### Count the number of rules per NSG
 
 ```sql
 select
@@ -44,7 +44,7 @@ from
 ```
 
 
-## List NSG whose inbound access is open to the internet
+## List NSGs whose inbound access is open to the internet
 
 ```sql
 select
@@ -98,7 +98,7 @@ where
 ```
 
 
-### Count of NSG per vcn
+### Count the number of NSGs per VCN
 
 ```sql
 select

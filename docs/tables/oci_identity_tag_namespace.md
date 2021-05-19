@@ -30,7 +30,7 @@ where
   lifecycle_state = 'ACTIVE';
 ```
 
-### List tag namespaces which are retired
+### List retired tag namespaces
 
 ```sql
 select

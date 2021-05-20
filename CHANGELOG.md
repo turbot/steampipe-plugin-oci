@@ -1,3 +1,12 @@
+## v0.0.8 [2021-05-20]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_network_security_group](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_network_security_group) ([#95](https://github.com/turbot/steampipe-plugin-oci/pull/95))
+  - [oci_identity_tag_namespace](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_tag_namespace) ([#110](https://github.com/turbot/steampipe-plugin-oci/pull/110))
+  - [oci_logging_log](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_logging_log) ([#100](https://github.com/turbot/steampipe-plugin-oci/pull/100))
+
 ## v0.0.7 [2021-05-13]
 
 _What's new?_

@@ -1,0 +1,11 @@
+[
+  {
+    "endpoint": "{{ output.endpoint.value }}",
+    "etag": "{{ output.etag.value }}",
+    "freeform_tags": {
+      "Name": "{{ resourceName }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "protocol": "{{ output.protocol.value }}"
+  }
+]

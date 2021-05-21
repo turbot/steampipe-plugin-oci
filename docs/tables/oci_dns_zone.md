@@ -16,7 +16,7 @@ from
   oci_dns_zone;
 ```
 
-### List inactive DNS zones
+### List deleted DNS zones
 
 ```sql
 select
@@ -26,5 +26,5 @@ select
 from
   oci_dns_zone
 where
-  lifecycle_state = 'INACTIVE';
+  lifecycle_state = 'DELETED';
 ```

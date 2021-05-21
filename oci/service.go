@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v36/audit"
 	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
@@ -34,6 +35,7 @@ import (
 
 type session struct {
 	TenancyID                      string
+	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
 	CloudGuardClient               cloudguard.CloudGuardClient
@@ -48,6 +50,45 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+}
+
+// auditService returns the service client for OCI Audit service
+func auditService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+
+	serviceCacheKey := fmt.Sprintf("audit-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// get audit service client
+	client, err := audit.NewAuditClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantId,
+		AuditClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // autoScalingService returns the service client for OCI Auto Scaling Service

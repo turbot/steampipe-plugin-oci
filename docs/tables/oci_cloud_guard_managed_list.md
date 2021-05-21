@@ -16,7 +16,7 @@ from
   oci_cloud_guard_managed_list;
 ```
 
-### List managed lists which are active
+### List active managed lists
 
 ```sql
 select

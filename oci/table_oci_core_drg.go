@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/logging"
+	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -14,51 +14,40 @@ import (
 
 //// TABLE DEFINITION
 
-func tableLoggingLogGroup(_ context.Context) *plugin.Table {
+func tableCoreDrg(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_logging_log_group",
-		Description: "OCI Logging Log Group",
+		Name:        "oci_core_drg",
+		Description: "OCI Core Dynamic Routing Gateway",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getLoggingLogGroup,
+			Hydrate:    getCoreDrg,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listLoggingLogGroups,
+			Hydrate: listCoreDrgs,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
+				Name:        "display_name",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "id",
-				Description: "The OCID of the log group.",
+				Description: "The DRG's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "lifecycle_state",
-				Description: "The log group object state.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "description",
-				Description: "Description for this log group.",
+				Description: "The DRG's current state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "Time the resource was created.",
+				Description: "The date and time the DRG was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
-				Name:        "time_last_modified",
-				Description: "Time the resource was last modified.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeLastModified.Time"),
 			},
 
 			// tags
@@ -78,7 +67,7 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(logGroupTags),
+				Transform:   transform.From(drgTags),
 			},
 			{
 				Name:        "title",
@@ -113,19 +102,19 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreDrgs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listLoggingLogGroups", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.listCoreDrgs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := loggingManagementService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := logging.ListLogGroupsRequest{
+	request := core.ListDrgsRequest{
 		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -134,13 +123,13 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.LoggingManagementClient.ListLogGroups(ctx, request)
+		response, err := session.VirtualNetworkClient.ListDrgs(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, logGroup := range response.Items {
-			d.StreamListItem(ctx, logGroup)
+		for _, drg := range response.Items {
+			d.StreamListItem(ctx, drg)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -154,12 +143,12 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 //// HYDRATE FUNCTION
 
-func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getLoggingLogGroup")
+func getCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getDrg")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getLoggingLogGroup", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci.getCoreDrg", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -168,57 +157,51 @@ func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty internet gateway id in get call
-	if id == "" {
+	// handle empty id in get call
+	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := loggingManagementService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := logging.GetLogGroupRequest{
-		LogGroupId: types.String(id),
+	request := core.GetDrgRequest{
+		DrgId: types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.LoggingManagementClient.GetLogGroup(ctx, request)
+	response, err := session.VirtualNetworkClient.GetDrg(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.LogGroup, nil
+	return response.Drg, nil
 }
 
 //// TRANSFORM FUNCTION
 
-// Priority order for tags
-// 1. System Tags
-// 2. Defined Tags
-// 3. Free-form tags
-func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := logGroupFreeformTags(d.HydrateItem)
+func drgTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	drg := d.HydrateItem.(core.Drg)
 
 	var tags map[string]interface{}
 
-	if freeformTags != nil {
+	if drg.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range freeformTags {
+		for k, v := range drg.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	definedTags := logGroupDefinedTags(d.HydrateItem)
-
-	if definedTags != nil {
+	if drg.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range definedTags {
+		for _, v := range drg.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -227,24 +210,4 @@ func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return tags, nil
-}
-
-func logGroupFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
-	case logging.LogGroup:
-		return item.(logging.LogGroup).FreeformTags
-	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).FreeformTags
-	}
-	return nil
-}
-
-func logGroupDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
-	case logging.LogGroup:
-		return item.(logging.LogGroup).DefinedTags
-	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).DefinedTags
-	}
-	return nil
 }

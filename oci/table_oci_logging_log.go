@@ -14,39 +14,52 @@ import (
 
 //// TABLE DEFINITION
 
-func tableLoggingLogGroup(_ context.Context) *plugin.Table {
+func tableLoggingLog(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_logging_log_group",
-		Description: "OCI Logging Log Group",
+		Name:        "oci_logging_log",
+		Description: "OCI Logging Log",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getLoggingLogGroup,
+			KeyColumns: plugin.AllColumns([]string{"id", "log_group_id"}),
+			Hydrate:    getLoggingLog,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listLoggingLogGroups,
+			ParentHydrate: listLoggingLogGroups,
+			Hydrate:       listLoggingLogs,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
+				Name:        "name",
+				Description: "A user-friendly name.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+			},
+			{
 				Name:        "id",
+				Description: "The OCID of the log.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "log_group_id",
 				Description: "The OCID of the log group.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "lifecycle_state",
-				Description: "The log group object state.",
+				Description: "The log object state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "description",
-				Description: "Description for this log group.",
+				Name:        "log_type",
+				Description: "The logType that the log object is for, whether custom or service.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "is_enabled",
+				Description: "Whether or not this resource is currently enabled.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
 				Name:        "time_created",
@@ -59,6 +72,16 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 				Description: "Time the resource was last modified.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeLastModified.Time"),
+			},
+			{
+				Name:        "retention_duration",
+				Description: "Log retention duration in 30-day increments (30, 60, 90 and so on).",
+				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "configuration",
+				Description: "Log object configuration.",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -78,7 +101,7 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(logGroupTags),
+				Transform:   transform.From(logTags),
 			},
 			{
 				Name:        "title",
@@ -113,20 +136,20 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listLoggingLogGroups", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listLoggingLogs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := loggingManagementService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
-
-	request := logging.ListLogGroupsRequest{
-		CompartmentId: types.String(compartment),
+	logGroupId := *h.Item.(logging.LogGroupSummary).Id
+	request := logging.ListLogsRequest{
+		LogGroupId: types.String(logGroupId),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -134,13 +157,13 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.LoggingManagementClient.ListLogGroups(ctx, request)
+		response, err := session.LoggingManagementClient.ListLogs(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, logGroup := range response.Items {
-			d.StreamListItem(ctx, logGroup)
+		for _, log := range response.Items {
+			d.StreamListItem(ctx, log)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -154,12 +177,12 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 //// HYDRATE FUNCTION
 
-func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getLoggingLogGroup")
+func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getLoggingLog")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getLoggingLogGroup", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getLoggingLog", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -167,9 +190,10 @@ func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+	logGroupId := d.KeyColumnQuals["log_group_id"].GetStringValue()
 
-	// handle empty internet gateway id in get call
-	if id == "" {
+	// handle empty log and log group id in get call
+	if id == "" || logGroupId == "" {
 		return nil, nil
 	}
 
@@ -179,29 +203,29 @@ func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	request := logging.GetLogGroupRequest{
-		LogGroupId: types.String(id),
+	request := logging.GetLogRequest{
+		LogGroupId: types.String(logGroupId),
+		LogId:      types.String(id),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.LoggingManagementClient.GetLogGroup(ctx, request)
+	response, err := session.LoggingManagementClient.GetLog(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.LogGroup, nil
+	return response.Log, nil
 }
 
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
-// 1. System Tags
 // 2. Defined Tags
 // 3. Free-form tags
-func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := logGroupFreeformTags(d.HydrateItem)
+func logTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := logFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -212,7 +236,7 @@ func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 		}
 	}
 
-	definedTags := logGroupDefinedTags(d.HydrateItem)
+	definedTags := logDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -229,22 +253,22 @@ func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	return tags, nil
 }
 
-func logGroupFreeformTags(item interface{}) map[string]string {
+func logFreeformTags(item interface{}) map[string]string {
 	switch item.(type) {
-	case logging.LogGroup:
-		return item.(logging.LogGroup).FreeformTags
-	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).FreeformTags
+	case logging.Log:
+		return item.(logging.Log).FreeformTags
+	case logging.LogSummary:
+		return item.(logging.LogSummary).FreeformTags
 	}
 	return nil
 }
 
-func logGroupDefinedTags(item interface{}) map[string]map[string]interface{} {
+func logDefinedTags(item interface{}) map[string]map[string]interface{} {
 	switch item.(type) {
-	case logging.LogGroup:
-		return item.(logging.LogGroup).DefinedTags
-	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).DefinedTags
+	case logging.Log:
+		return item.(logging.Log).DefinedTags
+	case logging.LogSummary:
+		return item.(logging.LogSummary).DefinedTags
 	}
 	return nil
 }

@@ -50,28 +50,17 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 				Description: "The current state of the managed list.",
 				Type:        proto.ColumnType_STRING,
 			},
-
-			// other columns
-			{
-				Name:        "description",
-				Description: "Managed list description.",
-				Type:        proto.ColumnType_STRING,
-			},
 			{
 				Name:        "time_created",
 				Description: "The date and time the managed list was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// other columns
 			{
-				Name:        "time_updated",
-				Description: "The date and time the managed list was updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeUpdated.Time"),
-			},
-			{
-				Name:        "list_type",
-				Description: "Type of the list.",
+				Name:        "description",
+				Description: "Managed list description.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -88,6 +77,17 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 				Name:        "lifecyle_details",
 				Description: "A message describing the current state in more detail.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "list_type",
+				Description: "Type of the list.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_updated",
+				Description: "The date and time the managed list was updated.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 
 			// json fields

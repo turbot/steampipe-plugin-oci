@@ -15,3 +15,16 @@ select
 from
   oci_dns_zone;
 ```
+
+### List DNS zones which are not active
+
+```sql
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_dns_zone
+where
+  lifecycle_state in ('CREATING','DELETED','DELETING','FAILED');
+```

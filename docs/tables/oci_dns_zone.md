@@ -15,16 +15,3 @@ select
 from
   oci_dns_zone;
 ```
-
-### List deleted DNS zones
-
-```sql
-select
-  name,
-  id,
-  lifecycle_state
-from
-  oci_dns_zone
-where
-  lifecycle_state = 'DELETED';
-```

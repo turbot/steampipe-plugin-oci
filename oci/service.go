@@ -19,6 +19,7 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
 	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v36/dns"
 	"github.com/oracle/oci-go-sdk/v36/events"
 	"github.com/oracle/oci-go-sdk/v36/functions"
 	"github.com/oracle/oci-go-sdk/v36/identity"
@@ -37,6 +38,7 @@ type session struct {
 	BlockstorageClient             core.BlockstorageClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
+	DnsClient                      dns.DnsClient
 	EventsClient                   events.EventsClient
 	FunctionsManagementClient      functions.FunctionsManagementClient
 	IdentityClient                 identity.IdentityClient
@@ -555,6 +557,44 @@ func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	sess := &session{
 		TenancyID:        tenantID,
 		CloudGuardClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// dnsService returns the service client for OCI DNS Service
+func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("dns-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		logger.Error("DNSService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := dns.NewDnsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantID,
+		DnsClient: client,
 	}
 
 	// save session in cache

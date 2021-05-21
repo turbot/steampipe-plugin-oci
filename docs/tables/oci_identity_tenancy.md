@@ -16,7 +16,7 @@ from
   oci_identity_tenancy;
 ```
 
-### List tenancies where retention period is not set to 365 days
+### List tenancies with a retention period less than 365 days
 
 ```sql
 select
@@ -27,5 +27,5 @@ select
 from
   oci_identity_tenancy
 where
-  retention_period_days <> 365;
+  retention_period_days < 365;
 ```

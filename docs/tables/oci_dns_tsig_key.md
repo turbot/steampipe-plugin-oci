@@ -16,7 +16,7 @@ from
   oci_dns_tsig_key;
 ```
 
-### List DNS zones which are active
+### List TSIG keys which are not active
 
 ```sql
 select
@@ -26,5 +26,5 @@ select
 from
   oci_dns_tsig_key
 where
-  lifecycle_state = 'ACTIVE';
+  lifecycle_state <> 'ACTIVE';
 ```

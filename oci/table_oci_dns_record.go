@@ -25,7 +25,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "domain",
-				Description: " The fully qualified domain name where the record can be located.",
+				Description: "The fully qualified domain name where the record can be located.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -34,7 +34,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "r_data",
+				Name:        "rdata",
 				Description: "The record's data.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Rdata"),
@@ -47,7 +47,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "rtype",
-				Description: "The date and time the zone was created.",
+				Description: "The type of DNS record, such as A or CNAME.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Rtype"),
 			},
@@ -63,7 +63,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 
-			// Standard Steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,

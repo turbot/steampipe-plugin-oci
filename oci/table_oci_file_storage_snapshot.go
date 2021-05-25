@@ -67,7 +67,6 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				Name:        "is_clone_source",
 				Description: "Specifies whether the snapshot has been cloned.",
 				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -128,7 +127,7 @@ func listFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("listFileStorageFileSystems", "Compartment", compartment, "zone", zone)
 
-	fileSyatem := h.Item.(filestorage.FileSystemSummary)
+	fileSystem := h.Item.(filestorage.FileSystemSummary)
 
 	// Create Session
 	session, err := fileStorageService(ctx, d, region)
@@ -137,7 +136,7 @@ func listFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin
 	}
 
 	request := filestorage.ListSnapshotsRequest{
-		FileSystemId: fileSyatem.Id,
+		FileSystemId: fileSystem.Id,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

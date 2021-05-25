@@ -69,7 +69,3 @@ output "file_system_id" {
 output "lifecycle_state" {
   value = oci_file_storage_snapshot.named_test_resource.state
 }
-
-output "is_clone_source" {
-  value = oci_file_storage_snapshot.named_test_resource.is_clone_source
-}

@@ -19,7 +19,7 @@ from
 ```
 
 
-## Count of snapshots created per file syatem
+## Count of snapshots created per file system
 
 ```sql
 select
@@ -40,7 +40,7 @@ select
   id,
   is_clone_source
 from
-  oci_file_storage_file_system
+  oci_file_storage_snapshot
 where
   is_clone_source;
 ```

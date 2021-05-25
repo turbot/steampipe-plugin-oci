@@ -19,7 +19,7 @@ from
 ```
 
 
-## List filesystems not in the active state
+## List file systems that are not active
 
 ```sql
 select
@@ -33,7 +33,7 @@ where
 ```
 
 
-## List cloned filesystems
+## List cloned file systems
 
 ```sql
 select
@@ -47,8 +47,7 @@ where
 ```
 
 
-## List filesystems with Oracle managed encryption (filesystems are encrypted by default with Oracled managed encryption keys)
-
+## List file systems with Oracle managed encryption (default encryption uses Oracle managed encryption keys)
 
 ```sql
 select
@@ -63,7 +62,7 @@ where
 ```
 
 
-### List filesystems with customer managed encryption
+### List file systems with customer managed encryption keys
 
 ```sql
 select
@@ -77,4 +76,3 @@ from
 where
   length(kms_key_id) <> 0;
 ```
-

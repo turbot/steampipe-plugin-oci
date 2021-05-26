@@ -106,7 +106,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "system_tags",
-				Description: "Tags added to instances by the service.",
+				Description: ColumnDescriptionSystemTags,
 				Type:        proto.ColumnType_JSON,
 			},
 

@@ -188,14 +188,14 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getCloudGuardDetectorRecipe", "Compartment", compartment)
 
-	// Rstrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(cloudguard.DetectorRecipeSummary).Id
 	} else {
+		// Rstrict the api call to only root compartment
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 

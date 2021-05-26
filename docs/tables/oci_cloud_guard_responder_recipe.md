@@ -16,7 +16,7 @@ from
   oci_cloud_guard_responder_recipe;
 ```
 
-### List active responder recipes
+### List responder recipes which are not active
 
 ```sql
 select
@@ -27,5 +27,5 @@ select
 from
   oci_cloud_guard_responder_recipe
 where
-  lifecycle_state = 'ACTIVE';
+  lifecycle_state <> 'ACTIVE';
 ```

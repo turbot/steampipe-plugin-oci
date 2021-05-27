@@ -3,6 +3,7 @@ package oci
 import (
 	"context"
 	"strings"
+	"sync"
 
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
@@ -23,8 +24,7 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 		// 	Hydrate:    getKmsKey,
 		// },
 		List: &plugin.ListConfig{
-			ParentHydrate: listKmsVaults,
-			Hydrate:       listKmsKeys,
+			Hydrate: listKmsKeys,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -122,31 +122,83 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 	}
 }
 
-type keyInfo = struct {
-	keymanagement.KeySummary
-	ManagementEndpoint string
-}
-
 //// LIST FUNCTION
 
 func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	//region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	//compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	//logger.Debug("listKmsKeys", "Compartment", compartment, "OCI_REGION", region)
-
-	vaultData := h.Item.(keymanagement.VaultSummary)
-	compartment := *vaultData.CompartmentId
-	endpoint := *vaultData.ManagementEndpoint
-	regionAA := strings.Split(endpoint, ".")[2]
-
-	logger.Debug("##############", "kmsEndpoint", endpoint)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("listKmsKeys", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := kmsManagementService(ctx, d, regionAA, endpoint)
-
+	session, err := kmsVaultService(ctx, d, region)
 	if err != nil {
 		return nil, err
+	}
+
+	request := keymanagement.ListVaultsRequest{
+		CompartmentId: types.String(compartment),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.KmsVaultClient.ListVaults(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		var wg sync.WaitGroup
+		errorCh := make(chan error, len(response.Items))
+		for _, vault := range response.Items {
+			if vault.LifecycleState != "ACTIVE" {
+				return nil, nil
+			}
+			wg.Add(1)
+			go getKmsKeyAsync(ctx, d, &wg, vault, errorCh)
+		}
+		// wait for all vaults to be processed
+		wg.Wait()
+
+		// NOTE: close channel before ranging over results
+		close(errorCh)
+
+		for err := range errorCh {
+			// return the first error
+			return nil, err
+		}
+
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return nil, err
+}
+
+func getKmsKeyAsync(ctx context.Context, d *plugin.QueryData, wg *sync.WaitGroup, vault keymanagement.VaultSummary, errorCh chan error) {
+	defer wg.Done()
+
+	err := getKmsKeyDetails(ctx, d, vault)
+	if err != nil {
+		errorCh <- err
+	}
+}
+
+func getKmsKeyDetails(ctx context.Context, d *plugin.QueryData, vault keymanagement.VaultSummary) error {
+	compartment := *vault.CompartmentId
+	endpoint := *vault.ManagementEndpoint
+	region := strings.Split(endpoint, ".")[2]
+
+	// Create Session
+	session, err := kmsManagementService(ctx, d, region, endpoint)
+
+	if err != nil {
+		return err
 	}
 
 	request := keymanagement.ListKeysRequest{
@@ -160,12 +212,11 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	for pagesLeft {
 		response, err := session.KmsManagementClient.ListKeys(ctx, request)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		logger.Warn("KmsResponse", "Items", response.Items)
 
 		for _, key := range response.Items {
-			d.StreamLeafListItem(ctx, key)
+			d.StreamListItem(ctx, key)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -174,7 +225,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		}
 	}
 
-	return nil, err
+	return err
 }
 
 //// HYDRATE FUNCTION

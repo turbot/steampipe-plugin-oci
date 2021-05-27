@@ -192,7 +192,7 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 	if h.Item != nil {
 		id = *h.Item.(cloudguard.DetectorRecipeSummary).Id
 	} else {
-		// Rstrict the api call to only root compartment
+		// Restrict the api call to only root compartment
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}

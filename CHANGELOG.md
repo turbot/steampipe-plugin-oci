@@ -1,3 +1,18 @@
+## v0.0.9 [2021-05-27]
+
+_What's new?_
+
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+- New tables added
+  - [oci_cloud_guard_managed_list](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_managed_list) ([#78](https://github.com/turbot/steampipe-plugin-oci/pull/78))
+  - [oci_dns_zone](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_zone) ([#101](https://github.com/turbot/steampipe-plugin-oci/pull/101))
+  - [oci_file_storage_file_system](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_file_system) ([#116](https://github.com/turbot/steampipe-plugin-oci/pull/116))
+  - [oci_identity_tenancy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_tenancy) ([#111](https://github.com/turbot/steampipe-plugin-oci/pull/111))
+
+_Bug fixes_
+
+- Fixed: Columns now hydrate properly in `oci_cloud_guard_detector_recipe` and `oci_cloud_guard_responder_recipe` tables ([#124](https://github.com/turbot/steampipe-plugin-oci/pull/124))
+
 ## v0.0.8 [2021-05-20]
 
 _What's new?_

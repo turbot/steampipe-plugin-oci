@@ -12,4 +12,5 @@ const (
 	// Other repetitive columns for the provider
 	ColumnDescriptionFreefromTags = "Free-form tags for resource. This tags can be applied by any user with permissions on the resource."
 	ColumnDescriptionDefinedTags  = "Defined tags for resource. Defined tags are set up in your tenancy by an administrator. Only users granted permission to work with the defined tags can apply them to resources."
+	ColumnDescriptionSystemTags   = "System tags for resource. System tags can be viewed by users, but can only be created by the system."
 )

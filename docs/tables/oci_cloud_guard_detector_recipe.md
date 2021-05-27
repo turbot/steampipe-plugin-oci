@@ -16,7 +16,7 @@ from
   oci_cloud_guard_detector_recipe;
 ```
 
-### List active detector recipes
+### List detector recipes which are not active
 
 ```sql
 select
@@ -27,7 +27,7 @@ select
 from
   oci_cloud_guard_detector_recipe
 where
-  lifecycle_state = 'ACTIVE';
+  lifecycle_state <> 'ACTIVE';
 ```
 
 ### List detector recipes with password related rules

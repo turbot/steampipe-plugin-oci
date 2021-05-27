@@ -16,7 +16,7 @@ from
   oci_cloud_guard_managed_list;
 ```
 
-### List active managed lists
+### List managed lists which are not active
 
 ```sql
 select
@@ -27,5 +27,5 @@ select
 from
   oci_cloud_guard_managed_list
 where
-  lifecycle_state = 'ACTIVE';
+  lifecycle_state <> 'ACTIVE';
 ```

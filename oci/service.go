@@ -250,44 +250,6 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	return sess, nil
 }
 
-// dnsService returns the service client for OCI DNS Service
-func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
-	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("dns-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*session), nil
-	}
-
-	// get oci config info
-	ociConfig := GetConfig(d.Connection)
-
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
-	if err != nil {
-		logger.Error("DNSService", "getProvider.Error", err)
-		return nil, err
-	}
-
-	client, err := dns.NewDnsClientWithConfigurationProvider(provider)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantID, err := provider.TenancyOCID()
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &session{
-		TenancyID: tenantID,
-		DnsClient: client,
-	}
-
-	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
-
-	return sess, nil
-}
-
 // eventsService returns the service client for OCI Events Service
 func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)

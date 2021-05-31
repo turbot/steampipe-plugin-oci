@@ -37,7 +37,7 @@ resource "oci_core_boot_volume" "test_boot_volume" {
   availability_domain = var.oci_ad
   compartment_id      = var.tenancy_ocid
   source_details {
-    id   = "ocid1.image.oc1.ap-mumbai-1.aaaaaaaahvzq3yhsiwotu3o4r4dkxdq4n4aehfooiwmabml4u5ckr25qbbda"
+    id   = ""
     type = "bootVolume"
   }
 }

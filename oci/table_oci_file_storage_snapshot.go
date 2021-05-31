@@ -24,7 +24,7 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 			Hydrate:           getFileStorageSnapshot,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:       listFileStorageSnapshot,
+			Hydrate:       listFileStorageSnapshots,
 			ParentHydrate: listFileStorageFileSystems,
 		},
 		GetMatrixItem: BuildCompartementZonalList,
@@ -120,12 +120,12 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("listFileStorageFileSystems", "Compartment", compartment, "zone", zone)
+	logger.Debug("listFileStorageSnapshots", "Compartment", compartment, "zone", zone)
 
 	fileSystem := h.Item.(filestorage.FileSystemSummary)
 
@@ -171,7 +171,7 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getFunctionsApplication", "Compartment", compartment, "OCI_ZONE", zone)
+	logger.Debug("getFileStorageSnapshot", "Compartment", compartment, "OCI_ZONE", zone)
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 	// Restrict the api call to only root compartment/ per region
@@ -179,7 +179,7 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, nil
 	}
 
-	// handle empty application id in get call
+	// handle empty snapshot id in get call
 	if id == "" {
 		return nil, nil
 	}

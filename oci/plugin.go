@@ -33,6 +33,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_cloud_guard_detector_recipe":            tableCloudGuardDetectorRecipe(ctx),
 			"oci_cloud_guard_managed_list":               tableCloudGuardManagedList(ctx),
 			"oci_cloud_guard_responder_recipe":           tableCloudGuardResponderRecipe(ctx),
+			"oci_core_boot_volume_backup":                tableCoreBootVolumeBackup(ctx),
 			"oci_core_dhcp_options":                      tableCoreDhcpOptions(ctx),
 			"oci_core_drg":                               tableCoreDrg(ctx),
 			"oci_core_image":                             tableCoreImage(ctx),

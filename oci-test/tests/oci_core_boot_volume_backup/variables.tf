@@ -39,51 +39,51 @@ data "oci_objectstorage_namespace" "test_namespace" {
 
 resource "oci_objectstorage_bucket" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  name = var.resource_name
-  namespace = data.oci_objectstorage_namespace.test_namespace.namespace
+  name           = var.resource_name
+  namespace      = data.oci_objectstorage_namespace.test_namespace.namespace
 }
 
 resource "oci_objectstorage_object" "test_object" {
-  bucket = oci_objectstorage_bucket.named_test_resource.name
-  content = "test"
+  bucket    = oci_objectstorage_bucket.named_test_resource.name
+  content   = "test"
   namespace = data.oci_objectstorage_namespace.test_namespace.namespace
-  object = "test"
+  object    = "test"
 }
 
 resource "oci_core_vcn" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
 }
 
 resource "oci_core_subnet" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
-  vcn_id = oci_core_vcn.named_test_resource.id
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+  vcn_id         = oci_core_vcn.named_test_resource.id
 }
 
 resource "oci_core_image" "test_image" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
+  display_name   = var.resource_name
   image_source_details {
-    source_type = "objectStorageTuple"
-    bucket_name = oci_objectstorage_bucket.named_test_resource.name
+    source_type    = "objectStorageTuple"
+    bucket_name    = oci_objectstorage_bucket.named_test_resource.name
     namespace_name = data.oci_objectstorage_namespace.test_namespace.namespace
-    object_name = oci_objectstorage_object.test_object.object
+    object_name    = oci_objectstorage_object.test_object.object
   }
 }
 
 resource "oci_core_instance" "test_instance" {
   availability_domain = var.oci_ad
-  compartment_id = var.tenancy_ocid
-  shape = "VM.Standard.E2.1.Micro"
+  compartment_id      = var.tenancy_ocid
+  shape               = "VM.Standard.E2.1.Micro"
   source_details {
-    source_id = oci_core_image.test_image.id
+    source_id   = oci_core_image.test_image.id
     source_type = "image"
   }
   create_vnic_details {
-      subnet_id = oci_core_subnet.named_test_resource.id
+    subnet_id = oci_core_subnet.named_test_resource.id
   }
   preserve_boot_volume = false
 }
@@ -105,4 +105,8 @@ output "resource_id" {
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
+}
+
+output "boot_volume_id" {
+  value = oci_core_instance.test_instance.boot_volume_id
 }

@@ -19,7 +19,7 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 		Name:        "oci_core_boot_volume_backup",
 		Description: "OCI Core Boot Volume Backup",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getBootVolumeBackup,
 		},
 		List: &plugin.ListConfig{
@@ -29,7 +29,7 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
-				Description: "The OCID of the boot volume backup..",
+				Description: "The OCID of the boot volume backup.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -45,20 +45,27 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "lifecycle_state",
+				Description: "The current state of a boot volume backup.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "expiration_time",
 				Description: "The date and time the volume backup will expire and be automatically deleted.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromField("ExpirationTime.Time"),
 			},
 			{
 				Name:        "image_id",
 				Description: "The image OCID used to create the boot volume the backup is taken from.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "kms_key_id",
 				Description: "The OCID of the Key Management master encryption assigned to the boot volume backup.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -70,7 +77,12 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 				Name:        "time_request_received",
 				Description: "The date and time the request to create the boot volume backup was received.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromField("TimeRequestReceived.Time"),
+			},
+			{
+				Name:        "type",
+				Description: "The type of a volume backup.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "size_in_gbs",
@@ -82,6 +94,7 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 				Name:        "source_boot_volume_backup_id",
 				Description: "The OCID of the source boot volume backup.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "source_type",
@@ -93,18 +106,6 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 				Description: "The size used by the backup, in GBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("UniqueSizeInGBs"),
-			},
-
-			// JSON columns
-			{
-				Name:        "lifecycle_state",
-				Description: "The current state of a boot volume backup.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "type",
-				Description: "The type of a volume backup.",
-				Type:        proto.ColumnType_JSON,
 			},
 
 			// tags
@@ -206,7 +207,7 @@ func listBootVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 //// HYDRATE FUNCTION
 
 func getBootVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getImage")
+	plugin.Logger(ctx).Trace("getBootVolumeBackup")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -219,7 +220,7 @@ func getBootVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty image id in get call
+	// handle empty boot volume backup id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

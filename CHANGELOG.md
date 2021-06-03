@@ -1,3 +1,11 @@
+## v0.0.10 [2021-06-03]
+
+_What's new?_
+
+- New tables added
+  - [oci_cloud_guard_target](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_target) ([#122](https://github.com/turbot/steampipe-plugin-oci/pull/122))
+  - [oci_dns_tsig_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_tsig_key) ([#119](https://github.com/turbot/steampipe-plugin-oci/pull/119))
+
 ## v0.0.9 [2021-05-27]
 
 _What's new?_

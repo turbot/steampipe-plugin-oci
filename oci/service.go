@@ -73,7 +73,7 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, erro
 		return nil, err
 	}
 
-	// get audit service client
+	// get apigateway service client
 	client, err := apigateway.NewApiGatewayClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err

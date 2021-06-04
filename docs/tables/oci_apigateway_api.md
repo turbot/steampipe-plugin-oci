@@ -17,7 +17,7 @@ from
 ```
 
 
-### List active Api in a compartment
+### List active apis
 
 ```sql
 select

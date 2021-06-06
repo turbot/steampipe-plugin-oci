@@ -170,6 +170,11 @@ func getApiGatewayApi(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty api id in get call
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := apiGatewayService(ctx, d)
 	if err != nil {

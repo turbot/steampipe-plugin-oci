@@ -36,8 +36,7 @@ import (
 )
 
 type session struct {
-	TenancyID string
-
+	TenancyID                      string
 	ApiGatewayClient               apigateway.ApiGatewayClient
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient

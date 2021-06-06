@@ -52,12 +52,6 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "time_updated",
-				Description: "The time this resource was last updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeUpdated.Time"),
-			},
-			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current lifecycleState.",
 				Type:        proto.ColumnType_STRING,
@@ -67,23 +61,29 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 				Description: "Type of API Specification file.",
 				Type:        proto.ColumnType_STRING,
 			},
+			{
+				Name:        "time_updated",
+				Description: "The time this resource was last updated.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
+			},
 
 			// json fields
+			{
+				Name:        "validation_results",
+				Description: "Status of each feature available from the API.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// tags
 			{
 				Name:        "defined_tags",
-				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
+				Description: ColumnDescriptionDefinedTags,
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "validation_results",
-				Description: "Status of each feature available from the API.",
+				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -160,14 +160,14 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 //// HYDRATE FUNCTION
 
 func getApiGatewayApi(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getApigatewayApi")
+	plugin.Logger(ctx).Trace("getApiGatewayApi")
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-	
+
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
@@ -226,16 +226,6 @@ func apiTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 	return tags, nil
 }
 
-func apiId(item interface{}) string {
-	switch item.(type) {
-	case apigateway.Api:
-		return *item.(apigateway.Api).Id
-	case apigateway.ApiSummary:
-		return *item.(apigateway.ApiSummary).Id
-	}
-	return ""
-}
-
 func apiGatewayApiFreeformTags(item interface{}) map[string]string {
 	switch item.(type) {
 	case apigateway.Api:
@@ -250,7 +240,7 @@ func apiGatewayApiDefinedTags(item interface{}) map[string]map[string]interface{
 	switch item.(type) {
 	case apigateway.Api:
 		return item.(apigateway.Api).DefinedTags
-	case apigateway.ApiCollection:
+	case apigateway.ApiSummary:
 		return item.(apigateway.ApiSummary).DefinedTags
 	}
 	return nil

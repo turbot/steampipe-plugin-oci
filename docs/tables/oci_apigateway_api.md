@@ -17,7 +17,7 @@ from
 ```
 
 
-### List active apis
+### List active APIs
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
 ```
 
 
-### List api older than 90 days
+### List APIs older than 90 days
 
 ```sql
 select

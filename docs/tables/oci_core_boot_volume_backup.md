@@ -19,7 +19,7 @@ from
   oci_core_boot_volume_backup;
 ```
 
-### List manual boot volume backup
+### List manual boot volume backups
 
 ```sql
 select

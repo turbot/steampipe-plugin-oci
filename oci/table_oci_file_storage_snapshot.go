@@ -108,6 +108,12 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
@@ -116,6 +122,11 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type snapshotInfo struct {
+	filestorage.SnapshotSummary
+	CompartmentId string
 }
 
 //// LIST FUNCTION
@@ -151,7 +162,7 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 		}
 
 		for _, snapshots := range response.Items {
-			d.StreamLeafListItem(ctx, snapshots)
+			d.StreamLeafListItem(ctx, snapshotInfo{snapshots, compartment})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -202,7 +213,21 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	return response.Snapshot, nil
+	snapshot := filestorage.SnapshotSummary{
+		FileSystemId:     response.FileSystemId,
+		Id:               response.Id,
+		Name:             response.Name,
+		TimeCreated:      response.TimeCreated,
+		LifecycleState:   filestorage.SnapshotSummaryLifecycleStateEnum(response.LifecycleState),
+		ProvenanceId:     response.ProvenanceId,
+		IsCloneSource:    response.IsCloneSource,
+		LifecycleDetails: response.LifecycleDetails,
+		FreeformTags:     response.FreeformTags,
+		DefinedTags:      response.DefinedTags,
+	}
+	rowData := snapshotInfo{snapshot, compartment}
+
+	return rowData, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -213,9 +238,9 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 // 3. Free-form tags
 func snapshotTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 
-	freeformTags := snapshotFreeformTags(d.HydrateItem)
-
 	var tags map[string]interface{}
+
+	freeformTags := d.HydrateItem.(snapshotInfo).FreeformTags
 
 	if freeformTags != nil {
 		tags = map[string]interface{}{}
@@ -224,7 +249,7 @@ func snapshotTags(_ context.Context, d *transform.TransformData) (interface{}, e
 		}
 	}
 
-	definedTags := snapshotDefinedTags(d.HydrateItem)
+	definedTags := d.HydrateItem.(snapshotInfo).DefinedTags
 
 	if definedTags != nil {
 		if tags == nil {
@@ -239,24 +264,4 @@ func snapshotTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return tags, nil
-}
-
-func snapshotFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
-	case filestorage.Snapshot:
-		return item.(filestorage.Snapshot).FreeformTags
-	case filestorage.SnapshotSummary:
-		return item.(filestorage.SnapshotSummary).FreeformTags
-	}
-	return nil
-}
-
-func snapshotDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
-	case filestorage.Snapshot:
-		return item.(filestorage.Snapshot).DefinedTags
-	case filestorage.SnapshotSummary:
-		return item.(filestorage.SnapshotSummary).DefinedTags
-	}
-	return nil
 }

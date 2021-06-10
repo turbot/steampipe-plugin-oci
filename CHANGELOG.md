@@ -1,3 +1,15 @@
+## v0.0.11 [2021-06-10]
+
+_What's new?_
+
+- New tables added
+  - [oci_apigateway_api](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_apigateway_api) ([#130](https://github.com/turbot/steampipe-plugin-oci/pull/130))
+  - [oci_core_boot_volume_backup](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_backup) ([#129](https://github.com/turbot/steampipe-plugin-oci/pull/129))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v0.2.10](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v0210-2021-06-09)
+
 ## v0.0.10 [2021-06-03]
 
 _What's new?_

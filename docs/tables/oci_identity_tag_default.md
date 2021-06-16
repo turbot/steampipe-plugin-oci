@@ -8,38 +8,35 @@ Tag defaults let you specify a default tag (tagnamespace.tag="value") to apply t
 
 ```sql
 select
-  name,
   id,
-  is_retired,
+  is_required,
   lifecycle_state
 from
   oci_identity_tag_default;
 ```
 
-### List active tag namespaces
+### List active tag defaults
 
 ```sql
 select
-  name,
   id,
-  is_retired,
+  is_required,
   lifecycle_state
 from
-  oci_identity_tag_namespace
+  oci_identity_tag_default
 where
   lifecycle_state = 'ACTIVE';
 ```
 
-### List retired tag namespaces
+### List required tag defaults
 
 ```sql
 select
-  name,
   id,
-  is_retired,
+  is_required,
   lifecycle_state
 from
-  oci_identity_tag_namespace
+  oci_identity_tag_default
 where
-  is_retired;
+  is_required;
 ```

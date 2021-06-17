@@ -1,6 +1,6 @@
 # Table: oci_identity_tag_default
 
-Tag defaults let you specify a default tag (tagnamespace.tag="value") to apply to all resource types in a specified compartment. The tag default is applied at the time the resource is created. Resources that exist in the compartment before you create the tag default are not tagged. The TagDefault object specifies the tag and compartment details.
+Tag defaults let you specify a default tag (tagnamespace.tag="value") to apply to all resource types in a specified compartment. The tag default is applied at the time the resource is created. Resources that exist in the compartment before you create the tag default are not tagged.
 
 ## Examples
 

@@ -44,5 +44,3 @@ from
 where
   is_clone_source;
 ```
-
-

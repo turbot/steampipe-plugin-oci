@@ -1,3 +1,11 @@
+## v0.0.12 [2021-06-17]
+
+_What's new?_
+
+- New tables added
+  - [oci_file_storage_snapshot](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_snapshot) ([#121](https://github.com/turbot/steampipe-plugin-oci/pull/121))
+  - [oci_identity_tag_default](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_tag_default) ([#141](https://github.com/turbot/steampipe-plugin-oci/pull/141))
+
 ## v0.0.11 [2021-06-10]
 
 _What's new?_

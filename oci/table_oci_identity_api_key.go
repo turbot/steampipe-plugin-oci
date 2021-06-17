@@ -29,18 +29,18 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "key_value",
-				Description: "The key's value..",
+				Description: "The key's value.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "user_id",
-				Description: "The OCID of the user the password belongs to.",
+				Description: "The OCID of the user the key belongs to.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "user_name",
-				Description: "The name of the user the password belongs to.",
+				Description: "The name of the user the key belongs to.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -50,7 +50,7 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "fingerprint",
-				Description: " The key's fingerprint.",
+				Description: "The key's fingerprint.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -93,7 +93,6 @@ type apiKeyInfo struct {
 //// LIST FUNCTION
 
 func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	user := h.Item.(identity.User)
 
 	// Create Session
@@ -102,7 +101,7 @@ func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, err
 	}
 
-	// The OCID of the tenancy containing the compartment.
+	// The OCID of the User.
 	request := identity.ListApiKeysRequest{
 		UserId: user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
@@ -117,7 +116,7 @@ func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	for _, apiKey := range item.Items {
-		d.StreamLeafListItem(ctx, apiKeyInfo{apiKey, *user.Name})
+		d.StreamListItem(ctx, apiKeyInfo{apiKey, *user.Name})
 	}
 
 	return nil, nil

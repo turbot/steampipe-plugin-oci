@@ -1,6 +1,6 @@
 # Table: oci_identity_api_key
 
-This resource provides the Api Key resource in Oracle Cloud Infrastructure Identity service. Uploads an API signing key for the specified user. Every user has permission to use this operation to upload a key for their own user ID
+This resource provides the Api Key resource in Oracle Cloud Infrastructure Identity service. Uploads an API signing key for the specified user. Every user has permission to use this operation to upload a key for their own user ID.
 
 ## Examples
 
@@ -18,7 +18,6 @@ from
   oci_identity_api_key;
 ```
 
-
 ### List inactive API keys
 
 ```sql
@@ -34,7 +33,6 @@ from
 where
   lifecycle_state = 'INACTIVE';
 ```
-
 
 ### Count API keys by user
 

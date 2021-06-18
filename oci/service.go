@@ -48,6 +48,7 @@ type session struct {
 	FileStorageClient              filestorage.FileStorageClient
 	FunctionsManagementClient      functions.FunctionsManagementClient
 	IdentityClient                 identity.IdentityClient
+	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
@@ -447,6 +448,38 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	// save session in cache
 	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 
+	return sess, nil
+}
+
+// kmsManagementService returns the service client for OCI KMS Management Service
+func kmsManagementService(ctx context.Context, d *plugin.QueryData, region string, endpoint string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("Management-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("kmsManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := keymanagement.NewKmsManagementClientWithConfigurationProvider(provider, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+	sess := &session{
+		TenancyID:           tenantId,
+		KmsManagementClient: client,
+	}
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 	return sess, nil
 }
 

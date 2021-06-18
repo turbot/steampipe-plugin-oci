@@ -1,0 +1,8 @@
+[
+  {
+    "file_system_id": "{{ output.file_system_id.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "{{ output.lifecycle_state.value }}",
+    "name": "{{ output.resource_name.value }}"
+  }
+]

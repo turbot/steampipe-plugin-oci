@@ -15,6 +15,7 @@ import (
 
 const matrixKeyRegion = "region"
 const matrixKeyCompartment = "compartment"
+const matrixKeyZone = "zone"
 
 var pluginQueryData *plugin.QueryData
 
@@ -47,6 +48,35 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 	return []map[string]interface{}{
 		{matrixKeyRegion: getRegionFromEnvVar()},
 	}
+}
+
+// BuildCompartmentList :: return a list of matrix items, one per compartment specified in the connection config
+func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+	// cache compartment matrix
+	cacheKey := "CompartementList"
+
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]map[string]interface{})
+	}
+
+	// get all the compartments in the tenant
+	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	if err != nil {
+		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
+			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		}
+		panic(err)
+	}
+
+	// validate compartment list
+	matrix := make([]map[string]interface{}, len(compartments))
+	for i, compartment := range compartments {
+		matrix[i] = map[string]interface{}{matrixKeyCompartment: *compartment.Id}
+	}
+	// set CompartementList cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+
+	return matrix
 }
 
 // BuildCompartementRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
@@ -201,6 +231,112 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 	pluginQueryData.ConnectionManager.Cache.Set(serviceCacheKey, compartments)
 
 	return compartments, err
+}
+
+type zoneInfo struct {
+	identity.AvailabilityDomain
+	Region string
+}
+
+func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.Connection) ([]zoneInfo, error) {
+
+	zonesList := []zoneInfo{}
+
+	regions := GetConfig(connection).Regions
+
+	if regions != nil {
+	for _, region := range regions {
+		session, err := identityServiceRegional(ctx, pluginQueryData, region)
+		if err != nil {
+			return nil, err
+		}
+
+		// The OCID of the tenancy containing the compartment.
+		request := identity.ListAvailabilityDomainsRequest{
+			CompartmentId: &session.TenancyID,
+			RequestMetadata: oci_common.RequestMetadata{
+				RetryPolicy: getDefaultRetryPolicy(),
+			},
+		}
+
+		response, err := session.IdentityClient.ListAvailabilityDomains(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, zones := range response.Items {
+			zonesList = 	append(zonesList, zoneInfo{zones, region})
+		}
+	}
+	return zonesList, nil
+}
+ region:= getRegionFromEnvVar()
+	session, err := identityServiceRegional(ctx, pluginQueryData, region)
+	if err != nil {
+		return nil, err
+	}
+
+	// The OCID of the tenancy containing the compartment.
+	request := identity.ListAvailabilityDomainsRequest{
+		CompartmentId: &session.TenancyID,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.IdentityClient.ListAvailabilityDomains(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, zones := range response.Items {
+		zonesList = 	append(zonesList, zoneInfo{zones, region})
+	}
+	return zonesList, nil
+}
+
+// BuildCompartementZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config
+func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+	cacheKey := "CompartementZonalList"
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]map[string]interface{})
+	}
+
+	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	if err != nil {
+		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
+			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		}
+		panic(err)
+	}
+
+	plugin.Logger(ctx).Debug("compartments", "compartments", compartments)
+
+	zones, err := listAllzones(ctx, pluginQueryData, connection)
+	if err != nil {
+		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
+			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
+		}
+		panic(err)
+	}
+
+	matrix := make([]map[string]interface{}, len(zones)*len(compartments))
+
+	for i, zone := range zones {
+		for j, compartment := range compartments {
+			matrix[len(compartments)*i+j] = map[string]interface{}{
+				matrixKeyZone:        *zone.Name,
+				matrixKeyCompartment: *compartment.Id,
+				matrixKeyRegion:      *&zone.Region,
+			}
+			plugin.Logger(ctx).Debug("listAllCompartments Matrix", (len(compartments)*i)+j, matrix[len(compartments)*i+j])
+		}
+	}
+
+	// set CompartementZonalList cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+
+	return matrix
 }
 
 // func getRegionFromEnvVar() (string, error) {

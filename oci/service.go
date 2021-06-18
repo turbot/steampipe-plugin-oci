@@ -454,7 +454,9 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 // kmsManagementService returns the service client for OCI KMS Management Service
 func kmsManagementService(ctx context.Context, d *plugin.QueryData, region string, endpoint string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("Management-%s", region)
+
+	// Cache the connection at vault level
+	serviceCacheKey := fmt.Sprintf("KeyManagement-%s-%s", region, endpoint)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -800,7 +802,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 }
 
 // get the configurtion provider for the OCI plugin connection to intract with API's
-func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
+func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
 	// if provider is already cached, return it

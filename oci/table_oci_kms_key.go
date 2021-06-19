@@ -20,10 +20,6 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 		Name:             "oci_kms_key",
 		Description:      "OCI KMS Key",
 		DefaultTransform: transform.FromCamel(),
-		// Get: &plugin.GetConfig{
-		// 	KeyColumns: plugin.AllColumns([]string{"management_endpoint", "id"}),
-		// 	Hydrate:    getKmsKey,
-		// },
 		List: &plugin.ListConfig{
 			ParentHydrate: listKmsVaults,
 			Hydrate:       listKmsKeys,
@@ -31,9 +27,10 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "name",
+				Description: "A user-friendly name of the key. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "id",
@@ -61,20 +58,53 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "algorithm",
+				Description: "The algorithm used by a key's key versions to encrypt or decrypt.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "current_key_version",
+				Description: "The OCID of the key version used in cryptographic operations.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getKmsKey,
+			},
+			{
+				Name:        "curve_id",
+				Description: "Supported curve Ids for ECDSA keys.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getKmsKey,
+				Transform:   transform.FromField("KeyShape.CurveId"),
+			},
+			{
+				Name:        "length",
+				Description: "The length of the key.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getKmsKey,
+				Transform:   transform.FromField("KeyShape.Length"),
+			},
+			{
+				Name:        "protection_mode",
+				Description: "The key's protection mode indicates how the key persists and where cryptographic operations that use the key are performed.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "restored_from_key_id",
+				Description: "The OCID of the key from which this key was restored.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getKmsKey,
+			},
+			{
 				Name:        "time_created",
 				Description: "The date and time the key was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "algorithm",
-				Description: "The algorithm used by a key's key versions to encrypt or decrypt.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "protection_mode",
-				Description: "The key's protection mode indicates how the key persists and where cryptographic operations that use the key are performed.",
-				Type:        proto.ColumnType_STRING,
+				Name:        "time_of_deletion",
+				Description: "An optional property indicating when to delete the key.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeOfDeletion.Time"),
+				Hydrate:     getKmsKey,
 			},
 
 			// tags
@@ -90,12 +120,12 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 			},
 
 			// Standard Steampipe columns
-			// {
-			// 	Name:        "tags",
-			// 	Description: ColumnDescriptionTags,
-			// 	Type:        proto.ColumnType_JSON,
-			// 	Transform:   transform.From(vaultTags),
-			// },
+			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(keyTags),
+			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -114,7 +144,6 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
 				Name:        "tenant_id",
@@ -125,6 +154,14 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+//// Key info
+
+type KeyInfo struct {
+	keymanagement.KeySummary
+	ManagementEndpoint string
+	VaultName          string
 }
 
 //// LIST FUNCTION
@@ -142,7 +179,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	}
 
 	// skip the API call if vault region doesn't match matrix region
-	if getRegionName(*vaultData.Id) != oci_common.StringToRegion(region) {
+	if ociRegionNameFromId(*vaultData.Id) != oci_common.StringToRegion(region) {
 		return nil, nil
 	}
 
@@ -174,7 +211,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		}
 
 		for _, key := range response.Items {
-			d.StreamLeafListItem(ctx, KeyInfo{key, *vaultData.ManagementEndpoint, *vaultData.DisplayName})
+			d.StreamListItem(ctx, KeyInfo{key, *vaultData.ManagementEndpoint, *vaultData.DisplayName})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -188,59 +225,69 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 //// HYDRATE FUNCTION
 
-// func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-// 	plugin.Logger(ctx).Trace("getKmsKey")
-// 	logger := plugin.Logger(ctx)
-// 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-// 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-// 	logger.Debug("oci.getKmsKey", "Compartment", compartment, "OCI_REGION", region)
+func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getKmsKey")
 
-// 	// Restrict the api call to only root compartment/ per region
-// 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-// 		return nil, nil
-// 	}
+	key := h.Item.(KeyInfo)
+	endpoint := key.ManagementEndpoint
+	region := strings.Split(endpoint, ".")[2]
 
-// 	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
-// 	id := d.KeyColumnQuals["id"].GetStringValue()
+	// Create Session
+	session, err := kmsManagementService(ctx, d, region, endpoint)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// handle empty key id in get call
-// 	if strings.TrimSpace(id) == "" {
-// 		return nil, nil
-// 	}
+	request := keymanagement.GetKeyRequest{
+		KeyId: key.Id,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
 
-// 	// Create Session
-// 	session, err := kmsManagementService(ctx, d, region, endpoint)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	response, err := session.KmsManagementClient.GetKey(ctx, request)
+	if err != nil {
+		return nil, err
+	}
 
-// 	request := keymanagement.GetKeyRequest{
-// 		KeyId: types.String(id),
-// 		RequestMetadata: oci_common.RequestMetadata{
-// 			RetryPolicy: getDefaultRetryPolicy(),
-// 		},
-// 	}
+	return response.Key, nil
+}
 
-// 	response, err := session.KmsManagementClient.GetKey(ctx, request)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+//// TRANSFORM FUNCTION
 
-// 	return response.Key, nil
-// }
+func keyTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := d.HydrateItem.(KeyInfo).FreeformTags
+
+	var tags map[string]interface{}
+
+	if freeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range freeformTags {
+			tags[k] = v
+		}
+	}
+
+	definedTags := d.HydrateItem.(KeyInfo).DefinedTags
+
+	if definedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	return tags, nil
+}
 
 // Extract OCI region name from the resource id
-func getRegionName(resourceId string) oci_common.Region {
+func ociRegionNameFromId(resourceId string) oci_common.Region {
 	id := types.SafeString(resourceId)
 	splittedID := strings.Split(id, ".")
 	regionName := oci_common.StringToRegion(types.SafeString(splittedID[3]))
 	return regionName
-}
-
-//// Key info
-
-type KeyInfo struct {
-	keymanagement.KeySummary
-	ManagementEndpoint string
-	VaultName          string
 }

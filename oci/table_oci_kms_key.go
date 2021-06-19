@@ -230,10 +230,10 @@ func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 
 	key := h.Item.(KeyInfo)
 	endpoint := key.ManagementEndpoint
-	region := strings.Split(endpoint, ".")[2]
+	region := ociRegionNameFromId(*key.Id)
 
 	// Create Session
-	session, err := kmsManagementService(ctx, d, region, endpoint)
+	session, err := kmsManagementService(ctx, d, string(region), endpoint)
 	if err != nil {
 		return nil, err
 	}

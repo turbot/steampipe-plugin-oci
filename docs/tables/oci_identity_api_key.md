@@ -1,6 +1,6 @@
 # Table: oci_identity_api_key
 
-This resource provides the Api Key resource in Oracle Cloud Infrastructure Identity service.
+An API key is a PEM-format RSA credential for securing requests to the Oracle Cloud Infrastructure REST API.
 
 ## Examples
 

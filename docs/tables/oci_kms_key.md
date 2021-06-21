@@ -17,7 +17,7 @@ from
   oci_kms_key;
 ```
 
-### List keys which are not enabled
+### List keys that are not enabled
 
 ```sql
 select

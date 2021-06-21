@@ -30,3 +30,19 @@ from
 where
   lifecycle_state <> 'ENABLED';
 ```
+
+### List keys older than 365 days
+
+```sql
+select
+  id,
+  name,
+  lifecycle_state,
+  vault_name
+from
+  oci_kms_key
+where
+  time_created <= (current_date - interval '365' day)
+order by
+  time_created;
+```

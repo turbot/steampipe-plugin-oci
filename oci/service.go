@@ -48,6 +48,7 @@ type session struct {
 	FileStorageClient              filestorage.FileStorageClient
 	FunctionsManagementClient      functions.FunctionsManagementClient
 	IdentityClient                 identity.IdentityClient
+	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
@@ -450,6 +451,40 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	return sess, nil
 }
 
+// kmsManagementService returns the service client for OCI KMS Management Service
+func kmsManagementService(ctx context.Context, d *plugin.QueryData, region string, endpoint string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// Cache the connection at vault level
+	serviceCacheKey := fmt.Sprintf("KeyManagement-%s-%s", region, endpoint)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("kmsManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := keymanagement.NewKmsManagementClientWithConfigurationProvider(provider, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+	sess := &session{
+		TenancyID:           tenantId,
+		KmsManagementClient: client,
+	}
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	return sess, nil
+}
+
 // kmsVaultService returns the service client for OCI KMS Vault Service
 func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -767,7 +802,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 }
 
 // get the configurtion provider for the OCI plugin connection to intract with API's
-func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
+func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
 	// if provider is already cached, return it

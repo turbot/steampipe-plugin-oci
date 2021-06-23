@@ -30,6 +30,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/logging"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/oracle/oci-go-sdk/v36/ons"
+	"github.com/oracle/oci-go-sdk/v36/resourcesearch"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -54,6 +55,7 @@ type session struct {
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
+	resourceSearchClient           resourcesearch.ResourceSearchClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
 
@@ -793,6 +795,44 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	sess := &session{
 		TenancyID: tenantID,
 		DnsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// resourceSearchService returns the service client for OCI Advance Resource Query Search Service
+func resourceSearchService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("resourcesearch-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		logger.Error("resourceSearchService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := resourcesearch.NewResourceSearchClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:            tenantId,
+		resourceSearchClient: client,
 	}
 
 	// save session in cache

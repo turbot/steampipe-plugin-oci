@@ -71,7 +71,17 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Domain"),
 			},
 
-			// Standard OCI columns
+			// OCI standardcolumns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
@@ -81,6 +91,12 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type dnsRecordInfo struct {
+	dns.Record
+	CompartmentId string
+	Region        string
 }
 
 //// LIST FUNCTION
@@ -114,8 +130,8 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 			return nil, err
 		}
 
-		for _, zone := range response.Items {
-			d.StreamListItem(ctx, zone)
+		for _, record := range response.Items {
+			d.StreamListItem(ctx, dnsRecordInfo{record, compartment, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

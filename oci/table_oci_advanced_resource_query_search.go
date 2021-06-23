@@ -20,6 +20,7 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("query"),
 			Hydrate:    listAdvancedResourceQuerySearch,
 		},
+		GetMatrixItem: BuildRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "identifier",
@@ -102,6 +103,11 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -120,12 +126,17 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 
 type querySearchInfo struct {
 	resourcesearch.ResourceSummary
-	Query string
+	Query  string
+	Region string
 }
 
 //// LIST FUNCTION
 
 func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	logger.Debug("listCoreVolumeBackups", "OCI_REGION", region)
+
 	query := d.KeyColumnQuals["query"].GetStringValue()
 
 	// handle empty query in list call
@@ -134,7 +145,7 @@ func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _
 	}
 
 	// Create Session
-	session, err := resourceSearchService(ctx, d)
+	session, err := resourceSearchService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +167,7 @@ func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _
 		}
 
 		for _, resource := range response.Items {
-			d.StreamListItem(ctx, querySearchInfo{resource, query})
+			d.StreamListItem(ctx, querySearchInfo{resource, query, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

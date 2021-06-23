@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v36/apigateway"
 	"github.com/oracle/oci-go-sdk/v36/audit"
 	"github.com/oracle/oci-go-sdk/v36/autoscaling"
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
@@ -22,6 +23,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/core"
 	"github.com/oracle/oci-go-sdk/v36/dns"
 	"github.com/oracle/oci-go-sdk/v36/events"
+	"github.com/oracle/oci-go-sdk/v36/filestorage"
 	"github.com/oracle/oci-go-sdk/v36/functions"
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
@@ -35,6 +37,7 @@ import (
 
 type session struct {
 	TenancyID                      string
+	ApiGatewayClient               apigateway.ApiGatewayClient
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
@@ -42,14 +45,55 @@ type session struct {
 	ComputeClient                  core.ComputeClient
 	DnsClient                      dns.DnsClient
 	EventsClient                   events.EventsClient
+	FileStorageClient              filestorage.FileStorageClient
 	FunctionsManagementClient      functions.FunctionsManagementClient
 	IdentityClient                 identity.IdentityClient
+	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+}
+
+// apiGatewayService returns the service client for OCI ApiGateway service
+func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+
+	serviceCacheKey := fmt.Sprintf("ApiGateway-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// get apigateway service client
+	client, err := apigateway.NewApiGatewayClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:        tenantId,
+		ApiGatewayClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // auditService returns the service client for OCI Audit service
@@ -154,6 +198,46 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	}
 
 	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantId,
+		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// identityServiceRegional returns the service client for OCI Logging Management Service
+func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("loggingManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := identity.NewIdentityClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
 	tenantId, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err
@@ -290,6 +374,45 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	return sess, nil
 }
 
+// fileStorageService returns the service client for OCI File Storage Service
+func fileStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("FileStorage-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("fileStorageService", "getProvider.Error", err)
+		return nil, err
+	}
+	client, err := filestorage.NewFileStorageClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:         tenantID,
+		FileStorageClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // functionsManagementService returns the service client for OCI Core VirtualNetwork Service
 func functionsManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -325,6 +448,40 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	// save session in cache
 	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 
+	return sess, nil
+}
+
+// kmsManagementService returns the service client for OCI KMS Management Service
+func kmsManagementService(ctx context.Context, d *plugin.QueryData, region string, endpoint string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// Cache the connection at vault level
+	serviceCacheKey := fmt.Sprintf("KeyManagement-%s-%s", region, endpoint)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("kmsManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := keymanagement.NewKmsManagementClientWithConfigurationProvider(provider, endpoint)
+	if err != nil {
+		return nil, err
+	}
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+	sess := &session{
+		TenancyID:           tenantId,
+		KmsManagementClient: client,
+	}
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 	return sess, nil
 }
 
@@ -645,7 +802,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 }
 
 // get the configurtion provider for the OCI plugin connection to intract with API's
-func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
+func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
 	// if provider is already cached, return it

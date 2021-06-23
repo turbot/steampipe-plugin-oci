@@ -1,3 +1,46 @@
+## v0.0.12 [2021-06-17]
+
+_What's new?_
+
+- New tables added
+  - [oci_file_storage_snapshot](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_snapshot) ([#121](https://github.com/turbot/steampipe-plugin-oci/pull/121))
+  - [oci_identity_tag_default](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_tag_default) ([#141](https://github.com/turbot/steampipe-plugin-oci/pull/141))
+
+## v0.0.11 [2021-06-10]
+
+_What's new?_
+
+- New tables added
+  - [oci_apigateway_api](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_apigateway_api) ([#130](https://github.com/turbot/steampipe-plugin-oci/pull/130))
+  - [oci_core_boot_volume_backup](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_backup) ([#129](https://github.com/turbot/steampipe-plugin-oci/pull/129))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v0.2.10](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v0210-2021-06-09)
+
+## v0.0.10 [2021-06-03]
+
+_What's new?_
+
+- New tables added
+  - [oci_cloud_guard_target](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_target) ([#122](https://github.com/turbot/steampipe-plugin-oci/pull/122))
+  - [oci_dns_tsig_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_tsig_key) ([#119](https://github.com/turbot/steampipe-plugin-oci/pull/119))
+
+## v0.0.9 [2021-05-27]
+
+_What's new?_
+
+- Updated plugin license to Apache 2.0 per [turbot/steampipe#488](https://github.com/turbot/steampipe/issues/488)
+- New tables added
+  - [oci_cloud_guard_managed_list](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_guard_managed_list) ([#78](https://github.com/turbot/steampipe-plugin-oci/pull/78))
+  - [oci_dns_zone](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_zone) ([#101](https://github.com/turbot/steampipe-plugin-oci/pull/101))
+  - [oci_file_storage_file_system](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_file_system) ([#116](https://github.com/turbot/steampipe-plugin-oci/pull/116))
+  - [oci_identity_tenancy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_tenancy) ([#111](https://github.com/turbot/steampipe-plugin-oci/pull/111))
+
+_Bug fixes_
+
+- Fixed: Columns now hydrate properly in `oci_cloud_guard_detector_recipe` and `oci_cloud_guard_responder_recipe` tables ([#124](https://github.com/turbot/steampipe-plugin-oci/pull/124))
+
 ## v0.0.8 [2021-05-20]
 
 _What's new?_

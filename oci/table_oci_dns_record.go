@@ -16,7 +16,7 @@ import (
 func tableDnsRecord(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_dns_record",
-		Description: "OCI Dns Record",
+		Description: "OCI DNS Record",
 		List: &plugin.ListConfig{
 			ParentHydrate: listDnsZones,
 			Hydrate:       listDnsRecords,
@@ -40,6 +40,11 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Rdata"),
 			},
 			{
+				Name:        "is_protected",
+				Description: "A Boolean flag indicating whether or not parts of the record are unable to be explicitly managed.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
 				Name:        "rrset_version",
 				Description: "The latest version of the record's zone in which its RRSet differs from the preceding version.",
 				Type:        proto.ColumnType_STRING,
@@ -56,11 +61,6 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Description: "The Time To Live for the record, in seconds.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Ttl"),
-			},
-			{
-				Name:        "is_protected",
-				Description: "A Boolean flag indicating whether or not parts of the record are unable to be explicitly managed.",
-				Type:        proto.ColumnType_BOOL,
 			},
 
 			// Steampipe standard columns
@@ -115,7 +115,7 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		}
 
 		for _, zone := range response.Items {
-			d.StreamLeafListItem(ctx, zone)
+			d.StreamListItem(ctx, zone)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

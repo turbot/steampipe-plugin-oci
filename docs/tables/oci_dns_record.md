@@ -39,5 +39,5 @@ select
 from
   oci_dns_record
 where
-  rtype ='NS';
+  rtype = 'NS';
 ```

@@ -123,7 +123,7 @@ func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
 	region := d.KeyColumnQuals["region"].GetStringValue()
 
-	// handle empty keyId, endpoint and region in get call
+	// handle empty keyId, endpoint and region in list call
 	if keyId == "" || endpoint == "" || region == "" {
 		return nil, nil
 	}

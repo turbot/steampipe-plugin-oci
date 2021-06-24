@@ -2,6 +2,8 @@
 
 OCI advanced resource query search lets you query any and all compartments in the specified tenancy to find resources that match the specified criteria.
 
+**You must specify a Query** in a `where` clause (`where query='`).
+
 ## Examples
 
 ### Basic info

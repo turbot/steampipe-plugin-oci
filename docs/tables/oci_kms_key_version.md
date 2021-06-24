@@ -1,6 +1,6 @@
 # Table: oci_kms_key_version
 
-OCI kms key version provides the Key Version resource in Oracle Cloud Infrastructure Kms service.
+A key version provides new cryptographic material for a master encryption key. The key must be in an ENABLED state to be rotated.
 
 **You must specify a Key ID, Management Endpoint and Region** in a `where` clause (`where key_id='' and management_endpoint='' and region=''`).
 
@@ -23,7 +23,7 @@ where
   and v.region = k.region;
 ```
 
-### List latest key version of the keys
+### Get latest key version for all keys
 
 ```sql
 select

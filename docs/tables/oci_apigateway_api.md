@@ -1,6 +1,6 @@
 # Table: oci_apigateway_api
 
-The API Gateway service enables you to publish APIs with private endpoints that are accessible from within your network, and which you can expose with public IP addresses if you want them to accept internet traffic.   
+The API Gateway service enables you to publish APIs with private endpoints that are accessible from within your network, and which you can expose with public IP addresses if you want them to accept internet traffic.       
 
 ## Examples
 

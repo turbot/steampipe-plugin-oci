@@ -72,7 +72,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Domain"),
 			},
 
-			// OCI standardcolumns
+			// OCI standard columns
 			{
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
@@ -82,6 +82,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
 				Name:        "tenant_id",

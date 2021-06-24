@@ -9,9 +9,9 @@ OCI kms key version provides the Key Version resource in Oracle Cloud Infrastruc
 ```sql
 select
   id,
+  key_name,
   lifecycle_state,
-  time_created,
-  key_name
+  time_created
 from
   oci_kms_key_version;
 ```

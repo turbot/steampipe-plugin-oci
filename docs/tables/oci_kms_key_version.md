@@ -2,6 +2,8 @@
 
 OCI kms key version provides the Key Version resource in Oracle Cloud Infrastructure Kms service.
 
+**You must specify a Key ID, Management Endpoint and Region** in a `where` clause (`where key_id=' and management_endpoint=' and region='`).
+
 ## Examples
 
 ### Basic info

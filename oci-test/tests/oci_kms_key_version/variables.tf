@@ -64,3 +64,7 @@ output "resource_id" {
 output "key_id" {
   value = oci_kms_key.named_test_resource.id
 }
+
+output "endpoint" {
+  value = oci_kms_vault.named_test_resource.management_endpoint
+}

@@ -2,11 +2,9 @@ package oci
 
 import (
 	"context"
-	"sync"
 
 	"github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -21,10 +19,9 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 		Description:      "OCI KMS Key Version",
 		DefaultTransform: transform.FromCamel(),
 		List: &plugin.ListConfig{
-			ParentHydrate: listKmsVaults,
-			Hydrate:       listKmsKeyVersions,
+			KeyColumns: plugin.AllColumns([]string{"key_id", "management_endpoint", "region"}),
+			Hydrate:    listKmsKeyVersions,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -37,18 +34,8 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "key_name",
-				Description: "A user-friendly name of the key. Does not have to be unique, and it's changeable.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "vault_id",
 				Description: "The OCID of the vault that contains this key version.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "vault_name",
-				Description: "The display name of the vault that contains this key version.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -104,7 +91,6 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -127,119 +113,33 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 type KeyVersionInfo struct {
 	keymanagement.KeyVersionSummary
 	ManagementEndpoint string
-	KeyName            string
-	VaultName          string
+	Region             string
 }
 
 //// LIST FUNCTION
 
 func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	keyId := d.KeyColumnQuals["key_id"].GetStringValue()
+	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
+	region := d.KeyColumnQuals["region"].GetStringValue()
 
-	vaultData := h.Item.(keymanagement.VaultSummary)
-
-	// skip the API call if vault is any of the below state
-	if helpers.StringSliceContains([]string{"CREATING", "DELETING", "DELETED", "RESTORING"}, types.ToString(vaultData.LifecycleState)) {
+	// handle empty keyId, endpoint and region in get call
+	if keyId == "" || endpoint == "" || region == "" {
 		return nil, nil
 	}
-
-	// skip the API call if vault region doesn't match matrix region
-	if ociRegionNameFromId(*vaultData.Id) != common.StringToRegion(region) {
-		return nil, nil
-	}
-
-	// skip the API call if vault compartment doesn't match matrix compartment
-	if *vaultData.CompartmentId != compartment {
-		return nil, nil
-	}
-
-	logger.Debug("listKmsKeyVersions", "OCI_REGION", region, "Compartment", compartment, "Vault Name", *vaultData.DisplayName)
 
 	// Create Session
-	session, err := kmsManagementService(ctx, d, region, *vaultData.ManagementEndpoint)
+	session, err := kmsManagementService(ctx, d, region, endpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	request := keymanagement.ListKeysRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	var keyList []keymanagement.KeySummary
-
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.KmsManagementClient.ListKeys(ctx, request)
-		if err != nil {
-			return nil, err
-		}
-
-		keyList = append(keyList, response.Items...)
-
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
-		} else {
-			pagesLeft = false
-		}
-	}
-
-	var wg sync.WaitGroup
-	keyVersionCh := make(chan []KeyVersionInfo, len(keyList))
-	errorCh := make(chan error, len(keyList))
-
-	// Iterating all the available keys
-	for _, item := range keyList {
-		wg.Add(1)
-		go getRowDataForKeyVersionAsync(ctx, item, session, &wg, keyVersionCh, *vaultData.ManagementEndpoint, *vaultData.DisplayName, errorCh)
-	}
-
-	// wait for all keys to be processed
-	wg.Wait()
-
-	// NOTE: close channel before ranging over results
-	close(keyVersionCh)
-	close(errorCh)
-
-	for err := range errorCh {
-		// return the first error
-		return nil, err
-	}
-
-	for keyVersion := range keyVersionCh {
-		for _, version := range keyVersion {
-			d.StreamListItem(ctx, version)
-		}
-	}
-
-	return nil, err
-}
-
-func getRowDataForKeyVersionAsync(ctx context.Context, item keymanagement.KeySummary, session *session, wg *sync.WaitGroup, versionCh chan []KeyVersionInfo, endpoint string, vaultName string, errorCh chan error) {
-	defer wg.Done()
-
-	rowData, err := getRowDataForKeyVersion(ctx, item, session, endpoint, vaultName)
-	if err != nil {
-		errorCh <- err
-	} else if rowData != nil {
-		versionCh <- rowData
-	}
-}
-
-// List all the available key versions
-func getRowDataForKeyVersion(ctx context.Context, item keymanagement.KeySummary, session *session, endpoint string, vaultName string) ([]KeyVersionInfo, error) {
 	request := keymanagement.ListKeyVersionsRequest{
-		KeyId: item.Id,
+		KeyId: types.String(keyId),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
-
-	var versionInfo []KeyVersionInfo
 
 	pagesLeft := true
 	for pagesLeft {
@@ -249,9 +149,8 @@ func getRowDataForKeyVersion(ctx context.Context, item keymanagement.KeySummary,
 		}
 
 		for _, keyVersion := range response.Items {
-			versionInfo = append(versionInfo, KeyVersionInfo{keyVersion, endpoint, *item.DisplayName, vaultName})
+			d.StreamListItem(ctx, KeyVersionInfo{keyVersion, endpoint, region})
 		}
-
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
 		} else {
@@ -259,7 +158,7 @@ func getRowDataForKeyVersion(ctx context.Context, item keymanagement.KeySummary,
 		}
 	}
 
-	return versionInfo, nil
+	return nil, err
 }
 
 //// HYDRATE FUNCTION
@@ -269,10 +168,10 @@ func getKmsKeyVersion(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 	keyVersion := h.Item.(KeyVersionInfo)
 	endpoint := keyVersion.ManagementEndpoint
-	region := ociRegionNameFromId(*keyVersion.Id)
+	region := keyVersion.Region
 
 	// Create Session
-	session, err := kmsManagementService(ctx, d, string(region), endpoint)
+	session, err := kmsManagementService(ctx, d, region, endpoint)
 	if err != nil {
 		return nil, err
 	}

@@ -2,8 +2,9 @@ package oci
 
 import (
 	"context"
+	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/dns"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -21,7 +22,7 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 			ParentHydrate: listDnsZones,
 			Hydrate:       listDnsRecords,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "domain",
@@ -103,9 +104,8 @@ type dnsRecordInfo struct {
 
 func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("dns.listDnsRecords", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("dns.listDnsRecords", "Compartment", compartment)
 
 	// Create Session
 	session, err := dnsService(ctx, d)
@@ -114,11 +114,12 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	zone := h.Item.(dns.ZoneSummary)
+	region := common.StringToRegion(strings.Split(types.SafeString(zone.Self), ".")[1])
 
 	request := dns.GetZoneRecordsRequest{
 		ZoneNameOrId:  zone.Id,
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -131,7 +132,7 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		}
 
 		for _, record := range response.Items {
-			d.StreamListItem(ctx, dnsRecordInfo{record, compartment, region})
+			d.StreamListItem(ctx, dnsRecordInfo{record, compartment, string(region)})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

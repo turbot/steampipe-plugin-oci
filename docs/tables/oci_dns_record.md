@@ -1,6 +1,6 @@
 # Table: oci_dns_record
 
-DNS or Domain Name System basically translates those domain names into IP addresses. A domain name and its matching IP address is called a “DNS record”.
+DNS or Domain Name System basically translates those domain names into IP addresses. A domain name and its matching IP address is called a DNS record.
 
 ## Examples
 
@@ -30,7 +30,7 @@ where
   not is_protected;
 ```
 
-### List name server type DNS records
+### List DNS records which are name server type
 
 ```sql
 select

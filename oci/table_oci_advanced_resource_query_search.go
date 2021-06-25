@@ -103,9 +103,10 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "region",
+				Name:        "search_region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Region"),
 			},
 			{
 				Name:        "compartment_id",

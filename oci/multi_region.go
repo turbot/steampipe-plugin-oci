@@ -218,7 +218,12 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 		if err != nil {
 			return nil, err
 		}
-		compartments = append(compartments, response.Items...)
+
+		for _, compartment := range response.Items {
+			if !helpers.StringSliceContains([]string{"CREATING", "DELETING", "DELETED"}, types.ToString(compartment.LifecycleState)) {
+				compartments = append(compartments, compartment)
+			}
+		}
 
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -245,32 +250,32 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 	regions := GetConfig(connection).Regions
 
 	if regions != nil {
-	for _, region := range regions {
-		session, err := identityServiceRegional(ctx, pluginQueryData, region)
-		if err != nil {
-			return nil, err
-		}
+		for _, region := range regions {
+			session, err := identityServiceRegional(ctx, pluginQueryData, region)
+			if err != nil {
+				return nil, err
+			}
 
-		// The OCID of the tenancy containing the compartment.
-		request := identity.ListAvailabilityDomainsRequest{
-			CompartmentId: &session.TenancyID,
-			RequestMetadata: oci_common.RequestMetadata{
-				RetryPolicy: getDefaultRetryPolicy(),
-			},
-		}
+			// The OCID of the tenancy containing the compartment.
+			request := identity.ListAvailabilityDomainsRequest{
+				CompartmentId: &session.TenancyID,
+				RequestMetadata: oci_common.RequestMetadata{
+					RetryPolicy: getDefaultRetryPolicy(),
+				},
+			}
 
-		response, err := session.IdentityClient.ListAvailabilityDomains(ctx, request)
-		if err != nil {
-			return nil, err
-		}
+			response, err := session.IdentityClient.ListAvailabilityDomains(ctx, request)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, zones := range response.Items {
-			zonesList = 	append(zonesList, zoneInfo{zones, region})
+			for _, zones := range response.Items {
+				zonesList = append(zonesList, zoneInfo{zones, region})
+			}
 		}
+		return zonesList, nil
 	}
-	return zonesList, nil
-}
- region:= getRegionFromEnvVar()
+	region := getRegionFromEnvVar()
 	session, err := identityServiceRegional(ctx, pluginQueryData, region)
 	if err != nil {
 		return nil, err
@@ -290,7 +295,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 	}
 
 	for _, zones := range response.Items {
-		zonesList = 	append(zonesList, zoneInfo{zones, region})
+		zonesList = append(zonesList, zoneInfo{zones, region})
 	}
 	return zonesList, nil
 }

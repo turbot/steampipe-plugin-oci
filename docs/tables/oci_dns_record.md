@@ -1,6 +1,6 @@
 # Table: oci_dns_record
 
-DNS or Domain Name System basically translates those domain names into IP addresses. A domain name and its matching IP address is called a DNS record.
+Domain Name System(DNS) translates domain names into IP addresses. A domain name and its matching IP address are called a DNS record.
 
 ## Examples
 

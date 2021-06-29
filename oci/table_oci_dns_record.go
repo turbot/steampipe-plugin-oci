@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/dns"
@@ -74,11 +73,6 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 
 			// OCI standard columns
 			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -98,7 +92,6 @@ func tableDnsRecord(_ context.Context) *plugin.Table {
 type dnsRecordInfo struct {
 	dns.Record
 	CompartmentId string
-	Region        string
 }
 
 //// LIST FUNCTION
@@ -115,7 +108,6 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	zone := h.Item.(dns.ZoneSummary)
-	region := common.StringToRegion(strings.Split(types.SafeString(zone.Self), ".")[1])
 
 	request := dns.GetZoneRecordsRequest{
 		ZoneNameOrId:  zone.Id,
@@ -133,7 +125,7 @@ func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		}
 
 		for _, record := range response.Items {
-			d.StreamListItem(ctx, dnsRecordInfo{record, compartment, string(region)})
+			d.StreamListItem(ctx, dnsRecordInfo{record, compartment})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

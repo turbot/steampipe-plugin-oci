@@ -323,7 +323,7 @@ func tableDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "standby_whitelisted_ips",
-				Description: "The client IP access control list (ACL).",
+				Description: "The client IP access control list (ACL). This feature is available for autonomous databases on shared Exadata infrastructure and on Exadata Cloud@Customer. Only clients connecting from an IP address included in the ACL may access the Autonomous Database instance. For shared Exadata infrastructure, this is an array of CIDR (Classless Inter-Domain Routing) notations for a subnet or VCN OCID.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -471,10 +471,6 @@ func getAutonomousDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 //// TRANSFORM FUNCTION
 
-// Priority order for tags
-// 1. System Tags
-// 2. Defined Tags
-// 3. Free-form tags
 func autonomousDatabaseTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

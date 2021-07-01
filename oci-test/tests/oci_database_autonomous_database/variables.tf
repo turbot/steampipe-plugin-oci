@@ -37,7 +37,6 @@ resource "oci_database_autonomous_database" "named_test_resource" {
 
     #The Autonomous Database name cannot be longer than 14 characters.
     db_name = "dbTest"
-
 }
 
 output "resource_name" {
@@ -55,4 +54,3 @@ output "tenancy_ocid" {
 output "resource_id" {
   value = oci_database_autonomous_database.named_test_resource.id
 }
-

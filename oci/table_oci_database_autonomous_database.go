@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAutonomousDatabase(_ context.Context) *plugin.Table {
+func tableDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_database_autonomous_database",
 		Description: "OCI Database Autonomous Database",
@@ -442,6 +442,11 @@ func getAutonomousDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := databaseService(ctx, d, region)

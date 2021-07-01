@@ -162,7 +162,7 @@ func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.resourceSearchClient.SearchResources(ctx, request)
+		response, err := session.ResourceSearchClient.SearchResources(ctx, request)
 		if err != nil {
 			return nil, err
 		}

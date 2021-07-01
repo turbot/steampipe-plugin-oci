@@ -55,7 +55,7 @@ type session struct {
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
-	resourceSearchClient           resourcesearch.ResourceSearchClient
+	ResourceSearchClient           resourcesearch.ResourceSearchClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
 
@@ -832,7 +832,7 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 
 	sess := &session{
 		TenancyID:            tenantId,
-		resourceSearchClient: client,
+		ResourceSearchClient: client,
 	}
 
 	// save session in cache

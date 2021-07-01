@@ -80,6 +80,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_notification_topic":                 tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                       tableOnsSubscription(ctx),
 			"oci_region":                                 tableIdentityRegion(ctx),
+			"oci_database_autonomous_database":           tableAutonomousDatabase(ctx),
 		},
 	}
 	return p

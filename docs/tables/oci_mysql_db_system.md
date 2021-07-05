@@ -29,3 +29,18 @@ from
 where
   lifecycle_state <> 'ACTIVE';
 ```
+
+### List db systems where backup is not enabled
+
+```sql
+select
+  id,
+  display_name,
+  lifecycle_state as state,
+  time_created
+from
+  oci_mysql_db_system
+where
+  lifecycle_state = 'ACTIVE'
+  and backup_policy -> 'isEnabled' <> 'true';
+```

@@ -36,7 +36,7 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the backup.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "description",
@@ -72,49 +72,44 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "db_system_id",
 				Description: "The OCID of the DB System the Backup is associated with.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "backup_type",
 				Description: "The type of backup.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "creation_type",
 				Description: "If the backup was created automatically, or by a manual request.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "data_storage_size_in_gbs",
 				Description: "Initial size of the data volume in GiBs.",
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
+				Transform:   transform.FromField("DataStorageSizeInGBs"),
 			},
 			{
 				Name:        "backup_size_in_gbs",
 				Description: "The size of the backup in GiBs.",
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
+				Transform:   transform.FromField("BackupSizeInGBs"),
 			},
 			{
 				Name:        "retention_in_days",
 				Description: "Number of days to retain this backup.",
 				Type:        proto.ColumnType_INT,
-				// Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "mysql_version",
 				Description: "The version of the DB System used for backup.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "shape_name",
 				Description: "The shape of the DB System instance used for backup.",
 				Type:        proto.ColumnType_STRING,
-				// Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "db_system_snapshot",
@@ -135,7 +130,7 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard Steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
@@ -149,7 +144,13 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("DisplayName"),
 			},
 
-			// Standard OCI columns
+			// OCI standard columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,

@@ -55,5 +55,6 @@ select
   count(*) as backup_count
 from
   oci_mysql_db_backup
-  group by db_system_id;
+group by
+  db_system_id;
 ```

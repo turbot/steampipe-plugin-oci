@@ -229,7 +229,7 @@ func listMysqlDbSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	logger.Debug("listMysqlDbSystems", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlDbSystemService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +243,7 @@ func listMysqlDbSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlClient.ListDbSystems(ctx, request)
+		response, err := session.MysqlDbSystemClient.ListDbSystems(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -286,7 +286,7 @@ func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlDbSystemService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		},
 	}
 
-	response, err := session.MysqlClient.GetDbSystem(ctx, request)
+	response, err := session.MysqlDbSystemClient.GetDbSystem(ctx, request)
 	if err != nil {
 		return nil, err
 	}

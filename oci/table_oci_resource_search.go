@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"errors"
 
 	"github.com/oracle/oci-go-sdk/v36/common"
 	"github.com/oracle/oci-go-sdk/v36/resourcesearch"
@@ -152,6 +153,10 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, nil
 	}
 
+	if query != "" && text != "" {
+		return nil, errors.New("please provide either query or text")
+	}
+
 	// Create Session
 	session, err := resourceSearchService(ctx, d, region)
 	if err != nil {
@@ -176,7 +181,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			}
 
 			for _, resource := range response.Items {
-				d.StreamListItem(ctx, searchInfo{resource, query, region, text})
+				d.StreamListItem(ctx, searchInfo{resource, query, region, ""})
 			}
 			if response.OpcNextPage != nil {
 				request.Page = response.OpcNextPage
@@ -203,7 +208,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			}
 
 			for _, resource := range response.Items {
-				d.StreamListItem(ctx, searchInfo{resource, query, region, text})
+				d.StreamListItem(ctx, searchInfo{resource, "", region, text})
 			}
 			if response.OpcNextPage != nil {
 				request.Page = response.OpcNextPage

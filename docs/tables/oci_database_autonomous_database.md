@@ -1,13 +1,11 @@
 # Table: oci_database_autonomous_database
 
-Oracle Cloud Infrastructure's Autonomous Database is a fully managed, preconfigured database environment with four workload types available, which are:
+Oracle Cloud Infrastructure's Autonomous Database is a fully managed, preconfigured database environment with four workload types available:
 
 - Autonomous Transaction Processing
 - Autonomous Data Warehouse
 - Oracle APEX Application Development
 - Autonomous JSON Database
-
-You do not need to configure or manage any hardware or install any software.
 
 ## Examples
 
@@ -23,7 +21,7 @@ from
   oci_database_autonomous_database;
 ```
 
-### List databases which are not available
+### List databases that are not available
 
 ```sql
 select
@@ -37,7 +35,7 @@ where
   lifecycle_state <> 'AVAILABLE';
 ```
 
-### List databases where data storage size greater than 1024 GB
+### List databases with a data storage size greater than 1024 GB
 
 ```sql
 select

@@ -176,7 +176,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			}
 
 			for _, resource := range response.Items {
-				d.StreamListItem(ctx, searchInfo{resource, query, region, "text"})
+				d.StreamListItem(ctx, searchInfo{resource, query, region, text})
 			}
 			if response.OpcNextPage != nil {
 				request.Page = response.OpcNextPage
@@ -203,7 +203,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			}
 
 			for _, resource := range response.Items {
-				d.StreamListItem(ctx, searchInfo{resource, " ", region, text})
+				d.StreamListItem(ctx, searchInfo{resource, query, region, text})
 			}
 			if response.OpcNextPage != nil {
 				request.Page = response.OpcNextPage

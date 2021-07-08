@@ -803,7 +803,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	return sess, nil
 }
 
-// resourceSearchService returns the service client for OCI Advance Resource Query Search Service
+// resourceSearchService returns the service client for OCI Resource Search Service
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("resourcesearch-%s", region)

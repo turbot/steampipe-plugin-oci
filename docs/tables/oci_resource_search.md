@@ -1,12 +1,12 @@
 # Table: oci_resource_search
 
-OCI resource query search lets you query any and all compartments in the specified tenancy to find resources that match the specified criteria.
+OCI resource query search lets you search any and all compartments in the specified tenancy to find resources that match the specified criteria.
 
 **You must specify a Query or Text** in a `where` clause (`where query=' or where text='`).
 
 ## Examples
 
-### Freetext search example
+### List resources/services/documentations with freetext as test
 
 ```sql
 select
@@ -17,7 +17,7 @@ select
 from
   oci_resource_search
 where
-  text = 'database';
+  text = 'test';
 ```
 
 ### List running instances

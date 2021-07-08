@@ -28,7 +28,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"oci_advanced_resource_query_search":         tableAdvancedResourceQuerySearch(ctx),
 			"oci_apigateway_api":                         tableApiGatewayApi(ctx),
 			"oci_autoscaling_auto_scaling_configuration": tableAutoScalingConfiguration(ctx),
 			"oci_cloud_guard_configuration":              tableCloudGuardConfiguration(ctx),
@@ -80,6 +79,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_notification_topic":                 tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                       tableOnsSubscription(ctx),
 			"oci_region":                                 tableIdentityRegion(ctx),
+			"oci_resource_search":                        tableResourceSearch(ctx),
 		},
 	}
 	return p

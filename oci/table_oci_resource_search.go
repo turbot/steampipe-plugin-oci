@@ -12,13 +12,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
+func tableResourceSearch(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_advanced_resource_query_search",
-		Description: "OCI Advanced Resource Query Search",
+		Name:        "oci_resource_search",
+		Description: "OCI Resource Search",
 		List: &plugin.ListConfig{
-			KeyColumns: plugin.SingleColumn("query"),
-			Hydrate:    listAdvancedResourceQuerySearch,
+			KeyColumns: plugin.AnyColumn([]string{"query", "text"}),
+			Hydrate:    listResourceSearch,
 		},
 		GetMatrixItem: BuildRegionList,
 		Columns: []*plugin.Column{
@@ -60,6 +60,11 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "text",
+				Description: "The freeText based on which the search was done.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "identity_context",
 				Description: "Additional identifiers to use together in a Get request for a specified resource, only required for resource types that explicitly cannot be retrieved by using a single identifier, such as the resource's OCID.",
 				Type:        proto.ColumnType_JSON,
@@ -92,7 +97,7 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(resourceQuerySearchTags),
+				Transform:   transform.From(resourceSearchTags),
 			},
 			{
 				Name:        "title",
@@ -125,23 +130,25 @@ func tableAdvancedResourceQuerySearch(_ context.Context) *plugin.Table {
 	}
 }
 
-type querySearchInfo struct {
+type searchInfo struct {
 	resourcesearch.ResourceSummary
 	Query  string
 	Region string
+	Text   string
 }
 
 //// LIST FUNCTION
 
-func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("listCoreVolumeBackups", "OCI_REGION", region)
+	logger.Debug("listResourceSearch", "OCI_REGION", region)
 
 	query := d.KeyColumnQuals["query"].GetStringValue()
+	text := d.KeyColumnQuals["text"].GetStringValue()
 
-	// handle empty query in list call
-	if query == "" {
+	// handle empty query and text in list call
+	if query == "" && text == "" {
 		return nil, nil
 	}
 
@@ -151,29 +158,58 @@ func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _
 		return nil, err
 	}
 
-	request := resourcesearch.SearchResourcesRequest{
-		SearchDetails: resourcesearch.StructuredSearchDetails{
-			Query: common.String(query),
-		},
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	if query != "" {
+		request := resourcesearch.SearchResourcesRequest{
+			SearchDetails: resourcesearch.StructuredSearchDetails{
+				Query: common.String(query),
+			},
+			RequestMetadata: common.RequestMetadata{
+				RetryPolicy: getDefaultRetryPolicy(),
+			},
+		}
+
+		pagesLeft := true
+		for pagesLeft {
+			response, err := session.ResourceSearchClient.SearchResources(ctx, request)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, resource := range response.Items {
+				d.StreamListItem(ctx, searchInfo{resource, query, region, "text"})
+			}
+			if response.OpcNextPage != nil {
+				request.Page = response.OpcNextPage
+			} else {
+				pagesLeft = false
+			}
+		}
 	}
 
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.ResourceSearchClient.SearchResources(ctx, request)
-		if err != nil {
-			return nil, err
+	if text != "" {
+		request := resourcesearch.SearchResourcesRequest{
+			SearchDetails: resourcesearch.FreeTextSearchDetails{
+				Text: common.String(text),
+			},
+			RequestMetadata: common.RequestMetadata{
+				RetryPolicy: getDefaultRetryPolicy(),
+			},
 		}
+		pagesLeft := true
+		for pagesLeft {
+			response, err := session.ResourceSearchClient.SearchResources(ctx, request)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, resource := range response.Items {
-			d.StreamListItem(ctx, querySearchInfo{resource, query, region})
-		}
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
-		} else {
-			pagesLeft = false
+			for _, resource := range response.Items {
+				d.StreamListItem(ctx, searchInfo{resource, " ", region, text})
+			}
+			if response.OpcNextPage != nil {
+				request.Page = response.OpcNextPage
+			} else {
+				pagesLeft = false
+			}
 		}
 	}
 
@@ -186,8 +222,8 @@ func listAdvancedResourceQuerySearch(ctx context.Context, d *plugin.QueryData, _
 // 1. System Tags
 // 2. Defined Tags
 // 3. Free-form tags
-func resourceQuerySearchTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	resourceSearch := d.HydrateItem.(querySearchInfo)
+func resourceSearchTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	resourceSearch := d.HydrateItem.(searchInfo)
 
 	var tags map[string]interface{}
 

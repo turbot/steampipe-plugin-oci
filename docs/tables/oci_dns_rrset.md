@@ -1,4 +1,4 @@
-# Table: oci_dns_record
+# Table: oci_dns_rrset
 
 Domain Name System(DNS) translates domain names into IP addresses. A domain name and its matching IP address are called a DNS record.
 
@@ -14,7 +14,7 @@ select
   ttl,
   is_protected
 from
-  oci_dns_record;
+  oci_dns_rrset;
 ```
 
 ### List DNS records which are not protected
@@ -25,7 +25,7 @@ select
   rtype,
   is_protected
 from
-  oci_dns_record
+  oci_dns_rrset
 where
   not is_protected;
 ```
@@ -37,7 +37,7 @@ select
   domain,
   rtype
 from
-  oci_dns_record
+  oci_dns_rrset
 where
   rtype = 'NS';
 ```

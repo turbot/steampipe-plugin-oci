@@ -15,11 +15,11 @@ import (
 
 func tableDnsRecord(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_dns_record",
-		Description: "OCI DNS Record",
+		Name:        "oci_dns_rrset",
+		Description: "OCI DNS Record Set",
 		List: &plugin.ListConfig{
 			ParentHydrate: listDnsZones,
-			Hydrate:       listDnsRecords,
+			Hydrate:       listDnsRecordSets,
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -96,10 +96,10 @@ type dnsRecordInfo struct {
 
 //// LIST FUNCTION
 
-func listDnsRecords(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("dns.listDnsRecords", "Compartment", compartment)
+	logger.Debug("dns.listDnsRecordSets", "Compartment", compartment)
 
 	// Create Session
 	session, err := dnsService(ctx, d)

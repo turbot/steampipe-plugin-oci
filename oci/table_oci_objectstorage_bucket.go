@@ -136,7 +136,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "object_lifecycle_policy",
 				Description: "Specifies the object lifecycle policy for the bucket.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getObjectStorageObjectLifecycle,
+				Hydrate:     getObjectStorageBucketObjectLifecycle,
 				Transform:   transform.FromValue(),
 			},
 
@@ -299,8 +299,8 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	return response.Bucket, nil
 }
 
-func getObjectStorageObjectLifecycle(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getObjectStorageObjectLifecycle")
+func getObjectStorageBucketObjectLifecycle(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getObjectStorageBucketObjectLifecycle")
 
 	data := h.Item.(bucketInfo)
 	bucketName := data.Name

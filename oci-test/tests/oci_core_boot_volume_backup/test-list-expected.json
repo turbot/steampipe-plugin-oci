@@ -1,0 +1,12 @@
+[
+  {
+    "boot_volume_id": "{{ output.boot_volume_id.value }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Department": "Finance"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE",
+    "size_in_gbs": 47
+  }
+]

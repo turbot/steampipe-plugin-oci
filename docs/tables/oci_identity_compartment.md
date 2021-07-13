@@ -21,14 +21,12 @@ from
 ```sql
 select
   child.name as name,
-  parent.name as parent_compartment,
+  coalesce(parent.name, 'root') as parent_compartment,
   child.id as id,
-  parent.id as parent_compartment_id
+  coalesce(parent.id, child.tenant_id) as parent_compartment_id
 from
   oci_identity_compartment child
-  left join
-    oci_identity_compartment parent
-    on (child.compartment_id = parent.id)
+  left join oci_identity_compartment parent on (child.compartment_id = parent.id)
 order by
   parent.name;
 ```

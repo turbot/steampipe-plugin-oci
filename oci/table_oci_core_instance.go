@@ -200,7 +200,7 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger.Debug("oci.listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := coreComputeServiceRegional(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := coreComputeServiceRegional(ctx, d, region)
+	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,7 @@
+[
+  {
+    "id": "{{ output.resource_id.value }}",
+    "key_id": "{{ output.key_id.value }}",
+    "lifecycle_state": "ENABLED"
+  }
+]

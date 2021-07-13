@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMysqlDbSystem(_ context.Context) *plugin.Table {
+func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_db_system",
-		Description: "OCI Mysql DB System",
+		Description: "OCI MySQL DB System",
 		List: &plugin.ListConfig{
-			Hydrate: listMysqlDbSystems,
+			Hydrate: listMySQLDBSystems,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getMysqlDbSytem,
+			Hydrate:    getMySQLDBSystem,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -48,14 +48,14 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Description: "The OCID of the Configuration to be used for Instances in this DB System.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "subnet_id",
 				Description: "The OCID of the subnet the DB System is associated with.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "time_created",
@@ -74,7 +74,7 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "data_storage_size_in_gbs",
 				Description: "Initial size of the data volume in GiBs that will be created and attached.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 				Transform:   transform.FromField("DataStorageSizeInGBs"),
 			},
 			{
@@ -91,13 +91,13 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "hostname_label",
 				Description: "The hostname for the primary endpoint of the DB System.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "ip_address",
 				Description: "The IP address the DB System is configured to listen on.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "is_analytics_cluster_attached",
@@ -108,7 +108,7 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_details",
 				Description: "Additional information about the current lifecycleState.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "mysql_version",
@@ -119,19 +119,19 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "port",
 				Description: "The port for primary endpoint of the DB System to listen on.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "port_x",
 				Description: "The network port on which X Plugin listens for TCP/IP connections. This is the X Plugin equivalent of port.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "shape_name",
 				Description: "The shape of the primary instances of the DB System.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "time_updated",
@@ -150,13 +150,13 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "backup_policy",
 				Description: "BackupPolicy The Backup policy for the DB System.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "channels",
 				Description: "A list with a summary of all the Channels attached to the DB System.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "endpoints",
@@ -167,13 +167,13 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 				Name:        "maintenance",
 				Description: "The Maintenance Policy for the DB System.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "source",
 				Description: "DbSystemSource Parameters detailing how to provision the initial data of the DB System.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMysqlDbSytem,
+				Hydrate:     getMySQLDBSystem,
 			},
 
 			// tags
@@ -222,14 +222,14 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMysqlDbSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listMysqlDbSystems", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listMySQLDBSystems", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlDbSystemService(ctx, d, region)
+	session, err := mySQLDBSystemService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +243,7 @@ func listMysqlDbSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlDbSystemClient.ListDbSystems(ctx, request)
+		response, err := session.MySQLDBSystemClient.ListDbSystems(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -263,11 +263,11 @@ func listMysqlDbSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTION
 
-func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getMySQLDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getMysqlDbSytem", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getMySQLDBSystem", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -286,7 +286,7 @@ func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Create Session
-	session, err := mysqlDbSystemService(ctx, d, region)
+	session, err := mySQLDBSystemService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		},
 	}
 
-	response, err := session.MysqlDbSystemClient.GetDbSystem(ctx, request)
+	response, err := session.MySQLDBSystemClient.GetDbSystem(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +309,6 @@ func getMysqlDbSytem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 //// TRANSFORM FUNCTION
 
 func dbSystemTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-
 	freeformTags := dbSystemFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}

@@ -8,38 +8,38 @@ A NoSQL database service offering on-demand throughput and storage based provisi
 
 ```sql
 select
-  db_name,
-  display_name,
+  name,
+  id,
   lifecycle_state,
   time_created
 from
-  oci_database_autonomous_database;
+  oci_nosql_table;
 ```
 
-### List databases that are not available
+### List tables that are not active
 
 ```sql
 select
-  db_name,
-  display_name,
+  name,
+  id,
   lifecycle_state,
   time_created
 from
-  oci_database_autonomous_database
+  oci_nosql_table
 where
-  lifecycle_state <> 'AVAILABLE';
+  lifecycle_state <> 'ACTIVE';
 ```
 
-### List databases with a data storage size greater than 1024 GB
+### List tables with a disk storage size greater than 1024 GB
 
 ```sql
 select
-  db_name,
-  display_name,
+  name,
+  id,
   lifecycle_state,
   time_created
 from
-  oci_database_autonomous_database
+  oci_nosql_table
 where
-  data_storage_size_in_gbs > 1024;
+  cast(table_limits -> 'maxStorageInGBs' as INTEGER) > 1024;
 ```

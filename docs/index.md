@@ -6,7 +6,7 @@ brand_color: "#F80000"
 display_name: "Oracle Cloud Infrastructure"
 short_name: "oci"
 description: "Steampipe plugin for Oracle Cloud Infrastructure services and resource types."
-og_description: "Query Oracle Cloud with SQL! Open source CLI. No DB required." 
+og_description: "Query Oracle Cloud with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/oci-social-graphic.png"
 ---
 
@@ -14,7 +14,7 @@ og_image: "/images/plugins/turbot/oci-social-graphic.png"
 
 [Steampipe](https://steampipe.io) is an open source CLI to instantly query cloud APIs using SQL.
 
-[Oracle Cloud](https://www.oracle.com/cloud/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis. 
+[Oracle Cloud](https://www.oracle.com/cloud/) provides on-demand cloud computing platforms and APIs to authenticated customers on a metered pay-as-you-go basis.
 
 For example:
 
@@ -22,7 +22,7 @@ For example:
 select
   name,
   id,
-  is_mfa_activated,
+  is_mfa_activated
 from
   oci_identity_user;
 ```
@@ -69,7 +69,7 @@ Installing the latest oci plugin will create a config file (`~/.steampipe/config
 ```hcl
 connection "oci_tenant_y" {
   plugin                = "oci"
-  config_file_profile   = "DEFAULT"          # Name of the profile 
+  config_file_profile   = "DEFAULT"          # Name of the profile
   config_path           = "~/.oci/config"    # Path to config file
   regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions
 }
@@ -102,7 +102,7 @@ connection "oci_tenant_x" {
 }
 ```
 
-### Using a named profile 
+### Using a named profile
 
 If you have an OCI config file(~/.oci/config) with multiple profiles setup, you can set the config_file_profile argument:
 

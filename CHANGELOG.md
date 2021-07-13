@@ -1,3 +1,28 @@
+## v0.0.14 [2021-07-01]
+
+_Enhancements_
+
+- Updated: Improved example queries in `oci_kms_key_version` table doc ([#155](https://github.com/turbot/steampipe-plugin-oci/pull/155))
+
+_Bug fixes_
+
+- Fixed: Compartments in creating and deleting states should not be retrieved in `oci_multi_region` table ([#151](https://github.com/turbot/steampipe-plugin-oci/pull/151))
+- Fixed: Remove unused `region` column in `oci_dns_zone` table ([#157](https://github.com/turbot/steampipe-plugin-oci/pull/157))
+- Fixed: Remove unused `region` column in `oci_dns_tsig_key` table ([#159](https://github.com/turbot/steampipe-plugin-oci/pull/159))
+
+## v0.0.13 [2021-06-24]
+
+_What's new?_
+
+- New tables added
+  - [oci_identity_api_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_api_key) ([#143](https://github.com/turbot/steampipe-plugin-oci/pull/143))
+  - [oci_kms_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_kms_key) ([#145](https://github.com/turbot/steampipe-plugin-oci/pull/145))
+  - [oci_kms_key_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_kms_key_version) ([#149](https://github.com/turbot/steampipe-plugin-oci/pull/149))
+
+_Bug fixes_
+
+- Fixed: Example query in `oci_identity_compartment` docs ([#134](https://github.com/turbot/steampipe-plugin-oci/pull/134))
+
 ## v0.0.12 [2021-06-17]
 
 _What's new?_

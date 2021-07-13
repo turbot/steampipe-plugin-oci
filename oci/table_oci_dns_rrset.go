@@ -13,7 +13,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableDnsRecord(_ context.Context) *plugin.Table {
+func tableDnsRecordSet(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_dns_rrset",
 		Description: "OCI DNS Record Set",

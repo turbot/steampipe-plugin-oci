@@ -76,3 +76,17 @@ from
 where
   not replication_enabled;
 ```
+
+### List buckets without lifecycle
+
+```sql
+select
+  name,
+  id,
+  object_lifecycle_policy -> 'items' as object_lifecycle_policy_rules
+from
+  oci_objectstorage_bucket
+where
+  object_lifecycle_policy ->> 'items' is null
+  or jsonb_array_length(object_lifecycle_policy -> 'items') = 0;
+```

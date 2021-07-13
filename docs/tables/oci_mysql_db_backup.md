@@ -5,6 +5,11 @@ MySQL Database Service supports the following backup types:
 FULL: a backup of all data contained in the DB System.
 INCREMENTAL: a backup of only the data which has been added or changed since the last FULL backup.
 
+Backups are run in either of the following ways:
+
+Manual: a backup initiated by an action in the console, or request made through the API. Manual backups can be retained for a minimum of 1 day and a maximum of 365 days. Currently, there is a limit of 100 manual backups per tenancy.
+Automatic: scheduled backups which run, without any required interaction, at a time of the user's choosing. Automatic backups are retained for between 1 and 35 days. The default retention value is 7 days. Once defined, it is not possible to edit the retention period of an automatic backup.
+
 ## Examples
 
 ### Basic info

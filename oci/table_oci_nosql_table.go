@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableNosqlTable(_ context.Context) *plugin.Table {
+func tableNoSQLTable(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_nosql_table",
-		Description: "OCI Nosql Table",
+		Description: "OCI NoSQL Table",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getNosqlTable,
+			Hydrate:    getNoSQLTable,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listNosqlTables,
+			Hydrate: listNoSQLTables,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -53,7 +53,7 @@ func tableNosqlTable(_ context.Context) *plugin.Table {
 				Name:        "ddl_statement",
 				Description: "A DDL statement representing the schema.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getNosqlTable,
+				Hydrate:     getNoSQLTable,
 			},
 			{
 				Name:        "is_auto_reclaimable",
@@ -81,7 +81,7 @@ func tableNosqlTable(_ context.Context) *plugin.Table {
 				Name:        "schema",
 				Description: "The schema of the table.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNosqlTable,
+				Hydrate:     getNoSQLTable,
 			},
 			{
 				Name:        "table_limits",
@@ -111,7 +111,7 @@ func tableNosqlTable(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(nosqlTableTags),
+				Transform:   transform.From(noSQLTableTags),
 			},
 			{
 				Name:        "title",
@@ -146,14 +146,14 @@ func tableNosqlTable(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listNosqlTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listNoSQLTables(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listNosqlTables", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listNoSQLTables", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := nosqlDatabaseService(ctx, d, region)
+	session, err := noSQLDatabaseService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +167,7 @@ func listNosqlTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.NosqlClient.ListTables(ctx, request)
+		response, err := session.NoSQLClient.ListTables(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -187,11 +187,11 @@ func listNosqlTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 //// HYDRATE FUNCTIONS
 
-func getNosqlTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getNoSQLTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getNosqlTable", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getNoSQLTable", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -210,7 +210,7 @@ func getNosqlTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	}
 
 	// Create Session
-	session, err := nosqlDatabaseService(ctx, d, region)
+	session, err := noSQLDatabaseService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +222,7 @@ func getNosqlTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		},
 	}
 
-	response, err := session.NosqlClient.GetTable(ctx, request)
+	response, err := session.NoSQLClient.GetTable(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func getNosqlTable(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 //// TRANSFORM FUNCTION
 
-func nosqlTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func noSQLTableTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	var systemTags map[string]map[string]interface{}

@@ -144,7 +144,7 @@ func listPublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	logger.Error("listPublicIPs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := virtualNetworkService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func getPublicIP(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
-	session, err := virtualNetworkService(ctx, d, region)
+	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

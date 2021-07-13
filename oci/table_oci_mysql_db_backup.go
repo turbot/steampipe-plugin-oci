@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMysqlDbBackup(_ context.Context) *plugin.Table {
+func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_db_backup",
-		Description: "OCI Mysql DB Backup",
+		Description: "OCI MySQL DB Backup",
 		List: &plugin.ListConfig{
-			Hydrate: listMysqlDbBackups,
+			Hydrate: listMySQLDBBackups,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getMysqlDbBackup,
+			Hydrate:    getMySQLDBBackup,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -53,7 +53,7 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The time the backup record was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMysqlDbBackup,
+				Hydrate:     getMySQLDBBackup,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
@@ -87,7 +87,7 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_details",
 				Description: "Additional information about the current lifecycleState.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbBackup,
+				Hydrate:     getMySQLDBBackup,
 			},
 			{
 				Name:        "mysql_version",
@@ -108,14 +108,14 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "time_updated",
 				Description: "The time at which the backup was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMysqlDbBackup,
+				Hydrate:     getMySQLDBBackup,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "db_system_snapshot",
 				Description: "Snapshot of the DbSystem details at the time of the backup.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMysqlDbBackup,
+				Hydrate:     getMySQLDBBackup,
 			},
 
 			// tags
@@ -155,7 +155,7 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbBackup,
+				Hydrate:     getMySQLDBBackup,
 				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
@@ -171,14 +171,14 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMySQLDBBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listMysqlDbBackups", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listMySQLDBBackups", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlDbBackupService(ctx, d, region)
+	session, err := mySQLDBBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlDbBackupClient.ListBackups(ctx, request)
+		response, err := session.MySQLDBBackupClient.ListBackups(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -212,11 +212,11 @@ func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getMySQLDBBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getMysqlDbBackup", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getMySQLDBBackup", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -235,7 +235,7 @@ func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Create Session
-	session, err := mysqlDbBackupService(ctx, d, region)
+	session, err := mySQLDBBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		},
 	}
 
-	response, err := session.MysqlDbBackupClient.GetBackup(ctx, request)
+	response, err := session.MySQLDBBackupClient.GetBackup(ctx, request)
 	if err != nil {
 		return nil, err
 	}

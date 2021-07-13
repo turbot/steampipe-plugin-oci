@@ -52,7 +52,7 @@ where
   retention_in_days < 90;
 ```
 
-### Count of backups per db system
+### Count of backups per DB system
 
 ```sql
 select

@@ -84,7 +84,7 @@ func tableMysqlDbSystem(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "fault_domain",
-				Description: "The name of the Fault Domain the DB System is located in.",
+				Description: "The name of the fault domain the DB System is located in.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

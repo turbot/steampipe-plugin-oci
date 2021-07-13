@@ -28,37 +28,38 @@ provider "oci" {
 }
 
 resource "oci_core_vcn" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    cidr_block = "10.0.0.0/16"
+  compartment_id = var.tenancy_ocid
+  cidr_block     = "10.0.0.0/16"
 }
+
 resource "oci_core_subnet" "named_test_resource" {
-    cidr_block = "10.0.0.0/16"
-    compartment_id = var.tenancy_ocid
-    vcn_id = oci_core_vcn.named_test_resource.id
+  cidr_block     = "10.0.0.0/16"
+  compartment_id = var.tenancy_ocid
+  vcn_id         = oci_core_vcn.named_test_resource.id
 }
 
 resource "oci_mysql_mysql_db_system" "named_test_resource" {
-    #Required
-    admin_password ="Admin@1234"
-    admin_username = "admin"
-    availability_domain = "TvRS:AP-MUMBAI-1-AD-1"
-    compartment_id = var.tenancy_ocid
-    shape_name = "VM.Standard.E2.1"
-    subnet_id = oci_core_subnet.named_test_resource.id
-    display_name = var.resource_name
-    data_storage_size_in_gb = "50"
+  #Required
+  admin_password          = "Admin@1234"
+  admin_username          = "admin"
+  availability_domain     = "TvRS:AP-MUMBAI-1-AD-1"
+  compartment_id          = var.tenancy_ocid
+  shape_name              = "VM.Standard.E2.1"
+  subnet_id               = oci_core_subnet.named_test_resource.id
+  display_name            = var.resource_name
+  data_storage_size_in_gb = "50"
 }
 
 resource "oci_mysql_mysql_backup" "named_test_resource" {
-    #Required
-    db_system_id = oci_mysql_mysql_db_system.named_test_resource.id
+  #Required
+  db_system_id = oci_mysql_mysql_db_system.named_test_resource.id
 
-    #Optional
-    backup_type = "FULL"
-    description = var.resource_name
-    display_name = var.resource_name
-    freeform_tags = {"Name"= var.resource_name}
-    retention_in_days = "365"
+  #Optional
+  backup_type       = "FULL"
+  description       = var.resource_name
+  display_name      = var.resource_name
+  freeform_tags     = { "Name" = var.resource_name }
+  retention_in_days = "365"
 }
 
 output "resource_name" {
@@ -116,7 +117,3 @@ output "creation_type" {
 output "data_storage_size_in_gb" {
   value = oci_mysql_mysql_backup.named_test_resource.data_storage_size_in_gb
 }
-
-
-
-

@@ -39,20 +39,15 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "description",
-				Description: " A user-supplied description of the backup.",
+				Name:        "db_system_id",
+				Description: "The OCID of the DB System the Backup is associated with.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the Backup.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "lifecycle_details",
-				Description: "Additional information about the current lifecycleState.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlDbBackup,
 			},
 			{
 				Name:        "time_created",
@@ -62,17 +57,10 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "time_updated",
-				Description: "The time at which the backup was updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMysqlDbBackup,
-				Transform:   transform.FromField("TimeUpdated.Time"),
-			},
-			{
-				Name:        "db_system_id",
-				Description: "The OCID of the DB System the Backup is associated with.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Name:        "backup_size_in_gbs",
+				Description: "The size of the backup in GiBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("BackupSizeInGBs"),
 			},
 			{
 				Name:        "backup_type",
@@ -85,21 +73,21 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "description",
+				Description: "A user-supplied description of the backup.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "data_storage_size_in_gbs",
 				Description: "Initial size of the data volume in GiBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("DataStorageSizeInGBs"),
 			},
 			{
-				Name:        "backup_size_in_gbs",
-				Description: "The size of the backup in GiBs.",
-				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromField("BackupSizeInGBs"),
-			},
-			{
-				Name:        "retention_in_days",
-				Description: "Number of days to retain this backup.",
-				Type:        proto.ColumnType_INT,
+				Name:        "lifecycle_details",
+				Description: "Additional information about the current lifecycleState.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getMysqlDbBackup,
 			},
 			{
 				Name:        "mysql_version",
@@ -107,9 +95,21 @@ func tableMysqlDbBackup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "retention_in_days",
+				Description: "Number of days to retain this backup.",
+				Type:        proto.ColumnType_INT,
+			},
+			{
 				Name:        "shape_name",
 				Description: "The shape of the DB System instance used for backup.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_updated",
+				Description: "The time at which the backup was updated.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Hydrate:     getMysqlDbBackup,
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "db_system_snapshot",
@@ -178,7 +178,7 @@ func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	logger.Debug("listMysqlDbBackups", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlDbBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlClient.ListBackups(ctx, request)
+		response, err := session.MysqlDbBackupClient.ListBackups(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -210,7 +210,7 @@ func listMysqlDbBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
 func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
@@ -235,7 +235,7 @@ func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlDbBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		},
 	}
 
-	response, err := session.MysqlClient.GetBackup(ctx, request)
+	response, err := session.MysqlDbBackupClient.GetBackup(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +258,6 @@ func getMysqlDbBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 //// TRANSFORM FUNCTION
 
 func dbBackupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-
 	freeformTags := dbBackupFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}

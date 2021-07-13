@@ -1,6 +1,9 @@
 # Table: oci_mysql_db_backup
 
-Backups help to restore lost data to Cloud SQL instance. Backups protect data from loss or damage.
+MySQL Database Service supports the following backup types:
+
+FULL: a backup of all data contained in the DB System.
+INCREMENTAL: a backup of only the data which has been added or changed since the last FULL backup.
 
 ## Examples
 
@@ -18,7 +21,6 @@ from
   oci_mysql_db_backup;
 ```
 
-
 ### List manual backups
 
 ```sql
@@ -32,7 +34,6 @@ where
   creation_type = 'MANUAL';
 ```
 
-
 ### List backups with retention days less than 90 days
 
 ```sql
@@ -45,7 +46,6 @@ from
 where
   retention_in_days < 90;
 ```
-
 
 ### Count of backups per db system
 

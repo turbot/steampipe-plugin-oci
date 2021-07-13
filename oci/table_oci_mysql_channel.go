@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMysqlChannel(_ context.Context) *plugin.Table {
+func tableMySQLChannel(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_channel",
-		Description: "OCI Mysql Channel",
+		Description: "OCI MySQL Channel",
 		List: &plugin.ListConfig{
-			Hydrate: listMysqlChannels,
+			Hydrate: listMySQLChannels,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getMysqlChannel,
+			Hydrate:    getMySQLChannel,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -53,26 +53,26 @@ func tableMysqlChannel(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The date and time the Channel was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMysqlChannel,
+				Hydrate:     getMySQLChannel,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "description",
 				Description: "A user-supplied description of the backup.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlChannel,
+				Hydrate:     getMySQLChannel,
 			},
 			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the state of the Channel.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlChannel,
+				Hydrate:     getMySQLChannel,
 			},
 			{
 				Name:        "time_updated",
 				Description: "The time the Channel was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMysqlChannel,
+				Hydrate:     getMySQLChannel,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
@@ -123,7 +123,7 @@ func tableMysqlChannel(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlChannel,
+				Hydrate:     getMySQLChannel,
 				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
@@ -139,14 +139,14 @@ func tableMysqlChannel(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMySQLChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listMysqlChannels", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listMySQLChannels", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlChannelService(ctx, d, region)
+	session, err := mySQLChannelService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlChannelClient.ListChannels(ctx, request)
+		response, err := session.MySQLChannelClient.ListChannels(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -180,11 +180,11 @@ func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 //// HYDRATE FUNCTIONS
 
-func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getMySQLChannel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getMysqlChannel", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getMySQLChannel", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -203,7 +203,7 @@ func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Create Session
-	session, err := mysqlChannelService(ctx, d, region)
+	session, err := mySQLChannelService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		},
 	}
 
-	response, err := session.MysqlChannelClient.GetChannel(ctx, request)
+	response, err := session.MySQLChannelClient.GetChannel(ctx, request)
 	if err != nil {
 		return nil, err
 	}

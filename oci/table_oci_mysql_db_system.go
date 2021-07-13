@@ -96,8 +96,9 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			{
 				Name:        "ip_address",
 				Description: "The IP address the DB System is configured to listen on.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_IPADDR,
 				Hydrate:     getMySQLDBSystem,
+				Transform:   transform.FromField("IpAddress"),
 			},
 			{
 				Name:        "is_analytics_cluster_attached",

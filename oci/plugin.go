@@ -77,6 +77,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_kms_vault":                              tableKmsVault(ctx),
 			"oci_logging_log":                            tableLoggingLog(ctx),
 			"oci_logging_log_group":                      tableLoggingLogGroup(ctx),
+			"oci_nosql_table":                            tableNosqlTable(ctx),
 			"oci_objectstorage_bucket":                   tableObjectStorageBucket(ctx),
 			"oci_ons_notification_topic":                 tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                       tableOnsSubscription(ctx),

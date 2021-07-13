@@ -29,7 +29,7 @@ func tableCorePublicIP(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -42,52 +42,54 @@ func tableCorePublicIP(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_state",
 				Description: "The public IP's current state.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LifecycleState").Transform(transform.ToString),
+			},
+			{
+				Name:        "ip_address",
+				Description: "The public IP address of the publicIp object.",
+				Type:        proto.ColumnType_IPADDR,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "scope",
-				Description: "Whether the public IP is regional or specific to a particular availability domain.",
+				Description: "Indicates whether the public IP is regional or specific to a particular availability domain.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Scope").Transform(transform.ToString),
 			},
 			{
 				Name:        "assigned_entity_id",
 				Description: "The OCID of the entity the public IP is assigned to, or in the process of being assigned to.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "assigned_entity_type",
 				Description: "The type of entity the public IP is assigned to, or in the process of being assigned to.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("AssignedEntityType").Transform(transform.ToString),
 			},
 			{
 				Name:        "availability_domain",
 				Description: "The public IP's availability domain. This property is set only for ephemeral public IPs that are assigned to a private IP.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "ip_address",
-				Description: "The public IP address of the publicIp object.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Transform:   transform.FromField("AvailabilityDomain"),
 			},
 			{
 				Name:        "lifetime",
 				Description: "Defines when the public IP is deleted and released back to Oracle's public IP pool.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "private_ip_id",
-				Description: "The OCID of the private IP that the public IP is currently assigned to, or in the process of being assigned to.",
-				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Lifetime").Transform(transform.ToString),
 			},
 			{
 				Name:        "public_ip_pool_id",
 				Description: "The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the pool object created in the current tenancy.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the publicIP was created.",
-				Type:        proto.ColumnType_STRING,
+				Description: "The date and time the public IP was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
@@ -138,10 +140,9 @@ func tableCorePublicIP(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("listPublicIPs", "Compartment", compartment, "OCI_REGION", region)
+	plugin.Logger(ctx).Error("listPublicIPs", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -151,7 +152,7 @@ func listPublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	request := core.ListPublicIpsRequest{
 		CompartmentId: types.String(compartment),
-		Scope:         `REGION`,
+		Scope:         "REGION",
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -177,20 +178,19 @@ func listPublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
 func getPublicIP(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getPublicIP")
-	logger := plugin.Logger(ctx)
+
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Error("oci.getPublicIP", "Compartment", compartment, "OCI_REGION", region)
+	plugin.Logger(ctx).Error("oci.getPublicIP", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// Create Session
@@ -214,7 +214,7 @@ func getPublicIP(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	return response.PublicIp, nil
 }
 
-//// TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
 
 func publicIPTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	publicIP := d.HydrateItem.(core.PublicIp)
@@ -236,7 +236,6 @@ func publicIPTags(_ context.Context, d *transform.TransformData) (interface{}, e
 			for key, value := range v {
 				tags[key] = value
 			}
-
 		}
 	}
 

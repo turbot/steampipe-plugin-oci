@@ -17,7 +17,6 @@ from
   oci_mysql_channel;
 ```
 
-
 ### List disabled channels
 
 ```sql
@@ -34,7 +33,6 @@ from
 where
   not is_enabled;
 ```
-
 
 ### List target details of channels
 

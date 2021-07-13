@@ -39,21 +39,15 @@ func tableMysqlChannel(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "description",
-				Description: " A user-supplied description of the backup.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlChannel,
-			},
-			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the Channel.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "lifecycle_details",
-				Description: "A message describing the state of the Channel.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMysqlChannel,
+				Name:        "is_enabled",
+				Description: "Whether the Channel has been enabled by the user.",
+				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -63,17 +57,23 @@ func tableMysqlChannel(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
+				Name:        "description",
+				Description: "A user-supplied description of the backup.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getMysqlChannel,
+			},
+			{
+				Name:        "lifecycle_details",
+				Description: "A message describing the state of the Channel.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getMysqlChannel,
+			},
+			{
 				Name:        "time_updated",
 				Description: "The time the Channel was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Hydrate:     getMysqlChannel,
 				Transform:   transform.FromField("TimeUpdated.Time"),
-			},
-			{
-				Name:        "is_enabled",
-				Description: "Whether the Channel has been enabled by the user.",
-				Type:        proto.ColumnType_BOOL,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "source",
@@ -146,12 +146,10 @@ func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger.Debug("listMysqlChannels", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlChannelService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
-
-	plugin.Logger(ctx).Trace("1234")
 
 	request := mysql.ListChannelsRequest{
 		CompartmentId: types.String(compartment),
@@ -160,17 +158,14 @@ func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		},
 	}
 
-	plugin.Logger(ctx).Trace("2345")
-
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MysqlClient.ListChannels(ctx, request)
+		response, err := session.MysqlChannelClient.ListChannels(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, channel := range response.Items {
-			plugin.Logger(ctx).Trace("List2345", channel)
 			d.StreamListItem(ctx, channel)
 		}
 		if response.OpcNextPage != nil {
@@ -183,7 +178,7 @@ func listMysqlChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
 func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
@@ -208,7 +203,7 @@ func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	}
 
 	// Create Session
-	session, err := mysqlService(ctx, d, region)
+	session, err := mysqlChannelService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +215,7 @@ func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		},
 	}
 
-	response, err := session.MysqlClient.GetChannel(ctx, request)
+	response, err := session.MysqlChannelClient.GetChannel(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +226,6 @@ func getMysqlChannel(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 //// TRANSFORM FUNCTION
 
 func channelTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-
 	freeformTags := channelFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}

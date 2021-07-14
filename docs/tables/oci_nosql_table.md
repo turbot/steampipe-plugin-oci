@@ -30,7 +30,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List tables with a disk storage size greater than 1024 GB
+### List tables with disk storage greater than 1024 GB
 
 ```sql
 select

@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/apigateway"
 	"github.com/oracle/oci-go-sdk/v36/audit"
 	"github.com/oracle/oci-go-sdk/v36/autoscaling"
+	"github.com/oracle/oci-go-sdk/v36/budget"
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
@@ -42,6 +43,7 @@ type session struct {
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
+	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
 	DatabaseClient                 database.DatabaseClient
@@ -833,6 +835,44 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 	sess := &session{
 		TenancyID:      tenantID,
 		DatabaseClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// budgetService returns the service client for OCI budget Service
+func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("budget-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("budgetService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := budget.NewBudgetClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantID,
+		BudgetClient: client,
 	}
 
 	// save session in cache

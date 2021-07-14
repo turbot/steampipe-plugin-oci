@@ -6,7 +6,6 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI tenancy id."
 }
 
@@ -23,16 +22,16 @@ variable "oci_ad" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_core_public_ip" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  lifetime = "RESERVED"
+  lifetime       = "RESERVED"
 
-  display_name = var.resource_name
-  freeform_tags = {"Name"= var.resource_name}
+  display_name  = var.resource_name
+  freeform_tags = { "Name" = var.resource_name }
 }
 
 output "tenancy_ocid" {
@@ -50,4 +49,3 @@ output "resource_id" {
 output "resource_name" {
   value = var.resource_name
 }
-

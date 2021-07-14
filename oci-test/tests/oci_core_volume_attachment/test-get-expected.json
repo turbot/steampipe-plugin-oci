@@ -1,0 +1,7 @@
+[
+  {
+    "id": "{{ output.resource_id.value }}",
+    "is_read_only": false,
+    "lifecycle_state": "AVAILABLE"
+  }
+]

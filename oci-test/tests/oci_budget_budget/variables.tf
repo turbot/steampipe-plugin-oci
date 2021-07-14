@@ -27,10 +27,11 @@ provider "oci" {
 }
 
 resource "oci_budget_budget" "named_test_resource" {
-  #Required
-  amount         = var.budget_amount
-  compartment_id = var.tenancy_ocid
-  reset_period   = var.budget_reset_period
+  display_name          = var.resource_name
+  amount                = 100
+  compartment_id        = var.tenancy_ocid
+  reset_period          = "MONTHLY"
+  target_compartment_id = var.tenancy_ocid
 }
 
 output "resource_name" {

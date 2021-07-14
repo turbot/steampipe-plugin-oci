@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v36/budget"
 	"github.com/oracle/oci-go-sdk/v36/common"
@@ -33,7 +34,7 @@ func tableBudget(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the budget",
+				Description: "The OCID of the budget.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -51,6 +52,12 @@ func tableBudget(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_state",
 				Description: "The current state of the budget.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "target_compartment_id",
+				Description: "This is DEPRECATED. For backwards compatability, the property will be populated when targetType is COMPARTMENT AND targets contains EXACT ONE target compartment ocid. For all other scenarios, this property will be left empty.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -207,6 +214,11 @@ func getBudget(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getBudget", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 

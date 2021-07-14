@@ -29,7 +29,7 @@ func tableNoSQLTable(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
-				Description: "immutable Human-friendly table name.",
+				Description: "Immutable human-friendly table name.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

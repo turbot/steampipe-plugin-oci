@@ -222,6 +222,11 @@ func getBudget(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := budgetService(ctx, d, region)
 	if err != nil {

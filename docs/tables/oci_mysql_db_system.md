@@ -16,7 +16,7 @@ from
   oci_mysql_db_system;
 ```
 
-### List DB systems which are not active
+### List DB systems that are not active
 
 ```sql
 select
@@ -30,7 +30,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List DB systems where backup is not enabled
+### List DB systems with backups not enabled
 
 ```sql
 select

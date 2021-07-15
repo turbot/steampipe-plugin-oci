@@ -1,6 +1,6 @@
 # Table: oci_mysql_channel
 
-A Channel connecting a DB System to an external entity.
+A channel connects a DB system to an external entity, establishing replication from a source to a target.
 
 ## Examples
 
@@ -34,7 +34,7 @@ where
   not is_enabled;
 ```
 
-### List target details of channels
+### Get target details for each channel
 
 ```sql
 select

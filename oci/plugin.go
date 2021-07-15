@@ -30,6 +30,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			"oci_apigateway_api":                         tableApiGatewayApi(ctx),
 			"oci_autoscaling_auto_scaling_configuration": tableAutoScalingConfiguration(ctx),
+			"oci_budget_budget":                          tableBudget(ctx),
 			"oci_cloud_guard_configuration":              tableCloudGuardConfiguration(ctx),
 			"oci_cloud_guard_detector_recipe":            tableCloudGuardDetectorRecipe(ctx),
 			"oci_cloud_guard_managed_list":               tableCloudGuardManagedList(ctx),

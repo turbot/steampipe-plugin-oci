@@ -30,6 +30,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
 	"github.com/oracle/oci-go-sdk/v36/logging"
 	"github.com/oracle/oci-go-sdk/v36/mysql"
+	"github.com/oracle/oci-go-sdk/v36/nosql"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/oracle/oci-go-sdk/v36/ons"
 	"github.com/turbot/go-kit/types"
@@ -56,6 +57,7 @@ type session struct {
 	LoggingManagementClient        logging.LoggingManagementClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
+	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
@@ -912,6 +914,44 @@ func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region strin
 	sess := &session{
 		TenancyID:           tenantID,
 		MySQLDBSystemClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// noSQLDatabaseService returns the service client for OCI NoSQL Database Service
+func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("noSQL-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("noSQLDatabaseService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := nosql.NewNosqlClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantID,
+		NoSQLClient: client,
 	}
 
 	// save session in cache

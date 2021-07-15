@@ -81,6 +81,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_logging_log_group":                      tableLoggingLogGroup(ctx),
 			"oci_mysql_channel":                          tableMySQLChannel(ctx),
 			"oci_mysql_db_system":                        tableMySQLDBSystem(ctx),
+			"oci_nosql_table":                            tableNoSQLTable(ctx),
 			"oci_objectstorage_bucket":                   tableObjectStorageBucket(ctx),
 			"oci_ons_notification_topic":                 tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                       tableOnsSubscription(ctx),

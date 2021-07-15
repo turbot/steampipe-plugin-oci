@@ -1,6 +1,6 @@
 # Table: oci_dns_rrset
 
-Domain Name System(DNS) translates domain names into IP addresses. A domain name and its matching IP address are called a DNS record.
+A DNS resource record (RR) set is a collection of DNS records of the same domain and type.
 
 ## Examples
 
@@ -30,7 +30,7 @@ where
   not is_protected;
 ```
 
-### List DNS records which are name server type
+### List name server DNS records
 
 ```sql
 select

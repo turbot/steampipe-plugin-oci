@@ -53,6 +53,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume_backup":                     tableCoreVolumeBackup(ctx),
 			"oci_core_volume_backup_policy":              tableCoreVolumeBackupPolicy(ctx),
 			"oci_database_autonomous_database":           tableDatabaseAutonomousDatabase(ctx),
+			"oci_dns_rrset":                              tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                           tableDnsTsigKey(ctx),
 			"oci_dns_zone":                               tableDnsZone(ctx),
 			"oci_events_rule":                            tableEventsRule(ctx),

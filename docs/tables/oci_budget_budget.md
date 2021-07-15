@@ -17,7 +17,7 @@ from
   oci_budget_budget;
 ```
 
-### List budgets which are not active
+### List budgets that are not active
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List budgets where actual spend more than 100 percent
+### List budgets with actual spend more than 100 percent
 
 ```sql
 select

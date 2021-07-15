@@ -18,7 +18,7 @@ from
   oci_core_public_ip;
 ```
 
-### List of unused public IPs
+### List unused public IPs
 
 ```sql
 select

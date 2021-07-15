@@ -144,6 +144,63 @@ func tableBudgetAlertRule(_ context.Context) *plugin.Table {
 	}
 }
 
+type AlertRuleInfo struct {
+
+	// The OCID of the alert rule
+	Id *string `mandatory:"true" json:"id"`
+
+	// The OCID of the budget
+	BudgetId *string `mandatory:"true" json:"budgetId"`
+
+	// The name of the alert rule.
+	DisplayName *string `mandatory:"true" json:"displayName"`
+
+	// The type of alert. Valid values are ACTUAL (the alert will trigger based on actual usage) or
+	// FORECAST (the alert will trigger based on predicted usage).
+	Type budget.AlertTypeEnum `mandatory:"true" json:"type"`
+
+	// The threshold for triggering the alert. If thresholdType is PERCENTAGE, the maximum value is 10000.
+	Threshold *float32 `mandatory:"true" json:"threshold"`
+
+	// The type of threshold.
+	ThresholdType budget.ThresholdTypeEnum `mandatory:"true" json:"thresholdType"`
+
+	// The current state of the alert rule.
+	LifecycleState budget.LifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
+
+	// Delimited list of email addresses to receive the alert when it triggers.
+	// Delimiter character can be comma, space, TAB, or semicolon.
+	Recipients *string `mandatory:"true" json:"recipients"`
+
+	// Time budget was created
+	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
+
+	// Time budget was updated
+	TimeUpdated *common.SDKTime `mandatory:"true" json:"timeUpdated"`
+
+	// Custom message sent when alert is triggered
+	Message *string `mandatory:"false" json:"message"`
+
+	// The description of the alert rule.
+	Description *string `mandatory:"false" json:"description"`
+
+	// Version of the alert rule. Starts from 1 and increments by 1.
+	Version *int `mandatory:"false" json:"version"`
+
+	// Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Department": "Finance"}`
+	FreeformTags map[string]string `mandatory:"false" json:"freeformTags"`
+
+	// Defined tags for this resource. Each key is predefined and scoped to a namespace.
+	// For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
+	// Example: `{"Operations": {"CostCenter": "42"}}`
+	DefinedTags map[string]map[string]interface{} `mandatory:"false" json:"definedTags"`
+
+	// The compartment id
+	CompartmentId string
+}
+
 //// LIST FUNCTION
 
 func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
@@ -174,7 +231,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			return nil, err
 		}
 		for _, rule := range response.Items {
-			d.StreamListItem(ctx, rule)
+			d.StreamListItem(ctx, AlertRuleInfo{rule.Id, rule.BudgetId, rule.DisplayName, rule.Type, rule.Threshold, rule.ThresholdType, rule.LifecycleState, rule.Recipients, rule.TimeCreated, rule.TimeUpdated, rule.Message, rule.Description, rule.Version, rule.FreeformTags, rule.DefinedTags, compartment})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -226,25 +283,15 @@ func getBudgetAlertRule(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
-	return response.AlertRule, nil
+	rule := response.AlertRule
+
+	return AlertRuleInfo{rule.Id, rule.BudgetId, rule.DisplayName, rule.Type, rule.Threshold, rule.ThresholdType, rule.LifecycleState, rule.Recipients, rule.TimeCreated, rule.TimeUpdated, rule.Message, rule.Description, rule.Version, rule.FreeformTags, rule.DefinedTags, compartment}, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func alertRuleTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	var freeformTags map[string]string
-	var definedTags map[string]map[string]interface{}
-
-	switch d.HydrateItem.(type) {
-	case budget.BudgetSummary:
-		alertRule := d.HydrateItem.(budget.AlertRuleSummary)
-		freeformTags = alertRule.FreeformTags
-		definedTags = alertRule.DefinedTags
-	case budget.AlertRule:
-		alertRule := d.HydrateItem.(budget.AlertRule)
-		freeformTags = alertRule.FreeformTags
-		definedTags = alertRule.DefinedTags
-	}
+func alertRuleTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := d.HydrateItem.(AlertRuleInfo).FreeformTags
 
 	var tags map[string]interface{}
 
@@ -254,6 +301,8 @@ func alertRuleTags(_ context.Context, d *transform.TransformData) (interface{}, 
 			tags[k] = v
 		}
 	}
+
+	definedTags := d.HydrateItem.(AlertRuleInfo).DefinedTags
 
 	if definedTags != nil {
 		if tags == nil {

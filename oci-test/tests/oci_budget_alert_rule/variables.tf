@@ -34,8 +34,9 @@ resource "oci_budget_budget" "named_test_resource" {
   target_compartment_id = var.tenancy_ocid
 }
 
-resource "oci_budget_alert_rule" "test_alert_rule" {
+resource "oci_budget_alert_rule" "named_test_resource" {
   budget_id      = oci_budget_budget.named_test_resource.id
+  display_name   = var.resource_name
   threshold      = "100"
   threshold_type = "PERCENTAGE"
   type           = "ACTUAL"

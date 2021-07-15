@@ -90,7 +90,7 @@ func tableBudgetAlertRule(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
-				Name:        "Type",
+				Name:        "type",
 				Description: "The type of alert.",
 				Type:        proto.ColumnType_STRING,
 			},

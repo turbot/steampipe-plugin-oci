@@ -3,8 +3,8 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/identity"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -105,7 +105,7 @@ func listIdentityCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h 
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListCustomerSecretKeysRequest{
-		UserId:        user.Id,
+		UserId: user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

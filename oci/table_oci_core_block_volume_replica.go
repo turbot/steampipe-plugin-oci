@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -14,63 +14,72 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreNatGateway(_ context.Context) *plugin.Table {
+func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_nat_gateway",
-		Description: "OCI Core Nat Gateway",
+		Name:        "oci_core_block_volume_replica",
+		Description: "OCI Core Block Volume Replica",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
-			Hydrate:    getCoreNatGateway,
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getCoreBlockVolumeReplica,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreNatGateways,
+			ParentHydrate: listCoreVolumes,
+			Hydrate:       listCoreBlockVolumeReplicas,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
-				Description: "The OCID of the NAT gateway.",
+				Description: "The block volume replica's Oracle ID (OCID).",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name of the NAT gateway.",
+				Description: "A user-friendly name.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The NAT gateway's current state.",
+				Description: "The current state of a block volume replica.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "vcn_id",
-				Description: "The OCID of the VCN the NAT gateway belongs to.",
+				Name:        "block_volume_id",
+				Description: "The OCID of the source block volume.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "availability_domain",
+				Description: "The availability domain of the block volume replica.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the NAT gateway was created.",
+				Description: "The date and time the block volume replica was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+
+			// other columns
 			{
-				Name:        "nat_ip",
-				Description: "The IP address associated with the NAT gateway.",
-				Type:        proto.ColumnType_IPADDR,
-				Transform:   transform.FromCamel(),
+				Name:        "size_in_gbs",
+				Description: "The size of the source block volume, in GBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInGBs"),
 			},
 			{
-				Name:        "public_ip_id",
-				Description: "The OCID of the public IP address associated with the NAT gateway.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Name:        "time_last_synced",
+				Description: "The date and time the block volume replica was last synced from the source block volume.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeLastSynced.Time"),
 			},
 			{
-				Name:        "block_traffic",
-				Description: "Specifies whether the NAT gateway blocks traffic through it.",
-				Type:        proto.ColumnType_BOOL,
+				Name:        "total_data_transferred_in_gbs",
+				Description: "The total size of the data transferred from the source block volume to the block volume replica, in GBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("TotalDataTransferredInGBs"),
 			},
 
 			// tags
@@ -90,7 +99,7 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(natGatewayTags),
+				Transform:   transform.From(volumeReplicaTags),
 			},
 			{
 				Name:        "title",
@@ -125,34 +134,37 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.listCoreNatGateways", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreBlockVolumeReplicas", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListNatGatewaysRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+	availabilityDomain := h.Item.(volumneInfo).AvailabilityDomain
+
+	request := core.ListBlockVolumeReplicasRequest{
+		AvailabilityDomain: availabilityDomain,
+		CompartmentId:      types.String(compartment),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListNatGateways(ctx, request)
+		response, err := session.BlockstorageClient.ListBlockVolumeReplicas(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, natGateway := range response.Items {
-			d.StreamListItem(ctx, natGateway)
+		for _, volumeReplica := range response.Items {
+			d.StreamListItem(ctx, volumeReplica)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -166,67 +178,68 @@ func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 //// HYDRATE FUNCTION
 
-func getCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getCoreNatGateway")
+func getCoreBlockVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreBlockVolumeReplica", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	if strings.TrimSpace(id) == "" {
+	// handle empty volume id in get call
+	if id == "" {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetNatGatewayRequest{
-		NatGatewayId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+	request := core.GetBlockVolumeReplicaRequest{
+		BlockVolumeReplicaId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetNatGateway(ctx, request)
+	response, err := session.BlockstorageClient.GetBlockVolumeReplica(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.NatGateway, nil
+	return response.BlockVolumeReplica, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	natGateway := d.HydrateItem.(core.NatGateway)
+func volumeReplicaTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	volumeReplica := d.HydrateItem.(core.BlockVolumeReplica)
 
 	var tags map[string]interface{}
 
-	if natGateway.FreeformTags != nil {
+	if volumeReplica.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range natGateway.FreeformTags {
+		for k, v := range volumeReplica.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if natGateway.DefinedTags != nil {
+	if volumeReplica.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range natGateway.DefinedTags {
+		for _, v := range volumeReplica.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
+
 		}
 	}
 

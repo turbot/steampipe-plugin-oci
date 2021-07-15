@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/core"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -121,7 +121,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -151,7 +151,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Id").Transform(ociRegionName),
-	  	},
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,

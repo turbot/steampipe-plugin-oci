@@ -1,6 +1,6 @@
 # Table: oci_budget_alert_rule
 
-You can set email alerts on your budgets. You can set alerts that are based on a percentage of your budget or an absolute amount, and on your actual spending or your forecast spending.
+Budget alert rules can contain rules based on a percentage of your budget or an absolute amount, and on your actual spending or your forecast spending.
 
 ## Examples
 
@@ -17,7 +17,7 @@ from
   oci_budget_alert_rule;
 ```
 
-### List alert rules which are not active
+### List alert rules that are not active
 
 ```sql
 select
@@ -32,7 +32,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List alert rules where threshold more than 100 percentage
+### List alert rules with a threshold more than 100 percentage
 
 ```sql
 select

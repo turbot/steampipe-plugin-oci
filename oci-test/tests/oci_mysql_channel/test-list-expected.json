@@ -1,0 +1,11 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "name": "{{ resourceName }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "is_enabled": true,
+    "lifecycle_state": "{{ output.state.value }}"
+  }
+]

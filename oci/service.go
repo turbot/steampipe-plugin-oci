@@ -54,6 +54,7 @@ type session struct {
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
+	MySQLChannelClient             mysql.ChannelsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
@@ -835,6 +836,44 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 	sess := &session{
 		TenancyID:      tenantID,
 		DatabaseClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLChannelService returns the service client for OCI MySQL Channel Service
+func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mySQLChannel-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLChannelService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewChannelsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantID,
+		MySQLChannelClient: client,
 	}
 
 	// save session in cache

@@ -14,16 +14,16 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMySQLDBBackup(_ context.Context) *plugin.Table {
+func tableMySQLBackup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_mysql_db_backup",
-		Description: "OCI MySQL DB Backup",
+		Name:        "oci_mysql_backup",
+		Description: "OCI MySQL Backup",
 		List: &plugin.ListConfig{
-			Hydrate: listMySQLDBBackups,
+			Hydrate: listMySQLBackups,
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getMySQLDBBackup,
+			Hydrate:    getMySQLBackup,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -53,7 +53,7 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 				Name:        "time_created",
 				Description: "The time the backup record was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMySQLDBBackup,
+				Hydrate:     getMySQLBackup,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
@@ -87,7 +87,7 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_details",
 				Description: "Additional information about the current lifecycleState.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMySQLDBBackup,
+				Hydrate:     getMySQLBackup,
 			},
 			{
 				Name:        "mysql_version",
@@ -108,14 +108,14 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 				Name:        "time_updated",
 				Description: "The time at which the backup was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getMySQLDBBackup,
+				Hydrate:     getMySQLBackup,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "db_system_snapshot",
 				Description: "Snapshot of the DbSystem details at the time of the backup.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMySQLDBBackup,
+				Hydrate:     getMySQLBackup,
 			},
 
 			// tags
@@ -135,7 +135,7 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(dbBackupTags),
+				Transform:   transform.From(backupTags),
 			},
 			{
 				Name:        "title",
@@ -155,7 +155,7 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMySQLDBBackup,
+				Hydrate:     getMySQLBackup,
 				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
@@ -171,11 +171,11 @@ func tableMySQLDBBackup(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMySQLDBBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listMySQLDBBackups", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listMySQLBackups", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := mySQLDBBackupService(ctx, d, region)
@@ -212,11 +212,11 @@ func listMySQLDBBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 //// HYDRATE FUNCTIONS
 
-func getMySQLDBBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getMySQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getMySQLDBBackup", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getMySQLBackup", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -257,8 +257,8 @@ func getMySQLDBBackup(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 //// TRANSFORM FUNCTION
 
-func dbBackupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := dbBackupFreeformTags(d.HydrateItem)
+func backupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := backupFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -269,7 +269,7 @@ func dbBackupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 		}
 	}
 
-	definedTags := dbBackupDefinedTags(d.HydrateItem)
+	definedTags := backupDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -286,7 +286,7 @@ func dbBackupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	return tags, nil
 }
 
-func dbBackupFreeformTags(item interface{}) map[string]string {
+func backupFreeformTags(item interface{}) map[string]string {
 	switch item.(type) {
 	case mysql.Backup:
 		return item.(mysql.Backup).FreeformTags
@@ -296,7 +296,7 @@ func dbBackupFreeformTags(item interface{}) map[string]string {
 	return nil
 }
 
-func dbBackupDefinedTags(item interface{}) map[string]map[string]interface{} {
+func backupDefinedTags(item interface{}) map[string]map[string]interface{} {
 	switch item.(type) {
 	case mysql.Backup:
 		return item.(mysql.Backup).DefinedTags

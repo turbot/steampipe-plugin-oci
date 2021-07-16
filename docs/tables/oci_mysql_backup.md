@@ -1,4 +1,4 @@
-# Table: oci_mysql_db_backup
+# Table: oci_mysql_backup
 
 MySQL Database Service supports the following backup types:
 
@@ -23,7 +23,7 @@ select
   backup_type,
   mysql_version
 from
-  oci_mysql_db_backup;
+  oci_mysql_backup;
 ```
 
 ### List manual backups
@@ -34,7 +34,7 @@ select
   id,
   creation_type
 from
-  oci_mysql_db_backup
+  oci_mysql_backup
 where
   creation_type = 'MANUAL';
 ```
@@ -47,7 +47,7 @@ select
   id,
   retention_in_days
 from
-  oci_mysql_db_backup
+  oci_mysql_backup
 where
   retention_in_days < 90;
 ```
@@ -59,7 +59,7 @@ select
   db_system_id,
   count(*) as backup_count
 from
-  oci_mysql_db_backup
+  oci_mysql_backup
 group by
   db_system_id;
 ```

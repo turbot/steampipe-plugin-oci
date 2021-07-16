@@ -1,0 +1,10 @@
+[
+  {
+    "display_name": "{{ output.resource_id.value.split('.').pop() }}",
+    "id": "{{ output.resource_id.value }}",
+    "is_auto_tune_enabled": false,
+    "is_hydrated": true,
+    "lifecycle_state": "AVAILABLE",
+    "size_in_gbs": 50
+  }
+]

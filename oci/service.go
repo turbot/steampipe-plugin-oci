@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/apigateway"
 	"github.com/oracle/oci-go-sdk/v36/audit"
 	"github.com/oracle/oci-go-sdk/v36/autoscaling"
+	"github.com/oracle/oci-go-sdk/v36/budget"
 	"github.com/oracle/oci-go-sdk/v36/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v36/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v36/common/auth"
@@ -30,6 +31,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
 	"github.com/oracle/oci-go-sdk/v36/logging"
 	"github.com/oracle/oci-go-sdk/v36/monitoring"
+	"github.com/oracle/oci-go-sdk/v36/mysql"
+	"github.com/oracle/oci-go-sdk/v36/nosql"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/oracle/oci-go-sdk/v36/ons"
 	"github.com/turbot/go-kit/types"
@@ -43,6 +46,7 @@ type session struct {
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
+	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
 	DatabaseClient                 database.DatabaseClient
@@ -55,6 +59,9 @@ type session struct {
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	MonitoringClient               monitoring.MonitoringClient
+	MySQLChannelClient             mysql.ChannelsClient
+	MySQLDBSystemClient            mysql.DbSystemClient
+	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
@@ -843,7 +850,45 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 	return sess, nil
 }
 
-//
+// budgetService returns the service client for OCI budget Service
+func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("budget-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("budgetService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := budget.NewBudgetClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantID,
+		BudgetClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// monitoringService returns the service client for OCI Monitoring Service
 func monitoringService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("metric explorer-%s", "region")
@@ -871,8 +916,122 @@ func monitoringService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	}
 
 	sess := &session{
-		TenancyID:      tenantID,
+		TenancyID:        tenantID,
 		MonitoringClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLChannelService returns the service client for OCI MySQL Channel Service
+func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mySQLChannel-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLChannelService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewChannelsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantID,
+		MySQLChannelClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySqlDBSystemService returns the service client for OCI MySQL DbSystem Service
+func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mySQLDBSystem-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLDBSystem", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewDbSystemClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:           tenantID,
+		MySQLDBSystemClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// noSQLDatabaseService returns the service client for OCI NoSQL Database Service
+func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("noSQL-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("noSQLDatabaseService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := nosql.NewNosqlClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantID,
+		NoSQLClient: client,
 	}
 
 	// save session in cache
@@ -934,7 +1093,6 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 		config_path = "~/Desktop/config"
 		regions = ["ap-mumbai-1", "us-ashburn-1"]
 	}
-
 	connection "oci" {
 		tenancy_ocid = "tenancy_ocid"
 		user_ocid = "user_ocid"

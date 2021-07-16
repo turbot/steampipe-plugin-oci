@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -28,15 +29,15 @@ provider "oci" {
 }
 
 resource "oci_database_autonomous_database" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    cpu_core_count = 1
-    display_name = var.resource_name
-    admin_password = "Test@12345678"
-    data_storage_size_in_tbs = 1
+  #Required
+  compartment_id           = var.tenancy_ocid
+  cpu_core_count           = 1
+  display_name             = var.resource_name
+  admin_password           = "Test@12345678"
+  data_storage_size_in_tbs = 1
 
-    #The Autonomous Database name cannot be longer than 14 characters.
-    db_name = "dbTest"
+  #The Autonomous Database name cannot be longer than 14 characters.
+  db_name = "dbTest"
 }
 
 output "resource_name" {

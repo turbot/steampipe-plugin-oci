@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -22,25 +23,25 @@ variable "region" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_kms_vault" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    vault_type = "DEFAULT"
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  vault_type     = "DEFAULT"
 }
 
 resource "oci_kms_key" "named_test_resource" {
-    depends_on  = [oci_kms_vault.named_test_resource]
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    management_endpoint = oci_kms_vault.named_test_resource.management_endpoint
-    key_shape {
-        algorithm = "AES"
-        length = 16
-    }
+  depends_on          = [oci_kms_vault.named_test_resource]
+  compartment_id      = var.tenancy_ocid
+  display_name        = var.resource_name
+  management_endpoint = oci_kms_vault.named_test_resource.management_endpoint
+  key_shape {
+    algorithm = "AES"
+    length    = 16
+  }
 }
 
 output "resource_name" {

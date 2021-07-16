@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -35,20 +36,20 @@ provider "oci" {
 
 resource "oci_ons_notification_topic" "test_notification_topic" {
   compartment_id = var.tenancy_ocid
-  name = var.resource_name
+  name           = var.resource_name
 }
 
 resource "oci_events_rule" "test_rule" {
-  depends_on  = [oci_ons_notification_topic.test_notification_topic]
+  depends_on = [oci_ons_notification_topic.test_notification_topic]
   actions {
-      actions {
-          action_type = "ONS"
-          is_enabled = true
-          topic_id = oci_ons_notification_topic.test_notification_topic.id
-      }
+    actions {
+      action_type = "ONS"
+      is_enabled  = true
+      topic_id    = oci_ons_notification_topic.test_notification_topic.id
+    }
   }
   compartment_id = var.tenancy_ocid
-  condition =  <<EOF
+  condition      = <<EOF
   {
     "eventType": "com.oraclecloud.autoscaling.changeautoscalingconfigurationcompartment",
     "cloudEventsVersion": "0.1",
@@ -67,10 +68,10 @@ resource "oci_events_rule" "test_rule" {
     }
   }
   EOF
-  display_name = var.resource_name
-  is_enabled = true
-  description = var.resource_name
-  freeform_tags = {"Department"= "Finance"}
+  display_name   = var.resource_name
+  is_enabled     = true
+  description    = var.resource_name
+  freeform_tags  = { "Department" = "Finance" }
 }
 
 output "resource_name" {
@@ -94,7 +95,7 @@ output "topic_id" {
 }
 
 output "action_id" {
-  value = "${element(oci_events_rule.test_rule.actions[0].actions[*].id, 0)}"
+  value = element(oci_events_rule.test_rule.actions[0].actions[*].id, 0)
 }
 
 output "region" {

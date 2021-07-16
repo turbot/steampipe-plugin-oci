@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -40,11 +41,11 @@ resource "oci_ons_notification_topic" "named_test_resource" {
 }
 
 resource "oci_ons_subscription" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    endpoint = "test@gmail.com"
-    protocol = "EMAIL"
-    topic_id = oci_ons_notification_topic.named_test_resource.topic_id
-    freeform_tags = {"Name"= var.resource_name}
+  compartment_id = var.tenancy_ocid
+  endpoint       = "test@gmail.com"
+  protocol       = "EMAIL"
+  topic_id       = oci_ons_notification_topic.named_test_resource.topic_id
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

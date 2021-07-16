@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -29,22 +30,22 @@ provider "oci" {
 
 resource "oci_core_vcn" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
 }
 
 resource "oci_core_subnet" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
-  vcn_id = oci_core_vcn.named_test_resource.id
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+  vcn_id         = oci_core_vcn.named_test_resource.id
 }
 
 resource "oci_functions_application" "test_application" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  subnet_ids = [oci_core_subnet.named_test_resource.id]
-  freeform_tags = {"Department"= "Finance"}
+  display_name   = var.resource_name
+  subnet_ids     = [oci_core_subnet.named_test_resource.id]
+  freeform_tags  = { "Department" = "Finance" }
 }
 
 output "resource_name" {

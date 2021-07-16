@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -35,9 +36,9 @@ resource "oci_core_vcn" "named_test_resource" {
 
 resource "oci_core_security_list" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  vcn_id = oci_core_vcn.named_test_resource.id
-  display_name = var.resource_name
-  freeform_tags = {"Name"= var.resource_name}
+  vcn_id         = oci_core_vcn.named_test_resource.id
+  display_name   = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

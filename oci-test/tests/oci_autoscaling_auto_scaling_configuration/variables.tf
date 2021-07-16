@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -39,69 +40,69 @@ data "oci_objectstorage_namespace" "test_namespace" {
 
 resource "oci_core_vcn" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
 }
 
 resource "oci_core_subnet" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  cidr_block = "10.0.0.0/16"
-  vcn_id = oci_core_vcn.named_test_resource.id
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+  vcn_id         = oci_core_vcn.named_test_resource.id
 }
 
 resource "oci_objectstorage_bucket" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  name = var.resource_name
-  namespace = data.oci_objectstorage_namespace.test_namespace.namespace
+  name           = var.resource_name
+  namespace      = data.oci_objectstorage_namespace.test_namespace.namespace
 }
 
 resource "oci_objectstorage_object" "test_object" {
-  bucket = oci_objectstorage_bucket.named_test_resource.name
-  content = "test"
+  bucket    = oci_objectstorage_bucket.named_test_resource.name
+  content   = "test"
   namespace = data.oci_objectstorage_namespace.test_namespace.namespace
-  object = "test"
+  object    = "test"
 }
 
 resource "oci_core_image" "test_image" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
+  display_name   = var.resource_name
   image_source_details {
-    source_type = "objectStorageTuple"
-    bucket_name = oci_objectstorage_bucket.named_test_resource.name
+    source_type    = "objectStorageTuple"
+    bucket_name    = oci_objectstorage_bucket.named_test_resource.name
     namespace_name = data.oci_objectstorage_namespace.test_namespace.namespace
-    object_name = oci_objectstorage_object.test_object.object
+    object_name    = oci_objectstorage_object.test_object.object
   }
 }
 
 resource "oci_core_volume" "test_volume" {
   availability_domain = var.oci_ad
-  compartment_id = var.tenancy_ocid
+  compartment_id      = var.tenancy_ocid
 }
 
 resource "oci_core_instance_configuration" "test_instance_configuration" {
-    compartment_id = var.tenancy_ocid
-     instance_details {
-      instance_type = "compute"
-      launch_details {
-        availability_domain = var.oci_ad
-        compartment_id = var.tenancy_ocid
-        shape = "VM.Standard.E2.1.Micro"
-        source_details {
-          source_type = "image"
-          image_id = oci_core_image.test_image.id
-        }
+  compartment_id = var.tenancy_ocid
+  instance_details {
+    instance_type = "compute"
+    launch_details {
+      availability_domain = var.oci_ad
+      compartment_id      = var.tenancy_ocid
+      shape               = "VM.Standard.E2.1.Micro"
+      source_details {
+        source_type = "image"
+        image_id    = oci_core_image.test_image.id
       }
     }
+  }
 }
 
 resource "oci_core_instance_pool" "test_instance_pool" {
-  depends_on  = [oci_core_image.test_image]
-  compartment_id = var.tenancy_ocid
+  depends_on                = [oci_core_image.test_image]
+  compartment_id            = var.tenancy_ocid
   instance_configuration_id = oci_core_instance_configuration.test_instance_configuration.id
   placement_configurations {
     availability_domain = var.oci_ad
-    primary_subnet_id = oci_core_subnet.named_test_resource.id
+    primary_subnet_id   = oci_core_subnet.named_test_resource.id
   }
   size = 2
 }
@@ -109,7 +110,7 @@ resource "oci_core_instance_pool" "test_instance_pool" {
 resource "oci_autoscaling_auto_scaling_configuration" "test_auto_scaling_configuration" {
   compartment_id       = var.tenancy_ocid
   cool_down_in_seconds = "300"
-  freeform_tags = {"Department"= "Finance"}
+  freeform_tags        = { "Department" = "Finance" }
   display_name         = var.resource_name
   is_enabled           = "true"
   policies {

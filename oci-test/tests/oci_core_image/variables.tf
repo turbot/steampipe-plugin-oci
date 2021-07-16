@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -22,38 +23,38 @@ variable "oci_ad" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "local_file" "foo" {
-    content     = "foo!"
-    filename = "${path.module}/foo.bar"
+  content  = "foo!"
+  filename = "${path.module}/foo.bar"
 }
 
 resource "oci_objectstorage_bucket" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  name = var.resource_name
-  namespace = "bmqeqvslavsz"
+  name           = var.resource_name
+  namespace      = "bmqeqvslavsz"
 }
 
 resource "oci_objectstorage_object" "test_object" {
-  bucket = oci_objectstorage_bucket.named_test_resource.name
-  content = local_file.foo.filename
+  bucket    = oci_objectstorage_bucket.named_test_resource.name
+  content   = local_file.foo.filename
   namespace = "bmqeqvslavsz"
-  object = local_file.foo.filename
+  object    = local_file.foo.filename
 }
 
 resource "oci_core_image" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    freeform_tags = {"Name"= var.resource_name}
-    image_source_details {
-      source_type = "objectStorageTuple"
-      bucket_name = oci_objectstorage_bucket.named_test_resource.name
-      namespace_name = "bmqeqvslavsz"
-      object_name = oci_objectstorage_object.test_object.object
-    }
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
+  image_source_details {
+    source_type    = "objectStorageTuple"
+    bucket_name    = oci_objectstorage_bucket.named_test_resource.name
+    namespace_name = "bmqeqvslavsz"
+    object_name    = oci_objectstorage_object.test_object.object
+  }
 }
 
 output "resource_name" {

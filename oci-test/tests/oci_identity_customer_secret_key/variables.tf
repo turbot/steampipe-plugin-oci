@@ -12,6 +12,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -22,20 +23,20 @@ variable "config_file_profile" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_identity_user" "test_user" {
   compartment_id = var.tenancy_ocid
-  description = var.user_name
-  name = var.user_name
+  description    = var.user_name
+  name           = var.user_name
 }
 
 resource "oci_identity_customer_secret_key" "test_customer_secret_key" {
-  depends_on  = [oci_identity_user.test_user]
+  depends_on   = [oci_identity_user.test_user]
   display_name = var.resource_name
-  user_id = oci_identity_user.test_user.id
+  user_id      = oci_identity_user.test_user.id
 }
 
 output "tenancy_ocid" {

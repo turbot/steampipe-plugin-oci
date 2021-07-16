@@ -58,7 +58,6 @@ type session struct {
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	MySQLChannelClient             mysql.ChannelsClient
-	MySQLDBBackupClient            mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
 	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
@@ -993,44 +992,6 @@ func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region strin
 	sess := &session{
 		TenancyID:   tenantID,
 		NoSQLClient: client,
-	}
-
-	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
-
-	return sess, nil
-}
-
-// mySQLDBBackupService returns the service client for OCI MySQL DB Backup Service
-func mySQLDBBackupService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
-	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("mySQLDBBackup-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*session), nil
-	}
-
-	// get oci config info
-	ociConfig := GetConfig(d.Connection)
-
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
-	if err != nil {
-		logger.Error("mySQLDBBackupService", "getProvider.Error", err)
-		return nil, err
-	}
-
-	client, err := mysql.NewDbBackupsClientWithConfigurationProvider(provider)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantID, err := provider.TenancyOCID()
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &session{
-		TenancyID:           tenantID,
-		MySQLDBBackupClient: client,
 	}
 
 	// save session in cache

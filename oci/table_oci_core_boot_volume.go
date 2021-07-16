@@ -23,7 +23,8 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 			Hydrate:    getBootVolume,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBootVolumes,
+			ParentHydrate: listCoreInstances,
+			Hydrate:       listBootVolumes,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -167,7 +168,7 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listBootVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -178,9 +179,11 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
+	availabilityDomain := h.Item.(core.Instance).AvailabilityDomain
 
 	request := core.ListBootVolumesRequest{
-		CompartmentId: types.String(compartment),
+		AvailabilityDomain: availabilityDomain,
+		CompartmentId:      types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

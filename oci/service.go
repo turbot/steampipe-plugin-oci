@@ -1053,7 +1053,6 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 		config_path = "~/Desktop/config"
 		regions = ["ap-mumbai-1", "us-ashburn-1"]
 	}
-	
 	connection "oci" {
 		tenancy_ocid = "tenancy_ocid"
 		user_ocid = "user_ocid"

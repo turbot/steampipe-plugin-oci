@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -28,17 +29,17 @@ provider "oci" {
 }
 
 resource "oci_core_vcn" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    display_name   = var.resource_name
-    cidr_block = "10.0.0.0/24"
+  #Required
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/24"
 }
 
 resource "oci_core_local_peering_gateway" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    vcn_id = oci_core_vcn.named_test_resource.id
-    display_name   = var.resource_name
+  #Required
+  compartment_id = var.tenancy_ocid
+  vcn_id         = oci_core_vcn.named_test_resource.id
+  display_name   = var.resource_name
 }
 
 output "resource_name" {

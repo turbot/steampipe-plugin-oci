@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -16,12 +17,12 @@ variable "config_file_profile" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 locals {
-  path = "${path.cwd}/identity_tenancy.json"
+  path       = "${path.cwd}/identity_tenancy.json"
   periodPath = "${path.cwd}/retention_period.json"
 }
 

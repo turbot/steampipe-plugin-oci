@@ -182,7 +182,7 @@ func listBudgets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	request := budget.ListBudgetsRequest{
 		CompartmentId: types.String(compartment),
-		TargetType:    "All",
+		TargetType:    "ALL",
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

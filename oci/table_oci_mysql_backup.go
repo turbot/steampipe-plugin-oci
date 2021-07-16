@@ -178,7 +178,7 @@ func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	logger.Debug("listMySQLBackups", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mySQLDBBackupService(ctx, d, region)
+	session, err := mySQLBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MySQLDBBackupClient.ListBackups(ctx, request)
+		response, err := session.MySQLBackupClient.ListBackups(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -235,7 +235,7 @@ func getMySQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	}
 
 	// Create Session
-	session, err := mySQLDBBackupService(ctx, d, region)
+	session, err := mySQLBackupService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func getMySQLBackup(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		},
 	}
 
-	response, err := session.MySQLDBBackupClient.GetBackup(ctx, request)
+	response, err := session.MySQLBackupClient.GetBackup(ctx, request)
 	if err != nil {
 		return nil, err
 	}

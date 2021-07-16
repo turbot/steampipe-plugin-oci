@@ -53,3 +53,7 @@ output "tenancy_ocid" {
 output "resource_id" {
   value = oci_budget_alert_rule.named_test_resource.id
 }
+
+output "budget_id" {
+  value = oci_budget_budget.named_test_resource.id
+}

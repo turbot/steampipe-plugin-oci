@@ -19,7 +19,7 @@ func tableBudgetAlertRule(_ context.Context) *plugin.Table {
 		Name:        "oci_budget_alert_rule",
 		Description: "OCI Budget Alert Rule",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"id,budget_id"}),
+			KeyColumns: plugin.AllColumns([]string{"id", "budget_id"}),
 			Hydrate:    getBudgetAlertRule,
 		},
 		List: &plugin.ListConfig{

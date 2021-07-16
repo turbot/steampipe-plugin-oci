@@ -38,6 +38,22 @@ resource "oci_objectstorage_bucket" "named_test_resource" {
   freeform_tags = {"Department"= "Finance"}
 }
 
+resource "oci_objectstorage_object_lifecycle_policy" "test_object_lifecycle_policy" {
+  depends_on = [oci_objectstorage_bucket.named_test_resource]
+  bucket = var.resource_name
+  namespace = data.oci_objectstorage_namespace.test_namespace.namespace
+
+  # Rules
+  rules {
+    action = "ARCHIVE"
+    is_enabled = true
+    name = var.resource_name
+    time_amount = 30
+    time_unit = "DAYS"
+    target = "objects"
+  }
+}
+
 output "resource_name" {
   value = var.resource_name
 }

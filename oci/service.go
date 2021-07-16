@@ -29,6 +29,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v36/identity"
 	"github.com/oracle/oci-go-sdk/v36/keymanagement"
 	"github.com/oracle/oci-go-sdk/v36/logging"
+	"github.com/oracle/oci-go-sdk/v36/monitoring"
 	"github.com/oracle/oci-go-sdk/v36/objectstorage"
 	"github.com/oracle/oci-go-sdk/v36/ons"
 	"github.com/turbot/go-kit/types"
@@ -53,6 +54,7 @@ type session struct {
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
+	MonitoringClient               monitoring.MonitoringClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
@@ -833,6 +835,44 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 	sess := &session{
 		TenancyID:      tenantID,
 		DatabaseClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+//
+func monitoringService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("metric explorer-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	if err != nil {
+		logger.Error("metricExplorerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := monitoring.NewMonitoringClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantID,
+		MonitoringClient: client,
 	}
 
 	// save session in cache

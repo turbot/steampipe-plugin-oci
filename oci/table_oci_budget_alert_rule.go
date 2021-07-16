@@ -257,7 +257,7 @@ func getBudgetAlertRule(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	budgetId := d.KeyColumnQuals["budget_id"].GetStringValue()
-	ruleId := d.KeyColumnQuals["rule_id"].GetStringValue()
+	ruleId := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty id in get call
 	if budgetId == "" || ruleId == "" {

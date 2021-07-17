@@ -23,7 +23,7 @@ variable "oci_ad" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
@@ -33,9 +33,25 @@ data "oci_objectstorage_namespace" "test_namespace" {
 
 resource "oci_objectstorage_bucket" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  name = var.resource_name
-  namespace = data.oci_objectstorage_namespace.test_namespace.namespace
-  freeform_tags = {"Department"= "Finance"}
+  name           = var.resource_name
+  namespace      = data.oci_objectstorage_namespace.test_namespace.namespace
+  freeform_tags  = { "Department" = "Finance" }
+}
+
+resource "oci_objectstorage_object_lifecycle_policy" "test_object_lifecycle_policy" {
+  depends_on = [oci_objectstorage_bucket.named_test_resource]
+  bucket     = var.resource_name
+  namespace  = data.oci_objectstorage_namespace.test_namespace.namespace
+
+  # Rules
+  rules {
+    action      = "ARCHIVE"
+    is_enabled  = true
+    name        = var.resource_name
+    time_amount = 30
+    time_unit   = "DAYS"
+    target      = "objects"
+  }
 }
 
 output "resource_name" {

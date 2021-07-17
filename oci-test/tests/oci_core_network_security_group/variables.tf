@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -29,14 +30,14 @@ provider "oci" {
 
 resource "oci_core_vcn" "test_vcn" {
   compartment_id = var.tenancy_ocid
-  cidr_block = "10.0.0.0/16"
+  cidr_block     = "10.0.0.0/16"
 }
 
 resource "oci_core_network_security_group" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  vcn_id = oci_core_vcn.test_vcn.id
-  display_name = var.resource_name
-  freeform_tags = {"Name"= var.resource_name}
+  vcn_id         = oci_core_vcn.test_vcn.id
+  display_name   = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

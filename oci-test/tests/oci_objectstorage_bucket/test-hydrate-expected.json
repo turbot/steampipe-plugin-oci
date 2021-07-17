@@ -1,0 +1,16 @@
+[
+  {
+    "name": "{{ resourceName }}",
+    "object_lifecycle_policy_rules": [
+      {
+        "action": "ARCHIVE",
+        "isEnabled": true,
+        "name": "{{ resourceName }}",
+        "objectNameFilter": null,
+        "target": "objects",
+        "timeAmount": 30,
+        "timeUnit": "DAYS"
+      }
+    ]
+  }
+]

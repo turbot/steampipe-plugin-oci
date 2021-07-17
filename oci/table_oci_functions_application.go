@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/functions"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -81,7 +81,7 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -106,7 +106,7 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Id").Transform(ociRegionName),
-	  	},
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,

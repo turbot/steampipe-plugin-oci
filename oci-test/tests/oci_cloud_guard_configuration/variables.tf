@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -27,10 +28,10 @@ provider "oci" {
 }
 
 resource "oci_cloud_guard_cloud_guard_configuration" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    reporting_region = var.region
-    status = "ENABLED"
+  #Required
+  compartment_id   = var.tenancy_ocid
+  reporting_region = var.region
+  status           = "ENABLED"
 }
 
 output "reporting_region" {

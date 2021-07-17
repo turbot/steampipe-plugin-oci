@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	"github.com/oracle/oci-go-sdk/v36/identity"
+	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"

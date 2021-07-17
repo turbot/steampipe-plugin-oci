@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/filestorage"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -19,9 +19,9 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 		Name:        "oci_file_storage_file_system",
 		Description: "OCI File Storage File System",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:    getFileStorageFileSystem,
+			Hydrate:           getFileStorageFileSystem,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listFileStorageFileSystems,
@@ -96,7 +96,7 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -155,7 +155,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	request := filestorage.ListFileSystemsRequest{
-		CompartmentId:  types.String(compartment),
+		CompartmentId:      types.String(compartment),
 		AvailabilityDomain: types.String(zone),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -170,7 +170,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 
 		for _, fileSystems := range response.Items {
-			d.StreamListItem(ctx, fileSystems )
+			d.StreamListItem(ctx, fileSystems)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

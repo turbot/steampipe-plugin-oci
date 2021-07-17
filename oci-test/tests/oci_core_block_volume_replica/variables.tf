@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -49,10 +50,14 @@ resource "oci_core_volume" "named_test_resource" {
 resource "null_resource" "named_test_resource" {
   depends_on = [oci_core_volume.named_test_resource]
   provisioner "local-exec" {
-    command = "oci bv block-volume-replica list --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --display-name ${var.resource_name} --output json > ${local.path}"
+    command = "oci bv block-volume-replica list --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --display-name ${var.resource_name} --region AP-HYDERABAD-1 --output json > ${local.path}"
   }
+}
+
+resource "null_resource" "destroy_resource" {
+  depends_on = [null_resource.named_test_resource]
   provisioner "local-exec" {
-    command = "oci bv volume update --volume-id ${oci_core_volume.named_test_resource.id} --force --block-volume-replicas '[]'"
+    command = "oci bv volume update --volume-id ${oci_core_volume.named_test_resource.id} --region ${var.region} --force --block-volume-replicas '[]'"
   }
 }
 
@@ -74,7 +79,7 @@ output "resource_id" {
   value      = jsondecode(data.local_file.input.content).data[0].id
 }
 
-output "state" {
+output "volume_id" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.input.content).data[0].lifecycle-state
+  value      = jsondecode(data.local_file.input.content).data[0].block-volume-id
 }

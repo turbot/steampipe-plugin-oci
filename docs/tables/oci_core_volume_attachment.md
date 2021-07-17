@@ -27,7 +27,7 @@ select
 from
   oci_core_volume_attachment
 where
-  lifecycle_state = 'ATTACHED';
+  lifecycle_state <> 'ATTACHED';
 ```
 
 ### List volume attachments which are read only

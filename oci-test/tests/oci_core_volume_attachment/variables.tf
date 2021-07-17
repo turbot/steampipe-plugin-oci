@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
+  default     = ""
   description = "OCI tenancy id."
 }
 
@@ -22,30 +22,81 @@ variable "oci_ad" {
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
+variable "image" {
+  type        = string
+  default     = "Oracle-Autonomous-Linux-7.9-2021.05-0"
+  description = "Oracle supported platform image."
+}
+
 provider "oci" {
   tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
+resource "oci_core_vcn" "named_test_resource" {
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+}
+
+resource "oci_core_subnet" "named_test_resource" {
+  depends_on     = [oci_core_vcn.named_test_resource]
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+  vcn_id         = oci_core_vcn.named_test_resource.id
+  freeform_tags  = { "Name" = var.resource_name }
+}
+
 resource "oci_core_volume" "test_volume" {
+  depends_on          = [oci_core_subnet.named_test_resource]
   availability_domain = var.oci_ad
   compartment_id      = var.tenancy_ocid
 }
 
-resource "oci_core_instance" "test_instance" {
-  #Required
-  availability_domain = var.oci_ad
-  compartment_id      = var.tenancy_ocid
-  shape               = "VM.Standard.E4.Flex"
+locals {
+  imagePath    = "${path.cwd}/image.json"
+  instancePath = "${path.cwd}/instance.json"
+}
+
+resource "null_resource" "test_image" {
+  depends_on = [oci_core_subnet.named_test_resource]
+  provisioner "local-exec" {
+    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --all --display-name ${var.image} --output json > ${local.imagePath}"
+  }
+}
+
+data "local_file" "image" {
+  depends_on = [null_resource.test_image]
+  filename   = local.imagePath
+}
+
+resource "null_resource" "named_test_resource" {
+  depends_on = [null_resource.test_image]
+  provisioner "local-exec" {
+    command = "oci compute instance launch --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --shape VM.Standard2.1 --subnet-id ${oci_core_subnet.named_test_resource.id} --image-id ${jsondecode(data.local_file.image.content).data[0].id} --output json > ${local.instancePath}"
+  }
+}
+
+data "local_file" "instance" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.instancePath
 }
 
 resource "oci_core_volume_attachment" "test_volume" {
-  #Required
+  depends_on      = [null_resource.named_test_resource]
   attachment_type = "iscsi"
-  instance_id     = oci_core_instance.test_instance.id
+  instance_id     = jsondecode(data.local_file.instance.content).data.id
   volume_id       = oci_core_volume.test_volume.id
   display_name    = var.resource_name
   is_read_only    = false
+}
+
+resource "null_resource" "destroy_test_resource" {
+  depends_on = [oci_core_volume_attachment.test_volume]
+  provisioner "local-exec" {
+    command = "oci compute instance terminate --instance-id ${jsondecode(data.local_file.instance.content).data.id} --force"
+  }
 }
 
 output "tenancy_ocid" {
@@ -54,4 +105,12 @@ output "tenancy_ocid" {
 
 output "resource_id" {
   value = oci_core_volume_attachment.test_volume.id
+}
+
+output "resource_name" {
+  value = oci_core_volume_attachment.test_volume.display_name
+}
+
+output "volume_id" {
+  value = oci_core_volume.test_volume.id
 }

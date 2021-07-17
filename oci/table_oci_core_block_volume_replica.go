@@ -6,6 +6,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -23,7 +24,7 @@ func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 			Hydrate:    getCoreBlockVolumeReplica,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listCoreVolumes,
+			ParentHydrate: lisAvailabilityDomains,
 			Hydrate:       listCoreBlockVolumeReplicas,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -146,7 +147,7 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	availabilityDomain := h.Item.(volumneInfo).AvailabilityDomain
+	availabilityDomain := h.Item.(identity.AvailabilityDomain).Name
 
 	request := core.ListBlockVolumeReplicasRequest{
 		AvailabilityDomain: availabilityDomain,

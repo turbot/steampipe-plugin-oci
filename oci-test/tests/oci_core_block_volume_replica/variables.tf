@@ -36,6 +36,7 @@ provider "oci" {
 locals {
   path = "${path.cwd}/output.json"
 }
+
 resource "oci_core_volume" "named_test_resource" {
   display_name        = var.resource_name
   availability_domain = "TvRS:AP-MUMBAI-1-AD-1"

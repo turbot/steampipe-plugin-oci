@@ -192,7 +192,7 @@ func getCoreBlockVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume id in get call
+	// handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}

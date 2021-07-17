@@ -16,11 +16,11 @@ from
   oci_core_boot_volume;
 ```
 
-### List volumes with a faulty state
+### List boot volumes with faulty state
 
 ```sql
 select
-  id as volume_id,
+  id as boot_volume_id
   display_name,
   lifecycle_state,
   time_created
@@ -30,11 +30,11 @@ where
   lifecycle_state = 'FAULTY';
 ```
 
-### List volumes with a memory size greater than 1024 GB
+### List boot volumes with memory size greater than 1024 GB
 
 ```sql
 select
-  id as volume_id,
+  id as boot_volume_id,
   display_name,
   lifecycle_state,
   size_in_gbs
@@ -44,11 +44,11 @@ where
   size_in_gbs > 1024;
 ```
 
-### List volumes with Oracle managed encryption (volumes are encrypted by default with Oracled managed encryption keys)
+### List boot volumes with Oracle managed encryption (volumes are encrypted by default with Oracled managed encryption keys)
 
 ```sql
 select
-  id as volume_id,
+  id as boot_volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -58,11 +58,11 @@ where
   kms_key_id is null;
 ```
 
-### List volumes with customer managed encryption
+### List boot volumes with customer managed encryption
 
 ```sql
 select
-  id as volume_id,
+  id as boot_volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -72,11 +72,11 @@ where
   kms_key_id is not null;
 ```
 
-### List volumes created in the root compartment
+### List boot volumes created in the root compartment
 
 ```sql
 select
-  id as volume_id,
+  id as boot_volume_id,
   display_name,
   lifecycle_state,
   tenant_id,

@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -74,6 +74,12 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "iscsi_login_state",
+				Description: "The iscsi login state of the volume attachment.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("IscsiLoginState"),
+			},
+			{
 				Name:        "is_read_only",
 				Description: "Whether the attachment was created in read-only mode.",
 				Type:        proto.ColumnType_BOOL,
@@ -87,6 +93,13 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "is_pv_encryption_in_transit_enabled",
 				Description: "Whether in-transit encryption for the data volume's paravirtualized attachment is enabled or not.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "is_multipath",
+				Description: "Whether the attachment is multipath or not.",
+				Type:        proto.ColumnType_BOOL,
+				Hydrate:     getCoreVolumeAttachment,
+				Transform:   transform.FromField("IsMultipath"),
 			},
 
 			// Standard Steampipe columns
@@ -164,6 +177,13 @@ type volumeAttachmentInfo struct {
 	// Whether in-transit encryption for the data volume's paravirtualized attachment is enabled or not.
 	IsPvEncryptionInTransitEnabled *bool
 
+	// Whether the attachment is multipath or not.
+	IsMultipath *bool
+
+	// The iscsi login state of the volume attachment. For a multipath volume attachment,
+	// all iscsi sessions need to be all logged-in or logged-out to be in logged-in or logged-out state.
+	IscsiLoginState core.VolumeAttachmentIscsiLoginStateEnum
+
 	// Volume region
 	Region string
 }
@@ -197,7 +217,7 @@ func listCoreVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *plug
 		}
 
 		for _, volumeAttachment := range response.Items {
-			d.StreamListItem(ctx, volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), region})
+			d.StreamListItem(ctx, volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), volumeAttachment.GetIsMultipath(), volumeAttachment.GetIscsiLoginState(), region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -250,5 +270,5 @@ func getCoreVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	volumeAttachment := response.VolumeAttachment
 
-	return volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), region}, nil
+	return volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), volumeAttachment.GetIsMultipath(), volumeAttachment.GetIscsiLoginState(), region}, nil
 }

@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI tenancy id."
 }
 
@@ -29,26 +30,26 @@ provider "oci" {
 
 resource "oci_core_vcn" "test_vcn" {
   compartment_id = var.tenancy_ocid
-  cidr_block = "10.0.0.0/16"
+  cidr_block     = "10.0.0.0/16"
 }
 
 resource "oci_core_internet_gateway" "named_test_resource" {
-  depends_on  = [oci_core_vcn.test_vcn]
+  depends_on     = [oci_core_vcn.test_vcn]
   compartment_id = var.tenancy_ocid
-  vcn_id = oci_core_vcn.test_vcn.id
-  display_name = var.resource_name
+  vcn_id         = oci_core_vcn.test_vcn.id
+  display_name   = var.resource_name
 }
 
 resource "oci_core_route_table" "test_route_table" {
-    depends_on  = [oci_core_internet_gateway.named_test_resource]
-    compartment_id = var.tenancy_ocid
-    vcn_id = oci_core_vcn.test_vcn.id
-    display_name = var.resource_name
-    freeform_tags = {"Department"= "Finance"}
-    route_rules {
-      network_entity_id = oci_core_internet_gateway.named_test_resource.id
-      destination = "192.168.1.0/24"
-    }
+  depends_on     = [oci_core_internet_gateway.named_test_resource]
+  compartment_id = var.tenancy_ocid
+  vcn_id         = oci_core_vcn.test_vcn.id
+  display_name   = var.resource_name
+  freeform_tags  = { "Department" = "Finance" }
+  route_rules {
+    network_entity_id = oci_core_internet_gateway.named_test_resource.id
+    destination       = "192.168.1.0/24"
+  }
 }
 
 output "resource_name" {

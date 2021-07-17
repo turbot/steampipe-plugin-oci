@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -28,11 +29,11 @@ provider "oci" {
 }
 
 resource "oci_apigateway_api" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
+  #Required
+  compartment_id = var.tenancy_ocid
 
-    #Optional
-    display_name = var.resource_name
+  #Optional
+  display_name = var.resource_name
 }
 
 output "reporting_region" {

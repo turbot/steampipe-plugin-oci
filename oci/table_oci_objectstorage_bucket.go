@@ -2,10 +2,12 @@ package oci
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -129,6 +131,13 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 				Description: "Arbitrary string keys and values for user-defined metadata.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getObjectStorageBucket,
+			},
+			{
+				Name:        "object_lifecycle_policy",
+				Description: "Specifies the object lifecycle policy for the bucket.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getObjectStorageBucketObjectLifecycle,
+				Transform:   transform.FromValue(),
 			},
 
 			// tags
@@ -288,6 +297,38 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	return response.Bucket, nil
+}
+
+func getObjectStorageBucketObjectLifecycle(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getObjectStorageBucketObjectLifecycle")
+
+	data := h.Item.(bucketInfo)
+	bucketName := data.Name
+	nameSpace := data.Namespace
+
+	// Create Session
+	session, err := objectStorageService(ctx, d, data.Region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := objectstorage.GetObjectLifecyclePolicyRequest{
+		NamespaceName: nameSpace,
+		BucketName:    bucketName,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+	response, err := session.ObjectStorageClient.GetObjectLifecyclePolicy(ctx, request)
+	if err != nil {
+		if ociErr, ok := err.(oci_common.ServiceError); ok {
+			if helpers.StringSliceContains([]string{"LifecyclePolicyNotFound"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
+				return nil, nil
+			}
+		}
+	}
+
+	return response.ObjectLifecyclePolicy, nil
 }
 
 //// TRANSFORM FUNCTION

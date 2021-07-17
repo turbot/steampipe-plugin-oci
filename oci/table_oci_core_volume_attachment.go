@@ -77,7 +77,6 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "iscsi_login_state",
 				Description: "The iscsi login state of the volume attachment.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("IscsiLoginState"),
 			},
 			{
 				Name:        "is_read_only",
@@ -99,7 +98,6 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Description: "Whether the attachment is multipath or not.",
 				Type:        proto.ColumnType_BOOL,
 				Hydrate:     getCoreVolumeAttachment,
-				Transform:   transform.FromField("IsMultipath"),
 			},
 
 			// Standard Steampipe columns

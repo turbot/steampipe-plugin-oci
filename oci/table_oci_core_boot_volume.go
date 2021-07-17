@@ -4,8 +4,9 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -23,7 +24,7 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 			Hydrate:    getBootVolume,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: listCoreInstances,
+			ParentHydrate: lisAvailabilityDomains,
 			Hydrate:       listBootVolumes,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -179,12 +180,13 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	if err != nil {
 		return nil, err
 	}
-	availabilityDomain := h.Item.(core.Instance).AvailabilityDomain
+
+	availabilityDomain := h.Item.(identity.AvailabilityDomain).Name
 
 	request := core.ListBootVolumesRequest{
 		AvailabilityDomain: availabilityDomain,
 		CompartmentId:      types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -238,7 +240,7 @@ func getBootVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	request := core.GetBootVolumeRequest{
 		BootVolumeId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

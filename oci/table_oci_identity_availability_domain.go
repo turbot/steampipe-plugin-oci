@@ -35,11 +35,6 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 
 			// Standard Steampipe columns
 			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
@@ -47,6 +42,11 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
+			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,

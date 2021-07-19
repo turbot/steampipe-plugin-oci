@@ -1,6 +1,6 @@
 # Table: oci_core_network_load_balancer
 
-A network security group (NSG) provides a virtual firewall for a set of cloud resources that all have the same security posture.
+The Network Load Balancing (NLB) feature distributes traffic across several servers by using the TCP/IP networking protocol.
 
 ## Examples
 

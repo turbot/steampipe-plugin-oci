@@ -6,7 +6,6 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
-	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -24,10 +23,9 @@ func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 			Hydrate:    getCoreBlockVolumeReplica,
 		},
 		List: &plugin.ListConfig{
-			ParentHydrate: lisAvailabilityDomains,
-			Hydrate:       listCoreBlockVolumeReplicas,
+			Hydrate: listCoreBlockVolumeReplicas,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -138,6 +136,7 @@ func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreBlockVolumeReplicas", "Compartment", compartment, "OCI_REGION", region)
 
@@ -147,11 +146,9 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 		return nil, err
 	}
 
-	availabilityDomain := h.Item.(identity.AvailabilityDomain).Name
-
 	request := core.ListBlockVolumeReplicasRequest{
-		AvailabilityDomain: availabilityDomain,
 		CompartmentId:      types.String(compartment),
+		AvailabilityDomain: types.String(zone),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -182,8 +179,9 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 func getCoreBlockVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getCoreBlockVolumeReplica", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreBlockVolumeReplica", "Compartment", compartment, "OCI_Zone", zone)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

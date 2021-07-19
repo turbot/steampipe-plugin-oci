@@ -48,14 +48,9 @@ resource "oci_core_subnet" "named_test_resource" {
   freeform_tags  = { "Name" = var.resource_name }
 }
 
-resource "oci_core_volume" "test_volume" {
-  depends_on          = [oci_core_subnet.named_test_resource]
-  availability_domain = var.oci_ad
-  compartment_id      = var.tenancy_ocid
-}
-
 locals {
   imagePath    = "${path.cwd}/image.json"
+  path         = "${path.cwd}/output.json"
   instancePath = "${path.cwd}/instance.json"
 }
 
@@ -76,6 +71,9 @@ resource "null_resource" "named_test_resource" {
   provisioner "local-exec" {
     command = "oci compute instance launch --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --shape VM.Standard2.1 --subnet-id ${oci_core_subnet.named_test_resource.id} --image-id ${jsondecode(data.local_file.image.content).data[0].id} --output json > ${local.instancePath}"
   }
+  provisioner "local-exec" {
+    command = "oci compute boot-volume-attachment list --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --all --output json > ${local.path}"
+  }
 }
 
 data "local_file" "instance" {
@@ -83,34 +81,38 @@ data "local_file" "instance" {
   filename   = local.instancePath
 }
 
-resource "oci_core_volume_attachment" "test_volume" {
-  depends_on      = [null_resource.named_test_resource]
-  attachment_type = "iscsi"
-  instance_id     = jsondecode(data.local_file.instance.content).data.id
-  volume_id       = oci_core_volume.test_volume.id
-  display_name    = var.resource_name
-  is_read_only    = false
-}
-
 resource "null_resource" "destroy_test_resource" {
-  depends_on = [oci_core_volume_attachment.test_volume]
+  depends_on = [null_resource.named_test_resource]
   provisioner "local-exec" {
     command = "oci compute instance terminate --instance-id ${jsondecode(data.local_file.instance.content).data.id} --force"
   }
+}
+
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
 }
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "resource_id" {
-  value = oci_core_volume_attachment.test_volume.id
-}
-
 output "resource_name" {
-  value = oci_core_volume_attachment.test_volume.display_name
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].display-name
 }
 
-output "volume_id" {
-  value = oci_core_volume.test_volume.id
+output "resource_id" {
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].id
+}
+
+output "boot-volume-id" {
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].boot-volume-id
+}
+
+output "instance_id" {
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.instance.content).data.id
 }

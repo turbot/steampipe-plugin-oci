@@ -2,6 +2,6 @@
   {
     "id": "{{ output.resource_id.value }}",
     "is_read_only": false,
-    "volume_id": "{{ output.volume_id.value }}"
+    "boot_volume_id": "{{ output.boot_volume_id.value }}"
   }
 ]

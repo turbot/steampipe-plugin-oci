@@ -69,8 +69,8 @@ func tableCoreBootVolumeAttachment(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "Encryption_In_Transit_Type",
-				Description: "Refer the top-level definition of encryptionInTransitType.",
+				Name:        "encryption_in_transit_type",
+				Description: "The type of the encryption in transit for the boot volume.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

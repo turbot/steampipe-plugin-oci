@@ -1,6 +1,5 @@
 [
   {
-    "region": "{{ output.region.value }}",
     "tenant_id": "{{ output.tenancy_ocid.value }}",
     "title": "{{ resourceName }}"
   }

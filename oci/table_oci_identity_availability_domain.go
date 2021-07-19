@@ -60,6 +60,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 	region := *h.Item.(ociRegion).Name
 	status := h.Item.(ociRegion).Status
 
+	// Check if the region is subscribed region
 	if status != "READY" {
 		return nil, nil
 	}

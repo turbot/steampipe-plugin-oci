@@ -30,7 +30,7 @@ where
   lifecycle_state = 'FAULTY';
 ```
 
-### List boot volumes with memory size greater than 1024 GB
+### List boot volumes with size greater than 1024 GB
 
 ```sql
 select

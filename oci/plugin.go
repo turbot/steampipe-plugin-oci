@@ -91,6 +91,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_nosql_table_metric_read_throttle_count_hourly": tableOciNoSQLTableMetricReadThrottleCountHourly(ctx),
 			"oci_nosql_table_metric_read_throttle_count_daily":  tableOciNoSQLTableMetricReadThrottleCountDaily(ctx),
 			"oci_nosql_table_metric_write_throttle_count":       tableOciNoSQLTableMetricWriteThrottleCount(ctx),
+			"oci_nosql_table_metric_write_throttle_count_daily": tableOciNoSQLTableMetricWriteThrottleCountDaily(ctx),
 			"oci_nosql_table_metric_storage_utilization":        tableOciNoSQLTableMetricStorageUtilization(ctx),
 			"oci_nosql_table_metric_storage_utilization_daily":  tableOciNoSQLTableMetricStorageUtilizationDaily(ctx),
 			"oci_nosql_table_metric_storage_utilization_hourly": tableOciNoSQLTableMetricStorageUtilizationHourly(ctx),

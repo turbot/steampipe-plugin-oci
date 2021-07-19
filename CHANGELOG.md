@@ -1,3 +1,24 @@
+## v0.0.15 [2021-07-16]
+
+_What's new?_
+
+- New tables added
+  - [oci_budget_alert_rule](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_budget_alert_rule) ([#198](https://github.com/turbot/steampipe-plugin-oci/pull/198))
+  - [oci_budget_budget](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_budget_budget) ([#197](https://github.com/turbot/steampipe-plugin-oci/pull/197))
+  - [oci_core_public_ip](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_public_ip) ([#194](https://github.com/turbot/steampipe-plugin-oci/pull/194))
+  - [oci_database_autonomous_database](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database) ([#162](https://github.com/turbot/steampipe-plugin-oci/pull/162))
+  - [oci_database_mysql_db_system](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_mysql_db_system) ([#169](https://github.com/turbot/steampipe-plugin-oci/pull/169))
+  - [oci_dns_rrset](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_rrset) ([#112](https://github.com/turbot/steampipe-plugin-oci/pull/112))
+  - [oci_mysql_channel](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_channel) ([#171](https://github.com/turbot/steampipe-plugin-oci/pull/171))
+  - [oci_nosql_table](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table) ([#193](https://github.com/turbot/steampipe-plugin-oci/pull/193))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.3.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v131--2021-07-15) ([#196](https://github.com/turbot/steampipe-plugin-oci/pull/196))
+- Updated: oci-go-sdk to v44 ([#206](https://github.com/turbot/steampipe-plugin-oci/pull/206))
+- Updated: Add column `object_lifecycle_policy` to `oci_objectstorage_bucket` table ([#187](https://github.com/turbot/steampipe-plugin-oci/pull/187))
+- Updated: Minor cleanup in docs/index.md ([#173](https://github.com/turbot/steampipe-plugin-oci/pull/173))
+
 ## v0.0.14 [2021-07-01]
 
 _Enhancements_

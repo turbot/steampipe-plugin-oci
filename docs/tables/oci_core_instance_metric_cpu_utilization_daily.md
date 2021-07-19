@@ -22,8 +22,6 @@ order by
   timestamp;
 ```
 
-
-
 ### CPU Over 80% average
 
 ```sql

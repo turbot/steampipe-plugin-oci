@@ -1,6 +1,6 @@
-# Table: oci_core_instance_metric_cpu_utilization
+q# Table: oci_core_instance_metric_cpu_utilization_hourly
 
-OCI Monitoring Metrics Explorer provide data about the performance of your systems.  The `oci_core_instance_metric_cpu_utilization` table provides metric statistics at 5 minute intervals for the most recent 5 days.
+OCI Monitoring Metrics Explorer provide data about the performance of your systems.  The `oci_core_instance_metric_cpu_utilization_hourly` table provides metric statistics at 60 minute intervals for the most recent 60 days.
 
 
 ## Examples
@@ -16,7 +16,7 @@ select
   average,
   sample_count
 from
-  oci_core_instance_metric_cpu_utilization
+  oci_core_instance_metric_cpu_utilization_hourly
 order by
   instance_id,
   timestamp;
@@ -33,7 +33,7 @@ select
   round(average::numeric,2) as avg_cpu,
   sample_count
 from
-  oci_core_instance_metric_cpu_utilization
+  oci_core_instance_metric_cpu_utilization_hourly
 where average > 80
 order by
   instance_id,

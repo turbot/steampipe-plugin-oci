@@ -171,7 +171,7 @@ func getCoreBootVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *pl
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume id in get call
+	// handle empty volume attachment id in get call
 	if id == "" {
 		return nil, nil
 	}

@@ -44,6 +44,13 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "health_status",
+				Description: "The overall health status of the network load balancer.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreNetworkLoadBalancerHealth,
+				Transform:   transform.FromField("Status"),
+			},
+			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail.",
 				Type:        proto.ColumnType_STRING,
@@ -64,6 +71,7 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Name:        "subnet_id",
 				Description: "The subnet in which the network load balancer is spawned OCIDs",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SubnetId"),
 			},
 			{
 				Name:        "is_private",
@@ -222,6 +230,47 @@ func getCoreNetworkLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	return response.NetworkLoadBalancer, nil
+}
+
+func getCoreNetworkLoadBalancerHealth(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getCoreNetworkLoadBalancerHealth")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("getCoreNetworkLoadBalancerHealth", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	var id string
+	switch h.Item.(type) {
+	case networkloadbalancer.NetworkLoadBalancerSummary:
+		id = *h.Item.(networkloadbalancer.NetworkLoadBalancerSummary).Id
+	case networkloadbalancer.NetworkLoadBalancer:
+		id = *h.Item.(networkloadbalancer.NetworkLoadBalancer).Id
+	}
+
+	// Create Session
+	session, err := networkLoadBalancerService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := networkloadbalancer.GetNetworkLoadBalancerHealthRequest{
+		NetworkLoadBalancerId: types.String(id),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.NetworkLoadBalancerClient.GetNetworkLoadBalancerHealth(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.NetworkLoadBalancerHealth, nil
 }
 
 //// TRANSFORM FUNCTION

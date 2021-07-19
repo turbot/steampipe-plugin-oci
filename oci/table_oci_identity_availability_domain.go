@@ -17,9 +17,9 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_availability_domain",
 		Description: "OCI Identity Availability Domain",
 		List: &plugin.ListConfig{
-			Hydrate: lisAvailabilityDomains,
+			ParentHydrate: listRegions,
+			Hydrate:       lisAvailabilityDomains,
 		},
-		GetMatrixItem: BuildRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -54,10 +54,15 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("lisAvailabilityDomains", "OCI_REGION", region)
+func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Debug("lisAvailabilityDomains")
+
+	region := *h.Item.(ociRegion).Name
+	status := h.Item.(ociRegion).Status
+
+	if status != "READY" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityServiceRegional(ctx, d, region)

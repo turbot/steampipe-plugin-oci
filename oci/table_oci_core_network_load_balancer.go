@@ -44,11 +44,11 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "health_status",
+				Name:        "network_load_balancer_health",
 				Description: "The overall health status of the network load balancer.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCoreNetworkLoadBalancerHealth,
-				Transform:   transform.FromField("Status"),
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -69,7 +69,7 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "subnet_id",
-				Description: "The subnet in which the network load balancer is spawned OCIDs",
+				Description: "The subnet in which the network load balancer is spawned OCIDs.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("SubnetId"),
 			},
@@ -238,11 +238,6 @@ func getCoreNetworkLoadBalancerHealth(ctx context.Context, d *plugin.QueryData, 
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getCoreNetworkLoadBalancerHealth", "Compartment", compartment, "OCI_REGION", region)
-
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
 
 	var id string
 	switch h.Item.(type) {

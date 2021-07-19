@@ -6,13 +6,13 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
 variable "config_file_profile" {
   type        = string
-  default     = "OCI"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -52,9 +52,12 @@ resource "oci_network_load_balancer_network_load_balancer" "named_test_resource"
 output "resource_name" {
   value = var.resource_name
 }
+output "resource_name" {
+  value = var.resource_name
 
-output "tenancy_ocid" {
-  value = var.tenancy_ocid
+
+output "region" {
+  value = var.region
 }
 
 output "freeform_tags" {

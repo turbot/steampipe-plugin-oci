@@ -1,6 +1,6 @@
 # Table: oci_core_network_load_balancer
 
-The Network Load Balancing (NLB) feature distributes traffic across several servers by using the TCP/IP networking protocol.
+Network Load Balancers can provide automated traffic distribution from one entry point to multiple servers in a backend set. It ensure that your services remain available by directing traffic only to healthy servers. Network Load Balancer provides the benefits of flow high availability, source and destination IP addresses, and port preservation. It is designed to handle volatile traffic patterns and millions of flows, offering high throughput while maintaining ultra low latency. It is the ideal load balancing solution for latency sensitive workloads. It is also optimized for long-running connections in the order of days or months.
 
 ## Examples
 
@@ -18,7 +18,6 @@ from
   oci_core_network_load_balancer;
 ```
 
-
 ### List NLBs assigns with public IP address
 
 ```sql
@@ -32,16 +31,15 @@ where
   not is_private;
 ```
 
-
-### List unhealthy NLBs
+### List critical NLBs
 
 ```sql
 select
   display_name,
   id,
-  health_status
+  network_load_balancer_health -> 'status' as health_status
 from
   oci_core_network_load_balancer
 where
-  health_status <> 'OK';
+  network_load_balancer_health ->> 'status' = 'CRITICAL';
 ```

@@ -44,7 +44,8 @@ where
   size_in_gbs > 1024;
 ```
 
-### List boot volumes with Oracle managed encryption (volumes are encrypted by default with Oracled managed encryption keys)
+### List boot volumes with Oracle managed encryption
+Note: Volumes are encrypted by default with Oracled managed encryption key
 
 ```sql
 select

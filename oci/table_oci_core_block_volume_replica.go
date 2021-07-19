@@ -138,7 +138,7 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreBlockVolumeReplicas", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreBlockVolumeReplicas", "Compartment", compartment, "OCI_Zone", zone)
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)

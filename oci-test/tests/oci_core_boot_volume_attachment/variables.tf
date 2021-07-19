@@ -107,12 +107,8 @@ output "resource_id" {
   value      = jsondecode(data.local_file.input.content).data[0].id
 }
 
-output "boot-volume-id" {
+output "boot_volume_id" {
   depends_on = [null_resource.named_test_resource]
   value      = jsondecode(data.local_file.input.content).data[0].boot-volume-id
 }
 
-output "instance_id" {
-  depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.instance.content).data.id
-}

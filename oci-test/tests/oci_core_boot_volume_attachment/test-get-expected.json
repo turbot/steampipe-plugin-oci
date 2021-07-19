@@ -1,7 +1,7 @@
 [
   {
-    "id": "{{ output.resource_id.value }}",
-    "is_read_only": false,
-    "boot_volume_id": "{{ output.boot_volume_id.value }}"
+    "boot_volume_id": "{{ output.boot_volume_id.value }}",
+    "id": "{{ output.resource_id.value }}"
+
   }
 ]

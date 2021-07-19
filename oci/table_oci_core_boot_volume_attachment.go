@@ -25,7 +25,7 @@ func tableCoreBootVolumeAttachment(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCoreBootVolumeAttachments,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -116,8 +116,9 @@ func tableCoreBootVolumeAttachment(_ context.Context) *plugin.Table {
 func listCoreBootVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreBootVolumeAttachments", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCoreBootVolumeAttachments", "Compartment", compartment, "OCI_Zone", zone)
 
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)
@@ -126,7 +127,8 @@ func listCoreBootVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *
 	}
 
 	request := core.ListBootVolumeAttachmentsRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId:      types.String(compartment),
+		AvailabilityDomain: types.String(zone),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -158,8 +160,9 @@ func getCoreBootVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *pl
 	plugin.Logger(ctx).Trace("getCoreBootVolumeAttachment")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getCoreBootVolumeAttachment", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreBootVolumeAttachment", "Compartment", compartment, "OCI_Zone", zone)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

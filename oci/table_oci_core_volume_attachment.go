@@ -31,39 +31,46 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the volume attachment.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "display_name",
 				Description: "A user-friendly name. Does not have to be unique, and it cannot be changed.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "volume_id",
 				Description: "The OCID of the volume.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "instance_id",
 				Description: "The OCID of the instance the volume is attached to.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the volume attachment.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "availability_domain",
 				Description: "The availability domain of an instance.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "time_created",
 				Description: "The date and time the volume was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
@@ -72,32 +79,37 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "device",
 				Description: "The device name.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "iscsi_login_state",
 				Description: "The iscsi login state of the volume attachment.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "is_read_only",
 				Description: "Whether the attachment was created in read-only mode.",
 				Type:        proto.ColumnType_BOOL,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "is_shareable",
 				Description: "Whether the attachment should be created in shareable mode.",
 				Type:        proto.ColumnType_BOOL,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "is_pv_encryption_in_transit_enabled",
 				Description: "Whether in-transit encryption for the data volume's paravirtualized attachment is enabled or not.",
 				Type:        proto.ColumnType_BOOL,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "is_multipath",
 				Description: "Whether the attachment is multipath or not.",
 				Type:        proto.ColumnType_BOOL,
-				Hydrate:     getCoreVolumeAttachment,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 
 			// Standard Steampipe columns
@@ -105,6 +117,7 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromField("DisplayName"),
 			},
 
@@ -113,11 +126,13 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getCoreVolumeAttachmentFields,
 				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
@@ -215,7 +230,7 @@ func listCoreVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *plug
 		}
 
 		for _, volumeAttachment := range response.Items {
-			d.StreamListItem(ctx, volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), volumeAttachment.GetIsMultipath(), volumeAttachment.GetIscsiLoginState(), region})
+			d.StreamListItem(ctx, volumeAttachment)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -266,7 +281,32 @@ func getCoreVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	volumeAttachment := response.VolumeAttachment
+	return response.VolumeAttachment, nil
+}
 
-	return volumeAttachmentInfo{volumeAttachment.GetAvailabilityDomain(), volumeAttachment.GetCompartmentId(), volumeAttachment.GetId(), volumeAttachment.GetInstanceId(), volumeAttachment.GetLifecycleState(), volumeAttachment.GetTimeCreated(), volumeAttachment.GetVolumeId(), volumeAttachment.GetDevice(), volumeAttachment.GetDisplayName(), volumeAttachment.GetIsReadOnly(), volumeAttachment.GetIsShareable(), volumeAttachment.GetIsPvEncryptionInTransitEnabled(), volumeAttachment.GetIsMultipath(), volumeAttachment.GetIscsiLoginState(), region}, nil
+func getCoreVolumeAttachmentFields(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	item := h.Item.(core.VolumeAttachment)
+
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	plugin.Logger(ctx).Debug("getCoreVolumeAttachmentFields", "OCI_REGION", region)
+
+	attachment := volumeAttachmentInfo{
+		item.GetAvailabilityDomain(),
+		item.GetCompartmentId(),
+		item.GetId(),
+		item.GetInstanceId(),
+		item.GetLifecycleState(),
+		item.GetTimeCreated(),
+		item.GetVolumeId(),
+		item.GetDevice(),
+		item.GetDisplayName(),
+		item.GetIsReadOnly(),
+		item.GetIsShareable(),
+		item.GetIsPvEncryptionInTransitEnabled(),
+		item.GetIsMultipath(),
+		item.GetIscsiLoginState(),
+		region,
+	}
+
+	return attachment, nil
 }

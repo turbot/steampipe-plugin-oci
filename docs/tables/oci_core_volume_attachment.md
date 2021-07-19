@@ -16,7 +16,7 @@ from
   oci_core_volume_attachment;
 ```
 
-### List volume attachments witch are not attached
+### List idle volume attachments
 
 ```sql
 select
@@ -30,7 +30,7 @@ where
   lifecycle_state <> 'ATTACHED';
 ```
 
-### List volume attachments which are read only
+### List read only volume attachments
 
 ```sql
 select

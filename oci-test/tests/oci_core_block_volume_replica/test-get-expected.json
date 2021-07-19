@@ -1,0 +1,7 @@
+[
+  {
+    "block_volume_id": "{{ output.volume_id.value }}",
+    "display_name": "{{ resourceName }}",
+    "id": "{{ output.resource_id.value }}"
+  }
+]

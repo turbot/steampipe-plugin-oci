@@ -31,6 +31,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
 	"github.com/oracle/oci-go-sdk/v44/logging"
 	"github.com/oracle/oci-go-sdk/v44/mysql"
+	"github.com/oracle/oci-go-sdk/v44/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
@@ -59,6 +60,7 @@ type session struct {
 	LoggingManagementClient        logging.LoggingManagementClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
+	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
 	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
@@ -992,6 +994,44 @@ func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region strin
 	sess := &session{
 		TenancyID:   tenantID,
 		NoSQLClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// networkLoadBalancerService returns the service client for OCI Network Load Balancer service
+func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("networkLoadBalancer-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkLoadBalancerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := networkloadbalancer.NewNetworkLoadBalancerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                 tenantID,
+		NetworkLoadBalancerClient: client,
 	}
 
 	// save session in cache

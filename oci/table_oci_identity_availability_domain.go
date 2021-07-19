@@ -35,6 +35,11 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 
 			// Standard Steampipe columns
 			{
+				Name:        "region",
+				Description: ColumnDescriptionRegion,
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
@@ -50,6 +55,11 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type availabilityDomainInfo struct {
+	identity.AvailabilityDomain
+	Region string
 }
 
 //// LIST FUNCTION
@@ -85,7 +95,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	for _, availabilityDomain := range response.Items {
-		d.StreamListItem(ctx, availabilityDomain)
+		d.StreamListItem(ctx, availabilityDomainInfo{availabilityDomain, region})
 	}
 
 	return nil, nil

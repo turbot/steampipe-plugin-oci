@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI tenancy id."
 }
 

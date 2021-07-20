@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/core"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -117,7 +117,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -169,7 +169,6 @@ type volumneInfo struct {
 	Region string
 }
 
-
 //// LIST FUNCTION
 
 func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -185,7 +184,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	request := core.ListVolumesRequest{
-		CompartmentId:  types.String(compartment),
+		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -199,7 +198,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, volumes := range response.Items {
-			d.StreamListItem(ctx,  volumneInfo{volumes, region})
+			d.StreamListItem(ctx, volumneInfo{volumes, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -250,7 +249,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	return volumneInfo{response.Volume, region},  nil
+	return volumneInfo{response.Volume, region}, nil
 }
 
 //// TRANSFORM FUNCTION

@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -29,9 +30,9 @@ resource "oci_identity_group" "test_group" {
 
 resource "oci_identity_network_source" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  description = var.resource_name
-  name = var.resource_name
-  freeform_tags = {"Name"= var.resource_name}
+  description    = var.resource_name
+  name           = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

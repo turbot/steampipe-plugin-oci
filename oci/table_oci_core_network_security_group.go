@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/core"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -142,7 +142,7 @@ func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *
 		}
 
 		for _, networkSecurityGroup := range response.Items {
-			d.StreamListItem(ctx,  networkSecurityGroup)
+			d.StreamListItem(ctx, networkSecurityGroup)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -268,5 +268,3 @@ func networkSecurityGroupTags(_ context.Context, d *transform.TransformData) (in
 
 	return tags, nil
 }
-
-

@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -35,14 +36,14 @@ provider "oci" {
 
 resource "oci_core_volume" "test_volume" {
   availability_domain = var.oci_ad
-  compartment_id = var.tenancy_ocid
+  compartment_id      = var.tenancy_ocid
 }
 
 resource "oci_core_volume_backup" "test_volume_backup" {
-  depends_on  = [oci_core_volume.test_volume]
-  volume_id = oci_core_volume.test_volume.id
-  display_name = var.resource_name
-  freeform_tags = {"Department"= "Finance"}
+  depends_on    = [oci_core_volume.test_volume]
+  volume_id     = oci_core_volume.test_volume.id
+  display_name  = var.resource_name
+  freeform_tags = { "Department" = "Finance" }
 }
 
 output "resource_name" {

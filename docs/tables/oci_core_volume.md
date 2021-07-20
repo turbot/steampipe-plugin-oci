@@ -32,7 +32,7 @@ where
 ```
 
 
-### List volumes with a memory size greater than 1024 GB
+### List volumes with size greater than 1024 GB
 
 ```sql
 select

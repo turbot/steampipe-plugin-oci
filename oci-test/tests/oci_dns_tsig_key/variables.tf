@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 

@@ -3,8 +3,8 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/identity"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -89,7 +89,6 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-
 			// Standard Steampipe columns
 			{
 				Name:        "tags",
@@ -140,8 +139,8 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 			return nil, err
 		}
 
-		for _, networkSources  := range response.Items {
-			d.StreamListItem(ctx, networkSources )
+		for _, networkSources := range response.Items {
+			d.StreamListItem(ctx, networkSources)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -27,10 +28,10 @@ provider "oci" {
 }
 
 resource "oci_cloud_guard_responder_recipe" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    source_responder_recipe_id = oci_cloud_guard_responder_recipe.named_test_resource.id
+  #Required
+  compartment_id             = var.tenancy_ocid
+  display_name               = var.resource_name
+  source_responder_recipe_id = oci_cloud_guard_responder_recipe.named_test_resource.id
 }
 
 output "resource_name" {

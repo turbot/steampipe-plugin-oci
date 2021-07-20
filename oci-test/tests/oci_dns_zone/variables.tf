@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -28,10 +29,10 @@ provider "oci" {
 }
 
 resource "oci_dns_zone" "named_test_resource" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    name = "turbot.com"
-    zone_type = "PRIMARY"
+  #Required
+  compartment_id = var.tenancy_ocid
+  name           = "turbot.com"
+  zone_type      = "PRIMARY"
 }
 
 output "resource_name" {

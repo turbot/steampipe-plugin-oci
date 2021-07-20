@@ -1,7 +1,6 @@
 # Table: oci_core_instance_metric_cpu_utilization_daily
 
-OCI Monitoring Metrics Explorer provide data about the performance of your systems.  The `oci_core_instance_metric_cpu_utilization_daily` table provides metric statistics at 24 hour intervals for the most recent 90 days.
-
+OCI Monitoring metrics explorer provide data about the performance of your systems. The `oci_core_instance_metric_cpu_utilization_daily` table provides metric statistics at 24 hour intervals for the most recent 90 days.
 
 ## Examples
 

@@ -2,12 +2,11 @@ package oci
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/monitoring"
+	"github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -22,7 +21,7 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 	return []*plugin.Column{
 		{
 			Name:        "compartment_id",
-			Description: "The ID of the Compartment.",
+			Description: "The ID of the compartment.",
 			Type:        proto.ColumnType_STRING,
 			Transform:   transform.FromField("CompartmentId"),
 		},
@@ -122,7 +121,7 @@ func getMonitoringStartDateForGranularity(granularity string) time.Time {
 	switch strings.ToUpper(granularity) {
 	case "DAILY":
 		// 90 daya (We can fetch upto 90 days maximum)
-		return time.Now().AddDate(0, 0, -90) 
+		return time.Now().AddDate(0, 0, -90)
 	case "HOURLY":
 		// 60 days
 		return time.Now().AddDate(0, 0, -60)
@@ -151,7 +150,7 @@ type MetricData struct {
 }
 
 func listMonitoringMetricStastics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string) (*monitoring.SummarizeMetricsDataResponse, error) {
-	plugin.Logger(ctx).Trace("listMonitoringMetricStastics ==>")
+	plugin.Logger(ctx).Trace("listMonitoringMetricStastics")
 	// Create Session
 	session, err := monitoringService(ctx, d)
 	if err != nil {
@@ -199,7 +198,6 @@ func listMonitoringMetricStastics(ctx context.Context, d *plugin.QueryData, gran
 		return nil, err
 	}
 	metricDetailsMin := filterMetricStatistic(minStatistics)
-	fmt.Println(metricDetailsMin)
 
 	// Max statistics
 	metricDetails.Query = &querystringMax
@@ -218,7 +216,6 @@ func listMonitoringMetricStastics(ctx context.Context, d *plugin.QueryData, gran
 		return nil, err
 	}
 	metricDetailsSum := filterMetricStatistic(sumStatistics)
-	fmt.Println(metricDetailsSum)
 
 	// Count statistics
 	metricDetails.Query = &querystringCount
@@ -228,7 +225,6 @@ func listMonitoringMetricStastics(ctx context.Context, d *plugin.QueryData, gran
 		return nil, err
 	}
 	metricDetailsCount := filterMetricStatistic(countStatistics)
-	fmt.Println(metricDetailsCount)
 
 	for _, item := range avgStatistics.Items {
 		for _, datapoint := range item.AggregatedDatapoints {

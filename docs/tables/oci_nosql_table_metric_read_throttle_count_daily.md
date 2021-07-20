@@ -1,7 +1,6 @@
 # Table: oci_nosql_table_metric_read_throttle_count_daily
 
-OCI Monitoring Metrics provide data about the performance of your systems.  The `oci_nosql_table_metric_read_throttle_count_daily` table provides metric statistics at 24 hour intervals for the most recent 90 days.
-
+OCI Monitoring metrics provide data about the performance of your systems. The `oci_nosql_table_metric_read_throttle_count_daily` table provides metric statistics at 24 hour intervals for the most recent 90 days.
 
 ## Examples
 
@@ -24,6 +23,7 @@ order by
 ```
 
 ### Intervals where read throttle count exceded 100 average
+
 ```sql
 select
   table_name,

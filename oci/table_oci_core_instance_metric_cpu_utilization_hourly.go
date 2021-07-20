@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	"github.com/oracle/oci-go-sdk/v36/core"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -22,8 +22,8 @@ func tableOciCoreInstanceMetricCpuUtilizationHourly(_ context.Context) *plugin.T
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
-					Name:        "instance_id",
-					Description: "The Core Instance ID.",
+					Name:        "id",
+					Description: "The OCID of the instance.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},

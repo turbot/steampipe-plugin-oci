@@ -44,27 +44,16 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "lifecycle_details",
-				Description: "A message describing the current state in more detail.",
+				Name:        "subnet_id",
+				Description: "The subnet in which the network load balancer is spawned OCIDs.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SubnetId"),
 			},
 			{
 				Name:        "time_created",
 				Description: "The date and time the network load balancer was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
-				Name:        "time_updated",
-				Description: "The date and time the network load balancer was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeUpdated.Time"),
-			},
-			{
-				Name:        "subnet_id",
-				Description: "The subnet in which the network load balancer is spawned OCIDs.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("SubnetId"),
 			},
 			{
 				Name:        "is_private",
@@ -77,6 +66,22 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
+				Name:        "lifecycle_details",
+				Description: "A message describing the current state in more detail.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_updated",
+				Description: "The date and time the network load balancer was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
+			},
+			{
+				Name:        "listeners",
+				Description: "Listeners associated with the network load balancer.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "network_load_balancer_health",
 				Description: "The overall health status of the network load balancer.",
 				Type:        proto.ColumnType_JSON,
@@ -86,11 +91,6 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 			{
 				Name:        "network_security_group_ids",
 				Description: "An array of network security groups OCIDs.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "listeners",
-				Description: "Listeners associated with the network load balancer.",
 				Type:        proto.ColumnType_JSON,
 			},
 

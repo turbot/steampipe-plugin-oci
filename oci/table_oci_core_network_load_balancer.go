@@ -44,13 +44,6 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "network_load_balancer_health",
-				Description: "The overall health status of the network load balancer.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getCoreNetworkLoadBalancerHealth,
-				Transform:   transform.FromValue(),
-			},
-			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail.",
 				Type:        proto.ColumnType_STRING,
@@ -82,6 +75,13 @@ func tableCoreNetworkLoadBalancer(_ context.Context) *plugin.Table {
 				Name:        "is_preserve_source_destination",
 				Description: "When enabled, the skipSourceDestinationCheck parameter is automatically enabled on the load balancer VNIC.",
 				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "network_load_balancer_health",
+				Description: "The overall health status of the network load balancer.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getCoreNetworkLoadBalancerHealth,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "network_security_group_ids",

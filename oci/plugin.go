@@ -43,6 +43,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_boot_volume_backup":                        tableCoreBootVolumeBackup(ctx),
 			"oci_core_boot_volume_metric_read_ops":               tableOciCoreBootVolumeMetricReadOps(ctx),
 			"oci_core_boot_volume_metric_read_ops_daily":         tableOciCoreBootVolumeMetricReadOpsDaily(ctx),
+			"oci_core_boot_volume_metric_read_ops_hourly":        tableOciCoreBootVolumeMetricReadOpsHourly(ctx),
 			"oci_core_dhcp_options":                              tableCoreDhcpOptions(ctx),
 			"oci_core_drg":                                       tableCoreDrg(ctx),
 			"oci_core_image":                                     tableCoreImage(ctx),

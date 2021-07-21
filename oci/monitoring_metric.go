@@ -120,7 +120,7 @@ type MonitoringMetricRow struct {
 func getMonitoringStartDateForGranularity(granularity string) time.Time {
 	switch strings.ToUpper(granularity) {
 	case "DAILY":
-		// 90 daya (We can fetch upto 90 days maximum)
+		// 90 days (We can fetch upto 90 days maximum)
 		return time.Now().AddDate(0, 0, -90)
 	case "HOURLY":
 		// 60 days

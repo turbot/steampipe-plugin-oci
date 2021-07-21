@@ -1058,12 +1058,21 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 		return nil, err
 	}
 
-	client, err := networkloadbalancer.NewNetworkLoadBalancerClientWithConfigurationProvider(provider) 
+	client, err := networkloadbalancer.NewNetworkLoadBalancerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
 	sess := &session{
 		TenancyID:                 tenantID,
 		NetworkLoadBalancerClient: client,
 	}
-  
+
 	// save session in cache
 	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 

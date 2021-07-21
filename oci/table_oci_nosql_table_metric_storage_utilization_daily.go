@@ -33,5 +33,5 @@ func tableOciNoSQLTableMetricStorageUtilizationDaily(_ context.Context) *plugin.
 
 func listNoSQLTableMetricStorageUtilizationDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	table := h.Item.(nosql.TableSummary)
-	return listMonitoringMetricStastics(ctx, d, "DAILY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId)
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId)
 }

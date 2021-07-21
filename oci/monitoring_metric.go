@@ -149,8 +149,8 @@ type MetricData struct {
 	Timestamp     *time.Time
 }
 
-func listMonitoringMetricStastics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string) (*monitoring.SummarizeMetricsDataResponse, error) {
-	plugin.Logger(ctx).Trace("listMonitoringMetricStastics")
+func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string) (*monitoring.SummarizeMetricsDataResponse, error) {
+	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
 	// Create Session
 	session, err := monitoringService(ctx, d)
 	if err != nil {

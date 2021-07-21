@@ -34,5 +34,5 @@ func tableOciCoreBootVolumeMetricWriteOpsDaily(_ context.Context) *plugin.Table 
 func listCoreBootVolumeMetricWriteOpsDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	// We can get the metric details of volume, only which are attach with the instance or boot volume
 	volume := h.Item.(core.BootVolume)
-	return listMonitoringMetricStastics(ctx, d, "DAILY", "oci_blockstore", "VolumeWriteOps", "resourceId", *volume.Id, *volume.CompartmentId)
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_blockstore", "VolumeWriteOps", "resourceId", *volume.Id, *volume.CompartmentId)
 }

@@ -1,0 +1,12 @@
+[
+  {
+    "backup_type": "{{ output.backup_type.value }}",
+    "creation_type": "{{ output.creation_type.value }}",
+    "db_system_id": "{{ output.db_system_id.value }}",
+    "description": "{{ output.description.value }}",
+    "display_name": "{{ output.display_name.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "{{ output.state.value }}",
+    "mysql_version": "{{ output.mysql_version.value }}"
+  }
+]

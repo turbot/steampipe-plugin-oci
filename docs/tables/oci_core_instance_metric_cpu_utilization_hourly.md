@@ -2,14 +2,13 @@
 
 OCI Monitoring metrics explorer provide data about the performance of your systems. The `oci_core_instance_metric_cpu_utilization_hourly` table provides metric statistics at 60 minute intervals for the most recent 60 days.
 
-
 ## Examples
 
 ### Basic info
 
 ```sql
 select
-  instance_id,
+  id,
   timestamp,
   minimum,
   maximum,
@@ -18,7 +17,7 @@ select
 from
   oci_core_instance_metric_cpu_utilization_hourly
 order by
-  instance_id,
+  id,
   timestamp;
 ```
 
@@ -26,7 +25,7 @@ order by
 
 ```sql
 select
-  instance_id,
+  id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
@@ -36,6 +35,6 @@ from
   oci_core_instance_metric_cpu_utilization_hourly
 where average > 80
 order by
-  instance_id,
+  id,
   timestamp;
 ```

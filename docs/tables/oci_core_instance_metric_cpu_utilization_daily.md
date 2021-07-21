@@ -8,7 +8,7 @@ OCI Monitoring metrics explorer provide data about the performance of your syste
 
 ```sql
 select
-  instance_id,
+  id,
   timestamp,
   minimum,
   maximum,
@@ -17,7 +17,7 @@ select
 from
   oci_core_instance_metric_cpu_utilization_daily
 order by
-  instance_id,
+  id,
   timestamp;
 ```
 
@@ -25,7 +25,7 @@ order by
 
 ```sql
 select
-  instance_id,
+  id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
@@ -35,6 +35,6 @@ from
   oci_core_instance_metric_cpu_utilization_daily
 where average > 8
 order by
-  instance_id,
+  id,
   timestamp;
 ```

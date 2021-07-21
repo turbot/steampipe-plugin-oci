@@ -8,7 +8,7 @@ OCI Monitoring metrics explorer provide data about the performance of your syste
 
 ```sql
 select
-  volume_id,
+  id,
   timestamp,
   minimum,
   maximum,
@@ -18,14 +18,15 @@ select
 from
   oci_core_boot_volume_metric_read_ops_hourly
 order by
-  volume_id,
+  id,
   timestamp;
 ```
 
 ### Intervals where volumes exceed 1000 average read ops
+
 ```sql
 select
-  volume_id,
+  id,
   timestamp,
   minimum,
   maximum,
@@ -37,14 +38,15 @@ from
 where
   average > 1000
 order by
-  volume_id,
+  id,
   timestamp;
 ```
 
 ### Intervals where volumes exceed 8000 max read ops
+
 ```sql
 select
-  volume_id,
+  id,
   timestamp,
   minimum,
   maximum,
@@ -56,7 +58,7 @@ from
 where
   maximum > 8000
 order by
-  volume_id,
+  id,
   timestamp;
 ```
 
@@ -64,7 +66,7 @@ order by
 
 ```sql
 select 
-  r.volume_id,
+  r.id,
   r.timestamp,
   round(r.average) + round(w.average) as iops_avg,
   round(r.average) as read_ops_avg,
@@ -79,9 +81,9 @@ from
   oci_core_boot_volume_metric_read_ops_hourly as r,
   oci_core_boot_volume_metric_write_ops_hourly as w
 where 
-  r.volume_id = w.volume_id
+  r.id = w.id
   and r.timestamp = w.timestamp
 order by
-  r.volume_id,
+  r.id,
   r.timestamp;
 ```

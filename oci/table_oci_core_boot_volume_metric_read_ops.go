@@ -22,8 +22,8 @@ func tableOciCoreBootVolumeMetricReadOps(_ context.Context) *plugin.Table {
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
-					Name:        "volume_id",
-					Description: "The OCID of the Boot Volume.",
+					Name:        "id",
+					Description: "The OCID of the boot volume.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},

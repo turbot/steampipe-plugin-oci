@@ -8,7 +8,7 @@ OCI Monitoring metrics provide data about the performance of your systems. The `
 
 ```sql
 select
-  table_name,
+  name,
   timestamp,
   minimum,
   maximum,
@@ -18,15 +18,15 @@ select
 from
   oci_nosql_table_metric_read_throttle_count_hourly
 order by
-  table_name,
+  name,
   timestamp;
 ```
 
-### Intervals where read throttle count exceded 100 average
+### Intervals where read throttle count exceeded 100 average
 
 ```sql
 select
-  table_name,
+  name,
   timestamp,
   minimum,
   maximum,
@@ -38,6 +38,6 @@ from
 where
   average > 100
 order by
-  table_name,
+  name,
   timestamp;
 ```

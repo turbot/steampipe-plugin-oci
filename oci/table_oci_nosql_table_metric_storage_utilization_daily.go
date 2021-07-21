@@ -22,8 +22,8 @@ func tableOciNoSQLTableMetricStorageUtilizationDaily(_ context.Context) *plugin.
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
-					Name:        "table_name",
-					Description: "The NoSQL Table Name.",
+					Name:        "name",
+					Description: "Immutable human-friendly table name.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},

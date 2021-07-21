@@ -8,7 +8,7 @@ OCI Monitoring metrics provide data about the performance of your systems. The `
 
 ```sql
 select
-  table_name,
+  name,
   timestamp,
   minimum,
   maximum,
@@ -18,15 +18,15 @@ select
 from
   oci_nosql_table_metric_storage_utilization_daily
 order by
-  table_name,
+  name,
   timestamp;
 ```
 
-### Intervals where storage utilization exceded 20GB average
+### Intervals where storage utilization exceeded 20GB average
 
 ```sql
 select
-  table_name,
+  name,
   timestamp,
   minimum,
   maximum,
@@ -38,6 +38,6 @@ from
 where
   average > 20 
 order by
-  table_name,
+  name,
   timestamp;
 ```

@@ -33,5 +33,5 @@ func tableOciNoSQLTableMetricWriteThrottleCountDaily(_ context.Context) *plugin.
 
 func listNoSQLTableMetricWriteThrottleCountDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	table := h.Item.(nosql.TableSummary)
-	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "WriteThrottleCount", "tableName", *table.Name, *table.CompartmentId,*table.Id)
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "WriteThrottleCount", "tableName", *table.Name, *table.CompartmentId, *table.Id)
 }

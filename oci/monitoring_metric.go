@@ -183,8 +183,11 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	querystringSum := queryString + ".grouping().sum()"
 	querystringCount := queryString + ".grouping().count()"
 
+	var resourceId string
 	if TableId != "" {
-		dimensionValue = TableId
+		resourceId = TableId
+	} else {
+		resourceId = dimensionValue
 	}
 
 	// Set Inteval
@@ -251,7 +254,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 		for _, datapoint := range item.AggregatedDatapoints {
 			d.StreamLeafListItem(ctx, &MonitoringMetricRow{
 				CompartmentId:  item.CompartmentId,
-				DimensionValue: &dimensionValue,
+				DimensionValue: &resourceId,
 				DimensionName:  &dimensionName,
 				Namespace:      &namespace,
 				MetricName:     &metricName,

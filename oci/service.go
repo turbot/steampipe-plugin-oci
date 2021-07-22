@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/oracle/oci-go-sdk/v44/apigateway"
 	"github.com/oracle/oci-go-sdk/v44/audit"
 	"github.com/oracle/oci-go-sdk/v44/autoscaling"
@@ -30,7 +29,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
+	"github.com/oracle/oci-go-sdk/v44/loadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/logging"
+	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/oracle/oci-go-sdk/v44/mysql"
 	"github.com/oracle/oci-go-sdk/v44/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/nosql"
@@ -59,6 +60,7 @@ type session struct {
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
+	LoadBalancerClient             loadbalancer.LoadBalancerClient
 	MonitoringClient               monitoring.MonitoringClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
@@ -529,6 +531,44 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 	sess := &session{
 		TenancyID:      tenantId,
 		KmsVaultClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// loadBalancerService returns the service client for OCI Load Balancer Service
+func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("LoadBalancer-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("kmsVaultService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := loadbalancer.NewLoadBalancerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		LoadBalancerClient: client,
 	}
 
 	// save session in cache

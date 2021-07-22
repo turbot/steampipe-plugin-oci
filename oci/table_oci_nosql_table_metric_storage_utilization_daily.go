@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,7 +24,7 @@ func tableOciNoSQLTableMetricStorageUtilizationDaily(_ context.Context) *plugin.
 			[]*plugin.Column{
 				{
 					Name:        "name",
-					Description: "Immutable human-friendly table name.",
+					Description: "The name of the NoSQL table.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
@@ -33,5 +34,6 @@ func tableOciNoSQLTableMetricStorageUtilizationDaily(_ context.Context) *plugin.
 
 func listNoSQLTableMetricStorageUtilizationDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	table := h.Item.(nosql.TableSummary)
-	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId)
+	region := fmt.Sprintf("%v", ociRegionNameFromId(*table.Id))
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId, region)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -19,12 +20,6 @@ func MonitoringMetricColumns(columns []*plugin.Column) []*plugin.Column {
 
 func commonMonitoringMetricColumns() []*plugin.Column {
 	return []*plugin.Column{
-		{
-			Name:        "compartment_id",
-			Description: "The ID of the compartment.",
-			Type:        proto.ColumnType_STRING,
-			Transform:   transform.FromField("CompartmentId"),
-		},
 		{
 			Name:        "metric_name",
 			Description: "The name of the metric.",
@@ -71,6 +66,24 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Description: "The time stamp used for the data point.",
 			Type:        proto.ColumnType_TIMESTAMP,
 		},
+		{
+			Name:        "region",
+			Description: ColumnDescriptionRegion,
+			Type:        proto.ColumnType_STRING,
+		},
+		{
+			Name:        "compartment_id",
+			Description: "The ID of the compartment.",
+			Type:        proto.ColumnType_STRING,
+			Transform:   transform.FromField("CompartmentId"),
+		},
+		{
+			Name:        "tenant_id",
+			Description: ColumnDescriptionTenant,
+			Type:        proto.ColumnType_STRING,
+			Hydrate:     getTenantId,
+			Transform:   transform.FromValue(),
+		},
 	}
 }
 
@@ -114,7 +127,7 @@ type MonitoringMetricRow struct {
 
 	Metadata map[string]string
 
-	// Value *float64
+	Region string
 }
 
 func getMonitoringStartDateForGranularity(granularity string) time.Time {
@@ -149,7 +162,7 @@ type MetricData struct {
 	Timestamp     *time.Time
 }
 
-func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string) (*monitoring.SummarizeMetricsDataResponse, error) {
+func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, Region string) (*monitoring.SummarizeMetricsDataResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
 	// Create Session
 	session, err := monitoringService(ctx, d)
@@ -182,6 +195,9 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	requestParam := monitoring.SummarizeMetricsDataRequest{
 		CompartmentId:               &compartmentId,
 		SummarizeMetricsDataDetails: metricDetails,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
 	}
 
 	// Mean statistics
@@ -241,6 +257,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 				SampleCount:    getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsCount),
 				Sum:            getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsSum),
 				Metadata:       item.Metadata,
+				Region:         Region,
 			})
 		}
 	}

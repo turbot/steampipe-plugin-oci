@@ -70,7 +70,6 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Name:        "region",
 			Description: ColumnDescriptionRegion,
 			Type:        proto.ColumnType_STRING,
-			Transform:   transform.FromField("DimensionValue").Transform(ociRegionName),
 		},
 		{
 			Name:        "compartment_id",
@@ -128,7 +127,7 @@ type MonitoringMetricRow struct {
 
 	Metadata map[string]string
 
-	// Value *float64
+	Region string
 }
 
 func getMonitoringStartDateForGranularity(granularity string) time.Time {
@@ -163,7 +162,7 @@ type MetricData struct {
 	Timestamp     *time.Time
 }
 
-func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, TableId string) (*monitoring.SummarizeMetricsDataResponse, error) {
+func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, Region string) (*monitoring.SummarizeMetricsDataResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
 	// Create Session
 	session, err := monitoringService(ctx, d)
@@ -182,13 +181,6 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	querystringMax := queryString + ".grouping().max()"
 	querystringSum := queryString + ".grouping().sum()"
 	querystringCount := queryString + ".grouping().count()"
-
-	var resourceId string
-	if TableId != "" {
-		resourceId = TableId
-	} else {
-		resourceId = dimensionValue
-	}
 
 	// Set Inteval
 	interval := getMonitoringPeriodForGranularity(granularity)
@@ -254,7 +246,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 		for _, datapoint := range item.AggregatedDatapoints {
 			d.StreamLeafListItem(ctx, &MonitoringMetricRow{
 				CompartmentId:  item.CompartmentId,
-				DimensionValue: &resourceId,
+				DimensionValue: &dimensionValue,
 				DimensionName:  &dimensionName,
 				Namespace:      &namespace,
 				MetricName:     &metricName,
@@ -265,6 +257,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 				SampleCount:    getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsCount),
 				Sum:            getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsSum),
 				Metadata:       item.Metadata,
+				Region:         Region,
 			})
 		}
 	}

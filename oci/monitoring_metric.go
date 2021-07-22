@@ -162,9 +162,9 @@ type MetricData struct {
 	Timestamp     *time.Time
 }
 
-func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, Region string) (*monitoring.SummarizeMetricsDataResponse, error) {
+func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, region string) (*monitoring.SummarizeMetricsDataResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+
 	// Create Session
 	session, err := monitoringService(ctx, d, region)
 	if err != nil {
@@ -258,7 +258,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 				SampleCount:    getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsCount),
 				Sum:            getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsSum),
 				Metadata:       item.Metadata,
-				Region:         Region,
+				Region:         region,
 			})
 		}
 	}

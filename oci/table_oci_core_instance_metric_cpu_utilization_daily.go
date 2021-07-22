@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -33,5 +34,6 @@ func tableOciCoreInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin.Ta
 
 func listCoreInstanceMetricCpuUtilizationDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instance := h.Item.(core.Instance)
-	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_computeagent", "CpuUtilization", "resourceId", *instance.Id, *instance.CompartmentId, "")
+	region := fmt.Sprintf("%v", ociRegionNameFromId(*instance.Id))
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_computeagent", "CpuUtilization", "resourceId", *instance.Id, *instance.CompartmentId, region)
 }

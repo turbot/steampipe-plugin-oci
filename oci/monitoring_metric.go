@@ -164,8 +164,9 @@ type MetricData struct {
 
 func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, Region string) (*monitoring.SummarizeMetricsDataResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	// Create Session
-	session, err := monitoringService(ctx, d)
+	session, err := monitoringService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

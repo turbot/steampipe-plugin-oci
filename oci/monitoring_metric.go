@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -162,7 +163,7 @@ type MetricData struct {
 	Timestamp     *time.Time
 }
 
-func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string) (*monitoring.SummarizeMetricsDataResponse, error) {
+func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, granularity string, namespace string, metricName string, dimensionName string, dimensionValue string, compartmentId string, TableId string) (*monitoring.SummarizeMetricsDataResponse, error) {
 	plugin.Logger(ctx).Trace("listMonitoringMetricStatistics")
 	// Create Session
 	session, err := monitoringService(ctx, d)
@@ -182,6 +183,10 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	querystringSum := queryString + ".grouping().sum()"
 	querystringCount := queryString + ".grouping().count()"
 
+	if TableId != "" {
+		dimensionValue = TableId
+	}
+
 	// Set Inteval
 	interval := getMonitoringPeriodForGranularity(granularity)
 	metricDetails := monitoring.SummarizeMetricsDataDetails{
@@ -195,6 +200,9 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	requestParam := monitoring.SummarizeMetricsDataRequest{
 		CompartmentId:               &compartmentId,
 		SummarizeMetricsDataDetails: metricDetails,
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
 	}
 
 	// Mean statistics

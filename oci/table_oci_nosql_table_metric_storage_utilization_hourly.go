@@ -22,8 +22,8 @@ func tableOciNoSQLTableMetricStorageUtilizationHourly(_ context.Context) *plugin
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
-					Name:        "name",
-					Description: "Immutable human-friendly table name.",
+					Name:        "id",
+					Description: "The OCID of the NoSQL Table.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
@@ -33,5 +33,5 @@ func tableOciNoSQLTableMetricStorageUtilizationHourly(_ context.Context) *plugin
 
 func listNoSQLTableMetricStorageUtilizationHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	table := h.Item.(nosql.TableSummary)
-	return listMonitoringMetricStatistics(ctx, d, "HOURLY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId)
+	return listMonitoringMetricStatistics(ctx, d, "HOURLY", "oci_nosql", "StorageGB", "tableName", *table.Name, *table.CompartmentId,*table.Id)
 }

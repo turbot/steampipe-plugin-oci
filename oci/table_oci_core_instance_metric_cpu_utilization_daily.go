@@ -33,5 +33,5 @@ func tableOciCoreInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin.Ta
 
 func listCoreInstanceMetricCpuUtilizationDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	instance := h.Item.(core.Instance)
-	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_computeagent", "CpuUtilization", "resourceId", *instance.Id, *instance.CompartmentId)
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_computeagent", "CpuUtilization", "resourceId", *instance.Id, *instance.CompartmentId, "")
 }

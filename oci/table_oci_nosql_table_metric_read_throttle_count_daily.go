@@ -22,8 +22,8 @@ func tableOciNoSQLTableMetricReadThrottleCountDaily(_ context.Context) *plugin.T
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
-					Name:        "name",
-					Description: "Immutable human-friendly table name.",
+					Name:        "id",
+					Description: "The OCID of the NoSQL Table.",
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
@@ -33,5 +33,5 @@ func tableOciNoSQLTableMetricReadThrottleCountDaily(_ context.Context) *plugin.T
 
 func listNoSQLTableMetricReadThrottleCountDaily(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	table := h.Item.(nosql.TableSummary)
-	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "ReadThrottleCount", "tableName", *table.Name, *table.CompartmentId)
+	return listMonitoringMetricStatistics(ctx, d, "DAILY", "oci_nosql", "ReadThrottleCount", "tableName", *table.Name, *table.CompartmentId, *table.Id)
 }

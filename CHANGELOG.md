@@ -33,7 +33,6 @@ _Enhancements_
 
 - Updated: Add column `region` to all metric tables ([#240](https://github.com/turbot/steampipe-plugin-oci/pull/240))
 - Updated: Add column `region` to `oci_mysql_db_system` table ([#235](https://github.com/turbot/steampipe-plugin-oci/pull/235))
-- Updated: Add metric statistic table for instance, volume, NoSQL ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
 
 _Bug fixes_
 

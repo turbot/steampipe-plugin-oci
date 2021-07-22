@@ -20,12 +20,6 @@ func MonitoringMetricColumns(columns []*plugin.Column) []*plugin.Column {
 func commonMonitoringMetricColumns() []*plugin.Column {
 	return []*plugin.Column{
 		{
-			Name:        "compartment_id",
-			Description: "The ID of the compartment.",
-			Type:        proto.ColumnType_STRING,
-			Transform:   transform.FromField("CompartmentId"),
-		},
-		{
 			Name:        "metric_name",
 			Description: "The name of the metric.",
 			Type:        proto.ColumnType_STRING,
@@ -70,6 +64,25 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 			Name:        "timestamp",
 			Description: "The time stamp used for the data point.",
 			Type:        proto.ColumnType_TIMESTAMP,
+		},
+		{
+			Name:        "region",
+			Description: ColumnDescriptionRegion,
+			Type:        proto.ColumnType_STRING,
+			Transform:   transform.FromField("DimensionValue").Transform(ociRegionName),
+		},
+		{
+			Name:        "compartment_id",
+			Description: "The ID of the compartment.",
+			Type:        proto.ColumnType_STRING,
+			Transform:   transform.FromField("CompartmentId"),
+		},
+		{
+			Name:        "tenant_id",
+			Description: ColumnDescriptionTenant,
+			Type:        proto.ColumnType_STRING,
+			Hydrate:     getTenantId,
+			Transform:   transform.FromValue(),
 		},
 	}
 }

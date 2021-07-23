@@ -1,6 +1,6 @@
 # Table: oci_database_autonomous_database_metric_storage_utilization_daily
 
-OCI Monitoring metrics explorer provide data about the performance of your systems.  The `oci_database_autonomous_database_metric_storage_utilization_daily` table provides metric statistics at 5 minute intervals for the most recent 5 days.
+OCI Monitoring metrics explorer provide data about the performance of your systems.  The `oci_database_autonomous_database_metric_storage_utilization_daily` table provides metric statistics at 24 hour intervals for the most recent 90 days.
 
 ## Examples
 

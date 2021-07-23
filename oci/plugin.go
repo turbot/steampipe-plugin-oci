@@ -71,6 +71,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume_backup_policy":                                     tableCoreVolumeBackupPolicy(ctx),
 			"oci_database_autonomous_database":                                  tableDatabaseAutonomousDatabase(ctx),
 			"oci_database_autonomous_database_metric_storage_utilization":       tableDatabaseAutonomousDatabaseStorageUtilization(ctx),
+			"oci_database_autonomous_database_metric_storage_utilization_daily": tableDatabaseAutonomousDatabaseStorageUtilizationDaily(ctx),
 			"oci_dns_rrset":                                                     tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                                  tableDnsTsigKey(ctx),
 			"oci_dns_zone":                                                      tableDnsZone(ctx),

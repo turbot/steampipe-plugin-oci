@@ -1,6 +1,6 @@
 # Table: oci_mysql_db_system_metric_connections
 
-OCI Monitoring metrics explorer provide data about the performance of your systems.  The `oci_mysql_db_system_metric_connections` table provides metric statistics at 5 minute intervals for the most recent 5 days.
+OCI Monitoring metrics explorer provide data about the performance of your systems. The `oci_mysql_db_system_metric_connections` table provides metric statistics at 5 minute intervals for the most recent 5 days.
 
 ## Examples
 

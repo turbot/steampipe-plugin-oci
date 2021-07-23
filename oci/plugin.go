@@ -99,6 +99,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_backup":                                   tableMySQLBackup(ctx),
 			"oci_mysql_channel":                                  tableMySQLChannel(ctx),
 			"oci_mysql_db_system":                                tableMySQLDBSystem(ctx),
+			"oci_mysql_db_system_metric_cpu_utilization":         tableOciMySQLDBSystemMetricCpuUtilization(ctx),
 			"oci_nosql_table":                                    tableNoSQLTable(ctx),
 			"oci_nosql_table_metric_read_throttle_count":         tableOciNoSQLTableMetricReadThrottleCount(ctx),
 			"oci_nosql_table_metric_read_throttle_count_daily":   tableOciNoSQLTableMetricReadThrottleCountDaily(ctx),

@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
+func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_database_autonomous_database",
 		Description: "OCI Database Autonomous Database",

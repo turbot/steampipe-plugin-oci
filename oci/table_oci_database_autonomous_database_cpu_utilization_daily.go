@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(_ context.Context) *plugin.Table {
+func tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_database_autonomous_database_metric_cpu_utilization_daily",
 		Description: "OCI Autonomous Database Monitoring Metrics - CPU Utilization (Daily)",

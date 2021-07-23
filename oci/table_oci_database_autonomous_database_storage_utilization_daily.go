@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(_ context.Context) *plugin.Table {
+func tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_database_autonomous_database_metric_storage_utilization_daily",
 		Description: "OCI Autonomous Database Monitoring Metrics - Storage Utilization (Daily)",

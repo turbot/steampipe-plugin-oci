@@ -21,7 +21,7 @@ order by
   timestamp;
 ```
 
-### List statistics for ActiveConnections
+### Active connection statistics
 
 ```sql
 select
@@ -39,7 +39,7 @@ order by
   timestamp;
 ```
 
-### List statistics for CurrentConnections
+### Current connection statistics
 
 ```sql
 select

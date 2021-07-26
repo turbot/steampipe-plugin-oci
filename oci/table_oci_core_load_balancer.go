@@ -62,39 +62,8 @@ func tableCoreLoadBalancer(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "ip_addresses",
-				Description: "An array of IP addresses.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromCamel(),
-			},
-			{
-				Name:        "subnet_ids",
-				Description: "An array of subnet OCIDs.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "shape_details",
-				Description: "The configuration details to update load balancer to a different shape.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "network_security_group_ids",
-				Description: "An array of NSG OCIDs associated with the load balancer.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "listeners",
-				Description: "The listener's configuration.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "hostnames",
-				Description: "A hostname resource associated with a load balancer for use by one or more listeners.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "ssl_cipher_suites",
-				Description: "The configuration details of an SSL cipher suite.",
+				Name:        "backend_sets",
+				Description: "The configuration of a load balancer backend set.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -103,8 +72,24 @@ func tableCoreLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "backend_sets",
-				Description: "The configuration of a load balancer backend set.",
+				Name:        "hostnames",
+				Description: "A hostname resource associated with a load balancer for use by one or more listeners.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "ip_addresses",
+				Description: "An array of IP addresses.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "listeners",
+				Description: "The listener's configuration.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "network_security_group_ids",
+				Description: "An array of NSG OCIDs associated with the load balancer.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -113,13 +98,28 @@ func tableCoreLoadBalancer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "routing_policies",
+				Description: "A named ordered list of routing rules that is applied to a listener.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "rule_sets",
 				Description: "A named set of rules associated with a load balancer.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:        "routing_policies",
-				Description: "A named ordered list of routing rules that is applied to a listener.",
+				Name:        "shape_details",
+				Description: "The configuration details to update load balancer to a different shape.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "ssl_cipher_suites",
+				Description: "The configuration details of an SSL cipher suite.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "subnet_ids",
+				Description: "An array of subnet OCIDs.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -228,13 +228,14 @@ func getCoreLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getCoreLoadBalancer", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}
@@ -279,6 +280,17 @@ func loadBalancerTags(_ context.Context, d *transform.TransformData) (interface{
 			tags = map[string]interface{}{}
 		}
 		for _, v := range loadBalancer.DefinedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+		}
+	}
+
+	if loadBalancer.SystemTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range loadBalancer.SystemTags {
 			for key, value := range v {
 				tags[key] = value
 			}

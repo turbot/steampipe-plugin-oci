@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/oracle/oci-go-sdk/v44/apigateway"
 	"github.com/oracle/oci-go-sdk/v44/audit"
 	"github.com/oracle/oci-go-sdk/v44/autoscaling"
@@ -31,6 +30,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
 	"github.com/oracle/oci-go-sdk/v44/logging"
+	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/oracle/oci-go-sdk/v44/mysql"
 	"github.com/oracle/oci-go-sdk/v44/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/nosql"
@@ -60,6 +60,7 @@ type session struct {
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	MonitoringClient               monitoring.MonitoringClient
+	MySQLaasClient                 mysql.MysqlaasClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
@@ -1073,6 +1074,44 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 	sess := &session{
 		TenancyID:         tenantID,
 		MySQLBackupClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLBackupService returns the service client for OCI MySQL Backup Service
+func mySQLaasService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mySQL-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLBackupService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewMysqlaasClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantID,
+		MySQLaasClient: client,
 	}
 
 	// save session in cache

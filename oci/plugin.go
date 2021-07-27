@@ -55,6 +55,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_instance_metric_cpu_utilization_daily":                    tableOciCoreInstanceMetricCpuUtilizationDaily(ctx),
 			"oci_core_instance_metric_cpu_utilization_hourly":                   tableOciCoreInstanceMetricCpuUtilizationHourly(ctx),
 			"oci_core_internet_gateway":                                         tableCoreInternetGateway(ctx),
+			"oci_core_load_balancer":                                            tableCoreLoadBalancer(ctx),
 			"oci_core_local_peering_gateway":                                    tableCoreLocalPeeringGateway(ctx),
 			"oci_core_nat_gateway":                                              tableCoreNatGateway(ctx),
 			"oci_core_network_load_balancer":                                    tableCoreNetworkLoadBalancer(ctx),

@@ -1,0 +1,9 @@
+[
+  {
+    "display_name": "{{ output.display_name.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "is_private": false,
+    "lifecycle_state": "{{ output.state.value }}",
+    "shape_name": "{{ output.shape.value }}"
+  }
+]

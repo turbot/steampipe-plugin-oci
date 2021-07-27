@@ -69,12 +69,6 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "variables",
-				Description: "ConfigurationVariables User controllable service variables.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getConfiguration,
-			},
-			{
 				Name:        "time_updated",
 				Description: "The date and time the Configuration was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -84,6 +78,12 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "type",
 				Description: "The Configuration type, DEFAULT or CUSTOM..",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "variables",
+				Description: "ConfigurationVariables User controllable service variables.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getConfiguration,
 			},
 
 			// tags
@@ -190,15 +190,14 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		id = *configuration.Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
+		// handle empty id in get call
+		if strings.TrimSpace(id) == "" {
+			return nil, nil
+		}
 		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
-	}
-
-	// handle empty id in get call
-	if strings.TrimSpace(id) == "" {
-		return nil, nil
 	}
 
 	// Create Session

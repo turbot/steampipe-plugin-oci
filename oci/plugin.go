@@ -62,6 +62,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_network_load_balancer":                                    tableCoreNetworkLoadBalancer(ctx),
 			"oci_core_network_security_group":                                   tableCoreNetworkSecurityGroup(ctx),
 			"oci_core_public_ip":                                                tableCorePublicIP(ctx),
+			"oci_core_public_ip_pool":                                           tableCorePublicIPPool(ctx),
 			"oci_core_route_table":                                              tableCoreRouteTable(ctx),
 			"oci_core_security_list":                                            tableCoreSecurityList(ctx),
 			"oci_core_service_gateway":                                          tableCoreServiceGateway(ctx),

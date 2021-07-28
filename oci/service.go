@@ -230,12 +230,12 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	return sess, nil
 }
 
-// identityServiceRegional returns the service client for OCI Logging Management Service
+// identityServiceRegional returns the service client for OCI Identity Regional Service
 func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	serviceCacheKey := fmt.Sprintf("IdentityRegional-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -245,7 +245,7 @@ func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region st
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("loggingManagementService", "getProvider.Error", err)
+		logger.Error("identityServiceRegional", "getProvider.Error", err)
 		return nil, err
 	}
 
@@ -429,7 +429,7 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// functionsManagementService returns the service client for OCI Core VirtualNetwork Service
+// functionsManagementService returns the service client for OCI Functions Management Service
 func functionsManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("FunctionsManagement-%s", region)
@@ -552,7 +552,7 @@ func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("kmsVaultService", "getProvider.Error", err)
+		logger.Error("loadBalancerService", "getProvider.Error", err)
 		return nil, err
 	}
 
@@ -934,7 +934,7 @@ func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*se
 // monitoringService returns the service client for OCI Monitoring Service
 func monitoringService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("metric explorer-%s", "region")
+	serviceCacheKey := fmt.Sprintf("monitoring-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -944,7 +944,7 @@ func monitoringService(ctx context.Context, d *plugin.QueryData, region string) 
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("metricExplorerService", "getProvider.Error", err)
+		logger.Error("monitoringService", "getProvider.Error", err)
 		return nil, err
 	}
 

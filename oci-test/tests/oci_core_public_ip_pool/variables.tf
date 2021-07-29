@@ -34,9 +34,9 @@ provider "oci" {
 }
 
 resource "oci_core_public_ip_pool" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    freeform_tags = { "Name" = var.resource_name }
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "tenancy_ocid" {
@@ -62,7 +62,6 @@ output "lifecycle_state" {
 output "freeform_tags" {
   value = oci_core_public_ip_pool.named_test_resource.freeform_tags
 }
-
 
 output "cidr_blocks" {
   value = oci_core_public_ip_pool.named_test_resource.cidr_blocks

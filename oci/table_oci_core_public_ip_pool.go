@@ -148,16 +148,21 @@ func listCorePublicIPPools(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 //// HYDRATE FUNCTIONS
 
-func getCorePublicIPPool(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getCorePublicIPPool(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	plugin.Logger(ctx).Error("getCorePublicIPPool", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(core.PublicIpPoolSummary).Id
+	} else {
+		// Restrict the api call to only root compartment/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
-	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty public ip pool id in get call
 	if strings.TrimSpace(id) == "" {

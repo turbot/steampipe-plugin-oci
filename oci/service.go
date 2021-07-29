@@ -1085,7 +1085,7 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 // mySQLConfigurationService returns the service client for OCI MySQL Configuration Service
 func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("mySQLConfiguration-%s", region)
+	serviceCacheKey := fmt.Sprintf("mysqlconfiguration-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}

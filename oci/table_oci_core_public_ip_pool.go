@@ -34,7 +34,7 @@ func tableCorePublicIPPool(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the public IP pool..",
+				Description: "The OCID of the public IP pool.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -51,8 +51,9 @@ func tableCorePublicIPPool(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "cidr_blocks",
-				Description: "The public IP pool's current state.",
+				Description: "The CIDR blocks added to this pool. This could be all or a portion of a BYOIP CIDR block.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getCorePublicIPPool,
 			},
 
 			// tags
@@ -158,7 +159,7 @@ func getCorePublicIPPool(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	}
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty snapshot id in get call
+	// handle empty public ip pool id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

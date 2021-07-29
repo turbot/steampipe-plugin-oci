@@ -191,11 +191,15 @@ func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plug
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getFileStorageMountTarget", "Compartment", compartment, "OCI_ZONE", zone)
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(filestorage.MountTargetSummary).Id
+	} else {
+		// Restrict the api call to only root compartment and one zone/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
+			return nil, nil
+		}
+		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
 	// handle empty mount target id in get call
@@ -221,14 +225,11 @@ func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plug
 		return nil, err
 	}
 
-	return response, nil
+	return response.MountTarget, nil
 }
 
 //// TRANSFORM FUNCTION
 
-// Priority order for tags
-// 1. Defined Tags
-// 2. Free-form tags
 func mountTargetTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 
 	var freeformTags map[string]string

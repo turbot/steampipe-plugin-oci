@@ -60,7 +60,7 @@ type session struct {
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	MonitoringClient               monitoring.MonitoringClient
-	MySQLaasClient                 mysql.MysqlaasClient
+	MySQLConfigurationClient       mysql.MysqlaasClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
@@ -1082,10 +1082,10 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// mySQLBackupService returns the service client for OCI MySQL Backup Service
-func mySQLaasService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// mySQLConfigurationService returns the service client for OCI MySQL aac Service
+func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("mySQL-%s", region)
+	serviceCacheKey := fmt.Sprintf("mySQLaas-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -1110,8 +1110,8 @@ func mySQLaasService(ctx context.Context, d *plugin.QueryData, region string) (*
 	}
 
 	sess := &session{
-		TenancyID:      tenantID,
-		MySQLaasClient: client,
+		TenancyID:                tenantID,
+		MySQLConfigurationClient: client,
 	}
 
 	// save session in cache

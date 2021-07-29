@@ -40,17 +40,17 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "description",
-				Description: "The current state of the Configuration",
+				Description: "User-provided data about the Configuration.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the Configuration",
+				Description: "The current state of the Configuration.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that budget was created.",
+				Description: "The date and time the Configuration was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -76,12 +76,12 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "type",
-				Description: "The Configuration type, DEFAULT or CUSTOM..",
+				Description: "The Configuration type, DEFAULT or CUSTOM.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "variables",
-				Description: "ConfigurationVariables User controllable service variables.",
+				Description: "User controllable service variables of the Configuration.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getConfiguration,
 			},
@@ -145,7 +145,7 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, h *plugin
 	logger.Debug("listMySQLConfigurations", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
-	session, err := mySQLaasService(ctx, d, region)
+	session, err := mySQLConfigurationService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.MySQLaasClient.ListConfigurations(ctx, request)
+		response, err := session.MySQLConfigurationClient.ListConfigurations(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -190,18 +190,19 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		id = *configuration.Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-		// handle empty id in get call
-		if strings.TrimSpace(id) == "" {
-			return nil, nil
-		}
 		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
 	}
 
+	// handle empty id in get call
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
+
 	// Create Session
-	session, err := mySQLaasService(ctx, d, region)
+	session, err := mySQLConfigurationService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		},
 	}
 
-	response, err := session.MySQLaasClient.GetConfiguration(ctx, request)
+	response, err := session.MySQLConfigurationClient.GetConfiguration(ctx, request)
 	if err != nil {
 		return nil, err
 	}

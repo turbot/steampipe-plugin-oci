@@ -17,7 +17,7 @@ from
   oci_core_public_ip_pool;
 ```
 
-## List public IP pool which are not active
+### List public IP pool which are not active
 
 ```sql
 select

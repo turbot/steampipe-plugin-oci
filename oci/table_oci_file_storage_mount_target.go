@@ -169,7 +169,7 @@ func listFileStorageMountTargets(ctx context.Context, d *plugin.QueryData, h *pl
 		}
 
 		for _, mountTarget := range response.Items {
-			d.StreamLeafListItem(ctx, mountTarget)
+			d.StreamListItem(ctx, mountTarget)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -192,12 +192,13 @@ func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plug
 	logger.Debug("getFileStorageMountTarget", "Compartment", compartment, "OCI_ZONE", zone)
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
-	// handle empty snapshot id in get call
+	// handle empty mount target id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

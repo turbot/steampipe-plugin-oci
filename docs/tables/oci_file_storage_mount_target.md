@@ -17,8 +17,7 @@ from
   oci_file_storage_mount_target;
 ```
 
-
-## List mount targets that are not active
+## List mount targets which are not active
 
 ```sql
 select

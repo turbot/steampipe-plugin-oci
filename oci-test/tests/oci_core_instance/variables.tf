@@ -55,8 +55,8 @@ resource "oci_core_subnet" "named_test_resource" {
 }
 
 locals {
-  imagePath    = "${path.cwd}/image.json"
-  path         = "${path.cwd}/output.json"
+  imagePath = "${path.cwd}/image.json"
+  path      = "${path.cwd}/output.json"
 }
 
 resource "null_resource" "test_image" {
@@ -114,5 +114,3 @@ output "shape" {
   depends_on = [null_resource.named_test_resource]
   value      = jsondecode(data.local_file.instance.content).data.shape
 }
-
-

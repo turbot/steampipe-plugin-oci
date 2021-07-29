@@ -39,9 +39,11 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "description",
-				Description: "User-provided data about the Configuration.",
+				Name:        "parent_configuration_id",
+				Description: "The OCID of the Configuration from which this Configuration is derived.",
 				Type:        proto.ColumnType_STRING,
+				Hydrate:     getConfiguration,
+				Transform:   transform.FromField("ParentConfigurationId"),
 			},
 			{
 				Name:        "lifecycle_state",
@@ -57,11 +59,9 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "parent_configuration_id",
-				Description: "The OCID of the Configuration from which this Configuration is derived.",
+				Name:        "description",
+				Description: "User-provided data about the Configuration.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getConfiguration,
-				Transform:   transform.FromField("ParentConfigurationId"),
 			},
 			{
 				Name:        "shape_name",

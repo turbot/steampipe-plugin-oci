@@ -40,7 +40,7 @@ provider "oci" {
 }
 
 locals {
-  path         = "${path.cwd}/output.json"
+  path = "${path.cwd}/output.json"
 }
 
 resource "null_resource" "named_test_resource" {

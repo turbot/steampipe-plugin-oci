@@ -189,8 +189,8 @@ func getCoreBootVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plugi
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getCoreBootVolumeReplica", "Compartment", compartment, "OCI_Zone", zone)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	// Restrict the api call to only root compartment and one zone/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
 		return nil, nil
 	}
 

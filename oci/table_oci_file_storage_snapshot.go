@@ -184,11 +184,12 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getFileStorageSnapshot", "Compartment", compartment, "OCI_ZONE", zone)
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	// Restrict the api call to only root compartment and one zone/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
 		return nil, nil
 	}
+
+	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty snapshot id in get call
 	if id == "" {

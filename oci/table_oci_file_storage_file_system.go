@@ -185,12 +185,11 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTION
 
 func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getFileStorageFileSystem")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getFunctionsApplication", "Compartment", compartment, "OCI_ZONE", zone)
+	logger.Debug("getFileStorageFileSystem", "Compartment", compartment, "OCI_ZONE", zone)
 
 	var id string
 	if h.Item != nil {
@@ -198,8 +197,8 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = *fileSystem.Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		// Restrict the api call to only root compartment and one zone/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
 			return nil, nil
 		}
 	}

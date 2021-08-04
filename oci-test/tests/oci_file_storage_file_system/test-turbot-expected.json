@@ -1,6 +1,6 @@
 [
   {
-    "region": "ap_mumbai_1",
+    "region": "{{ output.region.value }}",
     "tenant_id": "{{ output.tenancy_ocid.value }}",
     "title": "{{ output.resource_name.value }}"
   }

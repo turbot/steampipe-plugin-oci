@@ -1,10 +1,8 @@
-## v0.1.0 [2021-08-04]
-
-_What's new?_
+## v0.1.0 [2021-08-05]
 
 _Bug fixes_
 
-- Fixed: Restrict get api call only to root compartment and one zone per region ([#264](https://github.com/turbot/steampipe-plugin-oci/pull/264))
+- Fixed: Restrict get API calls to the root compartment and one zone per region in several core and file storage tables ([#264](https://github.com/turbot/steampipe-plugin-oci/pull/264))
 
 ## v0.0.17 [2021-07-31]
 

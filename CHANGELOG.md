@@ -1,3 +1,15 @@
+## v0.1.0 [2021-08-06]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_public_ip_pool](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_public_ip_pool) ([#260](https://github.com/turbot/steampipe-plugin-oci/pull/260))
+  - [oci_file_storage_mount_target](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_mount_target) ([#257](https://github.com/turbot/steampipe-plugin-oci/pull/257))
+
+_Bug fixes_
+
+- Fixed: Restrict get API calls to the root compartment and one zone per region in several core and file storage tables ([#264](https://github.com/turbot/steampipe-plugin-oci/pull/264))
+
 ## v0.0.17 [2021-07-31]
 
 _What's new?_

@@ -1,4 +1,10 @@
-## v0.1.0 [2021-08-05]
+## v0.1.0 [2021-08-06 ]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_public_ip_pool](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_public_ip_pool) ([#260](https://github.com/turbot/steampipe-plugin-oci/pull/260))
+  - [oci_file_storage_mount_target](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_mount_target) ([#257](https://github.com/turbot/steampipe-plugin-oci/pull/257))
 
 _Bug fixes_
 

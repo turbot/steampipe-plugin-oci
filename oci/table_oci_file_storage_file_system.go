@@ -266,21 +266,21 @@ func fileSystemTags(_ context.Context, d *transform.TransformData) (interface{},
 }
 
 func fileSystemFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case filestorage.FileSystem:
-		return item.(filestorage.FileSystem).FreeformTags
+		return item.FreeformTags
 	case filestorage.FileSystemSummary:
-		return item.(filestorage.FileSystemSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func fileSystemDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case filestorage.FileSystem:
-		return item.(filestorage.FileSystem).DefinedTags
+		return item.DefinedTags
 	case filestorage.FileSystemSummary:
-		return item.(filestorage.FileSystemSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

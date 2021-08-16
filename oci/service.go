@@ -17,17 +17,24 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/apigateway"
 	"github.com/oracle/oci-go-sdk/v44/audit"
 	"github.com/oracle/oci-go-sdk/v44/autoscaling"
+	"github.com/oracle/oci-go-sdk/v44/budget"
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v44/common/auth"
 	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/oracle/oci-go-sdk/v44/events"
 	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
+	"github.com/oracle/oci-go-sdk/v44/loadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/logging"
+	"github.com/oracle/oci-go-sdk/v44/monitoring"
+	"github.com/oracle/oci-go-sdk/v44/mysql"
+	"github.com/oracle/oci-go-sdk/v44/networkloadbalancer"
+	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
@@ -42,8 +49,10 @@ type session struct {
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BlockstorageClient             core.BlockstorageClient
+	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
+	DatabaseClient                 database.DatabaseClient
 	DnsClient                      dns.DnsClient
 	EventsClient                   events.EventsClient
 	FileStorageClient              filestorage.FileStorageClient
@@ -52,6 +61,13 @@ type session struct {
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
+	LoadBalancerClient             loadbalancer.LoadBalancerClient
+	MonitoringClient               monitoring.MonitoringClient
+	MySQLChannelClient             mysql.ChannelsClient
+	MySQLBackupClient              mysql.DbBackupsClient
+	MySQLDBSystemClient            mysql.DbSystemClient
+	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
+	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
@@ -62,7 +78,7 @@ type session struct {
 // apiGatewayService returns the service client for OCI ApiGateway service
 func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 
-	serviceCacheKey := fmt.Sprintf("ApiGateway-%s", "region")
+	serviceCacheKey := fmt.Sprintf("apigateway-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -142,7 +158,7 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("AutoScaling-%s", region)
+	serviceCacheKey := fmt.Sprintf("autoscaling-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -180,7 +196,7 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 // identityService returns the service client for OCI Identity service
 func identityService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 
-	serviceCacheKey := fmt.Sprintf("Identity-%s", "region")
+	serviceCacheKey := fmt.Sprintf("identity-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -216,12 +232,12 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	return sess, nil
 }
 
-// identityServiceRegional returns the service client for OCI Logging Management Service
+// identityServiceRegional returns the service client for OCI Identity Regional Service
 func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	serviceCacheKey := fmt.Sprintf("identityregional-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -231,7 +247,7 @@ func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region st
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("loggingManagementService", "getProvider.Error", err)
+		logger.Error("identityServiceRegional", "getProvider.Error", err)
 		return nil, err
 	}
 
@@ -261,7 +277,7 @@ func loggingManagementService(ctx context.Context, d *plugin.QueryData, region s
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("LoggingManagement-%s", region)
+	serviceCacheKey := fmt.Sprintf("loggingmanagement-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -301,7 +317,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("BlockStorage-%s", region)
+	serviceCacheKey := fmt.Sprintf("blockstorage-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -341,7 +357,7 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("Events-%s", region)
+	serviceCacheKey := fmt.Sprintf("events-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -381,7 +397,7 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("FileStorage-%s", region)
+	serviceCacheKey := fmt.Sprintf("filestorage-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -415,10 +431,10 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// functionsManagementService returns the service client for OCI Core VirtualNetwork Service
+// functionsManagementService returns the service client for OCI Functions Management Service
 func functionsManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("FunctionsManagement-%s", region)
+	serviceCacheKey := fmt.Sprintf("functionsmanagement-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -458,7 +474,7 @@ func kmsManagementService(ctx context.Context, d *plugin.QueryData, region strin
 	logger := plugin.Logger(ctx)
 
 	// Cache the connection at vault level
-	serviceCacheKey := fmt.Sprintf("KeyManagement-%s-%s", region, endpoint)
+	serviceCacheKey := fmt.Sprintf("keymanagement-%s-%s", region, endpoint)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -490,7 +506,7 @@ func kmsManagementService(ctx context.Context, d *plugin.QueryData, region strin
 // kmsVaultService returns the service client for OCI KMS Vault Service
 func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("Vault-%s", region)
+	serviceCacheKey := fmt.Sprintf("vault-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -525,10 +541,48 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 	return sess, nil
 }
 
+// loadBalancerService returns the service client for OCI Load Balancer Service
+func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("loadbalancer-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("loadBalancerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := loadbalancer.NewLoadBalancerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		LoadBalancerClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // objectStorageService returns the service client for OCI Object Storage service
 func objectStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("ObjectStorage-%s", region)
+	serviceCacheKey := fmt.Sprintf("objectstorage-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -568,7 +622,7 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("NotificationControlPlane-%s", region)
+	serviceCacheKey := fmt.Sprintf("notificationcontrolplane-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -610,7 +664,7 @@ func onsNotificationDataPlaneService(ctx context.Context, d *plugin.QueryData, r
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("NotificationDataPlane-%s", region)
+	serviceCacheKey := fmt.Sprintf("notificationdataplane-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -652,7 +706,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("ComputeRegional-%s", region)
+	serviceCacheKey := fmt.Sprintf("computeregional-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -692,7 +746,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 // coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
 func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("VirtualNetwork-%s", region)
+	serviceCacheKey := fmt.Sprintf("virtualnetwork-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -730,7 +784,7 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 // cloudGuardService returns the service client for OCI Cloud Guard Service
 func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("CloudGuard-%s", "region")
+	serviceCacheKey := fmt.Sprintf("cloudguard-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -795,6 +849,310 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	sess := &session{
 		TenancyID: tenantID,
 		DnsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// databaseService returns the service client for OCI Database Service
+func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("database-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("databaseService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := database.NewDatabaseClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantID,
+		DatabaseClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// budgetService returns the service client for OCI budget Service
+func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("budget-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("budgetService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := budget.NewBudgetClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantID,
+		BudgetClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// monitoringService returns the service client for OCI Monitoring Service
+func monitoringService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("monitoring-%s", "region")
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("monitoringService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := monitoring.NewMonitoringClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:        tenantID,
+		MonitoringClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLChannelService returns the service client for OCI MySQL Channel Service
+func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mysqlchannel-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLChannelService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewChannelsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantID,
+		MySQLChannelClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySqlDBSystemService returns the service client for OCI MySQL DbSystem Service
+func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mysqldbsystem-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLDBSystem", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewDbSystemClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:           tenantID,
+		MySQLDBSystemClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// noSQLDatabaseService returns the service client for OCI NoSQL Database Service
+func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("nosql-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("noSQLDatabaseService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := nosql.NewNosqlClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantID,
+		NoSQLClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLBackupService returns the service client for OCI MySQL Backup Service
+func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mysqlbackup-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLBackupService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewDbBackupsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:         tenantID,
+		MySQLBackupClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// networkLoadBalancerService returns the service client for OCI Network Load Balancer service
+func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("networkloadbalancer-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkLoadBalancerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := networkloadbalancer.NewNetworkLoadBalancerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                 tenantID,
+		NetworkLoadBalancerClient: client,
 	}
 
 	// save session in cache

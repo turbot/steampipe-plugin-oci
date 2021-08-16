@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/resourcesearch"
+	"github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"

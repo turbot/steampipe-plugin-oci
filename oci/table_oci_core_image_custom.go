@@ -135,6 +135,7 @@ func tableCoreImageCustom(_ context.Context) *plugin.Table {
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
+				Type:        proto.ColumnType_STRING,
 				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},

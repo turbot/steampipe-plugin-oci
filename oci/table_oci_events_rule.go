@@ -257,21 +257,21 @@ func ruleTags(_ context.Context, d *transform.TransformData) (interface{}, error
 }
 
 func ruleFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case events.Rule:
-		return item.(events.Rule).FreeformTags
+		return item.FreeformTags
 	case events.RuleSummary:
-		return item.(events.RuleSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func ruleDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case events.Rule:
-		return item.(events.Rule).DefinedTags
+		return item.DefinedTags
 	case events.RuleSummary:
-		return item.(events.RuleSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

@@ -332,7 +332,7 @@ func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connecti
 			matrix[len(compartments)*i+j] = map[string]interface{}{
 				matrixKeyZone:        *zone.Name,
 				matrixKeyCompartment: *compartment.Id,
-				matrixKeyRegion:      *&zone.Region,
+				matrixKeyRegion:      zone.Region,
 			}
 			plugin.Logger(ctx).Debug("listAllCompartments Matrix", (len(compartments)*i)+j, matrix[len(compartments)*i+j])
 		}

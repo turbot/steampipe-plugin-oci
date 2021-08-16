@@ -187,8 +187,8 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	interval := getMonitoringPeriodForGranularity(granularity)
 	metricDetails := monitoring.SummarizeMetricsDataDetails{
 		Namespace:  &namespace,
-		StartTime:  &common.SDKTime{getMonitoringStartDateForGranularity(granularity)},
-		EndTime:    &common.SDKTime{time.Now()},
+		StartTime:  &common.SDKTime{Time: getMonitoringStartDateForGranularity(granularity)},
+		EndTime:    &common.SDKTime{Time: time.Now()},
 		Query:      &queryStringavg,
 		Resolution: &interval,
 	}

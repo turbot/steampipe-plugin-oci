@@ -249,21 +249,21 @@ func applicationTags(_ context.Context, d *transform.TransformData) (interface{}
 }
 
 func applicationFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case functions.Application:
-		return item.(functions.Application).FreeformTags
+		return item.FreeformTags
 	case functions.ApplicationSummary:
-		return item.(functions.ApplicationSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func applicationDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case functions.Application:
-		return item.(functions.Application).DefinedTags
+		return item.DefinedTags
 	case functions.ApplicationSummary:
-		return item.(functions.ApplicationSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

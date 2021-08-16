@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/events"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/events"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -89,7 +89,7 @@ func tableEventsRule(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -147,7 +147,7 @@ func listEventsRules(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	}
 
 	request := events.ListRulesRequest{
-		CompartmentId:  types.String(compartment),
+		CompartmentId: types.String(compartment),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -161,7 +161,7 @@ func listEventsRules(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, event := range response.Items {
-			d.StreamListItem(ctx,  event)
+			d.StreamListItem(ctx, event)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -217,7 +217,7 @@ func getEventsRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	return response.Rule,  nil
+	return response.Rule, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -257,21 +257,21 @@ func ruleTags(_ context.Context, d *transform.TransformData) (interface{}, error
 }
 
 func ruleFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case events.Rule:
-		return item.(events.Rule).FreeformTags
+		return item.FreeformTags
 	case events.RuleSummary:
-		return item.(events.RuleSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func ruleDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case events.Rule:
-		return item.(events.Rule).DefinedTags
+		return item.DefinedTags
 	case events.RuleSummary:
-		return item.(events.RuleSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

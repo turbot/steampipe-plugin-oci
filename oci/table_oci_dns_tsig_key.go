@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/dns"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -103,12 +103,6 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Self").Transform(ociRegionFromSelf),
-			},
-			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -172,7 +166,7 @@ func getDnsTsigKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getDnsTsigKey", "Compartment", compartment)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Rstrict the api call to only root compartment
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}

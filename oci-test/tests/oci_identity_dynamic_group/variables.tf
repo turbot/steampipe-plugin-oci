@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -28,10 +29,10 @@ provider "oci" {
 
 resource "oci_identity_dynamic_group" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  description = var.resource_name
-  matching_rule = var.dynamic_group_matching_rule
-  name = var.resource_name
-  freeform_tags = {"Department"= "Finance"}
+  description    = var.resource_name
+  matching_rule  = var.dynamic_group_matching_rule
+  name           = var.resource_name
+  freeform_tags  = { "Department" = "Finance" }
 }
 
 output "resource_name" {

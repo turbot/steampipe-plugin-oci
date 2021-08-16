@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -29,9 +30,9 @@ provider "oci" {
 
 resource "oci_logging_log_group" "test_log_group" {
   compartment_id = var.tenancy_ocid
-  display_name = var.resource_name
-  description = var.resource_name
-  freeform_tags = { "Name" = var.resource_name }
+  display_name   = var.resource_name
+  description    = var.resource_name
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "display_name" {

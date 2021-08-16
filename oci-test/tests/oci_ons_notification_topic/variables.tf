@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -37,7 +38,7 @@ resource "oci_ons_notification_topic" "named_test_resource" {
   compartment_id = var.tenancy_ocid
   name           = var.resource_name
   description    = var.notification_topic_description
-  freeform_tags = { "Name" = var.resource_name }
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

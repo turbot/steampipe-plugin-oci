@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v36/apigateway"
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
+	"github.com/oracle/oci-go-sdk/v44/apigateway"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -232,21 +232,21 @@ func apiTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 }
 
 func apiGatewayApiFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case apigateway.Api:
-		return item.(apigateway.Api).FreeformTags
+		return item.FreeformTags
 	case apigateway.ApiSummary:
-		return item.(apigateway.ApiSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func apiGatewayApiDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case apigateway.Api:
-		return item.(apigateway.Api).DefinedTags
+		return item.DefinedTags
 	case apigateway.ApiSummary:
-		return item.(apigateway.ApiSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

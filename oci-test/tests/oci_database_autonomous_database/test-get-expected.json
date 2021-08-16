@@ -1,0 +1,8 @@
+[
+  {
+    "db_name": "{{ output.db_name.value }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE"
+
+  }
+]

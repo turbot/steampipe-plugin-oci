@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/core"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -145,7 +145,7 @@ func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugi
 		}
 
 		for _, internetGateway := range response.Items {
-			d.StreamListItem(ctx,  internetGatewayInfo{internetGateway, region})
+			d.StreamListItem(ctx, internetGatewayInfo{internetGateway, region})
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

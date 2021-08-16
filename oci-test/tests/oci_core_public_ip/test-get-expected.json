@@ -1,0 +1,14 @@
+[
+  {
+    "compartment_id": "{{ output.tenancy_ocid.value }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Name": "{{ resourceName }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "AVAILABLE",
+    "lifetime": "RESERVED",
+    "scope": "REGION",
+    "tenant_id": "{{ output.tenancy_ocid.value }}"
+  }
+]

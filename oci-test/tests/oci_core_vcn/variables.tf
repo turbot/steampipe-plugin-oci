@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -22,15 +23,15 @@ variable "oci_ad" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_core_vcn" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    cidr_block = "10.0.0.0/16"
-    freeform_tags = {"Name"= var.resource_name}
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  cidr_block     = "10.0.0.0/16"
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

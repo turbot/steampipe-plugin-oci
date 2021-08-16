@@ -12,6 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -29,13 +30,13 @@ provider "oci" {
 
 resource "oci_identity_user" "named_test_resource" {
   compartment_id = var.tenancy_ocid
-  description = var.user_name
-  name = var.user_name
+  description    = var.user_name
+  name           = var.user_name
 }
 
 resource "oci_identity_api_key" "named_test_resource" {
-    #Required
-    key_value = <<EOF
+  #Required
+  key_value = <<EOF
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtBLQAGmKJ7tpfzYJyqLG
 ZDwHL51+d6T8Z00BnP9CFfzxZZZ48PcYSUHuTyCM8mR5JqYLyH6C8tZ/DKqwxUnc
@@ -46,7 +47,7 @@ mXlrQB7nNKsJrrv5fHwaPDrAY4iNP2W0q3LRpyNigJ6cgRuGJhHa82iHPmxgIx8m
 fwIDAQAB
 -----END PUBLIC KEY-----
 EOF
-    user_id = oci_identity_user.named_test_resource.id
+  user_id   = oci_identity_user.named_test_resource.id
 }
 
 output "tenancy_ocid" {

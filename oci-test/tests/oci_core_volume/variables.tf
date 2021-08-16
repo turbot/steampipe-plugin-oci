@@ -23,14 +23,14 @@ variable "oci_ad" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_core_volume" "test_volume" {
   availability_domain = var.oci_ad
-  compartment_id = var.tenancy_ocid
-  freeform_tags = {"Name"= var.resource_name}
+  compartment_id      = var.tenancy_ocid
+  freeform_tags       = { "Name" = var.resource_name }
 }
 
 output "tenancy_ocid" {

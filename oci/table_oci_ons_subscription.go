@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/ons"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/ons"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -233,21 +233,21 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 }
 
 func subscriptionFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case ons.Subscription:
-		return item.(ons.Subscription).FreeformTags
+		return item.FreeformTags
 	case ons.SubscriptionSummary:
-		return item.(ons.SubscriptionSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case ons.Subscription:
-		return item.(ons.Subscription).DefinedTags
+		return item.DefinedTags
 	case ons.SubscriptionSummary:
-		return item.(ons.SubscriptionSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

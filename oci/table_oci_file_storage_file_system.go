@@ -4,10 +4,10 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/filestorage"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
@@ -19,9 +19,9 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 		Name:        "oci_file_storage_file_system",
 		Description: "OCI File Storage File System",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:    getFileStorageFileSystem,
+			Hydrate:           getFileStorageFileSystem,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listFileStorageFileSystems,
@@ -96,7 +96,7 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -155,7 +155,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	request := filestorage.ListFileSystemsRequest{
-		CompartmentId:  types.String(compartment),
+		CompartmentId:      types.String(compartment),
 		AvailabilityDomain: types.String(zone),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
@@ -170,7 +170,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 
 		for _, fileSystems := range response.Items {
-			d.StreamListItem(ctx, fileSystems )
+			d.StreamListItem(ctx, fileSystems)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -185,12 +185,11 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTION
 
 func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getFileStorageFileSystem")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getFunctionsApplication", "Compartment", compartment, "OCI_ZONE", zone)
+	logger.Debug("getFileStorageFileSystem", "Compartment", compartment, "OCI_ZONE", zone)
 
 	var id string
 	if h.Item != nil {
@@ -198,8 +197,8 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = *fileSystem.Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		// Restrict the api call to only root compartment and one zone/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
 			return nil, nil
 		}
 	}
@@ -267,21 +266,21 @@ func fileSystemTags(_ context.Context, d *transform.TransformData) (interface{},
 }
 
 func fileSystemFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case filestorage.FileSystem:
-		return item.(filestorage.FileSystem).FreeformTags
+		return item.FreeformTags
 	case filestorage.FileSystemSummary:
-		return item.(filestorage.FileSystemSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func fileSystemDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case filestorage.FileSystem:
-		return item.(filestorage.FileSystem).DefinedTags
+		return item.DefinedTags
 	case filestorage.FileSystemSummary:
-		return item.(filestorage.FileSystemSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

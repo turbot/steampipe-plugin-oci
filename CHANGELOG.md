@@ -1,3 +1,129 @@
+## v0.1.0 [2021-08-06]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_public_ip_pool](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_public_ip_pool) ([#260](https://github.com/turbot/steampipe-plugin-oci/pull/260))
+  - [oci_file_storage_mount_target](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_file_storage_mount_target) ([#257](https://github.com/turbot/steampipe-plugin-oci/pull/257))
+
+_Bug fixes_
+
+- Fixed: Restrict get API calls to the root compartment and one zone per region in several core and file storage tables ([#264](https://github.com/turbot/steampipe-plugin-oci/pull/264))
+
+## v0.0.17 [2021-07-31]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_boot_volume_replica](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_replica) ([#236](https://github.com/turbot/steampipe-plugin-oci/pull/236))
+  - [oci_core_load_balancer](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_load_balancer) ([#241](https://github.com/turbot/steampipe-plugin-oci/pull/241))
+  - [oci_database_autonomous_database_metric_cpu_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_cpu_utilization) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_database_autonomous_database_metric_cpu_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_cpu_utilization_daily) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_database_autonomous_database_metric_storage_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_storage_utilization) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_database_autonomous_database_metric_storage_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_storage_utilization_daily) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_connections](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_connections) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_connections_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_connections_daily) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_cpu_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_cpu_utilization) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_cpu_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_cpu_utilization_daily) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_memory_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_memory_utilization) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+  - [oci_mysql_db_system_metric_memory_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_memory_utilization_daily) ([#254](https://github.com/turbot/steampipe-plugin-oci/pull/254))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.4.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v141--2021-07-20) ([#256](https://github.com/turbot/steampipe-plugin-oci/pull/256))
+- Updated: Add integration test for `oci_core_instance` table ([#261](https://github.com/turbot/steampipe-plugin-oci/pull/261))
+
+_Bug fixes_
+
+- Fixed: Cache keys for monitoring service and identity service regional connection information are now correct ([#259](https://github.com/turbot/steampipe-plugin-oci/pull/259))
+- Fixed: Rename `table_core_volume_backup.go` to `table_oci_core_volume_backup.go` ([#245](https://github.com/turbot/steampipe-plugin-oci/pull/245))
+
+## v0.0.16 [2021-07-22]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_block_volume_replica](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_block_volume_replica) ([#202](https://github.com/turbot/steampipe-plugin-oci/pull/202))
+  - [oci_core_boot_volume](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume) ([#208](https://github.com/turbot/steampipe-plugin-oci/pull/208))
+  - [oci_core_boot_volume_attachment](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_attachment) ([#223](https://github.com/turbot/steampipe-plugin-oci/pull/223))
+  - [oci_core_boot_volume_metric_read_ops](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_read_ops) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_boot_volume_metric_read_ops_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_read_ops_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_boot_volume_metric_read_ops_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_read_ops_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_boot_volume_metric_write_ops](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_write_ops) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_boot_volume_metric_write_ops_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_write_ops_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_boot_volume_metric_write_ops_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_boot_volume_metric_write_ops_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_instance_metric_cpu_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_instance_metric_cpu_utilization) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_instance_metric_cpu_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_instance_metric_cpu_utilization_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_instance_metric_cpu_utilization_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_instance_metric_cpu_utilization_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_core_network_load_balancer](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_network_load_balancer) ([#224](https://github.com/turbot/steampipe-plugin-oci/pull/224))
+  - [oci_core_volume_attachment](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_attachment) ([#207](https://github.com/turbot/steampipe-plugin-oci/pull/207))
+  - [oci_identity_availability_domain](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_availability_domain) ([#210](https://github.com/turbot/steampipe-plugin-oci/pull/210))
+  - [oci_mysql_backup](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_backup) ([#170](https://github.com/turbot/steampipe-plugin-oci/pull/170))
+  - [oci_nosql_table_metric_read_throttle_count](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_read_throttle_count) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_read_throttle_count_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_read_throttle_count_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_read_throttle_count_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_read_throttle_count_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_storage_utilization](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_storage_utilization) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_storage_utilization_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_storage_utilization_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_storage_utilization_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_storage_utilization_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_write_throttle_count](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_write_throttle_count) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_write_throttle_count_daily](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_write_throttle_count_daily) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+  - [oci_nosql_table_metric_write_throttle_count_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table_metric_write_throttle_count_hourly) ([#204](https://github.com/turbot/steampipe-plugin-oci/pull/204))
+
+_Enhancements_
+
+- Updated: Add column `region` to all metric tables ([#240](https://github.com/turbot/steampipe-plugin-oci/pull/240))
+- Updated: Add column `region` to `oci_mysql_db_system` table ([#235](https://github.com/turbot/steampipe-plugin-oci/pull/235))
+
+_Bug fixes_
+
+- Fixed: Network load balancer service connection no longer fails due to undeclared tenant ID ([#232](https://github.com/turbot/steampipe-plugin-oci/pull/232))
+
+## v0.0.15 [2021-07-16]
+
+_What's new?_
+
+- New tables added
+  - [oci_budget_alert_rule](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_budget_alert_rule) ([#198](https://github.com/turbot/steampipe-plugin-oci/pull/198))
+  - [oci_budget_budget](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_budget_budget) ([#197](https://github.com/turbot/steampipe-plugin-oci/pull/197))
+  - [oci_core_public_ip](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_public_ip) ([#194](https://github.com/turbot/steampipe-plugin-oci/pull/194))
+  - [oci_database_autonomous_database](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database) ([#162](https://github.com/turbot/steampipe-plugin-oci/pull/162))
+  - [oci_database_mysql_db_system](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_mysql_db_system) ([#169](https://github.com/turbot/steampipe-plugin-oci/pull/169))
+  - [oci_dns_rrset](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_dns_rrset) ([#112](https://github.com/turbot/steampipe-plugin-oci/pull/112))
+  - [oci_mysql_channel](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_channel) ([#171](https://github.com/turbot/steampipe-plugin-oci/pull/171))
+  - [oci_nosql_table](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_nosql_table) ([#193](https://github.com/turbot/steampipe-plugin-oci/pull/193))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.3.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v131--2021-07-15) ([#196](https://github.com/turbot/steampipe-plugin-oci/pull/196))
+- Updated: oci-go-sdk to v44 ([#206](https://github.com/turbot/steampipe-plugin-oci/pull/206))
+- Updated: Add column `object_lifecycle_policy` to `oci_objectstorage_bucket` table ([#187](https://github.com/turbot/steampipe-plugin-oci/pull/187))
+- Updated: Minor cleanup in docs/index.md ([#173](https://github.com/turbot/steampipe-plugin-oci/pull/173))
+
+## v0.0.14 [2021-07-01]
+
+_Enhancements_
+
+- Updated: Improved example queries in `oci_kms_key_version` table doc ([#155](https://github.com/turbot/steampipe-plugin-oci/pull/155))
+
+_Bug fixes_
+
+- Fixed: Compartments in creating and deleting states should not be retrieved in `oci_multi_region` table ([#151](https://github.com/turbot/steampipe-plugin-oci/pull/151))
+- Fixed: Remove unused `region` column in `oci_dns_zone` table ([#157](https://github.com/turbot/steampipe-plugin-oci/pull/157))
+- Fixed: Remove unused `region` column in `oci_dns_tsig_key` table ([#159](https://github.com/turbot/steampipe-plugin-oci/pull/159))
+
+## v0.0.13 [2021-06-24]
+
+_What's new?_
+
+- New tables added
+  - [oci_identity_api_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_api_key) ([#143](https://github.com/turbot/steampipe-plugin-oci/pull/143))
+  - [oci_kms_key](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_kms_key) ([#145](https://github.com/turbot/steampipe-plugin-oci/pull/145))
+  - [oci_kms_key_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_kms_key_version) ([#149](https://github.com/turbot/steampipe-plugin-oci/pull/149))
+
+_Bug fixes_
+
+- Fixed: Example query in `oci_identity_compartment` docs ([#134](https://github.com/turbot/steampipe-plugin-oci/pull/134))
+
 ## v0.0.12 [2021-06-17]
 
 _What's new?_

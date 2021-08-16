@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/functions"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -81,7 +81,7 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
-				Name:       "freeform_tags",
+				Name:        "freeform_tags",
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
@@ -106,7 +106,7 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Id").Transform(ociRegionName),
-	  	},
+			},
 			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
@@ -249,21 +249,21 @@ func applicationTags(_ context.Context, d *transform.TransformData) (interface{}
 }
 
 func applicationFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case functions.Application:
-		return item.(functions.Application).FreeformTags
+		return item.FreeformTags
 	case functions.ApplicationSummary:
-		return item.(functions.ApplicationSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func applicationDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case functions.Application:
-		return item.(functions.Application).DefinedTags
+		return item.DefinedTags
 	case functions.ApplicationSummary:
-		return item.(functions.ApplicationSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

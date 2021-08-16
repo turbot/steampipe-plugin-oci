@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v36/common"
-	"github.com/oracle/oci-go-sdk/v36/logging"
+	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/logging"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -230,21 +230,21 @@ func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 }
 
 func logGroupFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.LogGroup:
-		return item.(logging.LogGroup).FreeformTags
+		return item.FreeformTags
 	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func logGroupDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.LogGroup:
-		return item.(logging.LogGroup).DefinedTags
+		return item.DefinedTags
 	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

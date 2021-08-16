@@ -6,6 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
+  default     = ""
   description = "OCID of your tenancy."
 }
 
@@ -22,15 +23,15 @@ variable "region" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.tenancy_ocid
+  tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
 }
 
 resource "oci_kms_vault" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    vault_type = "DEFAULT"
-    freeform_tags = {"Name"= var.resource_name}
+  compartment_id = var.tenancy_ocid
+  display_name   = var.resource_name
+  vault_type     = "DEFAULT"
+  freeform_tags  = { "Name" = var.resource_name }
 }
 
 output "resource_name" {

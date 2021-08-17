@@ -780,7 +780,7 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 }
 
 // cloudGuardService returns the service client for OCI Cloud Guard Service
-func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("cloudguard-%s", "region")
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
@@ -790,7 +790,7 @@ func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
 		logger.Error("cloudGuardService", "getProvider.Error", err)
 		return nil, err

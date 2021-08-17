@@ -25,7 +25,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardManagedLists,
 		},
-		GetMatrixItem: BuildCompartmentList,
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -151,10 +151,11 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("oci.listCloudGuardManagedLists", "Compartment", compartment)
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +191,7 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plu
 func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("oci.getCloudGuardManagedList", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment/ per region
@@ -204,7 +206,7 @@ func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, nil
 	}
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

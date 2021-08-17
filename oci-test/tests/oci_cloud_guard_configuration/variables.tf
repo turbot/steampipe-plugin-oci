@@ -16,9 +16,10 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
+# we are not creating any resource so we have to pass the reporting region where resorce will be available
 variable "region" {
   type        = string
-  default     = "ap-mumbai-1"
+  default     = "ap-hyderabad-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
@@ -27,11 +28,19 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_cloud_guard_configuration" "named_test_resource" {
-  #Required
-  compartment_id   = var.tenancy_ocid
-  reporting_region = var.region
-  status           = "ENABLED"
+locals {
+  path = "${path.cwd}/output.json"
+}
+
+resource "null_resource" "named_test_resource" {
+  provisioner "local-exec" {
+    command = "oci cloud-guard configuration get --compartment-id ${var.tenancy_ocid} --output json > ${local.path}"
+  }
+}
+
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
 }
 
 output "reporting_region" {
@@ -43,5 +52,15 @@ output "tenancy_ocid" {
 }
 
 output "self_manage_resources" {
-  value = oci_cloud_guard_cloud_guard_configuration.named_test_resource.self_manage_resources
+  depends_on = [
+     null_resource.named_test_resource
+  ]
+  value = jsondecode(data.local_file.input.content).data.self-manage-resources
+}
+
+output "status" {
+  depends_on = [
+     null_resource.named_test_resource
+  ]
+  value = jsondecode(data.local_file.input.content).data.status
 }

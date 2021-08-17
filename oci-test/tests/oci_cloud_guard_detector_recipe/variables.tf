@@ -16,9 +16,10 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
+# we are not creating any resource so we have to pass the reporting region where resorce will be available
 variable "region" {
   type        = string
-  default     = "ap-mumbai-1"
+  default     = "ap-hyderabad-1"
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
@@ -27,21 +28,48 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_detector_recipe" "named_test_resource" {
-  #Required
-  compartment_id            = var.tenancy_ocid
-  display_name              = var.resource_name
-  source_detector_recipe_id = oci_cloud_guard_detector_recipe.named_test_resource.id
+locals {
+  path = "${path.cwd}/output.json"
+}
+
+resource "null_resource" "named_test_resource" {
+  provisioner "local-exec" {
+    command = "oci cloud-guard detector-recipe list --compartment-id ${var.tenancy_ocid} --all --output json > ${local.path}"
+  }
+}
+
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
 }
 
 output "resource_name" {
-  value = var.resource_name
+  depends_on = [null_resource.named_test_resource]
+  value = jsondecode(data.local_file.input.content).data.items[0].display-name
 }
+
+output "resource_state" {
+  depends_on = [
+     null_resource.named_test_resource
+  ]
+  value = jsondecode(data.local_file.input.content).data.items[0].lifecycle-state
+}
+
+output "source_detector_id" {
+  depends_on = [
+     null_resource.named_test_resource
+  ]
+  value = jsondecode(data.local_file.input.content).data.items[0].source-detector-recipe-id
+}
+
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
 output "resource_id" {
-  value = oci_cloud_guard_detector_recipe.named_test_resource.id
+  depends_on = [
+     null_resource.named_test_resource
+  ]
+  value = jsondecode(data.local_file.input.content).data.items[0].id
 }

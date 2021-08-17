@@ -25,7 +25,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardDetectorRecipes,
 		},
-		GetMatrixItem: BuildCompartmentList,
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -147,10 +147,11 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Trace("oci.listCloudGuardDetectorRecipes", "Compartment", compartment)
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -186,6 +187,7 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("oci.getCloudGuardDetectorRecipe", "Compartment", compartment)
 
 	var id string
@@ -200,7 +202,7 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 	}
 
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

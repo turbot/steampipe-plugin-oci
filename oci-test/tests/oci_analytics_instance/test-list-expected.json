@@ -1,0 +1,11 @@
+[
+  {
+    "id": "{{ output.resource_id.value }}",
+    "name": "{{ resourceName }}",
+    "lifecycle_state": "ACTIVE",
+    "capacity_type": "OLPU_COUNT",
+    "capacity_value": 1,
+    "feature_set": "SELF_SERVICE_ANALYTICS",
+    "license_type": "BRING_YOUR_OWN_LICENSE"
+  }
+]

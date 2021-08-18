@@ -8,7 +8,7 @@ Oracle Cloud Infrastructure offers single-node DB systems on either bare metal o
 
 ```sql
 select
-  db_name,
+  id,
   display_name,
   lifecycle_state,
   time_created
@@ -20,7 +20,7 @@ from
 
 ```sql
 select
-  db_name,
+  id,
   display_name,
   lifecycle_state,
   time_created
@@ -34,7 +34,7 @@ where
 
 ```sql
 select
-  db_name,
+  id,
   display_name,
   lifecycle_state,
   time_created

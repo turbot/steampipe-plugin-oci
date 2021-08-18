@@ -88,6 +88,12 @@ func tableOciDatabaseDBSystem(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("DataStorageSizeInGBs"),
 			},
 			{
+				Name:        "db_system_options_storage_management",
+				Description: "The storage option used in DB system.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DbSystemOptions.StorageManagement"),
+			},
+			{
 				Name:        "disk_redundancy",
 				Description: "The type of redundancy configured for the DB system.",
 				Type:        proto.ColumnType_STRING,
@@ -216,6 +222,7 @@ func tableOciDatabaseDBSystem(_ context.Context) *plugin.Table {
 				Name:        "iorm_config_cache",
 				Description: "The IORM configuration of the DB system.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getDatabaseDBSystem,
 			},
 			{
 				Name:        "maintenance_window",

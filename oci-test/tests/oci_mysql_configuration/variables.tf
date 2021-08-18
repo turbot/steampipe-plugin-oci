@@ -45,7 +45,7 @@ locals {
 
 resource "null_resource" "named_test_resource" {
   provisioner "local-exec" {
-    command = "oci mysql configuration create --compartment-id ${var.tenancy_ocid} --shape-name ${var.shape} --output json > ${local.path}"
+    command = "oci mysql configuration list --compartment-id ${var.tenancy_ocid} --output json > ${local.path}"
   }
 }
 
@@ -58,31 +58,27 @@ output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "region" {
-  value = var.region
-}
-
 output "resource_name" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.configuration.content).data.display-name
+  value      = jsondecode(data.local_file.configuration.content).data[0].display-name
 }
 
 output "resource_id" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.configuration.content).data.id
+  value      = jsondecode(data.local_file.configuration.content).data[0].id
 }
 
 output "type" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.configuration.content).data.type
+  value      = jsondecode(data.local_file.configuration.content).data[0].type
 }
 
 output "shape_name" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.configuration.content).data.shape-name
+  value      = jsondecode(data.local_file.configuration.content).data[0].shape-name
 }
 
 output "lifecycle_state" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.configuration.content).data.lifecycle-state
+  value      = jsondecode(data.local_file.configuration.content).data[0].lifecycle-state
 }

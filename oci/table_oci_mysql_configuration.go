@@ -25,7 +25,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listMySQLConfigurations,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
@@ -114,12 +114,6 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 
 			// OCI standard columns
 			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
-			},
-			{
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
@@ -138,23 +132,26 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listMySQLConfigurations", "Compartment", compartment, "OCI_REGION", region)
-
+	logger.Debug("listMySQLConfigurations", "Compartment", compartment)
+	
+	// Restrict the api call to only root compartment
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+	
 	// Create Session
-	session, err := mySQLConfigurationService(ctx, d, region)
+	session, err := mySQLConfigurationService(ctx, d, "")
 	if err != nil {
 		return nil, err
 	}
 
 	request := mysql.ListConfigurationsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+		CompartmentId:   types.String(compartment),
+		Type:            []mysql.ListConfigurationsTypeEnum{"DEFAULT"},
+		RequestMetadata: common.RequestMetadata{RetryPolicy: getDefaultRetryPolicy()},
 	}
 
 	pagesLeft := true
@@ -180,9 +177,8 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, h *plugin
 
 func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getConfiguration", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getConfiguration", "Compartment", compartment)
 
 	var id string
 	if h.Item != nil {
@@ -190,7 +186,7 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 		id = *configuration.Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the api call to only root compartment/ per region
+		// Restrict the api call to only root compartment
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
@@ -202,7 +198,7 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Create Session
-	session, err := mySQLConfigurationService(ctx, d, region)
+	session, err := mySQLConfigurationService(ctx, d, "")
 	if err != nil {
 		return nil, err
 	}

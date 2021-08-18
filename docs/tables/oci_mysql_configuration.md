@@ -17,7 +17,7 @@ from
   oci_mysql_configuration;
 ```
 
-### List custom configurations
+### List deleted configurations
 
 ```sql
 select
@@ -25,9 +25,9 @@ select
   id,
   description,
   lifecycle_state as state,
-  type
+  time_created
 from
-  oci_mysql_configuration
+  oci_mysql_configuration 
 where
-  type = 'CUSTOM';
+  lifecycle_state = 'DELETED'
 ```

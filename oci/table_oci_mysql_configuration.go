@@ -17,7 +17,7 @@ import (
 func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_configuration",
-		Description: "OCI My SQL Configuration",
+		Description: "OCI MySQL Configuration",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getConfiguration,

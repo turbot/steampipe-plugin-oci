@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/database"
 	"github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -29,81 +29,61 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "The user-friendly name for the DB System. It does not have to be unique.",
+				Description: "The user-friendly name for the database home. It does not have to be unique.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the DB System.",
+				Description: "The OCID of the database home.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the DB System.",
+				Description: "The current state of the database home.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "configuration_id",
-				Description: "The OCID of the Configuration to be used for Instances in this DB System.",
+				Name:        "db_system_id",
+				Description: "The OCID of the DB system.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "subnet_id",
-				Description: "The OCID of the subnet the DB System is associated with.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the DB System was created.",
+				Description: "The date and time the database home was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// other columns
 			{
-				Name:        "availability_domain",
-				Description: "The Availability Domain where the primary DB System should be located.",
+				Name:        "database_software_image_id",
+				Description: "The database software image OCID.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "db_home_location",
+				Description: "The location of the oracle database home.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "data_storage_size_in_gbs",
-				Description: "Initial size of the data volume in GiBs that will be created and attached.",
-				Type:        proto.ColumnType_INT,
-				Hydrate:     getMySQLDBSystem,
-				Transform:   transform.FromField("DataStorageSizeInGBs"),
-			},
-			{
-				Name:        "description",
-				Description: "User-provided data about the DB System.",
+				Name:        "db_version",
+				Description: "The oracle database version.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "fault_domain",
-				Description: "The name of the fault domain the DB System is located in.",
+				Name:        "kms_key_id",
+				Description: "The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "hostname_label",
-				Description: "The hostname for the primary endpoint of the DB System.",
+				Name:        "last_patch_history_entry_id",
+				Description: "The OCID of the last patch history.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "ip_address",
-				Description: "The IP address the DB System is configured to listen on.",
-				Type:        proto.ColumnType_IPADDR,
-				Hydrate:     getMySQLDBSystem,
-				Transform:   transform.FromField("IpAddress"),
-			},
-			{
-				Name:        "is_analytics_cluster_attached",
-				Description: "If the DB System has an Analytics Cluster attached.",
-				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -112,69 +92,17 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 				Hydrate:     getMySQLDBSystem,
 			},
 			{
-				Name:        "mysql_version",
-				Description: "Name of the MySQL Version in use for the DB System.",
+				Name:        "vm_cluster_id",
+				Description: "The OCID of the VM cluster.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "port",
-				Description: "The port for primary endpoint of the DB System to listen on.",
-				Type:        proto.ColumnType_INT,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "port_x",
-				Description: "The network port on which X Plugin listens for TCP/IP connections. This is the X Plugin equivalent of port.",
-				Type:        proto.ColumnType_INT,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "shape_name",
-				Description: "The shape of the primary instances of the DB System.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "time_updated",
-				Description: "The time the DB System was last updated.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeUpdated.Time"),
+				Transform:   transform.FromCamel(),
 			},
 
 			// json fields
 			{
-				Name:        "analytics_cluster",
-				Description: "A summary of an Analytics Cluster.",
+				Name:        "one_off_patches",
+				Description: "List of one-off patches for Database Homes.",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "backup_policy",
-				Description: "BackupPolicy The Backup policy for the DB System.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "channels",
-				Description: "A list with a summary of all the Channels attached to the DB System.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "endpoints",
-				Description: "The network endpoints available for this DB System.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "maintenance",
-				Description: "The Maintenance Policy for the DB System.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMySQLDBSystem,
-			},
-			{
-				Name:        "source",
-				Description: "DbSystemSource Parameters detailing how to provision the initial data of the DB System.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getMySQLDBSystem,
 			},
 
 			// tags
@@ -194,7 +122,7 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(dbSystemTags),
+				Transform:   transform.From(dbHomeTags),
 			},
 			{
 				Name:        "title",
@@ -276,16 +204,12 @@ func getDatabaseDBHome(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getDatabaseDBHome", "Compartment", compartment, "OCI_REGION", region)
 
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(database.DbHomeSummary).Id
-	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-			return nil, nil
-		}
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
 	}
+
+	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty id in get call
 	if id == "" {
@@ -299,7 +223,7 @@ func getDatabaseDBHome(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	}
 
 	request := database.GetDbHomeRequest{
-		DbSystemId: types.String(id),
+		DbHomeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

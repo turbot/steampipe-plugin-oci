@@ -77,6 +77,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_autonomous_database_metric_cpu_utilization_daily":     tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(ctx),
 			"oci_database_autonomous_database_metric_storage_utilization":       tableOciDatabaseAutonomousDatabaseMetricStorageUtilization(ctx),
 			"oci_database_autonomous_database_metric_storage_utilization_daily": tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(ctx),
+			"oci_database_db_home":                                              tableOciDatabaseDBHome(ctx),
 			"oci_dns_rrset":                                                     tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                                  tableDnsTsigKey(ctx),
 			"oci_dns_zone":                                                      tableDnsZone(ctx),

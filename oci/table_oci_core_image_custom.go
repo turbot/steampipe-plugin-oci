@@ -17,7 +17,7 @@ import (
 func tableCoreImageCustom(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_image_custom",
-		Description: "OCI Core Image_custom",
+		Description: "OCI Core Image Custom",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AnyColumn([]string{"id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),

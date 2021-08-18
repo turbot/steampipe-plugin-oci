@@ -28,5 +28,5 @@ select
 from
   oci_core_image_custom
 where
-  launch_options ->> 'isPvEncryptionInTransitEnabled'  = 'false';
+  launch_options ->> 'isPvEncryptionInTransitEnabled' = 'false';
 ```

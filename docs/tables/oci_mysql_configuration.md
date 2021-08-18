@@ -29,5 +29,5 @@ select
 from
   oci_mysql_configuration 
 where
-  lifecycle_state = 'DELETED'
+  lifecycle_state = 'DELETED';
 ```

@@ -343,18 +343,22 @@ func listDatabaseDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 //// HYDRATE FUNCTION
 
-func getDatabaseDBSystem(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getDatabaseDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getDatabaseDBSystem", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(database.DbSystemSummary).Id
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+		// Restrict the api call to only root compartment/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
 	}
-
-	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty id in get call
 	if id == "" {

@@ -2,6 +2,8 @@
 
 DB System configurations are collections of variables which define the operation of the MySQL DB System.
 
+Configurations have a default set of variables assigned to them, user and system variables. To add variables, you must create a new configuration with the desired variable definitions, or copy an existing configuration, edit it accordingly, and edit the DB System to use the new configuration.
+
 ## Examples
 
 ### Basic info

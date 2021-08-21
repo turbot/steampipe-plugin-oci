@@ -100,7 +100,7 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 			// json fields
 			{
 				Name:        "one_off_patches",
-				Description: "List of one-off patches for database Homes.",
+				Description: "List of one-off patches for database homes.",
 				Type:        proto.ColumnType_JSON,
 			},
 

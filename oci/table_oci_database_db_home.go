@@ -87,9 +87,8 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_details",
-				Description: "Additional information about the current lifecycleState.",
+				Description: "Additional information about the current lifecycle state.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getMySQLDBSystem,
 			},
 			{
 				Name:        "vm_cluster_id",
@@ -101,7 +100,7 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 			// json fields
 			{
 				Name:        "one_off_patches",
-				Description: "List of one-off patches for Database Homes.",
+				Description: "List of one-off patches for database Homes.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -240,7 +239,7 @@ func getDatabaseDBHome(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 //// TRANSFORM FUNCTION
 
 func dbHomeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := dbSystemFreeformTags(d.HydrateItem)
+	freeformTags := dbHomeFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -251,7 +250,7 @@ func dbHomeTags(_ context.Context, d *transform.TransformData) (interface{}, err
 		}
 	}
 
-	definedTags := dbSystemDefinedTags(d.HydrateItem)
+	definedTags := dbHomeDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {

@@ -16,7 +16,7 @@ from
   oci_database_db_home;
 ```
 
-### List database homes that are not available
+### List db homes that are not available
 
 ```sql
 select

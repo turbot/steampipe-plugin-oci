@@ -1,6 +1,0 @@
-[
-  {
-    "tenant_id": "{{ output.tenancy_ocid.value }}",
-    "title": "{{ output.db_name.value }}"
-  }
-]

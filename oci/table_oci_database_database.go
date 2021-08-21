@@ -23,7 +23,8 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 			Hydrate:    getDatabase,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDatabases,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate:           listDatabases,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -195,9 +196,10 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	if err != nil {
 		return nil, err
 	}
-
+	dbSystemId := "ocid1.dbsystem.oc1.ap-mumbai-1.anrg6ljr6igdexaa5t33tvznyp34rfawyqeniyyhoazyd5xebrzfgq6xvf6q"
 	request := database.ListDatabasesRequest{
 		CompartmentId: types.String(compartment),
+		SystemId:      types.String(dbSystemId),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

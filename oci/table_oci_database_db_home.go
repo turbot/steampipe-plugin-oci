@@ -14,64 +14,34 @@ import (
 
 //// TABLE DEFINITION
 
-func tableOciDatabase(_ context.Context) *plugin.Table {
+func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_database_database",
-		Description: "OCI Database",
+		Name:        "oci_database_db_home",
+		Description: "OCI Database DB Home",
+		List: &plugin.ListConfig{
+			Hydrate: listDatabaseDBHomes,
+		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getDatabase,
-		},
-		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			ParentHydrate:     listDatabaseDBHomes,
-			Hydrate:           listDatabases,
+			Hydrate:    getDatabaseDBHome,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "db_name",
-				Description: "The database name.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "db_unique_name",
-				Description: "A system-generated name for the database to ensure uniqueness within an oracle data guard group.",
+				Name:        "display_name",
+				Description: "The user-friendly name for the database home. It does not have to be unique.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the database.",
+				Description: "The OCID of the database home.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the database.",
+				Description: "The current state of the database home.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "time_created",
-				Description: "The date and time the database was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
-			{
-				Name:        "character_set",
-				Description: "The character set for the database.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "database_software_image_id",
-				Description: "The database software image OCID.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
-			},
-			{
-				Name:        "db_home_id",
-				Description: "The OCID of the database home.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "db_system_id",
@@ -80,8 +50,27 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "db_workload",
-				Description: "The database workload type.",
+				Name:        "time_created",
+				Description: "The date and time the database home was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+
+			// other columns
+			{
+				Name:        "database_software_image_id",
+				Description: "The database software image OCID.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
+			},
+			{
+				Name:        "db_home_location",
+				Description: "The location of the oracle database home.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "db_version",
+				Description: "The oracle database version.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -91,10 +80,10 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "last_backup_timestamp",
-				Description: "The date and time when the latest database backup was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("LastBackupTimestamp.Time"),
+				Name:        "last_patch_history_entry_id",
+				Description: "The OCID of the last patch history.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -102,35 +91,16 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "ncharacter_set",
-				Description: "The national character set for the database.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "pdb_name",
-				Description: "The name of the pluggable database.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "source_database_point_in_time_recovery_timestamp",
-				Description: "Point in time recovery timeStamp of the source database at which cloned database system is cloned from the source database system.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("SourceDatabasePointInTimeRecoveryTimestamp.Time"),
-			},
-			{
 				Name:        "vm_cluster_id",
-				Description: "The OCID of the vm cluster.",
+				Description: "The OCID of the VM cluster.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
+
+			// json fields
 			{
-				Name:        "connection_strings",
-				Description: "The connection strings used to connect to the oracle database.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "db_backup_config",
-				Description: "Database backup configuration details.",
+				Name:        "one_off_patches",
+				Description: "List of one-off patches for database homes.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -146,21 +116,21 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Steampipe standard columns
+			// Standard Steampipe columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(databaseTags),
+				Transform:   transform.From(dbHomeTags),
 			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DbName"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 
-			// OCI standard columns
+			// Standard OCI columns
 			{
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
@@ -186,13 +156,11 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listDatabaseDBHomes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listDatabases", "Compartment", compartment, "OCI_REGION", region)
-
-	homeId := h.Item.(database.DbHomeSummary).Id
+	logger.Debug("listDatabaseDBHomes", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := databaseService(ctx, d, region)
@@ -200,9 +168,8 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		return nil, err
 	}
 
-	request := database.ListDatabasesRequest{
+	request := database.ListDbHomesRequest{
 		CompartmentId: types.String(compartment),
-		DbHomeId:      homeId,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -210,13 +177,13 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.DatabaseClient.ListDatabases(ctx, request)
+		response, err := session.DatabaseClient.ListDbHomes(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, database := range response.Items {
-			d.StreamListItem(ctx, database)
+		for _, dbHome := range response.Items {
+			d.StreamListItem(ctx, dbHome)
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -230,11 +197,11 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 //// HYDRATE FUNCTION
 
-func getDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getDatabaseDBHome(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getDatabase", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getDatabaseDBHome", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -254,37 +221,25 @@ func getDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, err
 	}
 
-	request := database.GetDatabaseRequest{
-		DatabaseId: types.String(id),
+	request := database.GetDbHomeRequest{
+		DbHomeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.DatabaseClient.GetDatabase(ctx, request)
+	response, err := session.DatabaseClient.GetDbHome(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Database, nil
+	return response.DbHome, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func databaseTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	var freeformTags map[string]string
-	var definedTags map[string]map[string]interface{}
-
-	switch d.HydrateItem.(type) {
-	case database.DatabaseSummary:
-		database := d.HydrateItem.(database.DatabaseSummary)
-		freeformTags = database.FreeformTags
-		definedTags = database.DefinedTags
-	case database.Database:
-		database := d.HydrateItem.(database.Database)
-		freeformTags = database.FreeformTags
-		definedTags = database.DefinedTags
-	}
+func dbHomeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	freeformTags := dbHomeFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -294,6 +249,8 @@ func databaseTags(_ context.Context, d *transform.TransformData) (interface{}, e
 			tags[k] = v
 		}
 	}
+
+	definedTags := dbHomeDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -308,4 +265,24 @@ func databaseTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return tags, nil
+}
+
+func dbHomeFreeformTags(item interface{}) map[string]string {
+	switch item := item.(type) {
+	case database.DbHome:
+		return item.FreeformTags
+	case database.DbHomeSummary:
+		return item.FreeformTags
+	}
+	return nil
+}
+
+func dbHomeDefinedTags(item interface{}) map[string]map[string]interface{} {
+	switch item := item.(type) {
+	case database.DbHome:
+		return item.DefinedTags
+	case database.DbHomeSummary:
+		return item.DefinedTags
+	}
+	return nil
 }

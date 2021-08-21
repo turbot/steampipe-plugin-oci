@@ -16,7 +16,7 @@ from
   oci_database_db_system;
 ```
 
-### List databases that are not available
+### List db systems that are not available
 
 ```sql
 select
@@ -30,7 +30,7 @@ where
   lifecycle_state <> 'AVAILABLE';
 ```
 
-### List databases with a data storage size greater than 1024 GB
+### List db systems with data storage size greater than 1024 GB
 
 ```sql
 select

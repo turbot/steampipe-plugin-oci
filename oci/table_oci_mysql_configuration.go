@@ -20,7 +20,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 		Description: "OCI MySQL Configuration",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getConfiguration,
+			Hydrate:    getMySQLConfiguration,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listMySQLConfigurations,
@@ -42,7 +42,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "parent_configuration_id",
 				Description: "The OCID of the Configuration from which this Configuration is derived.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getConfiguration,
+				Hydrate:     getMySQLConfiguration,
 				Transform:   transform.FromField("ParentConfigurationId"),
 			},
 			{
@@ -83,7 +83,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "variables",
 				Description: "User controllable service variables of the Configuration.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getConfiguration,
+				Hydrate:     getMySQLConfiguration,
 			},
 
 			// tags
@@ -103,7 +103,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(configurationTags),
+				Transform:   transform.From(mySQLConfigurationTags),
 			},
 			{
 				Name:        "title",
@@ -117,7 +117,8 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "tenant_id",
@@ -175,10 +176,10 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 //// HYDRATE FUNCTION
 
-func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getConfiguration", "Compartment", compartment)
+	logger.Debug("getMySQLConfiguration", "Compartment", compartment)
 
 	var id string
 	if h.Item != nil {
@@ -220,7 +221,7 @@ func getConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 
 //// TRANSFORM FUNCTION
 
-func configurationTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+func mySQLConfigurationTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

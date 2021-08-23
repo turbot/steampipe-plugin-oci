@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMySQLCustomConfiguration(_ context.Context) *plugin.Table {
+func tableMySQLConfigurationCustom(_ context.Context) *plugin.Table {
     return &plugin.Table{
         Name:        "oci_mysql_configuration_custom",
         Description: "OCI MySQL Custom Configuration",
@@ -29,30 +29,30 @@ func tableMySQLCustomConfiguration(_ context.Context) *plugin.Table {
         Columns: []*plugin.Column{
             {
                 Name:        "display_name",
-                Description: "The display name of the Configuration.",
+                Description: "The display name of the configuration.",
                 Type:        proto.ColumnType_STRING,
             },
             {
                 Name:        "id",
-                Description: "The OCID of the Configuration.",
+                Description: "The OCID of the configuration.",
                 Type:        proto.ColumnType_STRING,
                 Transform:   transform.FromCamel(),
             },
             {
                 Name:        "parent_configuration_id",
-                Description: "The OCID of the Configuration from which this Configuration is derived.",
+                Description: "The OCID of the configuration from which this configuration is derived.",
                 Type:        proto.ColumnType_STRING,
                 Hydrate:     getCustomConfiguration,
                 Transform:   transform.FromField("ParentConfigurationId"),
             },
             {
                 Name:        "lifecycle_state",
-                Description: "The current state of the Configuration.",
+                Description: "The current state of the configuration.",
                 Type:        proto.ColumnType_STRING,
             },
             {
                 Name:        "time_created",
-                Description: "The date and time the Configuration was created.",
+                Description: "The date and time the configuration was created.",
                 Type:        proto.ColumnType_TIMESTAMP,
                 Transform:   transform.FromField("TimeCreated.Time"),
             },
@@ -60,28 +60,28 @@ func tableMySQLCustomConfiguration(_ context.Context) *plugin.Table {
             // other columns
             {
                 Name:        "description",
-                Description: "User-provided data about the Configuration.",
+                Description: "User-provided data about the configuration.",
                 Type:        proto.ColumnType_STRING,
             },
             {
                 Name:        "shape_name",
-                Description: "The name of the associated Shape.",
+                Description: "The name of the associated shape.",
                 Type:        proto.ColumnType_STRING,
             },
             {
                 Name:        "time_updated",
-                Description: "The date and time the Configuration was last updated.",
+                Description: "The date and time the configuration was last updated.",
                 Type:        proto.ColumnType_TIMESTAMP,
                 Transform:   transform.FromField("TimeUpdated.Time"),
             },
             {
                 Name:        "type",
-                Description: "The Configuration type, DEFAULT or CUSTOM.",
+                Description: "The configuration type, DEFAULT or CUSTOM.",
                 Type:        proto.ColumnType_STRING,
             },
             {
                 Name:        "variables",
-                Description: "User controllable service variables of the Configuration.",
+                Description: "User controllable service variables of the configuration.",
                 Type:        proto.ColumnType_STRING,
                 Hydrate:     getCustomConfiguration,
             },

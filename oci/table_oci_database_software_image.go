@@ -40,7 +40,7 @@ func tableOciDatabaseSoftwareImage(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "image_type",
-				Description: "The type of software image. Can be grid or database.",
+				Description: "The type of software image. It can be grid or database.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -81,26 +81,24 @@ func tableOciDatabaseSoftwareImage(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "patch_set",
-				Description: "The PSU or PBP or Release Updates.",
+				Description: "The PSU or PBP or release updates.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "is_upgrade_supported",
-				Description: "True if this Database software image is supported for Upgrade.",
+				Description: "True if this database software image is supported for upgrade.",
 				Type:        proto.ColumnType_BOOL,
 				Default:     false,
 			},
 			{
-				Name:        "included_patches",
-				Description: "List of one-off patches for Database Homes.",
+				Name:        "database_software_image_included_patches",
+				Description: "List of one-off patches for database homes.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("DatabaseSoftwareImageIncludedPatches"),
 			},
 			{
-				Name:        "one_off_patches",
-				Description: "List of one-off patches for Database Homes.",
+				Name:        "database_software_image_one_off_patches",
+				Description: "List of one-off patches for database homes.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("DatabaseSoftwareImageOneOffPatches"),
 			},
 
 			// tags

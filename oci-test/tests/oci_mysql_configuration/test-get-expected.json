@@ -1,0 +1,9 @@
+[
+  {
+    "display_name": "{{ resourceName }}",
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "{{ output.lifecycle_state.value }}",
+    "shape_name": "{{ output.shape_name.value }}",
+    "type": "{{ output.type.value }}"
+  }
+]

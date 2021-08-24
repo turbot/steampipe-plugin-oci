@@ -63,6 +63,7 @@ type session struct {
 	LoggingManagementClient        logging.LoggingManagementClient
 	LoadBalancerClient             loadbalancer.LoadBalancerClient
 	MonitoringClient               monitoring.MonitoringClient
+	MySQLConfigurationClient       mysql.MysqlaasClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
@@ -1115,6 +1116,44 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 	sess := &session{
 		TenancyID:         tenantID,
 		MySQLBackupClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// mySQLConfigurationService returns the service client for OCI MySQL Configuration Service
+func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mysqlconfiguration-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLBackupService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewMysqlaasClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                tenantID,
+		MySQLConfigurationClient: client,
 	}
 
 	// save session in cache

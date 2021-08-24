@@ -103,7 +103,7 @@ func tableMySQLConfigurationCustom(_ context.Context) *plugin.Table {
                 Name:        "tags",
                 Description: ColumnDescriptionTags,
                 Type:        proto.ColumnType_JSON,
-                Transform:   transform.From(configurationTags),
+                Transform:   transform.From(mySQLConfigurationTags),
             },
             {
                 Name:        "title",

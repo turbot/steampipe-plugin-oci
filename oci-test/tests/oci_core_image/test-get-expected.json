@@ -1,9 +1,6 @@
 [
   {
-    "display_name": "{{ resourceName }}",
-    "freeform_tags": {
-      "Name": "{{ resourceName }}"
-    },
+    "display_name": "{{ output.resource_name.value }}",
     "id": "{{ output.resource_id.value }}",
     "lifecycle_state": "{{ output.lifecycle_state.value }}"
   }

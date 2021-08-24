@@ -130,13 +130,15 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     getTenantId,
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -149,6 +151,11 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)
@@ -171,7 +178,9 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 
 		for _, image := range response.Items {
-			d.StreamListItem(ctx, image)
+			if image.BaseImageId == nil {
+				d.StreamListItem(ctx, image)
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

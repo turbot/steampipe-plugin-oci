@@ -28,18 +28,5 @@ select
 from
   oci_core_image
 where
-  launch_options ->> 'isPvEncryptionInTransitEnabled'  = 'false';
-```
-
-### List custom images
-
-```sql
-select
-  display_name,
-  id,
-  lifecycle_state
-from
-  oci_core_image
-where
-  tenant_id is not null;
+  launch_options ->> 'isPvEncryptionInTransitEnabled' = 'false';
 ```

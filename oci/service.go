@@ -38,6 +38,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
+	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/connection"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -64,6 +65,7 @@ type session struct {
 	LoggingManagementClient        logging.LoggingManagementClient
 	LoadBalancerClient             loadbalancer.LoadBalancerClient
 	MonitoringClient               monitoring.MonitoringClient
+	MySQLConfigurationClient       mysql.MysqlaasClient
 	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
@@ -72,6 +74,7 @@ type session struct {
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
+	ResourceSearchClient           resourcesearch.ResourceSearchClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
 
@@ -1123,6 +1126,44 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
+// mySQLConfigurationService returns the service client for OCI MySQL Configuration Service
+func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("mysqlconfiguration-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("mySQLBackupService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := mysql.NewMysqlaasClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantID, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                tenantID,
+		MySQLConfigurationClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // networkLoadBalancerService returns the service client for OCI Network Load Balancer service
 func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1153,6 +1194,44 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 	sess := &session{
 		TenancyID:                 tenantID,
 		NetworkLoadBalancerClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// resourceSearchService returns the service client for OCI Resource Search Service
+func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("resourcesearch-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("resourceSearchService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := resourcesearch.NewResourceSearchClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:            tenantId,
+		ResourceSearchClient: client,
 	}
 
 	// save session in cache

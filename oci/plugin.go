@@ -52,6 +52,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_dhcp_options":                                             tableCoreDhcpOptions(ctx),
 			"oci_core_drg":                                                      tableCoreDrg(ctx),
 			"oci_core_image":                                                    tableCoreImage(ctx),
+			"oci_core_image_custom":                                             tableCoreImageCustom(ctx),
 			"oci_core_instance":                                                 tableCoreInstance(ctx),
 			"oci_core_instance_metric_cpu_utilization":                          tableOciCoreInstanceMetricCpuUtilization(ctx),
 			"oci_core_instance_metric_cpu_utilization_daily":                    tableOciCoreInstanceMetricCpuUtilizationDaily(ctx),
@@ -107,6 +108,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_logging_log_group":                                             tableLoggingLogGroup(ctx),
 			"oci_mysql_backup":                                                  tableMySQLBackup(ctx),
 			"oci_mysql_channel":                                                 tableMySQLChannel(ctx),
+			"oci_mysql_configuration":                                           tableMySQLConfiguration(ctx),
 			"oci_mysql_db_system":                                               tableMySQLDBSystem(ctx),
 			"oci_mysql_db_system_metric_connections":                            tableOciMySQLDBSystemMetricConnections(ctx),
 			"oci_mysql_db_system_metric_connections_daily":                      tableOciMySQLDBSystemMetricConnectionsDaily(ctx),
@@ -128,6 +130,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_notification_topic":                                        tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                                              tableOnsSubscription(ctx),
 			"oci_region":                                                        tableIdentityRegion(ctx),
+			"oci_resource_search":                                               tableResourceSearch(ctx),
 		},
 	}
 	return p

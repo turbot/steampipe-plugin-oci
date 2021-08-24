@@ -255,21 +255,21 @@ func channelTags(_ context.Context, d *transform.TransformData) (interface{}, er
 }
 
 func channelFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.Channel:
-		return item.(mysql.Channel).FreeformTags
+		return item.FreeformTags
 	case mysql.ChannelSummary:
-		return item.(mysql.ChannelSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func channelDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.Channel:
-		return item.(mysql.Channel).DefinedTags
+		return item.DefinedTags
 	case mysql.ChannelSummary:
-		return item.(mysql.ChannelSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

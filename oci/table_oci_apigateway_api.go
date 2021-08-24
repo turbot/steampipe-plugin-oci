@@ -232,21 +232,21 @@ func apiTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 }
 
 func apiGatewayApiFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case apigateway.Api:
-		return item.(apigateway.Api).FreeformTags
+		return item.FreeformTags
 	case apigateway.ApiSummary:
-		return item.(apigateway.ApiSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func apiGatewayApiDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case apigateway.Api:
-		return item.(apigateway.Api).DefinedTags
+		return item.DefinedTags
 	case apigateway.ApiSummary:
-		return item.(apigateway.ApiSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

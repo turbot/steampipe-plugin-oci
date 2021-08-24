@@ -259,21 +259,21 @@ func autoScalingConfigurationTags(_ context.Context, d *transform.TransformData)
 }
 
 func autoScalingConfigurationFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case autoscaling.AutoScalingConfiguration:
-		return item.(autoscaling.AutoScalingConfiguration).FreeformTags
+		return item.FreeformTags
 	case autoscaling.AutoScalingConfigurationSummary:
-		return item.(autoscaling.AutoScalingConfigurationSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func autoScalingConfigurationDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case autoscaling.AutoScalingConfiguration:
-		return item.(autoscaling.AutoScalingConfiguration).DefinedTags
+		return item.DefinedTags
 	case autoscaling.AutoScalingConfigurationSummary:
-		return item.(autoscaling.AutoScalingConfigurationSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

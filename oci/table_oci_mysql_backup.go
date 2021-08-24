@@ -287,21 +287,21 @@ func backupTags(_ context.Context, d *transform.TransformData) (interface{}, err
 }
 
 func backupFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.Backup:
-		return item.(mysql.Backup).FreeformTags
+		return item.FreeformTags
 	case mysql.BackupSummary:
-		return item.(mysql.BackupSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func backupDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.Backup:
-		return item.(mysql.Backup).DefinedTags
+		return item.DefinedTags
 	case mysql.BackupSummary:
-		return item.(mysql.BackupSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

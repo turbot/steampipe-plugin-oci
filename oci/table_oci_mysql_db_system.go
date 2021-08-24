@@ -345,21 +345,21 @@ func dbSystemTags(_ context.Context, d *transform.TransformData) (interface{}, e
 }
 
 func dbSystemFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.DbSystem:
-		return item.(mysql.DbSystem).FreeformTags
+		return item.FreeformTags
 	case mysql.DbSystemSummary:
-		return item.(mysql.DbSystemSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func dbSystemDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case mysql.DbSystem:
-		return item.(mysql.DbSystem).DefinedTags
+		return item.DefinedTags
 	case mysql.DbSystemSummary:
-		return item.(mysql.DbSystemSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

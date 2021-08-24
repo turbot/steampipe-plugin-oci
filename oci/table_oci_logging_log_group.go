@@ -230,21 +230,21 @@ func logGroupTags(_ context.Context, d *transform.TransformData) (interface{}, e
 }
 
 func logGroupFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.LogGroup:
-		return item.(logging.LogGroup).FreeformTags
+		return item.FreeformTags
 	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func logGroupDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.LogGroup:
-		return item.(logging.LogGroup).DefinedTags
+		return item.DefinedTags
 	case logging.LogGroupSummary:
-		return item.(logging.LogGroupSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

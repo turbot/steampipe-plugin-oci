@@ -257,21 +257,21 @@ func vaultTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 }
 
 func vaultFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case keymanagement.Vault:
-		return item.(keymanagement.Vault).FreeformTags
+		return item.FreeformTags
 	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func vaultDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case keymanagement.Vault:
-		return item.(keymanagement.Vault).DefinedTags
+		return item.DefinedTags
 	case keymanagement.VaultSummary:
-		return item.(keymanagement.VaultSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

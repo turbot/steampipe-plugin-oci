@@ -239,21 +239,21 @@ func topicTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 }
 
 func topicFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case ons.NotificationTopic:
-		return item.(ons.NotificationTopic).FreeformTags
+		return item.FreeformTags
 	case ons.NotificationTopicSummary:
-		return item.(ons.NotificationTopicSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func topicDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case ons.NotificationTopic:
-		return item.(ons.NotificationTopic).DefinedTags
+		return item.DefinedTags
 	case ons.NotificationTopicSummary:
-		return item.(ons.NotificationTopicSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

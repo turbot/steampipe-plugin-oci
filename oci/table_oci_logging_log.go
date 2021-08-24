@@ -254,21 +254,21 @@ func logTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 }
 
 func logFreeformTags(item interface{}) map[string]string {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.Log:
-		return item.(logging.Log).FreeformTags
+		return item.FreeformTags
 	case logging.LogSummary:
-		return item.(logging.LogSummary).FreeformTags
+		return item.FreeformTags
 	}
 	return nil
 }
 
 func logDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item.(type) {
+	switch item := item.(type) {
 	case logging.Log:
-		return item.(logging.Log).DefinedTags
+		return item.DefinedTags
 	case logging.LogSummary:
-		return item.(logging.LogSummary).DefinedTags
+		return item.DefinedTags
 	}
 	return nil
 }

@@ -64,3 +64,19 @@ from
 where
   network_endpoint_details ->> 'networkEndpointType' = 'PRIVATE';
 ```
+
+### Get analytics instance by ID
+
+```sql
+select
+  id,
+  name,
+  lifecycle_state,
+  network_endpoint_details,
+  time_created,
+  time_updated
+from
+  oci_analytics_instance
+where
+  id = 'ocid1.analyticsinstance.oc1.ap-mumbai-1.aaaaaaaaftab5bh4dp6ng6djpjnhix6mpfj25zwr6z67xnmg4c43k5hu5o2a';
+```

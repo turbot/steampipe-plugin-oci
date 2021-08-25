@@ -49,3 +49,20 @@ from
 group by
   shape;
 ```
+
+### List instances with shape configuration details
+
+```sql
+select
+  display_name,
+  shape_config_max_vnic_attachments,
+  shape_config_memory_in_gbs,
+  shape_config_networking_bandwidth_in_gbps,
+  shape_config_ocpus,
+  shape_config_baseline_ocpu_utilization,
+  shape_config_gpus,
+  shape_config_local_disks,
+  shape_config_local_disks_total_size_in_gbs
+from
+  oci_core_instance;
+```

@@ -222,7 +222,6 @@ func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 //// TRANSFORM FUNCTION
 
 func mySQLConfigurationTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
-
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 

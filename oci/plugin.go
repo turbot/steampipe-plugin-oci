@@ -109,6 +109,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_backup":                                                  tableMySQLBackup(ctx),
 			"oci_mysql_channel":                                                 tableMySQLChannel(ctx),
 			"oci_mysql_configuration":                                           tableMySQLConfiguration(ctx),
+			"oci_mysql_configuration_custom":                                    tableMySQLConfigurationCustom(ctx),
 			"oci_mysql_db_system":                                               tableMySQLDBSystem(ctx),
 			"oci_mysql_db_system_metric_connections":                            tableOciMySQLDBSystemMetricConnections(ctx),
 			"oci_mysql_db_system_metric_connections_daily":                      tableOciMySQLDBSystemMetricConnectionsDaily(ctx),

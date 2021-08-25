@@ -1,6 +1,6 @@
 # Table: oci_analytics_instance
 
-An analytics instance is a virtual server in the Oracle Analytics Cloud.     
+Oracle Analytics Cloud is a scalable and secure public cloud service that provides a full set of capabilities to explore and perform collaborative analytics for you, your workgroup, and your enterprise. An analytics instance is a virtual server in the Oracle Analytics Cloud. 
 
 ## Examples
 
@@ -17,7 +17,6 @@ from
   oci_analytics_instance;
 ```
 
-
 ### List active analytics instances
 
 ```sql
@@ -32,7 +31,6 @@ from
 where
   lifecycle_state = 'ACTIVE';
 ```
-
 
 ### List analytics instances older than 90 days
 

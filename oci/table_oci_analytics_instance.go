@@ -53,7 +53,7 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 				Name:        "time_updated",
 				Description: "The date and time the instance was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "capacity_type",
@@ -99,13 +99,13 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "private_access_channels",
-				Description: "Map of PrivateAccessChannel unique identifier key as KEY and PrivateAccessChannel Object as VALUE.",
+				Description: "The private access channels of the analytics instance.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getAnalyticsInstance,
 			},
 			{
 				Name:        "vanity_url_details",
-				Description: "Map of VanityUrl unique identifier key as KEY and VanityUrl Object as VALUE.",
+				Description: "The vanity url configuration details of the analytic instance.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getAnalyticsInstance,
 			},

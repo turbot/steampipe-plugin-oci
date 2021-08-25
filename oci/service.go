@@ -1255,7 +1255,7 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("analyticsServiceRegional", "getProvider.Error", err)
+		logger.Error("analyticsService", "getProvider.Error", err)
 		return nil, err
 	}
 

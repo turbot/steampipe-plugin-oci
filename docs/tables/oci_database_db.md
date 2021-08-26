@@ -1,7 +1,6 @@
 # Table: oci_database_db
 
-An Oracle Database on a bare metal or virtual machine DB system.
-All single-node Oracle RAC DB systems support the following Oracle Database editions:
+An Oracle Database on a bare metal or virtual machine DB system.All single-node Oracle RAC DB systems support the following Oracle Database editions:
 
 - Standard Edition
 - Enterprise Edition

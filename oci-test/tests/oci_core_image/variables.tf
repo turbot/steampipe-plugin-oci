@@ -16,10 +16,10 @@ variable "config_file_profile" {
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
-variable "oci_ad" {
+variable "region" {
   type        = string
-  default     = "TvRS:AP-MUMBAI-1-AD-1"
-  description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
+  default     = "ap-mumbai-1"
+  description = "OCI region"
 }
 
 provider "oci" {
@@ -27,58 +27,52 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "local_file" "foo" {
-  content  = "foo!"
-  filename = "${path.module}/foo.bar"
+locals {
+  path = "${path.cwd}/output.json"
 }
 
-resource "oci_objectstorage_bucket" "named_test_resource" {
-  compartment_id = var.tenancy_ocid
-  name           = var.resource_name
-  namespace      = "bmqeqvslavsz"
-}
-
-resource "oci_objectstorage_object" "test_object" {
-  bucket    = oci_objectstorage_bucket.named_test_resource.name
-  content   = local_file.foo.filename
-  namespace = "bmqeqvslavsz"
-  object    = local_file.foo.filename
-}
-
-resource "oci_core_image" "named_test_resource" {
-  compartment_id = var.tenancy_ocid
-  display_name   = var.resource_name
-  freeform_tags  = { "Name" = var.resource_name }
-  image_source_details {
-    source_type    = "objectStorageTuple"
-    bucket_name    = oci_objectstorage_bucket.named_test_resource.name
-    namespace_name = "bmqeqvslavsz"
-    object_name    = oci_objectstorage_object.test_object.object
+resource "null_resource" "named_test_resource" {
+  provisioner "local-exec" {
+    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --region ${var.region} --output json > ${local.path}"
   }
 }
 
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
+}
+
 output "resource_name" {
-  value = var.resource_name
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].display-name
 }
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
+output "region" {
+  value = var.region
+}
+
 output "resource_id" {
-  value = oci_core_image.named_test_resource.id
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].id
 }
 
 output "lifecycle_state" {
-  value = oci_core_image.named_test_resource.state
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].lifecycle-state
 }
 
 output "operating_system" {
-  value = oci_core_image.named_test_resource.operating_system
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].operating-system
 }
 
 output "operating_system_version" {
-  value = oci_core_image.named_test_resource.operating_system_version
+  depends_on = [null_resource.named_test_resource]
+  value      = jsondecode(data.local_file.input.content).data[0].operating-system-version
 }
 
 

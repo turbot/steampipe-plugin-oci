@@ -14,17 +14,17 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreImage(_ context.Context) *plugin.Table {
+func tableCoreImageCustom(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_image",
-		Description: "OCI Core Image",
+		Name:        "oci_core_image_custom",
+		Description: "OCI Core Image Custom",
 		Get: &plugin.GetConfig{
 			KeyColumns:        plugin.AnyColumn([]string{"id"}),
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
-			Hydrate:           getCoreImage,
+			Hydrate:           getCoreCustomImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreImages,
+			Hydrate: listCoreCustomImages,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -130,8 +130,7 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
 				Name:        "tenant_id",
@@ -146,16 +145,11 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCoreCustomImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
-
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
+	logger.Debug("listCoreCustomImages", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)
@@ -178,7 +172,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		}
 
 		for _, image := range response.Items {
-			if image.BaseImageId == nil {
+			if image.BaseImageId != nil {
 				d.StreamListItem(ctx, image)
 			}
 		}
@@ -194,12 +188,11 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 //// HYDRATE FUNCTION
 
-func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getImage")
+func getCoreCustomImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getCoreCustomImage", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -232,33 +225,4 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	return response.Image, nil
-}
-
-//// TRANSFORM FUNCTION
-
-func imageTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	instance := d.HydrateItem.(core.Image)
-
-	var tags map[string]interface{}
-
-	if instance.FreeformTags != nil {
-		tags = map[string]interface{}{}
-		for k, v := range instance.FreeformTags {
-			tags[k] = v
-		}
-	}
-
-	if instance.DefinedTags != nil {
-		if tags == nil {
-			tags = map[string]interface{}{}
-		}
-		for _, v := range instance.DefinedTags {
-			for key, value := range v {
-				tags[key] = value
-			}
-
-		}
-	}
-
-	return tags, nil
 }

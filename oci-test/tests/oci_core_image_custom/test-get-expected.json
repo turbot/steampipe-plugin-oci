@@ -1,6 +1,6 @@
 [
   {
-    "display_name": "{{ output.resource_name.value }}",
+    "display_name": "{{ resourceName }}",
     "id": "{{ output.resource_id.value }}",
     "lifecycle_state": "{{ output.lifecycle_state.value }}"
   }

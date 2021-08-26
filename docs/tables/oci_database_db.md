@@ -1,4 +1,4 @@
-# Table: oci_database_database
+# Table: oci_database_db
 
 An Oracle Database on a bare metal or virtual machine DB system.
 All single-node Oracle RAC DB systems support the following Oracle Database editions:
@@ -21,7 +21,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_database_database;
+  oci_database_db;
 ```
 
 ### List databases that are not available
@@ -33,7 +33,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_database_database
+  oci_database_db
 where
   lifecycle_state <> 'AVAILABLE';
 ```

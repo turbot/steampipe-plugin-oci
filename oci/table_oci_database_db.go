@@ -16,7 +16,7 @@ import (
 
 func tableOciDatabase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_database_database",
+		Name:        "oci_database_db",
 		Description: "OCI Database",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),

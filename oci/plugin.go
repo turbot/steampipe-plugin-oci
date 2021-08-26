@@ -79,6 +79,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_autonomous_database_metric_cpu_utilization_daily":     tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(ctx),
 			"oci_database_autonomous_database_metric_storage_utilization":       tableOciDatabaseAutonomousDatabaseMetricStorageUtilization(ctx),
 			"oci_database_autonomous_database_metric_storage_utilization_daily": tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(ctx),
+			"oci_database_db":                                                   tableOciDatabase(ctx),
 			"oci_database_db_home":                                              tableOciDatabaseDBHome(ctx),
 			"oci_database_db_system":                                            tableOciDatabaseDBSystem(ctx),
 			"oci_database_software_image":                                       tableOciDatabaseSoftwareImage(ctx),

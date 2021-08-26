@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v44/analytics"
 	"github.com/oracle/oci-go-sdk/v44/apigateway"
 	"github.com/oracle/oci-go-sdk/v44/audit"
 	"github.com/oracle/oci-go-sdk/v44/autoscaling"
@@ -45,6 +46,7 @@ import (
 
 type session struct {
 	TenancyID                      string
+	AnalyticsClient                analytics.AnalyticsClient
 	ApiGatewayClient               apigateway.ApiGatewayClient
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
@@ -1230,6 +1232,48 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	sess := &session{
 		TenancyID:            tenantId,
 		ResourceSearchClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// analyticsService returns the service client for OCI Analytics service
+func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("analytics-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("analyticsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get analytics service client
+	client, err := analytics.NewAnalyticsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		AnalyticsClient: client,
 	}
 
 	// save session in cache

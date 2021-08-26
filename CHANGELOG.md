@@ -19,7 +19,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fixed: `oci_core_image` table now lists only platform(standard) images ([#275](https://github.com/turbot/steampipe-plugin-oci/pull/275))
+- Fixed: `oci_core_image` table no longer includes duplicate data and now only lists platform (standard) images ([#275](https://github.com/turbot/steampipe-plugin-oci/pull/275))
 
 ## v0.1.0 [2021-08-06]
 

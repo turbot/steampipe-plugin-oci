@@ -30,7 +30,7 @@ Prerequisites:
 Clone:
 
 ```sh
-git clone git@github.com:turbot/steampipe-plugin-oci
+git clone https://github.com/turbot/steampipe-plugin-oci.git
 cd steampipe-plugin-oci
 ```
 

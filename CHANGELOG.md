@@ -1,3 +1,26 @@
+## v0.2.0 [2021-08-26]
+
+_What's new?_
+
+- New tables added
+  - [oci_analytics_instance](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_analytics_instance) ([#280](https://github.com/turbot/steampipe-plugin-oci/pull/280))
+  - [oci_core_image_custom](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_image_custom) ([#276](https://github.com/turbot/steampipe-plugin-oci/pull/276))
+  - [oci_database_db](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_db) ([#287](https://github.com/turbot/steampipe-plugin-oci/pull/287))
+  - [oci_database_db_home](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_db_home) ([#288](https://github.com/turbot/steampipe-plugin-oci/pull/288))
+  - [oci_database_db_system](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_db_system) ([#286](https://github.com/turbot/steampipe-plugin-oci/pull/286))
+  - [oci_database_software_image](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_software_image) ([#291](https://github.com/turbot/steampipe-plugin-oci/pull/291))
+  - [oci_mysql_configuration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_configuration) ([#255](https://github.com/turbot/steampipe-plugin-oci/pull/255))
+  - [oci_mysql_configuration_custom](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_configuration_custom) ([#285](https://github.com/turbot/steampipe-plugin-oci/pull/285))
+  - [oci_resource_search](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_resource_search) ([#148](https://github.com/turbot/steampipe-plugin-oci/pull/148))
+
+_Enhancements_
+
+- Updated: `oci_core_instance` table now includes `shape_config_max_vnic_attachments`, `shape_config_memory_in_gbs`, `shape_config_networking_bandwidth_in_gbps`, `shape_config_ocpus`, `shape_config_baseline_ocpu_utilization`, `shape_config_gpus`, `shape_config_local_disks`, `shape_config_local_disks_total_size_in_gbs` columns ([#294](https://github.com/turbot/steampipe-plugin-oci/pull/294))
+
+_Bug fixes_
+
+- Fixed: `oci_core_image` table no longer includes duplicate data and now only lists platform (standard) images ([#275](https://github.com/turbot/steampipe-plugin-oci/pull/275))
+
 ## v0.1.0 [2021-08-06]
 
 _What's new?_

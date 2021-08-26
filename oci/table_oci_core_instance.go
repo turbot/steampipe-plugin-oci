@@ -78,15 +78,63 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "shape",
+				Description: "The shape of the instance. The shape determines the number of CPUs and the amount of memory allocated to the instance.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "shape_config_baseline_ocpu_utilization",
+				Description: "The baseline OCPU utilization for a subcore burstable VM instance.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ShapeConfig.BaselineOcpuUtilization"),
+			},
+			{
+				Name:        "shape_config_gpus",
+				Description: "The number of GPUs available to the instance.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ShapeConfig.Gpus"),
+			},
+			{
+				Name:        "shape_config_local_disks",
+				Description: "The number of local disks available to the instance.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ShapeConfig.LocalDisks"),
+			},
+			{
+				Name:        "shape_config_local_disks_total_size_in_gbs",
+				Description: "The aggregate size of all local disks, in gigabytes.",
+				Type:        proto.ColumnType_DOUBLE,
+				Transform:   transform.FromField("ShapeConfig.LocalDisksTotalSizeInGBs"),
+			},
+			{
+				Name:        "shape_config_max_vnic_attachments",
+				Description: "The maximum number of VNIC attachments for the instance.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ShapeConfig.MaxVnicAttachments"),
+			},
+			{
+				Name:        "shape_config_memory_in_gbs",
+				Description: "The total amount of memory available to the instance, in gigabytes.",
+				Type:        proto.ColumnType_DOUBLE,
+				Transform:   transform.FromField("ShapeConfig.MemoryInGBs"),
+			},
+			{
+				Name:        "shape_config_networking_bandwidth_in_gbps",
+				Description: "The networking bandwidth available to the instance, in gigabits per second.",
+				Type:        proto.ColumnType_DOUBLE,
+				Transform:   transform.FromField("ShapeConfig.NetworkingBandwidthInGbps"),
+			},
+			{
+				Name:        "shape_config_ocpus",
+				Description: "The total number of OCPUs available to the instance.",
+				Type:        proto.ColumnType_DOUBLE,
+				Transform:   transform.FromField("ShapeConfig.Ocpus"),
+			},
+			{
 				Name:        "time_maintenance_reboot_due",
 				Description: "The date and time the instance is expected to be stopped/started. After that time if instance hasn't been rebooted, Oracle will reboot the instance within 24 hours of the due time.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeMaintenanceRebootDue.time"),
-			},
-			{
-				Name:        "shape",
-				Description: "The shape of the instance. The shape determines the number of CPUs and the amount of memory allocated to the instance.",
-				Type:        proto.ColumnType_STRING,
 			},
 
 			// json fields

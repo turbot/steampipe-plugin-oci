@@ -1,0 +1,13 @@
+[
+  {
+    "database_version": "{{ output.database_version.value }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Name": "{{ output.resource_name.value }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "image_type": "{{ output.image_type.value }}",
+    "lifecycle_state": "AVAILABLE",
+    "patch_set": "{{ output.patch_set.value }}"
+  }
+]

@@ -160,6 +160,7 @@ func getInvalidRegions(regions []string) []string {
 		"me-jeddah-1",
 		"sa-santiago-1",
 		"sa-saopaulo-1",
+		"sa-vinhedo-1",
 		"uk-cardiff-1",
 		"uk-gov-cardiff-1",
 		"uk-gov-london-1",

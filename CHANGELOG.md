@@ -1,3 +1,9 @@
+## v0.3.0 [2021-09-02]
+
+_What's new?_
+
+- Added support for the region `sa-vinhedo-1` across all the tables ([#302](https://github.com/turbot/steampipe-plugin-oci/pull/302))
+
 ## v0.2.0 [2021-08-26]
 
 _What's new?_

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/monitoring"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -196,7 +195,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 	requestParam := monitoring.SummarizeMetricsDataRequest{
 		CompartmentId:               &compartmentId,
 		SummarizeMetricsDataDetails: metricDetails,
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

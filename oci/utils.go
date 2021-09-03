@@ -8,12 +8,34 @@ import (
 	"time"
 
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
+
+var mappingInstanceLifecycleState = map[string]core.InstanceLifecycleStateEnum{
+	"MOVING":         core.InstanceLifecycleStateMoving,
+	"PROVISIONING":   core.InstanceLifecycleStateProvisioning,
+	"RUNNING":        core.InstanceLifecycleStateRunning,
+	"STARTING":       core.InstanceLifecycleStateStarting,
+	"STOPPING":       core.InstanceLifecycleStateStopping,
+	"STOPPED":        core.InstanceLifecycleStateStopped,
+	"CREATING_IMAGE": core.InstanceLifecycleStateCreatingImage,
+	"TERMINATING":    core.InstanceLifecycleStateTerminating,
+	"TERMINATED":     core.InstanceLifecycleStateTerminated,
+}
+
+var mappingVolumeLifecycleState = map[string]core.VolumeLifecycleStateEnum{
+	"PROVISIONING": core.VolumeLifecycleStateProvisioning,
+	"RESTORING":    core.VolumeLifecycleStateRestoring,
+	"AVAILABLE":    core.VolumeLifecycleStateAvailable,
+	"TERMINATING":  core.VolumeLifecycleStateTerminating,
+	"TERMINATED":   core.VolumeLifecycleStateTerminated,
+	"FAULTY":       core.VolumeLifecycleStateFaulty,
+}
 
 type nameSpace struct {
 	Value string

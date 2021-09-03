@@ -53,7 +53,7 @@ func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[str
 // BuildCompartmentList :: return a list of matrix items, one per compartment specified in the connection config
 func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 	// cache compartment matrix
-	cacheKey := "CompartementList"
+	cacheKey := "CompartmentList"
 
 	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
@@ -73,17 +73,17 @@ func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []
 	for i, compartment := range compartments {
 		matrix[i] = map[string]interface{}{matrixKeyCompartment: *compartment.Id}
 	}
-	// set CompartementList cache
+	// set CompartmentList cache
 	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
 
 	return matrix
 }
 
-// BuildCompartementRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
+// BuildCompartmentRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 
 	// cache compartment region matrix
-	cacheKey := "CompartementRegionList"
+	cacheKey := "CompartmentRegionList"
 
 	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
@@ -120,7 +120,7 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 			}
 		}
 
-		// set CompartementRegionList cache
+		// set CompartmentRegionList cache
 		pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
 		return matrix
 	}
@@ -134,7 +134,7 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 		plugin.Logger(ctx).Debug("listAllCompartments MATRIX", j, defaultMatrix[j])
 	}
 
-	// set CompartementRegionList cache
+	// set CompartmentRegionList cache
 	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, defaultMatrix)
 
 	return defaultMatrix
@@ -160,6 +160,7 @@ func getInvalidRegions(regions []string) []string {
 		"me-jeddah-1",
 		"sa-santiago-1",
 		"sa-saopaulo-1",
+		"sa-vinhedo-1",
 		"uk-cardiff-1",
 		"uk-gov-cardiff-1",
 		"uk-gov-london-1",
@@ -300,9 +301,9 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 	return zonesList, nil
 }
 
-// BuildCompartementZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config
+// BuildCompartmentZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config
 func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
-	cacheKey := "CompartementZonalList"
+	cacheKey := "CompartmentZonalList"
 	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
@@ -338,7 +339,7 @@ func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connecti
 		}
 	}
 
-	// set CompartementZonalList cache
+	// set CompartmentZonalList cache
 	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
 
 	return matrix

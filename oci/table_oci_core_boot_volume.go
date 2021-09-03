@@ -24,6 +24,20 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listBootVolumes,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "volume_group_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
@@ -158,7 +172,7 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -174,6 +188,18 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listBootVolumes", "Compartment", compartment, "OCI_Zone", zone)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
+	// Return nil, if given availability_domain doesn't match
+	if equalQuals["availability_domain"] != nil && zone != equalQuals["availability_domain"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
@@ -183,11 +209,25 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	request := core.ListBootVolumesRequest{
 		CompartmentId:      types.String(compartment),
 		AvailabilityDomain: types.String(zone),
+		Limit:              types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
+	if equalQuals["volume_group_id"] != nil {
+		volumeGroupId := equalQuals["volume_group_id"].GetStringValue()
+		request.VolumeGroupId = types.String(volumeGroupId)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
+	}
+
+	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.BlockstorageClient.ListBootVolumes(ctx, request)
@@ -197,6 +237,12 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 		for _, volume := range response.Items {
 			d.StreamListItem(ctx, volume)
+			count++
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

@@ -24,6 +24,20 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreInstances,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -145,7 +159,7 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "availability_config",
-				Description: "Options for defining the availabiity of a VM instance after a maintenance event that impacts the underlying hardware.",
+				Description: "Options for defining the availability of a VM instance after a maintenance event that impacts the underlying hardware.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -232,7 +246,7 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -253,13 +267,39 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	request := core.ListInstancesRequest{
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = mappingInstanceLifecycleState[lifecycleState]
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
+	}
+
+	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.ComputeClient.ListInstances(ctx, request)
@@ -269,6 +309,12 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 		for _, instance := range response.Items {
 			d.StreamListItem(ctx, instance)
+			count++
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -289,12 +335,16 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// Return nil, if no input provided
+	if id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)

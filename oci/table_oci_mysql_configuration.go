@@ -117,14 +117,14 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -137,12 +137,12 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listMySQLConfigurations", "Compartment", compartment)
-	
+
 	// Restrict the api call to only root compartment
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-	
+
 	// Create Session
 	session, err := mySQLConfigurationService(ctx, d, "")
 	if err != nil {

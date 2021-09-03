@@ -24,6 +24,24 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreVolumes,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "volume_group_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -157,14 +175,14 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
 	}
 }
 
-type volumneInfo struct {
+type volumeInfo struct {
 	core.Volume
 	Region string
 }
@@ -177,6 +195,13 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreVolumes", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
@@ -185,11 +210,35 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	request := core.ListVolumesRequest{
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = mappingVolumeLifecycleState[lifecycleState]
+	}
+
+	if equalQuals["volume_group_id"] != nil {
+		volumeGroupId := equalQuals["volume_group_id"].GetStringValue()
+		request.VolumeGroupId = types.String(volumeGroupId)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
+	}
+
+	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.BlockstorageClient.ListVolumes(ctx, request)
@@ -198,7 +247,13 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 
 		for _, volumes := range response.Items {
-			d.StreamListItem(ctx, volumneInfo{volumes, region})
+			d.StreamListItem(ctx, volumeInfo{volumes, region})
+			count++
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -223,7 +278,6 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty volume id in get call
@@ -249,7 +303,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, err
 	}
 
-	return volumneInfo{response.Volume, region}, nil
+	return volumeInfo{response.Volume, region}, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -259,7 +313,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 // 2. Defined Tags
 // 3. Free-form tags
 func volumeTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volume := d.HydrateItem.(volumneInfo).Volume
+	volume := d.HydrateItem.(volumeInfo).Volume
 
 	var tags map[string]interface{}
 

@@ -110,7 +110,6 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 				Hydrate:     getAnalyticsInstance,
 			},
 
-
 			// tags
 			{
 				Name:        "defined_tags",
@@ -157,7 +156,7 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -222,7 +221,7 @@ func getAnalyticsInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
-		
+
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 

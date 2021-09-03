@@ -20,7 +20,7 @@ from
 
 ```sql
 select
-  id as boot_volume_id
+  id as boot_volume_id,
   display_name,
   lifecycle_state,
   time_created
@@ -45,7 +45,8 @@ where
 ```
 
 ### List boot volumes with Oracle managed encryption
-Note: Volumes are encrypted by default with Oracled managed encryption key
+
+**Note:** Volumes are encrypted by default with Oracle managed encryption key
 
 ```sql
 select

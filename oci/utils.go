@@ -8,70 +8,12 @@ import (
 	"time"
 
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/oracle/oci-go-sdk/v44/core"
-	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
-
-var mappingInstanceLifecycleState = map[string]core.InstanceLifecycleStateEnum{
-	"MOVING":         core.InstanceLifecycleStateMoving,
-	"PROVISIONING":   core.InstanceLifecycleStateProvisioning,
-	"RUNNING":        core.InstanceLifecycleStateRunning,
-	"STARTING":       core.InstanceLifecycleStateStarting,
-	"STOPPING":       core.InstanceLifecycleStateStopping,
-	"STOPPED":        core.InstanceLifecycleStateStopped,
-	"CREATING_IMAGE": core.InstanceLifecycleStateCreatingImage,
-	"TERMINATING":    core.InstanceLifecycleStateTerminating,
-	"TERMINATED":     core.InstanceLifecycleStateTerminated,
-}
-
-var mappingVolumeLifecycleState = map[string]core.VolumeLifecycleStateEnum{
-	"PROVISIONING": core.VolumeLifecycleStateProvisioning,
-	"RESTORING":    core.VolumeLifecycleStateRestoring,
-	"AVAILABLE":    core.VolumeLifecycleStateAvailable,
-	"TERMINATING":  core.VolumeLifecycleStateTerminating,
-	"TERMINATED":   core.VolumeLifecycleStateTerminated,
-	"FAULTY":       core.VolumeLifecycleStateFaulty,
-}
-
-var mappingAutonomousDatabaseSummaryDbWorkload = map[string]database.AutonomousDatabaseSummaryDbWorkloadEnum{
-	"OLTP": database.AutonomousDatabaseSummaryDbWorkloadOltp,
-	"DW":   database.AutonomousDatabaseSummaryDbWorkloadDw,
-	"AJD":  database.AutonomousDatabaseSummaryDbWorkloadAjd,
-	"APEX": database.AutonomousDatabaseSummaryDbWorkloadApex,
-}
-
-var mappingAutonomousDatabaseSummaryInfrastructureType = map[string]database.AutonomousDatabaseSummaryInfrastructureTypeEnum{
-	"CLOUD":             database.AutonomousDatabaseSummaryInfrastructureTypeCloud,
-	"CLOUD_AT_CUSTOMER": database.AutonomousDatabaseSummaryInfrastructureTypeCloudAtCustomer,
-}
-
-var mappingAutonomousDatabaseSummaryLifecycleState = map[string]database.AutonomousDatabaseSummaryLifecycleStateEnum{
-	"PROVISIONING":              database.AutonomousDatabaseSummaryLifecycleStateProvisioning,
-	"AVAILABLE":                 database.AutonomousDatabaseSummaryLifecycleStateAvailable,
-	"STOPPING":                  database.AutonomousDatabaseSummaryLifecycleStateStopping,
-	"STOPPED":                   database.AutonomousDatabaseSummaryLifecycleStateStopped,
-	"STARTING":                  database.AutonomousDatabaseSummaryLifecycleStateStarting,
-	"TERMINATING":               database.AutonomousDatabaseSummaryLifecycleStateTerminating,
-	"TERMINATED":                database.AutonomousDatabaseSummaryLifecycleStateTerminated,
-	"UNAVAILABLE":               database.AutonomousDatabaseSummaryLifecycleStateUnavailable,
-	"RESTORE_IN_PROGRESS":       database.AutonomousDatabaseSummaryLifecycleStateRestoreInProgress,
-	"RESTORE_FAILED":            database.AutonomousDatabaseSummaryLifecycleStateRestoreFailed,
-	"BACKUP_IN_PROGRESS":        database.AutonomousDatabaseSummaryLifecycleStateBackupInProgress,
-	"SCALE_IN_PROGRESS":         database.AutonomousDatabaseSummaryLifecycleStateScaleInProgress,
-	"AVAILABLE_NEEDS_ATTENTION": database.AutonomousDatabaseSummaryLifecycleStateAvailableNeedsAttention,
-	"UPDATING":                  database.AutonomousDatabaseSummaryLifecycleStateUpdating,
-	"MAINTENANCE_IN_PROGRESS":   database.AutonomousDatabaseSummaryLifecycleStateMaintenanceInProgress,
-	"RESTARTING":                database.AutonomousDatabaseSummaryLifecycleStateRestarting,
-	"RECREATING":                database.AutonomousDatabaseSummaryLifecycleStateRecreating,
-	"ROLE_CHANGE_IN_PROGRESS":   database.AutonomousDatabaseSummaryLifecycleStateRoleChangeInProgress,
-	"UPGRADING":                 database.AutonomousDatabaseSummaryLifecycleStateUpgrading,
-	"INACCESSIBLE":              database.AutonomousDatabaseSummaryLifecycleStateInaccessible,
-}
 
 type nameSpace struct {
 	Value string

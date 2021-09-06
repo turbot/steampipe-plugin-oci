@@ -223,7 +223,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = mappingVolumeLifecycleState[lifecycleState]
+		request.LifecycleState = core.VolumeLifecycleStateEnum(lifecycleState)
 	}
 
 	if equalQuals["volume_group_id"] != nil {
@@ -238,7 +238,6 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		}
 	}
 
-	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.BlockstorageClient.ListVolumes(ctx, request)
@@ -248,10 +247,9 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 		for _, volumes := range response.Items {
 			d.StreamListItem(ctx, volumeInfo{volumes, region})
-			count++
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+			if plugin.IsCancelled(ctx) {
 				response.OpcNextPage = nil
 			}
 		}

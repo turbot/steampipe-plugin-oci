@@ -227,7 +227,6 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		}
 	}
 
-	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.BlockstorageClient.ListBootVolumes(ctx, request)
@@ -237,10 +236,9 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 		for _, volume := range response.Items {
 			d.StreamListItem(ctx, volume)
-			count++
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+			if plugin.IsCancelled(ctx) {
 				response.OpcNextPage = nil
 			}
 		}

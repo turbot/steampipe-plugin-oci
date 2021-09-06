@@ -464,7 +464,6 @@ func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin
 		}
 	}
 
-	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.DatabaseClient.ListAutonomousDatabases(ctx, request)
@@ -474,10 +473,9 @@ func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 		for _, database := range response.Items {
 			d.StreamListItem(ctx, database)
-			count++
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+			if plugin.IsCancelled(ctx) {
 				response.OpcNextPage = nil
 			}
 		}
@@ -610,13 +608,13 @@ func buildAutonomousDatabaseFilter(equalQuals plugin.KeyColumnEqualsQualMap, qua
 			case "db_version":
 				request.DbVersion = types.String(equalQuals[columnName].GetStringValue())
 			case "db_workload":
-				request.DbWorkload = mappingAutonomousDatabaseSummaryDbWorkload[equalQuals[columnName].GetStringValue()]
+				request.DbWorkload = database.AutonomousDatabaseSummaryDbWorkloadEnum(equalQuals[columnName].GetStringValue())
 			case "display_name":
 				request.DisplayName = types.String(equalQuals[columnName].GetStringValue())
 			case "infrastructure_type":
-				request.InfrastructureType = mappingAutonomousDatabaseSummaryInfrastructureType[equalQuals[columnName].GetStringValue()]
+				request.InfrastructureType = database.AutonomousDatabaseSummaryInfrastructureTypeEnum(equalQuals[columnName].GetStringValue())
 			case "lifecycle_state":
-				request.LifecycleState = mappingAutonomousDatabaseSummaryLifecycleState[equalQuals[columnName].GetStringValue()]
+				request.LifecycleState = database.AutonomousDatabaseSummaryLifecycleStateEnum(equalQuals[columnName].GetStringValue())
 			case "is_data_guard_enabled":
 				request.IsDataGuardEnabled = types.Bool(equalQuals[columnName].GetBoolValue())
 			case "is_free_tier":

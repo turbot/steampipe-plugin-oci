@@ -289,7 +289,7 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = mappingInstanceLifecycleState[lifecycleState]
+		request.LifecycleState = core.InstanceLifecycleStateEnum(lifecycleState)
 	}
 
 	limit := d.QueryContext.Limit
@@ -299,7 +299,6 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		}
 	}
 
-	var count int64
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.ComputeClient.ListInstances(ctx, request)
@@ -309,10 +308,9 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 		for _, instance := range response.Items {
 			d.StreamListItem(ctx, instance)
-			count++
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if plugin.IsCancelled(ctx) || (limit != nil && count >= *limit) {
+			if plugin.IsCancelled(ctx) {
 				response.OpcNextPage = nil
 			}
 		}

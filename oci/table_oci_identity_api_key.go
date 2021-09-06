@@ -2,9 +2,11 @@ package oci
 
 import (
 	"context"
+	"strconv"
 
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -112,6 +114,11 @@ func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// List user's API key
 	item, err := session.IdentityClient.ListApiKeys(ctx, request)
 	if err != nil {
+		if ociErr, ok := err.(oci_common.ServiceError); ok {
+			if helpers.StringSliceContains([]string{"404"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 

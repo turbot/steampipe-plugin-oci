@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -24,6 +24,12 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardDetectorRecipes,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -149,6 +155,13 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Trace("oci.listCloudGuardDetectorRecipes", "Compartment", compartment)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := cloudGuardService(ctx, d)
 	if err != nil {
@@ -157,7 +170,7 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 
 	request := cloudguard.ListDetectorRecipesRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -170,6 +183,11 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 		}
 		for _, detectorRecipe := range response.Items {
 			d.StreamListItem(ctx, detectorRecipe)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -207,7 +225,7 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 
 	request := cloudguard.GetDetectorRecipeRequest{
 		DetectorRecipeId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

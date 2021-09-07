@@ -24,6 +24,12 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIdentityTagNamespaces,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -113,6 +119,13 @@ func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plug
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Trace("oci.listIdentityTagNamespaces", "Compartment", compartment)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -134,6 +147,11 @@ func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plug
 		}
 		for _, tagNamespace := range response.Items {
 			d.StreamListItem(ctx, tagNamespace)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -152,7 +170,7 @@ func getIdentityTagNamespace(ctx context.Context, d *plugin.QueryData, h *plugin
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getIdentityTagNamespace", "Compartment", compartment)
 
-	// Rstrict the api call to only root compartment
+	// Restrict the api call to only root compartment
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}

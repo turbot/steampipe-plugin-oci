@@ -24,6 +24,12 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardManagedLists,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -153,6 +159,13 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plu
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCloudGuardManagedLists", "Compartment", compartment)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := cloudGuardService(ctx, d)
 	if err != nil {
@@ -174,6 +187,11 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plu
 		}
 		for _, managedList := range response.Items {
 			d.StreamListItem(ctx, managedList)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -192,7 +210,7 @@ func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugi
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getCloudGuardManagedList", "Compartment", compartment)
 
-	// Rstrict the api call to only root compartment/ per region
+	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}

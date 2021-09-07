@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -19,12 +19,34 @@ func tableCoreImageCustom(_ context.Context) *plugin.Table {
 		Name:        "oci_core_image_custom",
 		Description: "OCI Core Image Custom",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AnyColumn([]string{"id"}),
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 			Hydrate:           getCoreCustomImage,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreCustomImages,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "operating_system",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "operating_system_version",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -151,17 +173,32 @@ func listCoreCustomImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreCustomImages", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListImagesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildImageFilter(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -174,6 +211,11 @@ func listCoreCustomImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		for _, image := range response.Items {
 			if image.BaseImageId != nil {
 				d.StreamListItem(ctx, image)
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if plugin.IsCancelled(ctx) {
+					response.OpcNextPage = nil
+				}
 			}
 		}
 		if response.OpcNextPage != nil {
@@ -214,7 +256,7 @@ func getCoreCustomImage(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	request := core.GetImageRequest{
 		ImageId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

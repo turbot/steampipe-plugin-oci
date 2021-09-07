@@ -19,7 +19,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 		Name:        "oci_core_volume",
 		Description: "OCI Core Volume",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreVolume,
 		},
 		List: &plugin.ListConfig{

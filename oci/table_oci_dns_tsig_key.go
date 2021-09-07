@@ -20,6 +20,12 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 		Description: "OCI DNS TSIG Key",
 		List: &plugin.ListConfig{
 			Hydrate: listDnsTsigKeys,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -126,6 +132,13 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listDnsTsigKeys", "Compartment", compartment)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := dnsService(ctx, d)
 	if err != nil {
@@ -148,6 +161,11 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 		for _, key := range keys.Items {
 			d.StreamListItem(ctx, key)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				keys.OpcNextPage = nil
+			}
 		}
 		if keys.OpcNextPage != nil {
 			request.Page = keys.OpcNextPage

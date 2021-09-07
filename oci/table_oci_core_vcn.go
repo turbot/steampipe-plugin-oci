@@ -24,6 +24,12 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreVcns,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -159,6 +165,13 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
@@ -181,6 +194,11 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 		for _, network := range response.Items {
 			d.StreamListItem(ctx, network)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

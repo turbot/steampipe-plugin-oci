@@ -20,6 +20,12 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 		Description: "OCI DNS Zone",
 		List: &plugin.ListConfig{
 			Hydrate: listDnsZones,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -153,6 +159,13 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listDnsZones", "Compartment", compartment)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := dnsService(ctx, d)
 	if err != nil {
@@ -175,6 +188,11 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 		for _, zone := range zones.Items {
 			d.StreamListItem(ctx, zone)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				zones.OpcNextPage = nil
+			}
 		}
 		if zones.OpcNextPage != nil {
 			request.Page = zones.OpcNextPage

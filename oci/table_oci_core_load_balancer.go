@@ -24,6 +24,12 @@ func tableCoreLoadBalancer(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreLoadBalancers,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -186,6 +192,13 @@ func listCoreLoadBalancers(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCoreLoadBalancers", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := loadBalancerService(ctx, d, region)
 	if err != nil {
@@ -208,6 +221,11 @@ func listCoreLoadBalancers(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 		for _, loadBalancer := range response.Items {
 			d.StreamListItem(ctx, loadBalancer)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

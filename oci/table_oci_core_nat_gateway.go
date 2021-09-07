@@ -19,11 +19,17 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 		Name:        "oci_core_nat_gateway",
 		Description: "OCI Core Nat Gateway",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreNatGateway,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreNatGateways,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -131,6 +137,13 @@ func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCoreNatGateways", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
@@ -153,6 +166,11 @@ func listCoreNatGateways(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 		for _, natGateway := range response.Items {
 			d.StreamListItem(ctx, natGateway)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

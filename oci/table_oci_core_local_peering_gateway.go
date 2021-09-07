@@ -20,6 +20,12 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 		Description: "OCI Core Local Peering Gateway",
 		List: &plugin.ListConfig{
 			Hydrate: listCoreLocalPeeringGateways,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -150,6 +156,13 @@ func listCoreLocalPeeringGateways(ctx context.Context, d *plugin.QueryData, _ *p
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCoreLocalPeeringGateways", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
@@ -172,6 +185,11 @@ func listCoreLocalPeeringGateways(ctx context.Context, d *plugin.QueryData, _ *p
 
 		for _, gateway := range gateways.Items {
 			d.StreamListItem(ctx, gateway)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				gateways.OpcNextPage = nil
+			}
 		}
 		if gateways.OpcNextPage != nil {
 			request.Page = gateways.OpcNextPage

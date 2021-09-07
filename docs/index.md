@@ -58,9 +58,9 @@ steampipe plugin install oci
 | Item | Description |
 | - | - |
 | Credentials | Create API keys for your user and add to default OCI configuration: ~/.oci/config |
-| Permissions | Use policy builder to enable your group with the permission: `Allow group {group_name} to inspect all-resources in tenancy`  |
+| Permissions | Use policy builder to enable your group with following permissions:<br /><li>`Allow group {group_name} to read all-resources in tenancy`</li><li>`Allow group {group_name} to manage all-resources in tenancy where request.operation='GetConfiguration'`</li>**NOTE:** Administrator access is restricted only to get `Audit Log Retention Period`. |
 | Radius | Each connection represents a single OCI Tenant. |
-| Resolution |  1. Static credentials in the configuration file with the `tenancy_ocid`, `user_ocid`, `fingerprint` and `private_key_path arguments`..<br />2. Named profile from an OCI config file(~/.oci/config) with the config_file_profile argument.<br />3. Named profile containing security token.<br />4. Instance Principal based authentication. Note: this configuration will only work when run from an OCI instance.<br />5.  If no credentials are specified, the plugin will use the OCI Default Connection |
+| Resolution |  1. Static credentials in the configuration file with the `tenancy_ocid`, `user_ocid`, `fingerprint` and `private_key_path arguments`.<br />2. Named profile from an OCI config file(~/.oci/config) with the config_file_profile argument.<br />3. Named profile containing security token.<br />4. Instance Principal based authentication. Note: this configuration will only work when run from an OCI instance.<br />5.  If no credentials are specified, the plugin will use the OCI Default Connection |
 
 ### Configuration
 
@@ -68,18 +68,17 @@ Installing the latest oci plugin will create a config file (`~/.steampipe/config
 
 ```hcl
 connection "oci_tenant_y" {
-  plugin                = "oci"
-  config_file_profile   = "DEFAULT"          # Name of the profile
-  config_path           = "~/.oci/config"    # Path to config file
-  regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions
+  plugin              = "oci"
+  config_file_profile = "DEFAULT"          # Name of the profile
+  config_path         = "~/.oci/config"    # Path to config file
+  regions             = ["ap-mumbai-1", "us-ashburn-1"] # List of regions
 }
 ```
 
 ## Get involved
 
-* Open source: https://github.com/turbot/steampipe-plugin-oci
-* Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
-
+- Open source: https://github.com/turbot/steampipe-plugin-oci
+- Community: [Slack Channel](https://join.slack.com/t/steampipe/shared_invite/zt-oij778tv-lYyRTWOTMQYBVAbtPSWs3g)
 
 ## Advanced configuration options
 
@@ -87,18 +86,18 @@ If you have an OCI profile setup for using the [OCI CLI](https://docs.oracle.com
 
 For users with multiple accounts and more complex authentication use cases, here are some examples of advanced configuration options:
 
-
 ### Use static credentials
+
 The OCI plugin allows you set static credentials with the tenancy_ocid, user_ocid, fingerprint and private_key_path arguments. You may select one or more regions with the regions argument.
 
 ```hcl
 connection "oci_tenant_x" {
-  plugin            = "oci"
-  tenancy_ocid      = "ocid1.tenancy.oc1..aaaaaaaa111111111bbbbbbbetci3yjjnjqmfkr4pab12cd45gh56hm76cyljaq"
-  user_ocid         = "ocid1.user.oc1..aaaaaaaa111111111bbbbbbb2oixpabcd7a3jkl6yife75v7a7o6c5d6wclrsjia"
-  fingerprint       = "9a:a1:b2:c3:d4:e5:6f:7g:89:33:5f:ed:ab:ec:de:11"
-  private_key_path  = "~/.ssh/oci_private.pem"           # Path to user's private key
-  regions           = ["ap-mumbai-1" , "us-ashburn-1"]   # List of regions to query resources
+  plugin           = "oci"
+  tenancy_ocid     = "ocid1.tenancy.oc1..aaaaaaaa111111111bbbbbbbetci3yjjnjqmfkr4pab12cd45gh56hm76cyljaq"
+  user_ocid        = "ocid1.user.oc1..aaaaaaaa111111111bbbbbbb2oixpabcd7a3jkl6yife75v7a7o6c5d6wclrsjia"
+  fingerprint      = "9a:a1:b2:c3:d4:e5:6f:7g:89:33:5f:ed:ab:ec:de:11"
+  private_key_path = "~/.ssh/oci_private.pem"          # Path to user's private key
+  regions          = ["ap-mumbai-1", "us-ashburn-1"]   # List of regions to query resources
 }
 ```
 
@@ -111,14 +110,14 @@ connection "oci" {
   plugin                = "oci"
   config_file_profile   = "DEFAULT"          # Name of the profile in the OCI config file
   config_path           = "~/.oci/config"    # Path to config file
-  regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions to query resources
+  regions               = ["ap-mumbai-1", "us-ashburn-1"] # List of regions to query resources
 }
 
 connection "oci_tenant_x" {
   plugin                = "oci"
   config_file_profile   = "tenant_x"         # Name of the profile in the OCI config file
   config_path           = "~/.oci/config"    # Path to config file
-  regions               = ["ap-mumbai-1" , "us-ashburn-1"] # List of regions to query resources
+  regions               = ["ap-mumbai-1", "us-ashburn-1"] # List of regions to query resources
 }
 ```
 
@@ -126,9 +125,9 @@ connection "oci_tenant_x" {
 
 ```hcl
 connection "oci_tenant_z" {
-  plugin              =	"oci"
-  auth                =	"SecurityToken"   # Type of authentication
-  config_file_profile =	"tenant_z"        # OCI Profile containing the details of the token
+  plugin              = "oci"
+  auth                = "SecurityToken"   # Type of authentication
+  config_file_profile = "tenant_z"        # OCI Profile containing the details of the token
   regions             = ["ap-mumbai-1"]
 }
 ```
@@ -139,7 +138,7 @@ This configuration will only work when run from an OCI instance. More informatio
 
 ```hcl
 connection "oci" {
-  plugin  =  "oci"
-  auth    =  "InstancePrincipal"   # Type of authentication
+  plugin = "oci"
+  auth   = "InstancePrincipal"   # Type of authentication
 }
 ```

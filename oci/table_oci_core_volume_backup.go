@@ -19,7 +19,7 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 		Name:        "oci_core_volume_backup",
 		Description: "OCI Core Volume Backup",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getVolumeBackup,
 		},
 		List: &plugin.ListConfig{

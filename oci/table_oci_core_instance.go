@@ -19,7 +19,7 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 		Name:        "oci_core_instance",
 		Description: "OCI Core Instance",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getInstance,
 		},
 		List: &plugin.ListConfig{

@@ -18,7 +18,7 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_compartment",
 		Description: "OCI Identity Compartment",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCompartment,
 		},
 		List: &plugin.ListConfig{

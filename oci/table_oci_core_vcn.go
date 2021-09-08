@@ -19,7 +19,7 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 		Name:        "oci_core_vcn",
 		Description: "OCI Core VCN",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getVcn,
 		},
 		List: &plugin.ListConfig{

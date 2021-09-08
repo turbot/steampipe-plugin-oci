@@ -19,7 +19,7 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 		Name:        "oci_core_internet_gateway",
 		Description: "OCI Core Internet Gateway",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreInternetGateway,
 		},
 		List: &plugin.ListConfig{

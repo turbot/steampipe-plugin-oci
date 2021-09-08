@@ -19,7 +19,7 @@ func tableEventsRule(_ context.Context) *plugin.Table {
 		Name:        "oci_events_rule",
 		Description: "OCI Events Rule",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getEventsRule,
 		},
 		List: &plugin.ListConfig{

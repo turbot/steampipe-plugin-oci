@@ -19,7 +19,7 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_user",
 		Description: "OCI Identity User",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getUser,
 		},
 		List: &plugin.ListConfig{

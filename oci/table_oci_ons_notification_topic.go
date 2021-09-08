@@ -19,7 +19,7 @@ func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 		Name:        "oci_ons_notification_topic",
 		Description: "A communication channel for sending messages to the subscriptions.",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"topic_id"}),
+			KeyColumns: plugin.SingleColumn("topic_id"),
 			Hydrate:    getOnsNotificationTopic,
 		},
 		List: &plugin.ListConfig{

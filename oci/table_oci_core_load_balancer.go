@@ -19,7 +19,7 @@ func tableCoreLoadBalancer(_ context.Context) *plugin.Table {
 		Name:        "oci_core_load_balancer",
 		Description: "OCI Core Load Balancer",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreLoadBalancer,
 		},
 		List: &plugin.ListConfig{

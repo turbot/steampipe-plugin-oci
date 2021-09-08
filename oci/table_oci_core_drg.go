@@ -146,7 +146,7 @@ func listCoreDrgs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if plugin.IsCancelled(ctx) {
-				response.OpcNextPage = nil
+				return nil, nil
 			}
 		}
 		if response.OpcNextPage != nil {

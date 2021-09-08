@@ -228,7 +228,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if plugin.IsCancelled(ctx) {
-				response.OpcNextPage = nil
+				return nil, nil
 			}
 		}
 		if response.OpcNextPage != nil {

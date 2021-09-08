@@ -27,10 +27,6 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 			Hydrate: listCoreImages,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "display_name",
 					Require: plugin.Optional,
 				},
@@ -175,12 +171,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
-
+	
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
@@ -220,7 +211,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 				// Context can be cancelled due to manual cancellation or the limit has been hit
 				if plugin.IsCancelled(ctx) {
-					response.OpcNextPage = nil
+					return nil, nil
 				}
 			}
 		}

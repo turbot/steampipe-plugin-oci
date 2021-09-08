@@ -129,7 +129,7 @@ func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
-	// cache teanant id for the session
+	// cache tenant id for the session
 	d.ConnectionManager.Cache.Set(cacheKey, session.TenancyID)
 
 	return session.TenancyID, nil

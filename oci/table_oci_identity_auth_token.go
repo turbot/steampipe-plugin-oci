@@ -19,6 +19,12 @@ func tableIdentityAuthToken(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
 			Hydrate:       listIdentityAuthTokens,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "user_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -101,8 +107,13 @@ type authTokenInfo struct {
 //// LIST FUNCTION
 
 func listIdentityAuthTokens(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-
 	user := h.Item.(identity.User)
+
+	// Return nil, if given user_id doesn't match
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["user_id"] != nil && equalQuals["user_id"].GetStringValue() != *user.Id {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)

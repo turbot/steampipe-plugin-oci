@@ -21,6 +21,12 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
 			Hydrate:       listIdentityApiKeys,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "user_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -96,6 +102,12 @@ type apiKeyInfo struct {
 
 func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	user := h.Item.(identity.User)
+
+	// Return nil, if given user_id doesn't match
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["user_id"] != nil && equalQuals["user_id"].GetStringValue() != *user.Id {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)

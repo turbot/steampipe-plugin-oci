@@ -211,11 +211,11 @@ func listCoreCustomImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		for _, image := range response.Items {
 			if image.BaseImageId != nil {
 				d.StreamListItem(ctx, image)
+			}
 
-				// Context can be cancelled due to manual cancellation or the limit has been hit
-				if plugin.IsCancelled(ctx) {
-					response.OpcNextPage = nil
-				}
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
 			}
 		}
 		if response.OpcNextPage != nil {

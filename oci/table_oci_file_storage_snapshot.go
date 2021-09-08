@@ -26,16 +26,6 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listFileStorageSnapshots,
 			ParentHydrate: listFileStorageFileSystems,
-			KeyColumns: []*plugin.KeyColumn{
-				{
-					Name:    "availability_domain",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-			},
 		},
 		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
@@ -147,18 +137,6 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("listFileStorageSnapshots", "Compartment", compartment, "zone", zone)
-
-	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
-
-	// Return nil, if given availability_domain doesn't match
-	if equalQuals["availability_domain"] != nil && zone != equalQuals["availability_domain"].GetStringValue() {
-		return nil, nil
-	}
 
 	fileSystem := h.Item.(filestorage.FileSystemSummary)
 

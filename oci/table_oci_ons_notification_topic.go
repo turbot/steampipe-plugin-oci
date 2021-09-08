@@ -24,6 +24,12 @@ func tableOnsNotificationTopic(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listOnsNotificationTopics,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -132,6 +138,13 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listOnsNotificationTopics", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := onsNotificationControlPlaneService(ctx, d, region)
 	if err != nil {
@@ -154,6 +167,11 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 
 		for _, topic := range response.Items {
 			d.StreamListItem(ctx, topic)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if plugin.IsCancelled(ctx) {
+				response.OpcNextPage = nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

@@ -29,6 +29,10 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -148,6 +152,10 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = oci_common.String(equalQuals["display_name"].GetStringValue())
 	}
 
 	pagesLeft := true

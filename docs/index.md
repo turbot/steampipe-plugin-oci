@@ -58,9 +58,9 @@ steampipe plugin install oci
 | Item | Description |
 | - | - |
 | Credentials | Create API keys for your user and add to default OCI configuration: ~/.oci/config |
-| Permissions | Use policy builder to enable your group with following permissions:<br /><li>`Allow group {group_name} to read all-resources in tenancy`</li><li>`Allow group {group_name} to manage all-resources in tenancy where request.operation='GetConfiguration'`</li> |
+| Permissions | Use policy builder to enable your group with following permissions:<br /><li>`Allow group {group_name} to read all-resources in tenancy`</li><li>`Allow group {group_name} to manage all-resources in tenancy where request.operation='GetConfiguration'`</li>**Note:** Permission to manage `GetConfiguration` for all-resources is required for `oci_identity_tenancy` table. |
 | Radius | Each connection represents a single OCI Tenant. |
-| Resolution |  1. Static credentials in the configuration file with the `tenancy_ocid`, `user_ocid`, `fingerprint` and `private_key_path arguments`.<br />2. Named profile from an OCI config file(~/.oci/config) with the config_file_profile argument.<br />3. Named profile containing security token.<br />4. Instance Principal based authentication. Note: this configuration will only work when run from an OCI instance.<br />5.  If no credentials are specified, the plugin will use the OCI Default Connection |
+| Resolution | 1. Static credentials in the configuration file with the `tenancy_ocid`, `user_ocid`, `fingerprint` and `private_key_path arguments`.<br />2. Named profile from an OCI config file(~/.oci/config) with the config_file_profile argument.<br />3. Named profile containing security token.<br />4. Instance Principal based authentication. Note: this configuration will only work when run from an OCI instance.<br />5. If no credentials are specified, the plugin will use the OCI Default Connection |
 
 ### Configuration
 

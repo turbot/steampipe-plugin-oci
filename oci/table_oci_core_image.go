@@ -171,7 +171,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
-	
+
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
@@ -210,7 +210,7 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 				d.StreamListItem(ctx, image)
 
 				// Context can be cancelled due to manual cancellation or the limit has been hit
-				if plugin.IsCancelled(ctx) {
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
 					return nil, nil
 				}
 			}

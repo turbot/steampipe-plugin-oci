@@ -93,6 +93,12 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(subscriptionTags),
 			},
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Endpoint"),
+			},
 
 			// Standard OCI columns
 			{

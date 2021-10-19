@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,18 @@ func tableCoreNetworkSecurityGroup(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vcn_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -140,11 +152,19 @@ func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *
 		return nil, err
 	}
 
-	request := core.ListNetworkSecurityGroupsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCoreNetworkSecurityGroupsFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -201,7 +221,7 @@ func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *pl
 
 	request := core.GetNetworkSecurityGroupRequest{
 		NetworkSecurityGroupId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -230,7 +250,7 @@ func listCoreNetworkSecurityGroupRules(ctx context.Context, d *plugin.QueryData,
 
 	request := core.ListNetworkSecurityGroupSecurityRulesRequest{
 		NetworkSecurityGroupId: types.String(NetworkSecurityGroupID),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -285,4 +305,21 @@ func networkSecurityGroupTags(_ context.Context, d *transform.TransformData) (in
 	}
 
 	return tags, nil
+}
+
+// Build request filters
+func buildCoreNetworkSecurityGroupsFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListNetworkSecurityGroupsRequest {
+	request := core.ListNetworkSecurityGroupsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.NetworkSecurityGroupLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["vcn_id"] != nil {
+		request.VcnId = types.String(equalQuals["vcn_id"].GetStringValue())
+	}
+
+	return request
 }

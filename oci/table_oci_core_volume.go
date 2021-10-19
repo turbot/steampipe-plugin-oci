@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,6 +25,10 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCoreVolumes,
 			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
 				{
 					Name:    "compartment_id",
 					Require: plugin.Optional,
@@ -208,27 +212,12 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	request := core.ListVolumesRequest{
-		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	if equalQuals["display_name"] != nil {
-		displayName := equalQuals["display_name"].GetStringValue()
-		request.DisplayName = types.String(displayName)
-	}
-
-	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = core.VolumeLifecycleStateEnum(lifecycleState)
-	}
-
-	if equalQuals["volume_group_id"] != nil {
-		volumeGroupId := equalQuals["volume_group_id"].GetStringValue()
-		request.VolumeGroupId = types.String(volumeGroupId)
+	// Build request parameters
+	request := buildCoreVolumeFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
 	}
 
 	limit := d.QueryContext.Limit
@@ -291,7 +280,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	request := core.GetVolumeRequest{
 		VolumeId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -347,4 +336,24 @@ func volumeTags(_ context.Context, d *transform.TransformData) (interface{}, err
 	}
 
 	return tags, nil
+}
+
+// Build request filters
+func buildCoreVolumeFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumesRequest {
+	request := core.ListVolumesRequest{}
+
+	if equalQuals["availability_domain"] != nil {
+		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.VolumeLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["volume_group_id"] != nil {
+		request.VolumeGroupId = types.String(equalQuals["volume_group_id"].GetStringValue())
+	}
+
+	return request
 }

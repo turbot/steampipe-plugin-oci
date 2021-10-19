@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -27,6 +27,14 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
 					Require: plugin.Optional,
 				},
 			},
@@ -170,9 +178,28 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 
 	request := cloudguard.ListResponderRecipesRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Build request parameters
+	if equalQuals["name"] != nil {
+		displayName := equalQuals["name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = cloudguard.ListResponderRecipesLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -230,7 +257,7 @@ func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *p
 
 	request := cloudguard.GetResponderRecipeRequest{
 		ResponderRecipeId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

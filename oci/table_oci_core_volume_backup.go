@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,22 @@ func tableCoreVolumeBackup(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "source_volume_backup_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "volume_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -196,11 +212,19 @@ func listCoreVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	request := core.ListVolumeBackupsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCoreVolumeBackupFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -257,7 +281,7 @@ func getVolumeBackup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	request := core.GetVolumeBackupRequest{
 		VolumeBackupId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -313,4 +337,24 @@ func volumeBackupTags(_ context.Context, d *transform.TransformData) (interface{
 	}
 
 	return tags, nil
+}
+
+// Build request filters
+func buildCoreVolumeBackupFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumeBackupsRequest {
+	request := core.ListVolumeBackupsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.VolumeBackupLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["source_volume_backup_id"] != nil {
+		request.SourceVolumeBackupId = types.String(equalQuals["source_volume_backup_id"].GetStringValue())
+	}
+	if equalQuals["volume_id"] != nil {
+		request.VolumeId = types.String(equalQuals["volume_id"].GetStringValue())
+	}
+
+	return request
 }

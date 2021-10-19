@@ -26,7 +26,19 @@ func tableCorePublicIP(_ context.Context) *plugin.Table {
 			Hydrate: listCorePublicIPs,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifetime",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "public_ip_pool_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -158,12 +170,20 @@ func listCorePublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	request := core.ListPublicIpsRequest{
-		CompartmentId: types.String(compartment),
-		Scope:         "REGION",
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCorePublicIPFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+	request.Scope = "REGION"
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -251,4 +271,21 @@ func publicIPTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	}
 
 	return tags, nil
+}
+
+// Build request filters
+func buildCorePublicIPFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListPublicIpsRequest {
+	request := core.ListPublicIpsRequest{}
+
+	if equalQuals["availability_domain"] != nil {
+		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
+	}
+	if equalQuals["lifetime"] != nil {
+		request.Lifetime = core.ListPublicIpsLifetimeEnum(equalQuals["lifetime"].GetStringValue())
+	}
+	if equalQuals["public_ip_pool_id"] != nil {
+		request.PublicIpPoolId = types.String(equalQuals["public_ip_pool_id"].GetStringValue())
+	}
+
+	return request
 }

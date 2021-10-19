@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -27,6 +27,18 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "list_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
 					Require: plugin.Optional,
 				},
 			},
@@ -171,12 +183,20 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, _ *plu
 	if err != nil {
 		return nil, err
 	}
+	
+	// Build request parameters
+	request := buildCloudGuardManagedListFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
 
-	request := cloudguard.ListManagedListsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -229,7 +249,7 @@ func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	request := cloudguard.GetManagedListRequest{
 		ManagedListId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -301,4 +321,21 @@ func cloudGuardManagedListTags(_ context.Context, d *transform.TransformData) (i
 	}
 
 	return tags, nil
+}
+
+// Build request filters
+func buildCloudGuardManagedListFilters(equalQuals plugin.KeyColumnEqualsQualMap) cloudguard.ListManagedListsRequest {
+	request := cloudguard.ListManagedListsRequest{}
+
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = cloudguard.ListManagedListsLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["list_type"] != nil {
+		request.ListType = cloudguard.ListManagedListsListTypeEnum(equalQuals["list_type"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.DisplayName = types.String(equalQuals["name"].GetStringValue())
+	}
+
+	return request
 }

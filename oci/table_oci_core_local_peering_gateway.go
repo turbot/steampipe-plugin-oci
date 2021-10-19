@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,10 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vcn_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -171,9 +175,23 @@ func listCoreLocalPeeringGateways(ctx context.Context, d *plugin.QueryData, _ *p
 
 	request := core.ListLocalPeeringGatewaysRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Build request parameters
+	if equalQuals["vcn_id"] != nil {
+		vcnId := equalQuals["vcn_id"].GetStringValue()
+		request.VcnId = types.String(vcnId)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -227,7 +245,7 @@ func getCoreLocalPeeringGateway(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	request := core.GetLocalPeeringGatewayRequest{
 		LocalPeeringGatewayId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

@@ -26,7 +26,19 @@ func tableCoreVolumeAttachment(_ context.Context) *plugin.Table {
 			Hydrate: listCoreVolumeAttachments,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "instance_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "volume_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -228,11 +240,19 @@ func listCoreVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, err
 	}
 
-	request := core.ListVolumeAttachmentsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCoreVolumeAttachmentFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -327,4 +347,21 @@ func getCoreVolumeAttachmentFields(ctx context.Context, d *plugin.QueryData, h *
 	}
 
 	return attachment, nil
+}
+
+// Build request filters
+func buildCoreVolumeAttachmentFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumeAttachmentsRequest {
+	request := core.ListVolumeAttachmentsRequest{}
+
+	if equalQuals["availability_domain"] != nil {
+		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
+	}
+	if equalQuals["instance_id"] != nil {
+		request.InstanceId = types.String(equalQuals["instance_id"].GetStringValue())
+	}
+	if equalQuals["volume_id"] != nil {
+		request.VolumeId = types.String(equalQuals["volume_id"].GetStringValue())
+	}
+
+	return request
 }

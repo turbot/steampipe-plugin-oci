@@ -29,6 +29,26 @@ func tableOciDatabaseSoftwareImage(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "image_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "image_shape_family",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "is_upgrade_supported",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -178,11 +198,19 @@ func listSoftwareImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	request := database.ListDatabaseSoftwareImagesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildDatabaseSoftwareImageFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -293,4 +321,27 @@ func softwareImageTags(_ context.Context, d *transform.TransformData) (interface
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildDatabaseSoftwareImageFilters(equalQuals plugin.KeyColumnEqualsQualMap) database.ListDatabaseSoftwareImagesRequest {
+	request := database.ListDatabaseSoftwareImagesRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["image_type"] != nil {
+		request.ImageType = database.DatabaseSoftwareImageSummaryImageTypeEnum(equalQuals["image_type"].GetStringValue())
+	}
+	if equalQuals["image_shape_family"] != nil {
+		request.ImageShapeFamily = database.DatabaseSoftwareImageSummaryImageShapeFamilyEnum(equalQuals["image_shape_family"].GetStringValue())
+	}
+	if equalQuals["is_upgrade_supported"] != nil {
+		request.IsUpgradeSupported = types.Bool(equalQuals["is_upgrade_supported"].GetBoolValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = database.DatabaseSoftwareImageSummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

@@ -328,7 +328,7 @@ func subnetTags(_ context.Context, d *transform.TransformData) (interface{}, err
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreSubnetFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListSubnetsRequest {
 	request := core.ListSubnetsRequest{}
 

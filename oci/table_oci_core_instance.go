@@ -429,7 +429,7 @@ func regionName(_ context.Context, d *transform.TransformData) (interface{}, err
 	}
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListInstancesRequest {
 	request := core.ListInstancesRequest{}
 

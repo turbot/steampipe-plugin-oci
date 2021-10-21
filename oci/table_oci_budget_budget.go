@@ -210,7 +210,7 @@ func listBudgets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filters
 	if equalQuals["display_name"] != nil {
 		displayName := equalQuals["display_name"].GetStringValue()
 		request.DisplayName = types.String(displayName)

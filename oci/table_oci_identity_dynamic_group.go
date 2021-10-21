@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,20 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIdentityDynamicGroups,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -92,10 +106,17 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -104,6 +125,17 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("listIdentityDynamicGroups", "Compartment", compartment)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+	
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -112,10 +144,29 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListDynamicGroupsRequest{
-		CompartmentId: &session.TenancyID,
-		RequestMetadata: oci_common.RequestMetadata{
+		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.DynamicGroupLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -127,6 +178,11 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 
 		for _, dynamicGroup := range response.Items {
 			d.StreamListItem(ctx, dynamicGroup)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -158,7 +214,7 @@ func getIdentityDynamicGroup(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	request := identity.GetDynamicGroupRequest{
 		DynamicGroupId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

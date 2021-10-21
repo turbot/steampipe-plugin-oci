@@ -167,7 +167,7 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filters
 	if equalQuals["vcn_id"] != nil {
 		vcnId := equalQuals["vcn_id"].GetStringValue()
 		request.VcnId = types.String(vcnId)

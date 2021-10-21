@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,18 @@ func tableIdentityTagDefault(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "tag_definition_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -127,11 +139,19 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	request := identity.ListTagDefaultsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildIdentityTagDefaultFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -185,7 +205,7 @@ func getIdentityTagDefault(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	request := identity.GetTagDefaultRequest{
 		TagDefaultId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -196,4 +216,21 @@ func getIdentityTagDefault(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	return response.TagDefault, nil
+}
+
+// Build additional filters
+func buildIdentityTagDefaultFilters(equalQuals plugin.KeyColumnEqualsQualMap) identity.ListTagDefaultsRequest {
+	request := identity.ListTagDefaultsRequest{}
+
+	if equalQuals["id"] != nil {
+		request.Id = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = identity.TagDefaultSummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["tag_definition_id"] != nil {
+		request.TagDefinitionId = types.String(equalQuals["tag_definition_id"].GetStringValue())
+	}
+
+	return request
 }

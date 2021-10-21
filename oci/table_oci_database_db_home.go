@@ -25,6 +25,26 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "db_system_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "db_version",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vm_cluster_id",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		Get: &plugin.GetConfig{
@@ -181,11 +201,19 @@ func listDatabaseDBHomes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, err
 	}
 
-	request := database.ListDbHomesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildDatabaseDBHomeFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -303,4 +331,27 @@ func dbHomeDefinedTags(item interface{}) map[string]map[string]interface{} {
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildDatabaseDBHomeFilters(equalQuals plugin.KeyColumnEqualsQualMap) database.ListDbHomesRequest {
+	request := database.ListDbHomesRequest{}
+
+	if equalQuals["db_system_id"] != nil {
+		request.DbSystemId = types.String(equalQuals["db_system_id"].GetStringValue())
+	}
+	if equalQuals["db_version"] != nil {
+		request.DbVersion = types.String(equalQuals["db_version"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = database.DbHomeSummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["vm_cluster_id"] != nil {
+		request.VmClusterId = types.String(equalQuals["vm_cluster_id"].GetStringValue())
+	}
+
+	return request
 }

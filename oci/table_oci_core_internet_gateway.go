@@ -270,7 +270,7 @@ func internetGatewayTags(_ context.Context, d *transform.TransformData) (interfa
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreInternetGatewayFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListInternetGatewaysRequest {
 	request := core.ListInternetGatewaysRequest{}
 

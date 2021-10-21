@@ -271,7 +271,7 @@ func natGatewayTags(_ context.Context, d *transform.TransformData) (interface{},
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreNatGatewayFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListNatGatewaysRequest {
 	request := core.ListNatGatewaysRequest{}
 

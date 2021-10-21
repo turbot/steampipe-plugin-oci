@@ -3,11 +3,12 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/go-kit/types"
 )
 
 //// TABLE DEFINITION
@@ -18,6 +19,12 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 		Description: "OCI Identity Authentication Policy",
 		List: &plugin.ListConfig{
 			Hydrate: listAuthenticationPolicy,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			// Password Policy
@@ -68,10 +75,17 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -80,6 +94,14 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -88,8 +110,8 @@ func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugi
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.GetAuthenticationPolicyRequest{
-		CompartmentId: &session.TenancyID,
-		RequestMetadata: oci_common.RequestMetadata{
+		CompartmentId: types.String(compartment),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

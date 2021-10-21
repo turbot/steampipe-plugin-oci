@@ -165,7 +165,7 @@ func listCoreBootVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filters
 	if equalQuals["instance_id"] != nil {
 		instanceId := equalQuals["instance_id"].GetStringValue()
 		request.InstanceId = types.String(instanceId)

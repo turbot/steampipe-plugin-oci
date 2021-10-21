@@ -273,7 +273,7 @@ func publicIPTags(_ context.Context, d *transform.TransformData) (interface{}, e
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCorePublicIPFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListPublicIpsRequest {
 	request := core.ListPublicIpsRequest{}
 

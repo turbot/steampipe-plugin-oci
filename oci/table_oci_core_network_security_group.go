@@ -307,7 +307,7 @@ func networkSecurityGroupTags(_ context.Context, d *transform.TransformData) (in
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreNetworkSecurityGroupsFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListNetworkSecurityGroupsRequest {
 	request := core.ListNetworkSecurityGroupsRequest{}
 

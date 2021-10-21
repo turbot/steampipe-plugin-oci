@@ -338,7 +338,7 @@ func volumeTags(_ context.Context, d *transform.TransformData) (interface{}, err
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreVolumeFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumesRequest {
 	request := core.ListVolumesRequest{}
 

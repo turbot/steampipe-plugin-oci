@@ -261,7 +261,7 @@ func dhcpOptionTags(_ context.Context, d *transform.TransformData) (interface{},
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreDhcpOptionFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListDhcpOptionsRequest {
 	request := core.ListDhcpOptionsRequest{}
 

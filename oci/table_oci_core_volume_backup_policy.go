@@ -145,7 +145,7 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 		},
 	}
 
-	// Build request parameters
+	// Check for limit
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {

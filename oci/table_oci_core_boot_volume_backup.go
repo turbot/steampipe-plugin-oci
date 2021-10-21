@@ -333,7 +333,7 @@ func bootVolumeBackupTags(_ context.Context, d *transform.TransformData) (interf
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildBootVolumeBackupFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListBootVolumeBackupsRequest {
 	request := core.ListBootVolumeBackupsRequest{}
 

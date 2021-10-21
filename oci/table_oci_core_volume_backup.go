@@ -339,7 +339,7 @@ func volumeBackupTags(_ context.Context, d *transform.TransformData) (interface{
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreVolumeBackupFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumeBackupsRequest {
 	request := core.ListVolumeBackupsRequest{}
 

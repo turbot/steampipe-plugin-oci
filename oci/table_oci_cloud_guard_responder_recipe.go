@@ -184,7 +184,7 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filters
 	if equalQuals["name"] != nil {
 		displayName := equalQuals["name"].GetStringValue()
 		request.DisplayName = types.String(displayName)

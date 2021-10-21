@@ -323,7 +323,7 @@ func cloudGuardManagedListTags(_ context.Context, d *transform.TransformData) (i
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCloudGuardManagedListFilters(equalQuals plugin.KeyColumnEqualsQualMap) cloudguard.ListManagedListsRequest {
 	request := cloudguard.ListManagedListsRequest{}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,18 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
 					Require: plugin.Optional,
 				},
 			},
@@ -145,11 +157,19 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		return nil, err
 	}
 
-	request := dns.ListTsigKeysRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildDnsTsigKeyFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int64(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int64(int64(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -206,7 +226,7 @@ func getDnsTsigKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 	request := dns.GetTsigKeyRequest{
 		TsigKeyId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -261,4 +281,21 @@ func dnsTsigTags(_ context.Context, d *transform.TransformData) (interface{}, er
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildDnsTsigKeyFilters(equalQuals plugin.KeyColumnEqualsQualMap) dns.ListTsigKeysRequest {
+	request := dns.ListTsigKeysRequest{}
+
+	if equalQuals["id"] != nil {
+		request.Id = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = dns.TsigKeySummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.Name = types.String(equalQuals["name"].GetStringValue())
+	}
+
+	return request
 }

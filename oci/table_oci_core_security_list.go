@@ -265,7 +265,7 @@ func securityListTags(_ context.Context, d *transform.TransformData) (interface{
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreSecurityListFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListSecurityListsRequest {
 	request := core.ListSecurityListsRequest{}
 

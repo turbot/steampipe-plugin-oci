@@ -207,7 +207,7 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	}
 
 	// Build request parameters
-	request := buildAanalyticsInstanceFilters(equalQuals)
+	request := buildAnalyticsInstanceFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
@@ -325,8 +325,8 @@ func analyticsInstanceTags(_ context.Context, d *transform.TransformData) (inter
 	return tags, nil
 }
 
-// Build request filters
-func buildAanalyticsInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) analytics.ListAnalyticsInstancesRequest {
+// Build additional filters
+func buildAnalyticsInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) analytics.ListAnalyticsInstancesRequest {
 	request := analytics.ListAnalyticsInstancesRequest{}
 
 	if equalQuals["capacity_type"] != nil {

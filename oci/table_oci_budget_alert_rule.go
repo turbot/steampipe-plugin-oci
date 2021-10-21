@@ -236,7 +236,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filters
 	if equalQuals["display_name"] != nil {
 		displayName := equalQuals["display_name"].GetStringValue()
 		request.DisplayName = types.String(displayName)

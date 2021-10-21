@@ -349,7 +349,7 @@ func getCoreVolumeAttachmentFields(ctx context.Context, d *plugin.QueryData, h *
 	return attachment, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreVolumeAttachmentFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumeAttachmentsRequest {
 	request := core.ListVolumeAttachmentsRequest{}
 

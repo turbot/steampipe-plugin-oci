@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -32,6 +32,22 @@ func tableFileStorageMountTarget(_ context.Context) *plugin.Table {
 				},
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "export_set_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -173,13 +189,21 @@ func listFileStorageMountTargets(ctx context.Context, d *plugin.QueryData, h *pl
 	if err != nil {
 		return nil, err
 	}
+	
+	// Build request parameters
+	request := buildFileStorageMountTargetFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.AvailabilityDomain = types.String(zone)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
 
-	request := filestorage.ListMountTargetsRequest{
-		CompartmentId:      types.String(compartment),
-		AvailabilityDomain: types.String(zone),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -242,7 +266,7 @@ func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plug
 
 	request := filestorage.GetMountTargetRequest{
 		MountTargetId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -295,4 +319,24 @@ func mountTargetTags(ctx context.Context, d *transform.TransformData) (interface
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildFileStorageMountTargetFilters(equalQuals plugin.KeyColumnEqualsQualMap) filestorage.ListMountTargetsRequest {
+	request := filestorage.ListMountTargetsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["export_set_id"] != nil {
+		request.ExportSetId = types.String(equalQuals["export_set_id"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.Id = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = filestorage.ListMountTargetsLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

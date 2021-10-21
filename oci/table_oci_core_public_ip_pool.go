@@ -144,7 +144,7 @@ func listCorePublicIPPools(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filter
 	if equalQuals["display_name"] != nil {
 		displayName := equalQuals["display_name"].GetStringValue()
 		request.DisplayName = types.String(displayName)

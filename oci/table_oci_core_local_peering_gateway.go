@@ -181,7 +181,7 @@ func listCoreLocalPeeringGateways(ctx context.Context, d *plugin.QueryData, _ *p
 		},
 	}
 
-	// Build request parameters
+	// Check for additional filter
 	if equalQuals["vcn_id"] != nil {
 		vcnId := equalQuals["vcn_id"].GetStringValue()
 		request.VcnId = types.String(vcnId)

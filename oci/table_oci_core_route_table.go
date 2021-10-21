@@ -267,7 +267,7 @@ func routeTableTags(_ context.Context, d *transform.TransformData) (interface{},
 	return tags, nil
 }
 
-// Build request filters
+// Build additional filters
 func buildCoreRouteTableFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListRouteTablesRequest {
 	request := core.ListRouteTablesRequest{}
 

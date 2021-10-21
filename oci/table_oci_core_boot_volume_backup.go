@@ -24,6 +24,12 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listBootVolumeBackups,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -156,7 +162,7 @@ func tableCoreBootVolumeBackup(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -170,6 +176,13 @@ func listBootVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listBootVolumeBackups", "Compartment", compartment, "OCI_REGION", region)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -193,6 +206,11 @@ func listBootVolumeBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 		for _, backup := range response.Items {
 			d.StreamListItem(ctx, backup)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

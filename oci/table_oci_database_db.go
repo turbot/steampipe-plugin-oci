@@ -26,6 +26,12 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			ParentHydrate:     listDatabaseDBHomes,
 			Hydrate:           listDatabases,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -177,7 +183,7 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -191,6 +197,13 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listDatabases", "Compartment", compartment, "OCI_REGION", region)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	homeId := h.Item.(database.DbHomeSummary).Id
 
@@ -217,6 +230,11 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 
 		for _, database := range response.Items {
 			d.StreamListItem(ctx, database)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

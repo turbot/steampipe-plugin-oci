@@ -20,6 +20,12 @@ func tableDnsRecordSet(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listDnsZones,
 			Hydrate:       listDnsRecordSets,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -82,7 +88,7 @@ func tableDnsRecordSet(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -100,6 +106,13 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("dns.listDnsRecordSets", "Compartment", compartment)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := dnsService(ctx, d)
@@ -126,6 +139,11 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 
 		for _, record := range response.Items {
 			d.StreamListItem(ctx, dnsRecordInfo{record, compartment})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

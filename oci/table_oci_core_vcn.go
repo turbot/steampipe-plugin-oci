@@ -19,11 +19,17 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 		Name:        "oci_core_vcn",
 		Description: "OCI Core VCN",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getVcn,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreVcns,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -144,7 +150,7 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -158,6 +164,13 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
@@ -181,6 +194,11 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 		for _, network := range response.Items {
 			d.StreamListItem(ctx, network)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

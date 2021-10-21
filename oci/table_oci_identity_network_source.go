@@ -18,7 +18,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_network_source",
 		Description: "OCI Identity Network Source",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getIdentityNetworkSource,
 		},
 		List: &plugin.ListConfig{

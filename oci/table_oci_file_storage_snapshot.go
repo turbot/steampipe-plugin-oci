@@ -117,7 +117,7 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -163,6 +163,11 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 
 		for _, snapshots := range response.Items {
 			d.StreamLeafListItem(ctx, snapshotInfo{snapshots, compartment})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

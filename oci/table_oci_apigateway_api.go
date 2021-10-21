@@ -24,6 +24,20 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listApiGatewayApis,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -112,7 +126,7 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -124,6 +138,13 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := apiGatewayService(ctx, d)
 	if err != nil {
@@ -132,9 +153,27 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	request := apigateway.ListApisRequest{
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = apigateway.ApiSummaryLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -146,6 +185,11 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 		for _, api := range response.Items {
 			d.StreamListItem(ctx, api)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

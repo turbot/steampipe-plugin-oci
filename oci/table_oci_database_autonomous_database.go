@@ -24,6 +24,46 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAutonomousDatabases,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "autonomous_container_database_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "db_version",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "db_workload",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "infrastructure_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:      "is_data_guard_enabled",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:      "is_free_tier",
+					Require:   plugin.Optional,
+					Operators: []string{"<>", "="},
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -380,7 +420,7 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -395,17 +435,33 @@ func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listAutonomousDatabases", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+	quals := d.Quals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := databaseService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := database.ListAutonomousDatabasesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildAutonomousDatabaseFilter(equalQuals, quals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -417,6 +473,11 @@ func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 		for _, database := range response.Items {
 			d.StreamListItem(ctx, database)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -523,4 +584,70 @@ func autonomousDatabaseTags(_ context.Context, d *transform.TransformData) (inte
 	}
 
 	return tags, nil
+}
+
+func buildAutonomousDatabaseFilter(equalQuals plugin.KeyColumnEqualsQualMap, quals plugin.KeyColumnQualMap) database.ListAutonomousDatabasesRequest {
+	request := database.ListAutonomousDatabasesRequest{}
+
+	filterQuals := []string{
+		"autonomous_container_database_id",
+		"db_version",
+		"db_workload",
+		"display_name",
+		"infrastructure_type",
+		"is_data_guard_enabled",
+		"is_free_tier",
+		"lifecycle_state",
+	}
+
+	for _, columnName := range filterQuals {
+		if equalQuals[columnName] != nil {
+			switch columnName {
+			case "autonomous_container_database_id":
+				request.AutonomousContainerDatabaseId = types.String(equalQuals[columnName].GetStringValue())
+			case "db_version":
+				request.DbVersion = types.String(equalQuals[columnName].GetStringValue())
+			case "db_workload":
+				request.DbWorkload = database.AutonomousDatabaseSummaryDbWorkloadEnum(equalQuals[columnName].GetStringValue())
+			case "display_name":
+				request.DisplayName = types.String(equalQuals[columnName].GetStringValue())
+			case "infrastructure_type":
+				request.InfrastructureType = database.AutonomousDatabaseSummaryInfrastructureTypeEnum(equalQuals[columnName].GetStringValue())
+			case "lifecycle_state":
+				request.LifecycleState = database.AutonomousDatabaseSummaryLifecycleStateEnum(equalQuals[columnName].GetStringValue())
+			case "is_data_guard_enabled":
+				request.IsDataGuardEnabled = types.Bool(equalQuals[columnName].GetBoolValue())
+			case "is_free_tier":
+				request.IsFreeTier = types.Bool(equalQuals[columnName].GetBoolValue())
+			}
+		}
+	}
+
+	boolNEQuals := []string{
+		"is_data_guard_enabled",
+		"is_free_tier",
+	}
+	// Non-Equals Qual Map handling
+	for _, qual := range boolNEQuals {
+		if quals[qual] != nil {
+			for _, q := range quals[qual].Quals {
+				value := q.Value.GetBoolValue()
+				if q.Operator == "<>" {
+					if qual == "is_data_guard_enabled" {
+						request.IsDataGuardEnabled = types.Bool(false)
+						if !value {
+							request.IsDataGuardEnabled = types.Bool(true)
+						}
+					}
+					if qual == "is_free_tier" {
+						request.IsFreeTier = types.Bool(false)
+						if !value {
+							request.IsFreeTier = types.Bool(true)
+						}
+					}
+				}
+			}
+		}
+	}
+	return request
 }

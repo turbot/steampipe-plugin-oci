@@ -18,7 +18,7 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_compartment",
 		Description: "OCI Identity Compartment",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCompartment,
 		},
 		List: &plugin.ListConfig{
@@ -102,7 +102,7 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},

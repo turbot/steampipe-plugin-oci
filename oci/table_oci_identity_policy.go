@@ -18,7 +18,7 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_policy",
 		Description: "OCI Identity Policy",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getPolicy,
 		},
 		List: &plugin.ListConfig{

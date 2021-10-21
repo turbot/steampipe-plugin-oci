@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -19,12 +19,30 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 		Name:        "oci_core_image",
 		Description: "OCI Core Image",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.AnyColumn([]string{"id"}),
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
 			Hydrate:           getCoreImage,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreImages,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "operating_system",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "operating_system_version",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -130,14 +148,14 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -152,6 +170,8 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreImages", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
@@ -163,11 +183,19 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, err
 	}
 
-	request := core.ListImagesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildImageFilter(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -180,6 +208,11 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		for _, image := range response.Items {
 			if image.BaseImageId == nil {
 				d.StreamListItem(ctx, image)
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					return nil, nil
+				}
 			}
 		}
 		if response.OpcNextPage != nil {
@@ -205,7 +238,6 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// handle empty image id in get call
@@ -221,7 +253,7 @@ func getCoreImage(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	request := core.GetImageRequest{
 		ImageId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -261,4 +293,32 @@ func imageTags(_ context.Context, d *transform.TransformData) (interface{}, erro
 	}
 
 	return tags, nil
+}
+
+func buildImageFilter(equalQuals plugin.KeyColumnEqualsQualMap) core.ListImagesRequest {
+	request := core.ListImagesRequest{}
+
+	filterQuals := []string{
+		"display_name",
+		"lifecycle_state",
+		"operating_system",
+		"operating_system_version",
+	}
+
+	for _, columnName := range filterQuals {
+		if equalQuals[columnName] != nil {
+			switch columnName {
+			case "display_name":
+				request.DisplayName = types.String(equalQuals[columnName].GetStringValue())
+			case "lifecycle_state":
+				request.LifecycleState = core.ImageLifecycleStateEnum(equalQuals[columnName].GetStringValue())
+			case "operating_system":
+				request.OperatingSystem = types.String(equalQuals[columnName].GetStringValue())
+			case "operating_system_version":
+				request.OperatingSystemVersion = types.String(equalQuals[columnName].GetStringValue())
+			}
+		}
+	}
+
+	return request
 }

@@ -58,7 +58,7 @@ func tableIdentityRegion(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -129,7 +129,7 @@ func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
-	// cache teanant id for the session
+	// cache tenant id for the session
 	d.ConnectionManager.Cache.Set(cacheKey, session.TenancyID)
 
 	return session.TenancyID, nil

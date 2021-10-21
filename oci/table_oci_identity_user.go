@@ -19,11 +19,21 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_user",
 		Description: "OCI Identity User",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getUser,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listUsers,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -183,9 +193,29 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListUsersRequest{
 		CompartmentId: &session.TenancyID,
+		Limit:         oci_common.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filter
+	equalQuals := d.KeyColumnQuals
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.UserLifecycleStateEnum(lifecycleState)
+	}
+
+	if equalQuals["name"] != nil {
+		request.Name = oci_common.String(equalQuals["name"].GetStringValue())
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = oci_common.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -197,6 +227,11 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 		for _, user := range response.Items {
 			d.StreamListItem(ctx, user)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

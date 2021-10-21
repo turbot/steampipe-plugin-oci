@@ -1282,7 +1282,7 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 	return sess, nil
 }
 
-// get the configurtion provider for the OCI plugin connection to intract with API's
+// get the configuration provider for the OCI plugin connection to intract with API's
 func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"

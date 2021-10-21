@@ -18,7 +18,7 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_group",
 		Description: "OCI Identity Group",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getGroup,
 		},
 		List: &plugin.ListConfig{

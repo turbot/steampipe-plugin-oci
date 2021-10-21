@@ -28,6 +28,16 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 		// },
 		List: &plugin.ListConfig{
 			Hydrate: listObjectStorageBuckets,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "namespace",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -56,7 +66,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "approximate_size",
-				Description: "The approximate total size in bytes of all objects in the bucket..",
+				Description: "The approximate total size in bytes of all objects in the bucket.",
 				Type:        proto.ColumnType_INT,
 				Hydrate:     getObjectStorageBucket,
 			},
@@ -185,7 +195,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -205,6 +215,13 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Error("listObjectStorageBuckets", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := objectStorageService(ctx, d, region)
 	if err != nil {
@@ -219,9 +236,21 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 	request := objectstorage.ListBucketsRequest{
 		CompartmentId: types.String(compartment),
 		NamespaceName: &nameSpace.Value,
+		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	if equalQuals["namespace"] != nil {
+		request.NamespaceName = types.String(equalQuals["namespace"].GetStringValue())
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -233,6 +262,11 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 
 		for _, bucketSummary := range response.Items {
 			d.StreamListItem(ctx, bucketInfo{region, bucketSummary})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

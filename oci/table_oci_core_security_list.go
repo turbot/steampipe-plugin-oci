@@ -19,11 +19,21 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 		Name:        "oci_core_security_list",
 		Description: "A security list is a virtual firewall for an instance, with ingress and egress rules that specify the types of traffic allowed in and out.",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreSecurityList,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreSecurityLists,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -109,7 +119,7 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -124,6 +134,13 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreSecurityLists", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := coreVirtualNetworkService(ctx, d, region)
 	if err != nil {
@@ -137,6 +154,10 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		},
 	}
 
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = oci_common.String(equalQuals["display_name"].GetStringValue())
+	}
+
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.VirtualNetworkClient.ListSecurityLists(ctx, request)
@@ -146,6 +167,11 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 		for _, securityList := range response.Items {
 			d.StreamListItem(ctx, securityList)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

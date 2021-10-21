@@ -24,6 +24,16 @@ func tableCoreBootVolumeReplica(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreBootVolumeReplicas,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
@@ -130,7 +140,7 @@ func tableCoreBootVolumeReplica(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -145,6 +155,18 @@ func listCoreBootVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plu
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listCoreBootVolumeReplicas", "Compartment", compartment, "OCI_Zone", zone)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
+	// Return nil, if given availability_domain doesn't match
+	if equalQuals["availability_domain"] != nil && zone != equalQuals["availability_domain"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -169,6 +191,11 @@ func listCoreBootVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plu
 
 		for _, bootVolumeReplica := range response.Items {
 			d.StreamListItem(ctx, bootVolumeReplica)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

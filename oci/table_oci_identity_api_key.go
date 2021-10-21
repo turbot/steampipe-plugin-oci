@@ -2,9 +2,11 @@ package oci
 
 import (
 	"context"
+	"strconv"
 
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
+	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
@@ -19,6 +21,12 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listUsers,
 			Hydrate:       listIdentityApiKeys,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "user_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -78,7 +86,7 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -94,6 +102,12 @@ type apiKeyInfo struct {
 
 func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	user := h.Item.(identity.User)
+
+	// Return nil, if given user_id doesn't match
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["user_id"] != nil && equalQuals["user_id"].GetStringValue() != *user.Id {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -112,6 +126,11 @@ func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// List user's API key
 	item, err := session.IdentityClient.ListApiKeys(ctx, request)
 	if err != nil {
+		if ociErr, ok := err.(oci_common.ServiceError); ok {
+			if helpers.StringSliceContains([]string{"404"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
+				return nil, nil
+			}
+		}
 		return nil, err
 	}
 

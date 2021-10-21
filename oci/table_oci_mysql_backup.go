@@ -20,6 +20,12 @@ func tableMySQLBackup(_ context.Context) *plugin.Table {
 		Description: "OCI MySQL Backup",
 		List: &plugin.ListConfig{
 			Hydrate: listMySQLBackups,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -162,7 +168,7 @@ func tableMySQLBackup(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -176,6 +182,13 @@ func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listMySQLBackups", "Compartment", compartment, "OCI_REGION", region)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := mySQLBackupService(ctx, d, region)
@@ -199,6 +212,11 @@ func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 		for _, dbBackup := range response.Items {
 			d.StreamListItem(ctx, dbBackup)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

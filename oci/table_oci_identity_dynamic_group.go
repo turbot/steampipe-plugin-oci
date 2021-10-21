@@ -18,7 +18,7 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 		Name:        "oci_identity_dynamic_group",
 		Description: "OCI Identity Dynamic Group",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AnyColumn([]string{"id"}),
+			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getIdentityDynamicGroup,
 		},
 		List: &plugin.ListConfig{

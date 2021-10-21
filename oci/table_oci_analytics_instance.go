@@ -24,6 +24,12 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAnalyticsInstances,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -110,7 +116,6 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 				Hydrate:     getAnalyticsInstance,
 			},
 
-
 			// tags
 			{
 				Name:        "defined_tags",
@@ -157,7 +162,7 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -171,6 +176,13 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listAnalyticsInstances", "Compartment", compartment, "OCI_REGION", region)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := analyticsService(ctx, d, region)
@@ -222,7 +234,7 @@ func getAnalyticsInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
-		
+
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 

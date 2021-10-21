@@ -20,6 +20,12 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listIdentityTenancies,
 		},
+		HydrateConfig: []plugin.HydrateConfig{
+			{
+				Func:              getRetentionPeriod,
+				ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			},
+		},
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -92,7 +98,7 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -120,9 +126,9 @@ func listIdentityTenancies(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	if err != nil {
 		return nil, err
 	}
-
 	d.StreamListItem(ctx, response.Tenancy)
-	return nil, err
+
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS
@@ -136,8 +142,15 @@ func getRetentionPeriod(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, err
 	}
 
+	var compartmentID string
+	if h.Item != nil {
+		compartmentID = *h.Item.(identity.Tenancy).Id
+	} else {
+		compartmentID = session.TenancyID
+	}
+
 	request := audit.GetConfigurationRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: &compartmentID,
 		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -149,7 +162,6 @@ func getRetentionPeriod(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	return response.Configuration, nil
-
 }
 
 //// TRANSFORM FUNCTION

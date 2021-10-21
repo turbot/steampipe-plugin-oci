@@ -24,6 +24,12 @@ func tableIdentityTagDefault(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIdentityTagDefaults,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartmentList,
 		Columns: []*plugin.Column{
@@ -94,7 +100,7 @@ func tableIdentityTagDefault(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getTenantId,
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -107,6 +113,13 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Trace("oci.listIdentityTagDefaults", "Compartment", compartment)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -129,6 +142,11 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 		}
 		for _, tagDefault := range response.Items {
 			d.StreamListItem(ctx, tagDefault)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

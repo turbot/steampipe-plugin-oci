@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "Default"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 

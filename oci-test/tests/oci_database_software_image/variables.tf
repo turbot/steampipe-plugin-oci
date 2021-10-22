@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -28,12 +28,12 @@ provider "oci" {
 }
 
 resource "oci_database_database_software_image" "named_test_resource" {
-    compartment_id = var.tenancy_ocid
-    display_name = var.resource_name
-    database_version = "19.0.0.0"
-    freeform_tags  = { "Name" = var.resource_name }
-    image_type = "DATABASE_IMAGE"
-    patch_set = "19.11.0.0"
+  compartment_id   = var.tenancy_ocid
+  display_name     = var.resource_name
+  database_version = "19.0.0.0"
+  freeform_tags    = { "Name" = var.resource_name }
+  image_type       = "DATABASE_IMAGE"
+  patch_set        = "19.11.0.0"
 }
 
 output "resource_name" {

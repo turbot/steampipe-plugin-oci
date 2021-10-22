@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -81,10 +81,10 @@ data "local_file" "instance" {
 }
 
 resource "oci_core_image" "named_test_resource" {
-  depends_on = [null_resource.named_test_resource]
-    compartment_id = var.tenancy_ocid
-    instance_id = jsondecode(data.local_file.instance.content).data.id
-    display_name = var.resource_name
+  depends_on     = [null_resource.named_test_resource]
+  compartment_id = var.tenancy_ocid
+  instance_id    = jsondecode(data.local_file.instance.content).data.id
+  display_name   = var.resource_name
 }
 
 resource "null_resource" "destroy_test_resource" {

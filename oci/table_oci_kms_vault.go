@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -165,9 +165,18 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	request := keymanagement.ListVaultsRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for limit
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -230,7 +239,7 @@ func getKmsVault(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 	request := keymanagement.GetVaultRequest{
 		VaultId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

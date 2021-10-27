@@ -29,6 +29,14 @@ func tableBudget(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -195,10 +203,29 @@ func listBudgets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	request := budget.ListBudgetsRequest{
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		TargetType:    "ALL",
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = budget.ListBudgetsLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true

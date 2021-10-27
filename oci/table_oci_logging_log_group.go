@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/logging"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,10 @@ func tableLoggingLogGroup(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
 					Require: plugin.Optional,
 				},
 			},
@@ -140,9 +144,23 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 
 	request := logging.ListLogGroupsRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filter
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -199,7 +217,7 @@ func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	request := logging.GetLogGroupRequest{
 		LogGroupId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

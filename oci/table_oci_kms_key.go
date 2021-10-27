@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
@@ -25,7 +25,23 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 			Hydrate:       listKmsKeys,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "algorithm",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "curve_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "length",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "protection_mode",
 					Require: plugin.Optional,
 				},
 			},
@@ -192,7 +208,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	}
 
 	// skip the API call if vault region doesn't match matrix region
-	if ociRegionNameFromId(*vaultData.Id) != oci_common.StringToRegion(region) {
+	if ociRegionNameFromId(*vaultData.Id) != common.StringToRegion(region) {
 		return nil, nil
 	}
 
@@ -209,11 +225,19 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
-	request := keymanagement.ListKeysRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildKmsKeyFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -258,7 +282,7 @@ func getKmsKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 
 	request := keymanagement.GetKeyRequest{
 		KeyId: key.Id,
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -303,9 +327,29 @@ func keyTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 }
 
 // Extract OCI region name from the resource id
-func ociRegionNameFromId(resourceId string) oci_common.Region {
+func ociRegionNameFromId(resourceId string) common.Region {
 	id := types.SafeString(resourceId)
 	splittedID := strings.Split(id, ".")
-	regionName := oci_common.StringToRegion(types.SafeString(splittedID[3]))
+	regionName := common.StringToRegion(types.SafeString(splittedID[3]))
 	return regionName
+}
+
+// Build additional filters
+func buildKmsKeyFilters(equalQuals plugin.KeyColumnEqualsQualMap) keymanagement.ListKeysRequest {
+	request := keymanagement.ListKeysRequest{}
+
+	if equalQuals["algorithm"] != nil {
+		request.Algorithm = keymanagement.ListKeysAlgorithmEnum(equalQuals["algorithm"].GetStringValue())
+	}
+	if equalQuals["curve_id"] != nil {
+		request.CurveId = keymanagement.ListKeysCurveIdEnum(equalQuals["curve_id"].GetStringValue())
+	}
+	if equalQuals["length"] != nil {
+		request.Length = types.Int(int(equalQuals["length"].GetInt64Value()))
+	}
+	if equalQuals["protection_mode"] != nil {
+		request.ProtectionMode = keymanagement.ListKeysProtectionModeEnum(equalQuals["protection_mode"].GetStringValue())
+	}
+
+	return request
 }

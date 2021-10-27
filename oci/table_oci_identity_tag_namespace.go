@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,10 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -134,9 +138,23 @@ func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	request := identity.ListTagNamespacesRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filter
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.TagNamespaceLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -190,7 +208,7 @@ func getIdentityTagNamespace(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	request := identity.GetTagNamespaceRequest{
 		TagNamespaceId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

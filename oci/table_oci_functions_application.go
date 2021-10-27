@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,18 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -150,12 +162,20 @@ func listFunctionsApplications(ctx context.Context, d *plugin.QueryData, _ *plug
 	if err != nil {
 		return nil, err
 	}
+	
+	// Build request parameters
+	request := buildFunctionsApplicationsFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
 
-	request := functions.ListApplicationsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -217,7 +237,7 @@ func getFunctionsApplication(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	request := functions.GetApplicationRequest{
 		ApplicationId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -284,4 +304,21 @@ func applicationDefinedTags(item interface{}) map[string]map[string]interface{} 
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildFunctionsApplicationsFilters(equalQuals plugin.KeyColumnEqualsQualMap) functions.ListApplicationsRequest {
+	request := functions.ListApplicationsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.Id = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = functions.ApplicationLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

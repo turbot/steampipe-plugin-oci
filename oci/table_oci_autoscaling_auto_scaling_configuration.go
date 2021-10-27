@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/autoscaling"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -27,6 +27,10 @@ func tableAutoScalingConfiguration(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
 					Require: plugin.Optional,
 				},
 			},
@@ -160,9 +164,15 @@ func listAutoScalingConfigurations(ctx context.Context, d *plugin.QueryData, _ *
 	request := autoscaling.ListAutoScalingConfigurationsRequest{
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filter
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
 	}
 
 	limit := d.QueryContext.Limit
@@ -236,7 +246,7 @@ func getAutoScalingConfiguration(ctx context.Context, d *plugin.QueryData, h *pl
 
 	request := autoscaling.GetAutoScalingConfigurationRequest{
 		AutoScalingConfigurationId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

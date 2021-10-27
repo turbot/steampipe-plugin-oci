@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,6 +25,14 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCoreInstances,
 			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "capacity_reservation_id",
+					Require: plugin.Optional,
+				},
 				{
 					Name:    "compartment_id",
 					Require: plugin.Optional,
@@ -48,6 +56,11 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "display_name",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "availability_domain",
 				Description: "The availability domain the instance is running in.",
 				Type:        proto.ColumnType_STRING,
@@ -66,15 +79,16 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 
 			// other columns
 			{
-				Name:        "dedicated_vm_host_id",
-				Description: "The OCID of dedicated VM host.",
+				Name:        "capacity_reservation_id",
+				Description: "The OCID of the compute capacity reservation this instance is launched under.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "dedicated_vm_host_id",
+				Description: "The OCID of dedicated VM host.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "fault_domain",
@@ -274,22 +288,12 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, nil
 	}
 
-	request := core.ListInstancesRequest{
-		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	if equalQuals["display_name"] != nil {
-		displayName := equalQuals["display_name"].GetStringValue()
-		request.DisplayName = types.String(displayName)
-	}
-
-	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = core.InstanceLifecycleStateEnum(lifecycleState)
+	// Build request parameters
+	request := buildCoreInstanceFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
 	}
 
 	limit := d.QueryContext.Limit
@@ -352,7 +356,7 @@ func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	request := core.GetInstanceRequest{
 		InstanceId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -423,4 +427,24 @@ func regionName(_ context.Context, d *transform.TransformData) (interface{}, err
 	default:
 		return region, nil
 	}
+}
+
+// Build additional filters
+func buildCoreInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListInstancesRequest {
+	request := core.ListInstancesRequest{}
+
+	if equalQuals["availability_domain"] != nil {
+		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
+	}
+	if equalQuals["capacity_reservation_id"] != nil {
+		request.CapacityReservationId = types.String(equalQuals["capacity_reservation_id"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.InstanceLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

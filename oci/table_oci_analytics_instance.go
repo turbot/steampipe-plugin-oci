@@ -29,6 +29,22 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "capacity_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "feature_set",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -190,11 +206,19 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 		return nil, err
 	}
 
-	request := analytics.ListAnalyticsInstancesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildAnalyticsInstanceFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -206,6 +230,11 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 		for _, instance := range response.Items {
 			d.StreamListItem(ctx, instance)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -269,7 +298,6 @@ func getAnalyticsInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 // Priority order for tags
 // 1. Free-form tags
 // 2. Defined Tags
-
 func analyticsInstanceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	instance := d.HydrateItem.(analytics.AnalyticsInstance)
 
@@ -295,4 +323,24 @@ func analyticsInstanceTags(_ context.Context, d *transform.TransformData) (inter
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildAnalyticsInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) analytics.ListAnalyticsInstancesRequest {
+	request := analytics.ListAnalyticsInstancesRequest{}
+
+	if equalQuals["capacity_type"] != nil {
+		request.CapacityType = analytics.ListAnalyticsInstancesCapacityTypeEnum(equalQuals["capacity_type"].GetStringValue())
+	}
+	if equalQuals["feature_set"] != nil {
+		request.FeatureSet = analytics.ListAnalyticsInstancesFeatureSetEnum(equalQuals["feature_set"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = analytics.ListAnalyticsInstancesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.Name = types.String(equalQuals["name"].GetStringValue())
+	}
+
+	return request
 }

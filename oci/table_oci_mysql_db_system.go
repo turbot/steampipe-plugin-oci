@@ -34,6 +34,18 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "is_analytics_cluster_attached",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "is_heat_wave_cluster_attached",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -121,6 +133,11 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			{
 				Name:        "is_analytics_cluster_attached",
 				Description: "If the DB System has an Analytics Cluster attached.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "is_heat_wave_cluster_attached",
+				Description: "Whether the DB System has a HeatWave cluster attached.",
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
@@ -266,28 +283,16 @@ func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	request := mysql.ListDbSystemsRequest{
-		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	if equalQuals["configuration_id"] != nil {
-		request.ConfigurationId = types.String(equalQuals["configuration_id"].GetStringValue())
-	}
-
-	if equalQuals["display_name"] != nil {
-		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
-	}
-
-	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = mysql.DbSystemLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	// Build request parameters
+	request := buildMySQLDBSystemFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
 	}
 
 	limit := d.QueryContext.Limit
-	if limit != nil {
+	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
 			request.Limit = types.Int(int(*limit))
 		}
@@ -412,4 +417,30 @@ func dbSystemDefinedTags(item interface{}) map[string]map[string]interface{} {
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildMySQLDBSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.ListDbSystemsRequest {
+	request := mysql.ListDbSystemsRequest{}
+
+	if equalQuals["configuration_id"] != nil {
+		request.ConfigurationId = types.String(equalQuals["configuration_id"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.DbSystemId = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["is_analytics_cluster_attached"] != nil {
+		request.IsAnalyticsClusterAttached = types.Bool(equalQuals["display_name"].GetBoolValue())
+	}
+	if equalQuals["is_heat_wave_cluster_attached"] != nil {
+		request.IsHeatWaveClusterAttached = types.Bool(equalQuals["is_heat_wave_cluster_attached"].GetBoolValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = mysql.DbSystemLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

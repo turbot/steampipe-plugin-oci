@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,26 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "scope",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "view_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "zone_type",
 					Require: plugin.Optional,
 				},
 			},
@@ -172,11 +192,19 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 
-	request := dns.ListZonesRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildDnsZoneFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int64(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int64(int64(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -233,7 +261,7 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 	request := dns.GetZoneRequest{
 		ZoneNameOrId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -288,4 +316,27 @@ func dnsZoneTags(_ context.Context, d *transform.TransformData) (interface{}, er
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildDnsZoneFilters(equalQuals plugin.KeyColumnEqualsQualMap) dns.ListZonesRequest {
+	request := dns.ListZonesRequest{}
+
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = dns.ListZonesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.Name = types.String(equalQuals["name"].GetStringValue())
+	}
+	if equalQuals["scope"] != nil {
+		request.Scope = dns.ListZonesScopeEnum(equalQuals["scope"].GetStringValue())
+	}
+	if equalQuals["view_id"] != nil {
+		request.ViewId = types.String(equalQuals["view_id"].GetStringValue())
+	}
+	if equalQuals["zone_type"] != nil {
+		request.ZoneType = dns.ListZonesZoneTypeEnum(equalQuals["zone_type"].GetStringValue())
+	}
+
+	return request
 }

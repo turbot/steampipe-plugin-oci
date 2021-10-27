@@ -172,6 +172,11 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	equalQuals := d.KeyColumnQuals
 
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil

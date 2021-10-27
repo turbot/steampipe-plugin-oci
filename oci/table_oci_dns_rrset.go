@@ -25,6 +25,14 @@ func tableDnsRecordSet(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "domain",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "rtype",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartmentList,
@@ -125,9 +133,25 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	request := dns.GetZoneRecordsRequest{
 		ZoneNameOrId:  zone.Id,
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int64(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["domain"] != nil {
+		request.Domain = types.String(equalQuals["domain"].GetStringValue())
+	}
+	if equalQuals["rtype"] != nil {
+		request.Rtype = types.String(equalQuals["rtype"].GetStringValue())
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int64(int64(*limit))
+		}
 	}
 
 	pagesLeft := true

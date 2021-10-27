@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,6 +25,18 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listUsers,
 			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "external_identifier",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "identity_provider_id",
+					Require: plugin.Optional,
+				},
 				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
@@ -172,10 +184,17 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
+				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Transform:   transform.FromValue(),
 			},
 		},
 	}
@@ -184,37 +203,35 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("listUsers", "Compartment", compartment)
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
-	// The OCID of the tenancy containing the compartment.
-	request := identity.ListUsersRequest{
-		CompartmentId: &session.TenancyID,
-		Limit:         oci_common.Int(1000),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	// Check for additional filter
-	equalQuals := d.KeyColumnQuals
-
-	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = identity.UserLifecycleStateEnum(lifecycleState)
-	}
-
-	if equalQuals["name"] != nil {
-		request.Name = oci_common.String(equalQuals["name"].GetStringValue())
+	// Build request parameters
+	request := buildUserGroupFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
 	}
 
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
-			request.Limit = oci_common.Int(int(*limit))
+			request.Limit = types.Int(int(*limit))
 		}
 	}
 
@@ -258,7 +275,7 @@ func getUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 
 	request := identity.GetUserRequest{
 		UserId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -285,7 +302,7 @@ func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	request := identity.ListUserGroupMembershipsRequest{
 		CompartmentId: &session.TenancyID,
 		UserId:        user.Id,
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -345,4 +362,24 @@ func userType(_ context.Context, d *transform.TransformData) (interface{}, error
 	}
 
 	return "IAM", nil
+}
+
+// Build additional filters
+func buildUserGroupFilters(equalQuals plugin.KeyColumnEqualsQualMap) identity.ListUsersRequest {
+	request := identity.ListUsersRequest{}
+
+	if equalQuals["external_identifier"] != nil {
+		request.ExternalIdentifier = types.String(equalQuals["external_identifier"].GetStringValue())
+	}
+	if equalQuals["identity_provider_id"] != nil {
+		request.IdentityProviderId = types.String(equalQuals["identity_provider_id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = identity.UserLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.Name = types.String(equalQuals["name"].GetStringValue())
+	}
+
+	return request
 }

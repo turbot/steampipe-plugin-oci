@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -26,6 +26,20 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listFileStorageSnapshots,
 			ParentHydrate: listFileStorageFileSystems,
+			KeyColumns:    []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
@@ -137,6 +151,13 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("listFileStorageSnapshots", "Compartment", compartment, "zone", zone)
+	
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	fileSystem := h.Item.(filestorage.FileSystemSummary)
 
@@ -148,9 +169,28 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	request := filestorage.ListSnapshotsRequest{
 		FileSystemId: fileSystem.Id,
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:        types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["id"] != nil {
+		id := equalQuals["id"].GetStringValue()
+		request.Id = types.String(id)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = filestorage.ListSnapshotsLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -209,7 +249,7 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	request := filestorage.GetSnapshotRequest{
 		SnapshotId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

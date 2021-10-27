@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,18 @@ func tableCoreInternetGateway(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vcn_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -143,11 +155,19 @@ func listCoreInternetGateways(ctx context.Context, d *plugin.QueryData, _ *plugi
 		return nil, err
 	}
 
-	request := core.ListInternetGatewaysRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCoreInternetGatewayFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -204,7 +224,7 @@ func getCoreInternetGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.
 
 	request := core.GetInternetGatewayRequest{
 		IgId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -248,4 +268,21 @@ func internetGatewayTags(_ context.Context, d *transform.TransformData) (interfa
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildCoreInternetGatewayFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListInternetGatewaysRequest {
+	request := core.ListInternetGatewaysRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.InternetGatewayLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["vcn_id"] != nil {
+		request.VcnId = types.String(equalQuals["vcn_id"].GetStringValue())
+	}
+
+	return request
 }

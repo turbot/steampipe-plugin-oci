@@ -30,7 +30,15 @@ func tableCoreBootVolumeAttachment(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
+					Name:    "boot_volume_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "instance_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -149,11 +157,30 @@ func listCoreBootVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *
 	}
 
 	request := core.ListBootVolumeAttachmentsRequest{
-		CompartmentId:      types.String(compartment),
 		AvailabilityDomain: types.String(zone),
+		CompartmentId:      types.String(compartment),
+		Limit:              types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["instance_id"] != nil {
+		instanceId := equalQuals["instance_id"].GetStringValue()
+		request.InstanceId = types.String(instanceId)
+	}
+
+	if equalQuals["boot_volume_id"] != nil {
+		bootVolumeId := equalQuals["boot_volume_id"].GetStringValue()
+		request.BootVolumeId = types.String(bootVolumeId)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true

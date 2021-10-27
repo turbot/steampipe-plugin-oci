@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -27,6 +27,14 @@ func tableCoreServiceGateway(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vcn_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -153,9 +161,28 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 	request := core.ListServiceGatewaysRequest{
 		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["vcn_id"] != nil {
+		vcnId := equalQuals["vcn_id"].GetStringValue()
+		request.VcnId = types.String(vcnId)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = core.ServiceGatewayLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -211,7 +238,7 @@ func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 	request := core.GetServiceGatewayRequest{
 		ServiceGatewayId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

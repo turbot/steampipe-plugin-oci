@@ -136,9 +136,18 @@ func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	request := keymanagement.ListKeyVersionsRequest{
 		KeyId: types.String(keyId),
+		Limit: types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for limit 
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -150,6 +159,11 @@ func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 		for _, keyVersion := range response.Items {
 			d.StreamListItem(ctx, KeyVersionInfo{keyVersion, endpoint, region})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

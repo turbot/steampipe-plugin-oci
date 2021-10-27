@@ -25,6 +25,16 @@ func tableBudgetAlertRule(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listBudgets,
 			Hydrate:       listBudgetAlertRules,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -207,6 +217,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	equalQuals := d.KeyColumnQuals
 	logger.Debug("listBudgets", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
@@ -219,9 +230,28 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	request := budget.ListAlertRulesRequest{
 		BudgetId: id,
+		Limit: types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = budget.ListAlertRulesLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -232,6 +262,11 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		}
 		for _, rule := range response.Items {
 			d.StreamListItem(ctx, AlertRuleInfo{rule.Id, rule.BudgetId, rule.DisplayName, rule.Type, rule.Threshold, rule.ThresholdType, rule.LifecycleState, rule.Recipients, rule.TimeCreated, rule.TimeUpdated, rule.Message, rule.Description, rule.Version, rule.FreeformTags, rule.DefinedTags, compartment})
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

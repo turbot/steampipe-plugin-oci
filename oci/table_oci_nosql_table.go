@@ -29,6 +29,14 @@ func tableNoSQLTable(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -173,9 +181,28 @@ func listNoSQLTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	request := nosql.ListTablesRequest{
 		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = nosql.ListTablesLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true

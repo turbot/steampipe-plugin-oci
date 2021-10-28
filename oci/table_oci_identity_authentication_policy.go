@@ -8,7 +8,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
-	"github.com/turbot/go-kit/types"
 )
 
 //// TABLE DEFINITION
@@ -94,14 +93,6 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
-
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -110,7 +101,7 @@ func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugi
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.GetAuthenticationPolicyRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId:   &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

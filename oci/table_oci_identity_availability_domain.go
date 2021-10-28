@@ -8,7 +8,6 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
-	"github.com/turbot/go-kit/types"
 )
 
 //// TABLE DEFINITION
@@ -79,18 +78,9 @@ type availabilityDomainInfo struct {
 //// LIST FUNCTION
 
 func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	plugin.Logger(ctx).Debug("lisAvailabilityDomains")
 	region := *h.Item.(ociRegion).Name
 	status := h.Item.(ociRegion).Status
-	logger.Debug("lisAvailabilityDomains", "Compartment", compartment, "OCI_REGION", region)
-
-	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
 
 	// Check if the region is subscribed region
 	if status != "READY" {
@@ -105,7 +95,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListAvailabilityDomainsRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

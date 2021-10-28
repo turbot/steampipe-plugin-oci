@@ -161,7 +161,7 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	request := ons.ListTopicsRequest{
 		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
+		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

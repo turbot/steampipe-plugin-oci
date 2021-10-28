@@ -228,7 +228,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	// Build request parameters
 	request := buildKmsKeyFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
-	request.Limit = types.Int(1000)
+	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),
 	}

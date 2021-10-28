@@ -136,7 +136,7 @@ func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	request := keymanagement.ListKeyVersionsRequest{
 		KeyId: types.String(keyId),
-		Limit: types.Int(1000),
+		Limit: types.Int(100),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

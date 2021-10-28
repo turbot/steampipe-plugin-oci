@@ -125,16 +125,7 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listIdentityDynamicGroups", "Compartment", compartment)
-
 	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
 	
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -144,7 +135,7 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListDynamicGroupsRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: &session.TenancyID,
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),

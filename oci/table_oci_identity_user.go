@@ -203,16 +203,7 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listUsers", "Compartment", compartment)
-
 	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -222,7 +213,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	// Build request parameters
 	request := buildUserGroupFilters(equalQuals)
-	request.CompartmentId = types.String(compartment)
+	request.CompartmentId = &session.TenancyID
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),

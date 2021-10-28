@@ -165,7 +165,7 @@ func listKmsVaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 	request := keymanagement.ListVaultsRequest{
 		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
+		Limit:         types.Int(100),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

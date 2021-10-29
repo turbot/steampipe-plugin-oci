@@ -21,18 +21,14 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_identity_group" "test_group" {
-  #Required
-  compartment_id = var.tenancy_ocid
-  description    = var.resource_name
-  name           = var.resource_name
-}
-
 resource "oci_identity_network_source" "named_test_resource" {
   compartment_id = var.tenancy_ocid
   description    = var.resource_name
   name           = var.resource_name
   freeform_tags  = { "Name" = var.resource_name }
+  provisioner "local-exec" {
+    command = "sleep 120"
+  }
 }
 
 output "resource_name" {
@@ -44,6 +40,7 @@ output "tenancy_ocid" {
 }
 
 output "freeform_tags" {
+  depends_on = [oci_identity_network_source.named_test_resource]
   value = oci_identity_network_source.named_test_resource.freeform_tags
 }
 
@@ -52,5 +49,6 @@ output "description" {
 }
 
 output "resource_id" {
+  depends_on = [oci_identity_network_source.named_test_resource]
   value = oci_identity_network_source.named_test_resource.id
 }

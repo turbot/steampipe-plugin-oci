@@ -6,7 +6,7 @@ variable "user_name" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "default"
+  default     = "DEFAULT"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -35,7 +35,7 @@ resource "oci_identity_user" "named_test_resource" {
 }
 
 resource "oci_identity_api_key" "named_test_resource" {
-  #Required
+  depends_on = [oci_identity_user.named_test_resource]
   key_value = <<EOF
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtBLQAGmKJ7tpfzYJyqLG
@@ -47,7 +47,10 @@ mXlrQB7nNKsJrrv5fHwaPDrAY4iNP2W0q3LRpyNigJ6cgRuGJhHa82iHPmxgIx8m
 fwIDAQAB
 -----END PUBLIC KEY-----
 EOF
-  user_id   = oci_identity_user.named_test_resource.id
+  user_id = oci_identity_user.named_test_resource.id
+  provisioner "local-exec" {
+    command = "sleep 120"
+  }
 }
 
 output "tenancy_ocid" {
@@ -55,18 +58,22 @@ output "tenancy_ocid" {
 }
 
 output "user_id" {
+  depends_on = [oci_identity_user.named_test_resource]
   value = oci_identity_api_key.named_test_resource.user_id
 }
 
 output "key_id" {
+  depends_on = [oci_identity_api_key.named_test_resource]
   value = oci_identity_api_key.named_test_resource.id
 }
 
 output "fingerprint" {
+  depends_on = [oci_identity_api_key.named_test_resource]
   value = oci_identity_api_key.named_test_resource.fingerprint
 }
 
 output "state" {
+  depends_on = [oci_identity_api_key.named_test_resource]
   value = oci_identity_api_key.named_test_resource.state
 }
 

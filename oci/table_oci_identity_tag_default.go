@@ -139,14 +139,20 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 		return nil, err
 	}
 
-	// Build request parameters
-	request := buildIdentityTagDefaultFilters(equalQuals)
-	request.CompartmentId = types.String(compartment)
-	request.Limit = types.Int(1000)
-	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+	request := identity.ListTagDefaultsRequest{
+		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
 	}
 
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.TagDefaultSummaryLifecycleStateEnum(lifecycleState)
+	}
+
+	// Check for limit
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
@@ -216,21 +222,4 @@ func getIdentityTagDefault(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	}
 
 	return response.TagDefault, nil
-}
-
-// Build additional filters
-func buildIdentityTagDefaultFilters(equalQuals plugin.KeyColumnEqualsQualMap) identity.ListTagDefaultsRequest {
-	request := identity.ListTagDefaultsRequest{}
-
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-	}
-	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = identity.TagDefaultSummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
-	}
-	if equalQuals["tag_definition_id"] != nil {
-		request.TagDefinitionId = types.String(equalQuals["tag_definition_id"].GetStringValue())
-	}
-
-	return request
 }

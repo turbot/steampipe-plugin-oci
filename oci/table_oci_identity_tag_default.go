@@ -30,15 +30,7 @@ func tableIdentityTagDefault(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "tag_definition_id",
 					Require: plugin.Optional,
 				},
 			},

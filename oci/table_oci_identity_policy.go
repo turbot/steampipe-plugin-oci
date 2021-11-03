@@ -25,10 +25,6 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listPolicy,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -114,17 +110,10 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
-			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("CompartmentId"),
 			},
 		},
 	}

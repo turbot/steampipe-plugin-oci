@@ -31,10 +31,6 @@ func tableLoggingLog(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "log_group_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "log_type",
 					Require: plugin.Optional,
 				},
@@ -168,12 +164,12 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		return nil, err
 	}
 
-	logGroupId := *h.Item.(logging.LogGroupSummary).Id
+	logGroupId := h.Item.(logging.LogGroupSummary).Id
 	
 	
 	// Build request parameters
 	request := buildLoggingLogFilters(equalQuals)
-	request.LogGroupId = types.String(logGroupId)
+	request.LogGroupId = logGroupId
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),
@@ -315,9 +311,6 @@ func buildLoggingLogFilters(equalQuals plugin.KeyColumnEqualsQualMap) logging.Li
 
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = logging.ListLogsLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
-	}
-	if equalQuals["log_group_id"] != nil {
-		request.LogGroupId = types.String(equalQuals["log_group_id"].GetStringValue())
 	}
 	if equalQuals["log_type"] != nil {
 		request.LogType = logging.ListLogsLogTypeEnum(equalQuals["log_type"].GetStringValue())

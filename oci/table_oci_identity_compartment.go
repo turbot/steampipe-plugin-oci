@@ -25,10 +25,6 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 			Hydrate: listCompartments,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},

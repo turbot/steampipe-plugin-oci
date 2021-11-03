@@ -29,6 +29,22 @@ func tableMySQLConfigurationCustom(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "shape_name",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -163,12 +179,20 @@ func listMySQLCustomConfigurations(ctx context.Context, d *plugin.QueryData, _ *
 		return nil, err
 	}
 
-	request := mysql.ListConfigurationsRequest{
-		CompartmentId: types.String(compartment),
-		Type:          []mysql.ListConfigurationsTypeEnum{"CUSTOM"},
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildMySQLConfigurationFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.Type = []mysql.ListConfigurationsTypeEnum{"CUSTOM"}
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -239,4 +263,24 @@ func getCustomConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.
 	}
 
 	return response.Configuration, nil
+}
+
+// Build additional filters
+func buildMySQLConfigurationFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.ListConfigurationsRequest {
+	request := mysql.ListConfigurationsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.ConfigurationId = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = mysql.ConfigurationLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["shape_name"] != nil {
+		request.ShapeName = types.String(equalQuals["shape_name"].GetStringValue())
+	}
+
+	return request
 }

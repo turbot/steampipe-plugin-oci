@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,16 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCompartments,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -112,6 +122,8 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	equalQuals := d.KeyColumnQuals
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -119,8 +131,8 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	rootRequest := identity.GetCompartmentRequest{
-		CompartmentId: &session.TenancyID,
-		RequestMetadata: oci_common.RequestMetadata{
+		CompartmentId:   &session.TenancyID,
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -138,9 +150,28 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	request := identity.ListCompartmentsRequest{
 		CompartmentId:          &session.TenancyID,
 		CompartmentIdInSubtree: types.Bool(true),
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:                  types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.CompartmentLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -152,6 +183,11 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 		for _, compartment := range response.Items {
 			d.StreamListItem(ctx, compartment)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -178,7 +214,7 @@ func getCompartment(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 
 	request := identity.GetCompartmentRequest{
 		CompartmentId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

@@ -62,7 +62,7 @@ locals {
 resource "null_resource" "test_image" {
   depends_on = [oci_core_subnet.named_test_resource]
   provisioner "local-exec" {
-    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --all --display-name ${var.image} --output json > ${local.imagePath}"
+    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --all --output json > ${local.imagePath}"
   }
 }
 
@@ -75,6 +75,9 @@ resource "null_resource" "named_test_resource" {
   depends_on = [null_resource.test_image]
   provisioner "local-exec" {
     command = "oci compute instance launch --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --shape VM.Standard2.1 --subnet-id ${oci_core_subnet.named_test_resource.id} --image-id ${jsondecode(data.local_file.image.content).data[0].id} --output json > ${local.instancePath}"
+  }
+  provisioner "local-exec" {
+    command = "sleep 150"
   }
 }
 

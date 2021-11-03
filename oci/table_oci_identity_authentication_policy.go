@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -88,8 +88,8 @@ func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugi
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.GetAuthenticationPolicyRequest{
-		CompartmentId: &session.TenancyID,
-		RequestMetadata: oci_common.RequestMetadata{
+		CompartmentId:   &session.TenancyID,
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

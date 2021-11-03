@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -31,6 +31,14 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 				},
 				{
 					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vcn_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -147,15 +155,19 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, err
 	}
 
-	request := core.ListSecurityListsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildCoreSecurityListFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
 	}
 
-	if equalQuals["display_name"] != nil {
-		request.DisplayName = oci_common.String(equalQuals["display_name"].GetStringValue())
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -211,7 +223,7 @@ func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 
 	request := core.GetSecurityListRequest{
 		SecurityListId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -251,4 +263,21 @@ func securityListTags(_ context.Context, d *transform.TransformData) (interface{
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildCoreSecurityListFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListSecurityListsRequest {
+	request := core.ListSecurityListsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.SecurityListLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["vcn_id"] != nil {
+		request.VcnId = types.String(equalQuals["vcn_id"].GetStringValue())
+	}
+
+	return request
 }

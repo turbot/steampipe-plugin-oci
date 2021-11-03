@@ -1,6 +1,6 @@
 [
   {
     "id": "{{ output.resource_id.value }}",
-    "lifecycle_state": "ACTIVE"
+    "tag_definition_id": "{{ output.tag_definition_id.value }}"
   }
 ]

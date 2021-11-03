@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/logging"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -25,6 +25,20 @@ func tableLoggingLog(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listLoggingLogGroups,
 			Hydrate:       listLoggingLogs,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "log_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -142,17 +156,30 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listLoggingLogs", "Compartment", compartment, "OCI_REGION", region)
 
+	equalQuals := d.KeyColumnQuals
+
 	// Create Session
 	session, err := loggingManagementService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
-	logGroupId := *h.Item.(logging.LogGroupSummary).Id
-	request := logging.ListLogsRequest{
-		LogGroupId: types.String(logGroupId),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+
+	logGroupId := h.Item.(logging.LogGroupSummary).Id
+	
+	
+	// Build request parameters
+	request := buildLoggingLogFilters(equalQuals)
+	request.LogGroupId = logGroupId
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -164,6 +191,11 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 
 		for _, log := range response.Items {
 			d.StreamListItem(ctx, log)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -206,7 +238,7 @@ func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	request := logging.GetLogRequest{
 		LogGroupId: types.String(logGroupId),
 		LogId:      types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -271,4 +303,21 @@ func logDefinedTags(item interface{}) map[string]map[string]interface{} {
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildLoggingLogFilters(equalQuals plugin.KeyColumnEqualsQualMap) logging.ListLogsRequest {
+	request := logging.ListLogsRequest{}
+
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = logging.ListLogsLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+	if equalQuals["log_type"] != nil {
+		request.LogType = logging.ListLogsLogTypeEnum(equalQuals["log_type"].GetStringValue())
+	}
+	if equalQuals["name"] != nil {
+		request.DisplayName = types.String(equalQuals["name"].GetStringValue())
+	}
+
+	return request
 }

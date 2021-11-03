@@ -31,6 +31,14 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "db_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
@@ -216,9 +224,28 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	request := database.ListDatabasesRequest{
 		CompartmentId: types.String(compartment),
 		DbHomeId:      homeId,
+		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["db_name"] != nil {
+		dbName := equalQuals["db_name"].GetStringValue()
+		request.DbName = types.String(dbName)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = database.DatabaseSummaryLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true

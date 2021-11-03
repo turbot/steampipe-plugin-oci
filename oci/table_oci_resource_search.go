@@ -9,6 +9,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/go-kit/types"
 )
 
 //// TABLE DEFINITION
@@ -165,12 +166,21 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	if query != "" {
 		request := resourcesearch.SearchResourcesRequest{
+			Limit:         types.Int(1000),
 			SearchDetails: resourcesearch.StructuredSearchDetails{
 				Query: common.String(query),
 			},
 			RequestMetadata: common.RequestMetadata{
 				RetryPolicy: getDefaultRetryPolicy(),
 			},
+		}
+
+		// Check for limit
+		limit := d.QueryContext.Limit
+		if d.QueryContext.Limit != nil {
+			if *limit < int64(*request.Limit) {
+				request.Limit = types.Int(int(*limit))
+			}
 		}
 
 		pagesLeft := true
@@ -182,6 +192,11 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 			for _, resource := range response.Items {
 				d.StreamListItem(ctx, searchInfo{resource, query, region, ""})
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+					return nil, nil
+				}
 			}
 			if response.OpcNextPage != nil {
 				request.Page = response.OpcNextPage

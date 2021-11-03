@@ -25,6 +25,26 @@ func tableMySQLBackup(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "creation_type",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "db_system_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		Get: &plugin.GetConfig{
@@ -196,11 +216,19 @@ func listMySQLBackups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		return nil, err
 	}
 
-	request := mysql.ListBackupsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildMySQLBackupFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -322,4 +350,27 @@ func backupDefinedTags(item interface{}) map[string]map[string]interface{} {
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildMySQLBackupFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.ListBackupsRequest {
+	request := mysql.ListBackupsRequest{}
+
+	if equalQuals["creation_type"] != nil {
+		request.CreationType = mysql.BackupCreationTypeEnum(equalQuals["creation_type"].GetStringValue())
+	}
+	if equalQuals["db_system_id"] != nil {
+		request.DbSystemId = types.String(equalQuals["db_system_id"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.BackupId = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = mysql.BackupLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

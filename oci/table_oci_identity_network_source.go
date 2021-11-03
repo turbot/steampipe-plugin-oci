@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
@@ -23,6 +23,16 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listIdentityNetworkSources,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -118,6 +128,8 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	equalQuals := d.KeyColumnQuals
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -127,9 +139,28 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListNetworkSourcesRequest{
 		CompartmentId: &session.TenancyID,
-		RequestMetadata: oci_common.RequestMetadata{
+		Limit:         types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
+	}
+
+	// Check for additional filters
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.NetworkSourcesLifecycleStateEnum(lifecycleState)
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -141,6 +172,11 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 
 		for _, networkSources := range response.Items {
 			d.StreamListItem(ctx, networkSources)
+
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
 		}
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
@@ -177,7 +213,7 @@ func getIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	request := identity.GetNetworkSourceRequest{
 		NetworkSourceId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}

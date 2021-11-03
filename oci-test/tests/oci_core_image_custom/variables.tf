@@ -49,14 +49,14 @@ resource "oci_core_subnet" "named_test_resource" {
 }
 
 locals {
-  imagePath = "${path.cwd}/image.json"
-  path      = "${path.cwd}/output.json"
+  imagePath    = "${path.cwd}/image.json"
+  instancePath = "${path.cwd}/instance.json"
 }
 
 resource "null_resource" "test_image" {
   depends_on = [oci_core_subnet.named_test_resource]
   provisioner "local-exec" {
-    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --all --display-name ${var.image} --output json > ${local.imagePath}"
+    command = "oci compute image list --compartment-id ${var.tenancy_ocid} --all --output json > ${local.imagePath}"
   }
 }
 
@@ -68,7 +68,7 @@ data "local_file" "image" {
 resource "null_resource" "named_test_resource" {
   depends_on = [null_resource.test_image]
   provisioner "local-exec" {
-    command = "oci compute instance launch --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --shape VM.Standard2.1 --subnet-id ${oci_core_subnet.named_test_resource.id} --image-id ${jsondecode(data.local_file.image.content).data[0].id} --output json > ${local.path}"
+    command = "oci compute instance launch --availability-domain ${var.oci_ad} --compartment-id ${var.tenancy_ocid} --shape VM.Standard2.1 --subnet-id ${oci_core_subnet.named_test_resource.id} --image-id ${jsondecode(data.local_file.image.content).data[2].id} --output json > ${local.instancePath}"
   }
   provisioner "local-exec" {
     command = "sleep 150"
@@ -77,14 +77,14 @@ resource "null_resource" "named_test_resource" {
 
 data "local_file" "instance" {
   depends_on = [null_resource.named_test_resource]
-  filename   = local.path
+  filename   = local.instancePath
 }
 
 resource "oci_core_image" "named_test_resource" {
-  depends_on = [null_resource.named_test_resource]
-    compartment_id = var.tenancy_ocid
-    instance_id = jsondecode(data.local_file.instance.content).data.id
-    display_name = var.resource_name
+  depends_on     = [null_resource.named_test_resource]
+  compartment_id = var.tenancy_ocid
+  instance_id    = jsondecode(data.local_file.instance.content).data.id
+  display_name   = var.resource_name
 }
 
 resource "null_resource" "destroy_test_resource" {

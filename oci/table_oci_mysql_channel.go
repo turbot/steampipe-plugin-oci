@@ -25,6 +25,22 @@ func tableMySQLChannel(_ context.Context) *plugin.Table {
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "is_enabled",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		Get: &plugin.GetConfig{
@@ -164,11 +180,19 @@ func listMySQLChannels(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	request := mysql.ListChannelsRequest{
-		CompartmentId: types.String(compartment),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
+	// Build request parameters
+	request := buildMySQLChannelFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(),
+	}
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
 	}
 
 	pagesLeft := true
@@ -290,4 +314,24 @@ func channelDefinedTags(item interface{}) map[string]map[string]interface{} {
 		return item.DefinedTags
 	}
 	return nil
+}
+
+// Build additional filters
+func buildMySQLChannelFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.ListChannelsRequest {
+	request := mysql.ListChannelsRequest{}
+
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["id"] != nil {
+		request.ChannelId = types.String(equalQuals["id"].GetStringValue())
+	}
+	if equalQuals["is_enabled"] != nil {
+		request.IsEnabled = types.Bool(equalQuals["is_enabled"].GetBoolValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = mysql.ChannelLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

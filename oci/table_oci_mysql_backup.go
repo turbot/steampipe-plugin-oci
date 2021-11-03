@@ -357,7 +357,7 @@ func buildMySQLBackupFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.Lis
 	request := mysql.ListBackupsRequest{}
 
 	if equalQuals["creation_type"] != nil {
-		request.CreationType = mysql.BackupCreationTypeEnum(equalQuals["lifecycle_state"].GetStringValue())
+		request.CreationType = mysql.BackupCreationTypeEnum(equalQuals["creation_type"].GetStringValue())
 	}
 	if equalQuals["db_system_id"] != nil {
 		request.DbSystemId = types.String(equalQuals["db_system_id"].GetStringValue())

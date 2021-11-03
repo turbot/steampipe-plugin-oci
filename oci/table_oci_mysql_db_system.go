@@ -292,7 +292,7 @@ func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
+	if limit != nil {
 		if *limit < int64(*request.Limit) {
 			request.Limit = types.Int(int(*limit))
 		}
@@ -433,7 +433,7 @@ func buildMySQLDBSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.L
 		request.DbSystemId = types.String(equalQuals["id"].GetStringValue())
 	}
 	if equalQuals["is_analytics_cluster_attached"] != nil {
-		request.IsAnalyticsClusterAttached = types.Bool(equalQuals["display_name"].GetBoolValue())
+		request.IsAnalyticsClusterAttached = types.Bool(equalQuals["is_analytics_cluster_attached"].GetBoolValue())
 	}
 	if equalQuals["is_heat_wave_cluster_attached"] != nil {
 		request.IsHeatWaveClusterAttached = types.Bool(equalQuals["is_heat_wave_cluster_attached"].GetBoolValue())

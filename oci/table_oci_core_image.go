@@ -27,6 +27,10 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 			Hydrate: listCoreImages,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "display_name",
 					Require: plugin.Optional,
 				},

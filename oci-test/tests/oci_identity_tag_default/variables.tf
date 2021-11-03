@@ -22,12 +22,6 @@ variable "region" {
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
-variable "tag_default_id" {
-  type        = string
-  default     = "ocid1.tagdefault.oc1..aaaaaaaau7zn6kswmpaoz2yeiqdtxzivcvzcnuntu56wew74x6rlasjwrdja"
-  description = "OCID of your tag default."
-}
-
 provider "oci" {
   tenancy_ocid        = var.tenancy_ocid
   config_file_profile = var.config_file_profile
@@ -40,7 +34,7 @@ locals {
 
 resource "null_resource" "named_test_resource" {
   provisioner "local-exec" {
-    command = "oci iam tag-default get --tag-default-id ${var.tag_default_id} --output json > ${local.path}"
+    command = "oci iam tag-default list --all --compartment-id ${var.tenancy_ocid} --output json > ${local.path}"
   }
 }
 
@@ -55,10 +49,10 @@ output "tenancy_ocid" {
 
 output "resource_id" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.input.content).data.id
+  value      = jsondecode(data.local_file.input.content).data[0].id
 }
 
 output "tag_definition_id" {
   depends_on = [null_resource.named_test_resource]
-  value      = jsondecode(data.local_file.input.content).data.tag-definition-id
+  value      = jsondecode(data.local_file.input.content).data[0].tag-definition-id
 }

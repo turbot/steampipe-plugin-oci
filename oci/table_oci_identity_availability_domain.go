@@ -19,12 +19,6 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listRegions,
 			Hydrate:       lisAvailabilityDomains,
-			KeyColumns: []*plugin.KeyColumn{
-				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -49,12 +43,6 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
-			{
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
@@ -63,8 +51,7 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("CompartmentId"),
 			},
 		},
 	}
@@ -79,6 +66,7 @@ type availabilityDomainInfo struct {
 
 func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Debug("lisAvailabilityDomains")
+
 	region := *h.Item.(ociRegion).Name
 	status := h.Item.(ociRegion).Status
 

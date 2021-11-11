@@ -50,7 +50,7 @@ output "tenancy_ocid" {
 }
 
 output "region" {
-  value = var.region
+  value = replace(var.region, "-", "_")
 }
 
 output "availability_domain" {

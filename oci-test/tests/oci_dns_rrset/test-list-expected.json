@@ -1,7 +1,7 @@
 [
   {
     "domain": "{{ output.domain.value }}",
-    "is_protected": "true",
+    "is_protected": true,
     "rtype": "{{ output.rtype.value }}",
     "ttl": "86400"
   }

@@ -1,3 +1,10 @@
+## v0.4.0 [2021-11-03]
+
+_Enhancements_
+
+- Updated: Add additional optional key quals, filter support, and context cancellation handling and improve hydrate with cache functionality across all the  tables ([#306](https://github.com/turbot/steampipe-plugin-oci/pull/306)) ([#317](https://github.com/turbot/steampipe-plugin-oci/pull/317))
+- Updated: Add `title` column in `oci_ons_subscription` table ([#313](https://github.com/turbot/steampipe-plugin-oci/pull/313))
+
 ## v0.3.1 [2021-09-13]
 
 _Enhancements_

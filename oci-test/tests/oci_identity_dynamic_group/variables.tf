@@ -33,6 +33,9 @@ resource "oci_identity_dynamic_group" "named_test_resource" {
   matching_rule  = var.dynamic_group_matching_rule
   name           = var.resource_name
   freeform_tags  = { "Department" = "Finance" }
+  provisioner "local-exec" {
+    command = "sleep 120"
+  }
 }
 
 output "resource_name" {
@@ -44,14 +47,17 @@ output "tenancy_ocid" {
 }
 
 output "description" {
+  depends_on = [oci_identity_dynamic_group.named_test_resource]
   value = oci_identity_dynamic_group.named_test_resource.description
 }
 
 output "freeform_tags" {
+  depends_on = [oci_identity_dynamic_group.named_test_resource]
   value = oci_identity_dynamic_group.named_test_resource.freeform_tags
 }
 
 output "resource_id" {
+  depends_on = [oci_identity_dynamic_group.named_test_resource]
   value = oci_identity_dynamic_group.named_test_resource.id
 }
 

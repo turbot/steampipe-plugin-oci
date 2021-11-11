@@ -279,7 +279,7 @@ func buildMySQLConfigurationFilters(equalQuals plugin.KeyColumnEqualsQualMap) my
 		request.LifecycleState = mysql.ConfigurationLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}
 	if equalQuals["shape_name"] != nil {
-		request.ShapeName = types.String(equalQuals["id"].GetStringValue())
+		request.ShapeName = types.String(equalQuals["shape_name"].GetStringValue())
 	}
 
 	return request

@@ -154,6 +154,11 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 		}
 	}
 
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.LifecycleState = identity.TagDefaultSummaryLifecycleStateEnum(lifecycleState)
+	}
+
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.IdentityClient.ListTagDefaults(ctx, request)

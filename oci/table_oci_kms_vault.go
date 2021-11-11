@@ -21,6 +21,7 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getKmsVault,
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listKmsVaults,

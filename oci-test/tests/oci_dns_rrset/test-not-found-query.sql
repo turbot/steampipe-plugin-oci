@@ -1,3 +1,3 @@
-select domain, is_protected, ttl
+select domain, is_protected, ttl, rtype
 from oci.oci_dns_rrset
-where domain = '{{ output.domain.value }}aa';
+where domain = 'dummy-test-{{ output.domain.value }}' and rtype = 'NS' limit 1;

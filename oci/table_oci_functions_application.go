@@ -166,7 +166,7 @@ func listFunctionsApplications(ctx context.Context, d *plugin.QueryData, _ *plug
 	// Build request parameters
 	request := buildFunctionsApplicationsFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
-	request.Limit = types.Int(1000)
+	request.Limit = types.Int(50)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),
 	}

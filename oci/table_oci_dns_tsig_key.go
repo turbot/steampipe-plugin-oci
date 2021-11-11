@@ -160,7 +160,7 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	// Build request parameters
 	request := buildDnsTsigKeyFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
-	request.Limit = types.Int64(1000)
+	request.Limit = types.Int64(100)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),
 	}

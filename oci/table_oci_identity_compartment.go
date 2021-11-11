@@ -25,10 +25,6 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 			Hydrate: listCompartments,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -126,16 +122,7 @@ func tableIdentityCompartment(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCompartments", "Compartment", compartment)
-
 	equalQuals := d.KeyColumnQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -144,7 +131,7 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	rootRequest := identity.GetCompartmentRequest{
-		CompartmentId:   types.String(compartment),
+		CompartmentId:   &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
@@ -161,7 +148,7 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListCompartmentsRequest{
-		CompartmentId:          types.String(compartment),
+		CompartmentId:          &session.TenancyID,
 		CompartmentIdInSubtree: types.Bool(true),
 		Limit:                  types.Int(1000),
 		RequestMetadata: common.RequestMetadata{

@@ -169,7 +169,7 @@ func listEventsRules(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 	request := events.ListRulesRequest{
 		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
+		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

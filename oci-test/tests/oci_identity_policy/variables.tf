@@ -39,12 +39,13 @@ resource "oci_identity_group" "test_group" {
   compartment_id = var.tenancy_ocid
   description    = var.resource_name
   name           = var.resource_name
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 resource "oci_identity_policy" "named_test_resource" {
-  depends_on = [
-    oci_identity_group.test_group
-  ]
+  depends_on = [oci_identity_group.test_group]
   compartment_id = var.tenancy_ocid
   name           = var.resource_name
   description    = var.policy_description
@@ -52,6 +53,9 @@ resource "oci_identity_policy" "named_test_resource" {
     "Allow group ${var.resource_name} to manage users in tenancy"
   ]
   freeform_tags = { "Name" = var.resource_name }
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 output "resource_name" {
@@ -63,6 +67,7 @@ output "tenancy_ocid" {
 }
 
 output "policy_description" {
+  depends_on = [oci_identity_group.test_group]
   value = oci_identity_policy.named_test_resource.description
 }
 
@@ -73,13 +78,16 @@ output "policy_statements" {
 }
 
 output "freeform_tags" {
+  depends_on = [oci_identity_group.test_group]
   value = oci_identity_policy.named_test_resource.freeform_tags
 }
 
 output "resource_id" {
+  depends_on = [oci_identity_group.test_group]
   value = oci_identity_policy.named_test_resource.id
 }
 
 output "time_created" {
+  depends_on = [oci_identity_group.test_group]
   value = oci_identity_policy.named_test_resource.time_created
 }

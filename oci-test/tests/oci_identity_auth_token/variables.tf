@@ -31,11 +31,18 @@ resource "oci_identity_user" "test_user" {
   compartment_id = var.tenancy_ocid
   description    = var.user_name
   name           = var.user_name
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 resource "oci_identity_auth_token" "test_auth_token" {
+  depends_on  = [oci_identity_user.test_user]
   description = var.resource_name
   user_id     = oci_identity_user.test_user.id
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 output "tenancy_ocid" {
@@ -47,9 +54,11 @@ output "resource_name" {
 }
 
 output "user_id" {
-  value = oci_identity_auth_token.test_auth_token.user_id
+  depends_on  = [oci_identity_auth_token.test_auth_token]
+  value       = oci_identity_auth_token.test_auth_token.user_id
 }
 
 output "resource_id" {
-  value = oci_identity_auth_token.test_auth_token.id
+  depends_on  = [oci_identity_auth_token.test_auth_token]
+  value       = oci_identity_auth_token.test_auth_token.id
 }

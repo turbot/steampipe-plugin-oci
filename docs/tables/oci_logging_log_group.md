@@ -13,7 +13,7 @@ select
   lifecycle_state,
   time_created
 from
-  oci_new.oci_logging_log_group;
+  oci_logging_log_group;
 ```
 
 
@@ -26,7 +26,7 @@ select
   lifecycle_state as state,
   time_created
 from
-  oci_new.oci_logging_log_group
+  oci_logging_log_group
 where
   lifecycle_state = 'INACTIVE';
 ```

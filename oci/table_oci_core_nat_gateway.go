@@ -19,8 +19,9 @@ func tableCoreNatGateway(_ context.Context) *plugin.Table {
 		Name:        "oci_core_nat_gateway",
 		Description: "OCI Core Nat Gateway",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getCoreNatGateway,
+			KeyColumns:        plugin.SingleColumn("id"),
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			Hydrate:           getCoreNatGateway,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreNatGateways,

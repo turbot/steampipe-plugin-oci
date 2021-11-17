@@ -167,13 +167,6 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	for pagesLeft {
 		response, err := session.LoggingManagementClient.ListLogGroups(ctx, request)
 		if err != nil {
-			plugin.Logger(ctx).Error("listLoggingLogGroups", "error_ListLogGroups", err)
-			if ociErr, ok := err.(common.ServiceError); ok {
-				if ociErr.GetCode() == "InvalidParameter" {
-					return logging.ListLogGroupsResponse{}, nil
-				}
-			}
-
 			return nil, err
 		}
 

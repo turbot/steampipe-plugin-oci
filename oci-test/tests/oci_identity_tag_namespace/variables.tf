@@ -38,6 +38,9 @@ resource "oci_identity_tag_namespace" "named_test_resource" {
   compartment_id = var.tenancy_ocid
   description    = var.tag_namespace_description
   name           = var.resource_name
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 output "resource_name" {
@@ -49,9 +52,11 @@ output "tenancy_ocid" {
 }
 
 output "tag_namespace_description" {
-  value = oci_identity_tag_namespace.named_test_resource.description
+  depends_on = [oci_identity_tag_namespace.named_test_resource]
+  value      = oci_identity_tag_namespace.named_test_resource.description
 }
 
 output "resource_id" {
-  value = oci_identity_tag_namespace.named_test_resource.id
+  depends_on = [oci_identity_tag_namespace.named_test_resource]
+  value      = oci_identity_tag_namespace.named_test_resource.id
 }

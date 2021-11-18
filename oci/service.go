@@ -79,9 +79,11 @@ type session struct {
 }
 
 // apiGatewayService returns the service client for OCI ApiGateway service
-func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
 
-	serviceCacheKey := fmt.Sprintf("apigateway-%s", "region")
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("apigateway-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -89,20 +91,23 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
+		logger.Error("apiGatewayService", "error_getProvider", err)
 		return nil, err
 	}
 
 	// get apigateway service client
 	client, err := apigateway.NewApiGatewayClientWithConfigurationProvider(provider)
 	if err != nil {
+		logger.Error("apiGatewayService", "error_NewApiGatewayClientWithConfigurationProvider", err)
 		return nil, err
 	}
 
 	// get tenant ocid from provider
 	tenantId, err := provider.TenancyOCID()
 	if err != nil {
+		logger.Error("apiGatewayService", "error_TenancyOCID", err)
 		return nil, err
 	}
 

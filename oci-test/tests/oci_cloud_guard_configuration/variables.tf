@@ -51,5 +51,5 @@ output "tenancy_ocid" {
 }
 
 output "status" {
-  value = jsondecode(data.local_file.input.content).data.self-manage-resources
+  value = jsondecode(data.local_file.input.content).data.status
 }

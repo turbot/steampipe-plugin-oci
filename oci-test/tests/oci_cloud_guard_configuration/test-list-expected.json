@@ -1,6 +1,6 @@
 [
   {
     "reporting_region": "{{ output.reporting_region.value }}",
-    "self_manage_resources": false
+    "status": "{{ output.status.value }}"
   }
 ]

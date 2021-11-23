@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/apigateway"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -39,7 +39,7 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartmentList,
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -136,7 +136,10 @@ func tableApiGatewayApi(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Trace("listApiGatewayApis", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -146,15 +149,16 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 
 	// Create Session
-	session, err := apiGatewayService(ctx, d)
+	session, err := apiGatewayService(ctx, d, region)
 	if err != nil {
+		logger.Error("listApiGatewayApis", "error_apiGatewayService", err)
 		return nil, err
 	}
 
 	request := apigateway.ListApisRequest{
-		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
-		RequestMetadata: oci_common.RequestMetadata{
+		CompartmentId:   types.String(compartment),
+		Limit:           types.Int(1000),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
@@ -180,6 +184,12 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	for pagesLeft {
 		response, err := session.ApiGatewayClient.ListApis(ctx, request)
 		if err != nil {
+			logger.Error("listApiGatewayApis", "error_ListApis", err)
+			if ociErr, ok := err.(common.ServiceError); ok {
+				if ociErr.GetCode() == "InvalidParameter" {
+					return apigateway.ListApisResponse{}, nil
+				}
+			}
 			return nil, err
 		}
 
@@ -191,6 +201,7 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 				return nil, nil
 			}
 		}
+
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage
 		} else {
@@ -198,14 +209,16 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTION
 
 func getApiGatewayApi(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getApiGatewayApi")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("getApiGatewayApi", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -220,32 +233,34 @@ func getApiGatewayApi(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	// Create Session
-	session, err := apiGatewayService(ctx, d)
+	session, err := apiGatewayService(ctx, d, region)
 	if err != nil {
+		logger.Error("getApiGatewayApi", "error_apiGatewayService", err)
 		return nil, err
 	}
 
 	request := apigateway.GetApiRequest{
-		ApiId: types.String(id),
-		RequestMetadata: oci_common.RequestMetadata{
+		ApiId:           types.String(id),
+		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
 	response, err := session.ApiGatewayClient.GetApi(ctx, request)
 	if err != nil {
+		logger.Error("getApiGatewayApi", "error_GetApi", err)
 		return nil, err
 	}
 
 	return response.Api, nil
 }
 
-// //// TRANSFORM FUNCTION
+//// TRANSFORM FUNCTION
 
-// // Priority order for tags
-// // 1. System Tags
-// // 2. Defined Tags
-// // 3. Free-form tags
+// Priority order for tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
 func apiTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	freeformTags := apiGatewayApiFreeformTags(d.HydrateItem)
 

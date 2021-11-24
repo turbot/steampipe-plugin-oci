@@ -1,3 +1,16 @@
+## v0.5.0 [2021-11-24]
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v182--2021-11-22) ([#331](https://github.com/turbot/steampipe-plugin-oci/pull/331))
+- Recompiled plugin with Go version 1.17 ([#332](https://github.com/turbot/steampipe-plugin-oci/pull/332))
+
+_Bug fixes_
+
+- `oci_apigateway_api` table will now return data available in each region configured in the plugin config (oci.spc) file ([#328](https://github.com/turbot/steampipe-plugin-oci/pull/328))
+- `oci_logging_log_group` table will no longer return `InvalidParameter` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+- `oci_core_nat_gateway` table will no longer return `400` or `404` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+
 ## v0.4.0 [2021-11-03]
 
 _Enhancements_

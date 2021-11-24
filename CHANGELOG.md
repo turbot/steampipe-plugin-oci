@@ -7,9 +7,9 @@ _Enhancements_
 
 _Bug fixes_
 
-- `oci_apigateway_api` table will no longer return empty response ([#328](https://github.com/turbot/steampipe-plugin-oci/pull/328))
-- `oci_logging_log_group` table will no longer return `InvalidParameter` error ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
-- `oci_core_nat_gateway` table will no longer return `400` or `404` error ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+- `oci_apigateway_api` table will no longer return empty response when data is available ([#328](https://github.com/turbot/steampipe-plugin-oci/pull/328))
+- `oci_logging_log_group` table will no longer return `InvalidParameter` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+- `oci_core_nat_gateway` table will no longer return `400` or `404` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
 
 ## v0.4.0 [2021-11-03]
 

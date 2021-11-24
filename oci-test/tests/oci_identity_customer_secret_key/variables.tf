@@ -31,12 +31,18 @@ resource "oci_identity_user" "test_user" {
   compartment_id = var.tenancy_ocid
   description    = var.user_name
   name           = var.user_name
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 resource "oci_identity_customer_secret_key" "test_customer_secret_key" {
   depends_on   = [oci_identity_user.test_user]
   display_name = var.resource_name
   user_id      = oci_identity_user.test_user.id
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
 }
 
 output "tenancy_ocid" {
@@ -48,18 +54,22 @@ output "resource_name" {
 }
 
 output "user_id" {
-  value = oci_identity_user.test_user.id
+  depends_on = [oci_identity_user.test_user]
+  value      = oci_identity_user.test_user.id
 }
 
 output "resource_id" {
-  value = oci_identity_customer_secret_key.test_customer_secret_key.id
+  depends_on = [oci_identity_customer_secret_key.test_customer_secret_key]
+  value      = oci_identity_customer_secret_key.test_customer_secret_key.id
 }
 
 output "time_created" {
-  value = oci_identity_customer_secret_key.test_customer_secret_key.time_created
+  depends_on = [oci_identity_customer_secret_key.test_customer_secret_key]
+  value      = oci_identity_customer_secret_key.test_customer_secret_key.time_created
 }
 
 output "display_name" {
-  value = oci_identity_customer_secret_key.test_customer_secret_key.display_name
+  depends_on = [oci_identity_customer_secret_key.test_customer_secret_key]
+  value      = oci_identity_customer_secret_key.test_customer_secret_key.display_name
 }
 

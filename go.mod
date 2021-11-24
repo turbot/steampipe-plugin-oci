@@ -5,6 +5,6 @@ go 1.16
 require (
 	github.com/oracle/oci-go-sdk/v44 v44.0.0
 	github.com/turbot/go-kit v0.3.0
-	github.com/turbot/steampipe-plugin-sdk v1.7.1
+	github.com/turbot/steampipe-plugin-sdk v1.8.2
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
 )

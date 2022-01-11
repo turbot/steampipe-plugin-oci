@@ -40,7 +40,7 @@ func tableFunctionsFunction(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "The display name of the application.",
+				Description: "The display name of the function.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -201,7 +201,11 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
-			request.Limit = types.Int(int(*limit))
+			if *limit < 1 {
+				request.Limit = types.Int(1)
+			} else {
+				request.Limit = types.Int(int(*limit))
+			}
 		}
 	}
 

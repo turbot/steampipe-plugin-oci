@@ -91,6 +91,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_file_storage_mount_target":                                     tableFileStorageMountTarget(ctx),
 			"oci_file_storage_snapshot":                                         tableFileStorageSnapshot(ctx),
 			"oci_functions_application":                                         tableFunctionsApplication(ctx),
+			"oci_functions_function":                                            tableFunctionsFunction(ctx),
 			"oci_identity_api_key":                                              tableIdentityApiKey(ctx),
 			"oci_identity_auth_token":                                           tableIdentityAuthToken(ctx),
 			"oci_identity_authentication_policy":                                tableIdentityAuthenticationPolicy(ctx),

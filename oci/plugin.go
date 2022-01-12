@@ -132,6 +132,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_nosql_table_metric_write_throttle_count_daily":                 tableOciNoSQLTableMetricWriteThrottleCountDaily(ctx),
 			"oci_nosql_table_metric_write_throttle_count_hourly":                tableOciNoSQLTableMetricWriteThrottleCountHourly(ctx),
 			"oci_objectstorage_bucket":                                          tableObjectStorageBucket(ctx),
+			"oci_objectstorage_object":                                          tableObjectStorageObject(ctx),
 			"oci_ons_notification_topic":                                        tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                                              tableOnsSubscription(ctx),
 			"oci_region":                                                        tableIdentityRegion(ctx),

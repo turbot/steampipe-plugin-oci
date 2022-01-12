@@ -158,7 +158,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Trace("oci.listCloudGuardDetectorRecipes", "Compartment", compartment)
@@ -170,8 +170,17 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, _ *
 		return nil, nil
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -244,8 +253,17 @@ func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *pl
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}

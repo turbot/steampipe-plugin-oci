@@ -27,15 +27,23 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_responder_recipe" "named_test_resource" {
-  #Required
-  compartment_id             = var.tenancy_ocid
-  display_name               = var.resource_name
-  source_responder_recipe_id = oci_cloud_guard_responder_recipe.named_test_resource.id
+locals {
+  path = "${path.cwd}/output.json"
+}
+
+resource "null_resource" "named_test_resource" {
+  provisioner "local-exec" {
+    command = "oci cloud-guard responder-recipe list --compartment-id ${var.tenancy_ocid} --output json > ${local.path}"
+  }
+}
+
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
 }
 
 output "resource_name" {
-  value = var.resource_name
+  value = jsondecode(data.local_file.input.content).data.items[0].display-name
 }
 
 output "tenancy_ocid" {
@@ -43,5 +51,5 @@ output "tenancy_ocid" {
 }
 
 output "resource_id" {
-  value = oci_cloud_guard_responder_recipe.named_test_resource.id
+  value = jsondecode(data.local_file.input.content).data.items[0].id
 }

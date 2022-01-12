@@ -171,7 +171,7 @@ func tableCloudGuardTarget(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCloudGuardTargets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCloudGuardTargets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCloudGuardTargets", "Compartment", compartment)
@@ -183,8 +183,17 @@ func listCloudGuardTargets(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		return nil, nil
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -262,8 +271,17 @@ func getCloudGuardTarget(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		return nil, nil
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}

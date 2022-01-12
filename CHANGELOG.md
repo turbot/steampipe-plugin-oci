@@ -1,3 +1,18 @@
+## v0.6.0 [2022-01-12]
+
+_What's new?_
+
+- New tables added
+  - [oci_functions_function](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_functions_function) ([#340](https://github.com/turbot/steampipe-plugin-oci/pull/340))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.3](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v183--2021-12-23) ([#339](https://github.com/turbot/steampipe-plugin-oci/pull/339))
+
+_Bug fixes_
+
+- Fixed the Cloud Guard tables to correctly return the result instead of an empty table ([#335](https://github.com/turbot/steampipe-plugin-oci/pull/335))
+
 ## v0.5.0 [2021-11-24]
 
 _Enhancements_

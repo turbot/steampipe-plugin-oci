@@ -137,7 +137,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 				Description: "Time that the object is returned to the archived state. This field is only present for restored objects.",
 				Hydrate:     getObjectStorageObject,
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromField("TimeOfArchival.Time"),
 			},
 			{
 				Name:        "version_id",

@@ -210,8 +210,6 @@ func listVaultSecrets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		}
 	}
 
-	logger.Trace("listVaultSecrets", "error_request", request)
-
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.VaultClient.ListSecrets(ctx, request)
@@ -264,7 +262,7 @@ func getVaultSecret(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
-	// handle empty vault id in get call
+	// handle empty secret id in get call
 	if strings.TrimSpace(id) == "" {
 		return nil, nil
 	}

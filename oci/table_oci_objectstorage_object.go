@@ -22,7 +22,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			Hydrate:       listObjectStorageObjects,
 			ParentHydrate: listObjectStorageBuckets,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItem: BuildRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -90,7 +90,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 				Description: "The date and time after which the object is no longer cached by a browser, proxy, or other caching entity.",
 				Hydrate:     getObjectStorageObject,
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Transform:   transform.FromField("Expires.Time"),
 			},
 			{
 				Name:        "is_not_modified",

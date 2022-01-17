@@ -31,15 +31,15 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 				{
 					Name:    "name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "vault_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -217,6 +217,11 @@ func listVaultSecrets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		response, err := session.VaultClient.ListSecrets(ctx, request)
 		if err != nil {
 			logger.Error("listVaultSecrets", "error_ListSecrets", err)
+			if ociErr, ok := err.(common.ServiceError); ok {
+				if ociErr.GetCode() == "InvalidParameter" || ociErr.GetCode() == "BadErrorResponse" {
+					return nil, nil
+				}
+			}
 			return nil, err
 		}
 
@@ -346,8 +351,8 @@ func buildVaultSecretFilters(equalQuals plugin.KeyColumnEqualsQualMap) vault.Lis
 	if equalQuals["name"] != nil {
 		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
-	if equalQuals["id"] != nil {
-		request.VaultId = types.String(equalQuals["id"].GetStringValue())
+	if equalQuals["vault_id"] != nil {
+		request.VaultId = types.String(equalQuals["vault_id"].GetStringValue())
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = vault.SecretSummaryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())

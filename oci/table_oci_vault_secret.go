@@ -17,7 +17,7 @@ import (
 func tableVaultSecret(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_vault_secret",
-		Description: "OCI KMS Vault Secret",
+		Description: "OCI Vault Secret",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getVaultSecret,

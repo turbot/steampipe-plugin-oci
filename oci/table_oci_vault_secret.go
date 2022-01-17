@@ -252,16 +252,15 @@ func getVaultSecret(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getVaultSecret", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
 	var id string
 	if h.Item != nil {
 		i := h.Item.(vault.SecretSummary)
 		id = *i.Id
 	} else {
+		// Restrict the api call to only root compartment/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 

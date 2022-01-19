@@ -1,3 +1,11 @@
+## v0.7.0 [2022-01-19]
+
+_What's new?_
+
+- New tables added
+  - [oci_objectstorage_object](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_objectstorage_object) ([#342](https://github.com/turbot/steampipe-plugin-oci/pull/342))
+  - [oci_vault_secret](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_vault_secret) ([#343](https://github.com/turbot/steampipe-plugin-oci/pull/343))
+
 ## v0.6.0 [2022-01-12]
 
 _What's new?_

@@ -22,7 +22,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			Hydrate:       listObjectStorageObjects,
 			ParentHydrate: listObjectStorageBuckets,
 		},
-		GetMatrixItem: BuildRegionList,
+		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -94,7 +94,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "is_not_modified",
-				Description: "Flag to indicate whether or not the object was modified.  If this is true,the getter for the object itself will return null.",
+				Description: "Flag to indicate whether or not the object was modified. If this is true, the getter for the object itself will return null.",
 				Hydrate:     getObjectStorageObject,
 				Type:        proto.ColumnType_BOOL,
 				Default:     false,

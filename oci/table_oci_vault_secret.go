@@ -77,7 +77,7 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "current_version_number",
-				Description: "The version number of the secret version that's currently in use.",
+				Description: "The version number of the secret that's currently in use.",
 				Hydrate:     getVaultSecret,
 				Type:        proto.ColumnType_INT,
 			},
@@ -105,7 +105,7 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_of_deletion",
-				Description: "n optional property indicating when to delete the secret.",
+				Description: "An optional property indicating when to delete the secret.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},

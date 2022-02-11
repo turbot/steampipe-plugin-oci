@@ -126,7 +126,8 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 			{
 				Name:        "time_created",
 				Description: "The date and time the bucket was created.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "versioning",

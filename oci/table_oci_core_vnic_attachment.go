@@ -155,7 +155,7 @@ func tableCoreVnicAttachment(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 			},
 
-			// json column
+			// JSON columns
 			{
 				Name:        "nsg_ids",
 				Description: "A list of the OCIDs of the network security groups that the VNIC belongs to.",
@@ -163,7 +163,7 @@ func tableCoreVnicAttachment(_ context.Context) *plugin.Table {
 				Hydrate:     getVnic,
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -250,12 +250,12 @@ func listVnicAttachments(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Check for additional filters
-	if equalQuals["availability_domain"] != nil {
+	if equalQuals["availability_domain"] != nil && equalQuals["availability_domain"].GetStringValue() != "" {
 		availabilityDomain := equalQuals["availability_domain"].GetStringValue()
 		request.AvailabilityDomain = types.String(availabilityDomain)
 	}
 
-	if equalQuals["instance_id"] != nil {
+	if equalQuals["instance_id"] != nil && equalQuals["instance_id"].GetStringValue() != "" {
 		instanceId := equalQuals["instance_id"].GetStringValue()
 		request.InstanceId = types.String(instanceId)
 	}
@@ -412,7 +412,6 @@ func vnicTags(_ context.Context, d *transform.TransformData) (interface{}, error
 				for key, value := range v {
 					tags[key] = value
 				}
-
 			}
 		}
 

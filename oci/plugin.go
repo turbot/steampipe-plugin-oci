@@ -70,6 +70,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_service_gateway":                                          tableCoreServiceGateway(ctx),
 			"oci_core_subnet":                                                   tableCoreSubnet(ctx),
 			"oci_core_vcn":                                                      tableCoreVcn(ctx),
+			"oci_core_vnic_attachment":                                          tableCoreVnicAttachment(ctx),
 			"oci_core_volume":                                                   tableCoreVolume(ctx),
 			"oci_core_volume_attachment":                                        tableCoreVolumeAttachment(ctx),
 			"oci_core_volume_backup":                                            tableCoreVolumeBackup(ctx),

@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,8 +19,8 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 		Name:        "oci_vault_secret",
 		Description: "OCI Vault Secret",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getVaultSecret,
+			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate:           getVaultSecret,
 			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 		},
 		List: &plugin.ListConfig{
@@ -274,7 +274,7 @@ func getVaultSecret(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
-	request := vault.GetSecretRequest {
+	request := vault.GetSecretRequest{
 		SecretId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),

@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,8 +19,8 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 		Name:        "oci_kms_vault",
 		Description: "OCI KMS Vault",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getKmsVault,
+			KeyColumns:        plugin.SingleColumn("id"),
+			Hydrate:           getKmsVault,
 			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 		},
 		List: &plugin.ListConfig{

@@ -27,21 +27,29 @@ provider "oci" {
   config_file_profile = var.config_file_profile
 }
 
-resource "oci_cloud_guard_cloud_guard_configuration" "named_test_resource" {
-  #Required
-  compartment_id   = var.tenancy_ocid
-  reporting_region = var.region
-  status           = "ENABLED"
+locals {
+  path = "${path.cwd}/output.json"
+}
+
+resource "null_resource" "named_test_resource" {
+  provisioner "local-exec" {
+    command = "oci cloud-guard configuration get --compartment-id ${var.tenancy_ocid} --output json > ${local.path}"
+  }
+}
+
+data "local_file" "input" {
+  depends_on = [null_resource.named_test_resource]
+  filename   = local.path
 }
 
 output "reporting_region" {
-  value = var.region
+  value = jsondecode(data.local_file.input.content).data.reporting-region
 }
 
 output "tenancy_ocid" {
   value = var.tenancy_ocid
 }
 
-output "self_manage_resources" {
-  value = oci_cloud_guard_cloud_guard_configuration.named_test_resource.self_manage_resources
+output "status" {
+  value = jsondecode(data.local_file.input.content).data.status
 }

@@ -5,12 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v44/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/connection"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 )
 
 const matrixKeyRegion = "region"
@@ -354,4 +355,31 @@ func getRegionFromEnvVar() string {
 	}
 
 	return getEnvSettingWithBlankDefault("region")
+}
+
+func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	cacheKey := "getCloudGuardConfiguration"
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.(interface{}), nil
+	}
+
+	// Create Session
+	session, err := cloudGuardService(ctx, d, "")
+	if err != nil {
+		return nil, err
+	}
+
+	request := cloudguard.GetConfigurationRequest{
+		CompartmentId: types.String(session.TenancyID),
+		RequestMetadata: oci_common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.CloudGuardClient.GetConfiguration(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Configuration, nil
 }

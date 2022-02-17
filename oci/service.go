@@ -39,9 +39,10 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
+	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/connection"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 )
 
 type session struct {
@@ -75,13 +76,16 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	ResourceSearchClient           resourcesearch.ResourceSearchClient
+	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
 
 // apiGatewayService returns the service client for OCI ApiGateway service
-func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
 
-	serviceCacheKey := fmt.Sprintf("apigateway-%s", "region")
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("apigateway-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
@@ -89,20 +93,23 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData) (*session, erro
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
+		logger.Error("apiGatewayService", "error_getProvider", err)
 		return nil, err
 	}
 
 	// get apigateway service client
 	client, err := apigateway.NewApiGatewayClientWithConfigurationProvider(provider)
 	if err != nil {
+		logger.Error("apiGatewayService", "error_NewApiGatewayClientWithConfigurationProvider", err)
 		return nil, err
 	}
 
 	// get tenant ocid from provider
 	tenantId, err := provider.TenancyOCID()
 	if err != nil {
+		logger.Error("apiGatewayService", "error_TenancyOCID", err)
 		return nil, err
 	}
 
@@ -785,17 +792,16 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 }
 
 // cloudGuardService returns the service client for OCI Cloud Guard Service
-func cloudGuardService(ctx context.Context, d *plugin.QueryData) (*session, error) {
+func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
-	serviceCacheKey := fmt.Sprintf("cloudguard-%s", "region")
+	serviceCacheKey := fmt.Sprintf("cloudguard-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
-
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
 		logger.Error("cloudGuardService", "getProvider.Error", err)
 		return nil, err
@@ -1240,6 +1246,44 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	return sess, nil
 }
 
+// vaultService returns the service client for OCI Vault Service
+func vaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("vaultService-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("vaultService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := vault.NewVaultsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantId,
+		VaultClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // analyticsService returns the service client for OCI Analytics service
 func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1272,7 +1316,7 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:       tenantId,
 		AnalyticsClient: client,
 	}
 

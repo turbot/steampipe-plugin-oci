@@ -1,3 +1,39 @@
+## v0.7.0 [2022-01-19]
+
+_What's new?_
+
+- New tables added
+  - [oci_objectstorage_object](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_objectstorage_object) ([#342](https://github.com/turbot/steampipe-plugin-oci/pull/342))
+  - [oci_vault_secret](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_vault_secret) ([#343](https://github.com/turbot/steampipe-plugin-oci/pull/343))
+
+## v0.6.0 [2022-01-12]
+
+_What's new?_
+
+- New tables added
+  - [oci_functions_function](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_functions_function) ([#340](https://github.com/turbot/steampipe-plugin-oci/pull/340))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.3](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v183--2021-12-23) ([#339](https://github.com/turbot/steampipe-plugin-oci/pull/339))
+
+_Bug fixes_
+
+- Fixed the Cloud Guard tables to correctly return the result instead of an empty table ([#335](https://github.com/turbot/steampipe-plugin-oci/pull/335))
+
+## v0.5.0 [2021-11-24]
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v1.8.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v182--2021-11-22) ([#331](https://github.com/turbot/steampipe-plugin-oci/pull/331))
+- Recompiled plugin with Go version 1.17 ([#332](https://github.com/turbot/steampipe-plugin-oci/pull/332))
+
+_Bug fixes_
+
+- `oci_apigateway_api` table will now return data available in each region configured in the plugin config (oci.spc) file ([#328](https://github.com/turbot/steampipe-plugin-oci/pull/328))
+- `oci_logging_log_group` table will no longer return `InvalidParameter` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+- `oci_core_nat_gateway` table will no longer return `400` or `404` error in get call ([#327](https://github.com/turbot/steampipe-plugin-oci/pull/327))
+
 ## v0.4.0 [2021-11-03]
 
 _Enhancements_

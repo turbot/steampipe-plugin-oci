@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -26,7 +26,7 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listFileStorageSnapshots,
 			ParentHydrate: listFileStorageFileSystems,
-			KeyColumns:    []*plugin.KeyColumn{
+			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
 					Require: plugin.Optional,
@@ -151,7 +151,7 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("listFileStorageSnapshots", "Compartment", compartment, "zone", zone)
-	
+
 	equalQuals := d.KeyColumnQuals
 
 	// Return nil, if given compartment_id doesn't match

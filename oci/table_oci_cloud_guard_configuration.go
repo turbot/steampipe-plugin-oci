@@ -4,11 +4,9 @@ import (
 	"context"
 
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -51,25 +49,14 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCloudGuardConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	// Create Session
-	session, err := cloudGuardService(ctx, d)
+func listCloudGuardConfigurations(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
 	if err != nil {
 		return nil, err
 	}
 
-	request := cloudguard.GetConfigurationRequest{
-		CompartmentId: types.String(session.TenancyID),
-		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
+	d.StreamListItem(ctx, configuration.(cloudguard.Configuration))
 
-	response, err := session.CloudGuardClient.GetConfiguration(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-	d.StreamListItem(ctx, response.Configuration)
-
-	return nil, err
+	return nil, nil
 }

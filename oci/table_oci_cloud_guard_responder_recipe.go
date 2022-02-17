@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -158,7 +158,7 @@ func tableCloudGuardResponderRecipe(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.listCloudGuardResponderRecipes", "Compartment", compartment)
@@ -170,8 +170,17 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, _ 
 		return nil, nil
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}
@@ -249,8 +258,17 @@ func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *p
 		return nil, nil
 	}
 
+	// fetch reporting region from configuration
+	getCloudGuardConfigurationCached := plugin.HydrateFunc(getCloudGuardConfiguration).WithCache()
+	configuration, err := getCloudGuardConfigurationCached(ctx, d, h)
+	if err != nil {
+		return nil, err
+	}
+
+	reportingRegion := configuration.(cloudguard.Configuration).ReportingRegion
+
 	// Create Session
-	session, err := cloudGuardService(ctx, d)
+	session, err := cloudGuardService(ctx, d, *reportingRegion)
 	if err != nil {
 		return nil, err
 	}

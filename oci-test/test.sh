@@ -101,6 +101,7 @@ run_test oci_objectstorage_bucket
 run_test oci_ons_notification_topic
 run_test oci_ons_subscription
 run_test oci_resource_search
+run_test oci_core_vnic_attachment
 
 date >> output.txt
 date >> failed_tests.txt

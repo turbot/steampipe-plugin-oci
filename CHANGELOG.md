@@ -1,3 +1,22 @@
+## v0.8.0 [2022-02-18]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_vnic_attachment](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_vnic_attachment) ([#346](https://github.com/turbot/steampipe-plugin-oci/pull/346))
+  - [oci_database_autonomous_database_metric_cpu_utilization_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_cpu_utilization_hourly) ([#353](https://github.com/turbot/steampipe-plugin-oci/pull/353))
+  - [oci_database_autonomous_database_metric_storage_utilization_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_autonomous_database_metric_storage_utilization_hourly) ([#359](https://github.com/turbot/steampipe-plugin-oci/pull/359))
+  - [oci_mysql_db_system_metric_cpu_utilization_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_cpu_utilization_hourly) ([#352](https://github.com/turbot/steampipe-plugin-oci/pull/352))
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v2.0.3](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v203--2022-02-14) ([#354](https://github.com/turbot/steampipe-plugin-oci/pull/354))
+
+_Bug fixes_
+
+- Fixed the lower limit in the `oci_dns_rrset` table ([#357](https://github.com/turbot/steampipe-plugin-oci/pull/357))
+- Updated the column type  of `time_created` column to `TIMESTAMP` in `oci_objectstorage_bucket` table
+
 ## v0.7.0 [2022-01-19]
 
 _What's new?_

@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v44/mysql"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -40,6 +40,6 @@ func listMySQLDBSystemMetricMemoryUtilization(ctx context.Context, d *plugin.Que
 	if dbSystem.LifecycleState == "DELETING" || dbSystem.LifecycleState == "DELETED" {
 		return nil, nil
 	}
-	
+
 	return listMonitoringMetricStatistics(ctx, d, "5_MIN", "oci_mysql_database", "MemoryUtilization", "resourceId", *dbSystem.Id, *dbSystem.CompartmentId, region)
 }

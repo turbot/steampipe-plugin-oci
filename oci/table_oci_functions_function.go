@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -189,7 +189,7 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		logger.Error("listFunctions", "error_functionsManagementService", err)
 		return nil, err
 	}
-	
+
 	// Build request parameters
 	request := buildFunctionsFilters(equalQuals)
 	request.ApplicationId = &applicationId

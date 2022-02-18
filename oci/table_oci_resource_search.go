@@ -6,10 +6,10 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
-	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -166,7 +166,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 	if query != "" {
 		request := resourcesearch.SearchResourcesRequest{
-			Limit:         types.Int(1000),
+			Limit: types.Int(1000),
 			SearchDetails: resourcesearch.StructuredSearchDetails{
 				Query: common.String(query),
 			},

@@ -133,7 +133,7 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	request := dns.GetZoneRecordsRequest{
 		ZoneNameOrId:  zone.Id,
 		CompartmentId: types.String(compartment),
-		Limit:         types.Int64(1000),
+		Limit:         types.Int64(100),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},

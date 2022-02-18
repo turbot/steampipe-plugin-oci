@@ -15,7 +15,7 @@ _Enhancements_
 _Bug fixes_
 
 - Fixed the lower limit in the `oci_dns_rrset` table ([#357](https://github.com/turbot/steampipe-plugin-oci/pull/357))
-- Updated the column type  of `time_created` column to `TIMESTAMP` in `oci_objectstorage_bucket` table
+- Updated the column type  of `time_created` column to `TIMESTAMP` in `oci_objectstorage_bucket` table ([#348](https://github.com/turbot/steampipe-plugin-oci/pull/348))
 
 ## v0.7.0 [2022-01-19]
 

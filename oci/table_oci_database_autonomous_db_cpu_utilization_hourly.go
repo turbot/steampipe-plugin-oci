@@ -12,13 +12,13 @@ import (
 
 //// TABLE DEFINITION
 
-func tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(_ context.Context) *plugin.Table {
+func tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationHourly(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_database_autonomous_database_metric_cpu_utilization",
-		Description: "OCI Autonomous Database Monitoring Metrics - CPU Utilization",
+		Name:        "oci_database_autonomous_db_metric_cpu_utilization_hourly",
+		Description: "OCI Autonomous Database Monitoring Metrics - CPU Utilization (Hourly)",
 		List: &plugin.ListConfig{
 			ParentHydrate: listAutonomousDatabases,
-			Hydrate:       listAutonomousDatabaseMetricCpuUtilization,
+			Hydrate:       listAutonomousDatabaseMetricCpuUtilizationHourly,
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: MonitoringMetricColumns(
@@ -33,8 +33,8 @@ func tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(_ context.Context) *
 	}
 }
 
-func listAutonomousDatabaseMetricCpuUtilization(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listAutonomousDatabaseMetricCpuUtilizationHourly(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	database := h.Item.(database.AutonomousDatabaseSummary)
 	region := fmt.Sprintf("%v", ociRegionNameFromId(*database.Id))
-	return listMonitoringMetricStatistics(ctx, d, "5_MIN", "oci_autonomous_database", "CpuUtilization", "resourceId", *database.Id, *database.CompartmentId, region)
+	return listMonitoringMetricStatistics(ctx, d, "HOURLY", "oci_autonomous_database", "CpuUtilization", "resourceId", *database.Id, *database.CompartmentId, region)
 }

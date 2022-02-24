@@ -237,6 +237,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		}
 	}
 
+	// List All keys available in various compartments other than vault compartment
 	errorCh := make(chan error, len(compartments))
 	for _, compartment := range compartments {
 		request.CompartmentId = compartment.Id

@@ -3,6 +3,7 @@ package oci
 import (
 	"context"
 	"strings"
+	"sync"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
@@ -26,10 +27,6 @@ func tableKmsKey(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "algorithm",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
 				{
@@ -195,11 +192,6 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 	equalQuals := d.KeyColumnQuals
 
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
-
 	vaultData := h.Item.(keymanagement.VaultSummary)
 
 	// skip the API call if vault is any of the below state
@@ -225,9 +217,14 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
+	compartments, err := listAllCompartments(ctx, d, d.Connection)
+	if err != nil {
+		return nil, err
+	}
+
 	// Build request parameters
 	request := buildKmsKeyFilters(equalQuals)
-	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(),
@@ -240,11 +237,40 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		}
 	}
 
+	errorCh := make(chan error, len(compartments))
+	for _, compartment := range compartments {
+		request.CompartmentId = compartment.Id
+		wg.Add(1)
+		go getKmsKeyAsync(ctx, d, request, session, &wg, vaultData, errorCh)
+	}
+
+	// wait for all keys to be processed
+	wg.Wait()
+
+	// NOTE: close channel before ranging over error
+	close(errorCh)
+
+	for err := range errorCh {
+		// return the first error
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func getKmsKeyAsync(ctx context.Context, d *plugin.QueryData, request keymanagement.ListKeysRequest, session *session, wg *sync.WaitGroup, vaultData keymanagement.VaultSummary, errorCh chan error) {
+	defer wg.Done()
+	err := getKmsKeyAsyncData(ctx, d, request, session, vaultData)
+	if err != nil {
+		errorCh <- err
+	}
+}
+func getKmsKeyAsyncData(ctx context.Context, d *plugin.QueryData, request keymanagement.ListKeysRequest, session *session, vaultData keymanagement.VaultSummary) error {
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.KmsManagementClient.ListKeys(ctx, request)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		for _, key := range response.Items {
@@ -252,7 +278,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
-				return nil, nil
+				return nil
 			}
 		}
 		if response.OpcNextPage != nil {
@@ -262,7 +288,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 		}
 	}
 
-	return nil, err
+	return nil
 }
 
 //// HYDRATE FUNCTION

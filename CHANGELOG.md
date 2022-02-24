@@ -1,3 +1,16 @@
+## v0.8.1 [2022-02-24]
+
+_Bug fixes_
+
+- Fixed the `oci_kms_key` table to list keys from different compartments instead of fetching keys from only the vault's compartment ([#365](https://github.com/turbot/steampipe-plugin-oci/pull/365))
+- The following tables have been renamed to shorten their names to avoid hitting a PostgreSQL identifier character limit that would prevent proper schema generation. Any scripts or workflows that use should be updated to use the updated names. ([#364](https://github.com/turbot/steampipe-plugin-oci/pull/364))
+  - `oci_database_autonomous_database_metric_cpu_utilization` renamed to `oci_database_autonomous_db_metric_cpu_utilization`
+  - `oci_database_autonomous_database_metric_cpu_utilization_daily` renamed to `oci_database_autonomous_db_metric_cpu_utilization_daily`
+  - `oci_database_autonomous_database_metric_cpu_utilization_hourly` renamed to `oci_database_autonomous_db_metric_cpu_utilization_hourly`
+  - `oci_database_autonomous_database_metric_storage_utilization` renamed to `oci_database_autonomous_db_metric_storage_utilization`
+  - `oci_database_autonomous_database_metric_storage_utilization_daily` renamed to `oci_database_autonomous_db_metric_storage_utilization_daily`
+  - `oci_database_autonomous_database_metric_storage_utilization_hourly` renamed to `oci_database_autonomous_db_metric_storage_utilization_hourly`
+
 ## v0.8.0 [2022-02-18]
 
 _What's new?_

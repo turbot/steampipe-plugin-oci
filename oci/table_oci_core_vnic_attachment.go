@@ -67,7 +67,7 @@ func tableCoreVnicAttachment(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "lifecycle_state`",
+				Name:        "lifecycle_state",
 				Description: "The current state of the VNIC attachment. Possible values include: 'ATTACHING', 'ATTACHED', 'DETACHING', 'DETACHED'.",
 				Type:        proto.ColumnType_STRING,
 			},

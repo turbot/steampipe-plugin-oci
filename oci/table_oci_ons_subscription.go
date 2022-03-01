@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/ons"
@@ -18,13 +17,9 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_ons_subscription",
 		Description: "OCI Ons Subscription",
-		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
-			Hydrate:           getOnsSubscription,
-		},
 		List: &plugin.ListConfig{
-			Hydrate: listOnsSubscriptions,
+			Hydrate:           listOnsSubscriptions,
+			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -201,52 +196,11 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
-
-func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getOnsSubscription")
-	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
-
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
-	id := d.KeyColumnQuals["id"].GetStringValue()
-
-	// handle empty subscription id in get call
-	if strings.TrimSpace(id) == "" {
-		return nil, nil
-	}
-
-	// Create Session
-	session, err := onsNotificationDataPlaneService(ctx, d, region)
-	if err != nil {
-		return nil, err
-	}
-
-	request := ons.GetSubscriptionRequest{
-		SubscriptionId: types.String(id),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	response, err := session.NotificationDataPlaneClient.GetSubscription(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	return response.Subscription, nil
-}
-
 //// TRANSFORM FUNCTION
 
 func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	freeformTags := subscriptionFreeformTags(d.HydrateItem)
+	allTags := d.HydrateItem.(ons.SubscriptionSummary)
+	freeformTags := allTags.FreeformTags
 
 	var tags map[string]interface{}
 
@@ -257,7 +211,7 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 		}
 	}
 
-	definedTags := subscriptionDefinedTags(d.HydrateItem)
+	definedTags := allTags.DefinedTags
 
 	if definedTags != nil {
 		if tags == nil {
@@ -272,24 +226,4 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 	}
 
 	return tags, nil
-}
-
-func subscriptionFreeformTags(item interface{}) map[string]string {
-	switch item := item.(type) {
-	case ons.Subscription:
-		return item.FreeformTags
-	case ons.SubscriptionSummary:
-		return item.FreeformTags
-	}
-	return nil
-}
-
-func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{} {
-	switch item := item.(type) {
-	case ons.Subscription:
-		return item.DefinedTags
-	case ons.SubscriptionSummary:
-		return item.DefinedTags
-	}
-	return nil
 }

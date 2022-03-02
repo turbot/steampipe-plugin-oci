@@ -16,7 +16,7 @@ import (
 func tableOnsSubscription(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_ons_subscription",
-		Description: "OCI Ons Subscription",
+		Description: "OCI ONS Subscription",
 		List: &plugin.ListConfig{
 			Hydrate:           listOnsSubscriptions,
 			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),

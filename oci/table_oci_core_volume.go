@@ -309,9 +309,9 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getVolumeBackupPolicyAssignment")
-  region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+        region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 
-  volumeId := h.Item.(volumeInfo).Id
+        volumeId := h.Item.(volumeInfo).Id
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -332,7 +332,7 @@ func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h
 		return nil, err
 	}
 
-  if len (response.Items) > 0{
+        if len (response.Items) > 0{
 		return response.Items[0], nil
 	}
 

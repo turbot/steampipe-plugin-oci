@@ -119,6 +119,20 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("SizeInMBs"),
 			},
 			{
+				Name:        "volume_backup_policy_id",
+				Description: "The OCID of the volume backup policy that has been assigned to the volume.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getVolumeBackupPolicyAssignment,
+				Transform:   transform.FromField("PolicyId"),
+			},
+			{
+				Name:        "volume_backup_policy_assignment_id",
+				Description: "The OCID of the volume backup policy assignment.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getVolumeBackupPolicyAssignment,
+				Transform:   transform.FromField("Id"),
+			},
+			{
 				Name:        "vpus_per_gb",
 				Description: "The number of volume performance units (VPUs) that will be applied to this volume per GB,representing the Block Volume service's elastic performance options.",
 				Type:        proto.ColumnType_INT,
@@ -291,6 +305,38 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	return volumeInfo{response.Volume, region}, nil
+}
+
+func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getVolumeBackupPolicyAssignment")
+        region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+
+        volumeId := h.Item.(volumeInfo).Id
+
+	// Create Session
+	session, err := coreBlockStorageService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := core.GetVolumeBackupPolicyAssetAssignmentRequest{
+		AssetId: volumeId,
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(),
+		},
+	}
+
+	response, err := session.BlockstorageClient.GetVolumeBackupPolicyAssetAssignment(ctx, request)
+	if err != nil {
+		plugin.Logger(ctx).Error("getVolumeBackupPolicyAssignment","err",err)
+		return nil, err
+	}
+
+        if len (response.Items) > 0{
+		return response.Items[0], nil
+	}
+
+	return nil, nil
 }
 
 //// TRANSFORM FUNCTION

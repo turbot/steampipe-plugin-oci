@@ -332,7 +332,11 @@ func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h
 		return nil, err
 	}
 
-	return response.Items[0], nil
+  if len (response.Items) > 0{
+		return response.Items[0], nil
+	}
+
+	return nil, nil
 }
 
 //// TRANSFORM FUNCTION

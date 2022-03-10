@@ -1,3 +1,10 @@
+## v0.9.0 [2022-03-10]
+
+_Enhancements_
+
+- Added `volume_backup_policy_id` and `volume_backup_policy_assignment_id` columns to `oci_core_boot_volume` table ([#371](https://github.com/turbot/steampipe-plugin-oci/pull/371))
+- Added `volume_backup_policy_id` and `volume_backup_policy_assignment_id` columns to `oci_core_volume` table ([#371](https://github.com/turbot/steampipe-plugin-oci/pull/371))
+
 ## v0.8.1 [2022-02-24]
 
 _Bug fixes_
@@ -28,7 +35,7 @@ _Enhancements_
 _Bug fixes_
 
 - Fixed the lower limit in the `oci_dns_rrset` table ([#357](https://github.com/turbot/steampipe-plugin-oci/pull/357))
-- Updated the column type  of `time_created` column to `TIMESTAMP` in `oci_objectstorage_bucket` table ([#348](https://github.com/turbot/steampipe-plugin-oci/pull/348))
+- Updated the column type of `time_created` column to `TIMESTAMP` in `oci_objectstorage_bucket` table ([#348](https://github.com/turbot/steampipe-plugin-oci/pull/348))
 
 ## v0.7.0 [2022-01-19]
 
@@ -70,7 +77,7 @@ _Bug fixes_
 
 _Enhancements_
 
-- Updated: Add additional optional key quals, filter support, and context cancellation handling and improve hydrate with cache functionality across all the  tables ([#306](https://github.com/turbot/steampipe-plugin-oci/pull/306)) ([#317](https://github.com/turbot/steampipe-plugin-oci/pull/317))
+- Updated: Add additional optional key quals, filter support, and context cancellation handling and improve hydrate with cache functionality across all the tables ([#306](https://github.com/turbot/steampipe-plugin-oci/pull/306)) ([#317](https://github.com/turbot/steampipe-plugin-oci/pull/317))
 - Updated: Add `title` column in `oci_ons_subscription` table ([#313](https://github.com/turbot/steampipe-plugin-oci/pull/313))
 
 ## v0.3.1 [2021-09-13]

@@ -1,0 +1,11 @@
+[
+  {
+    "crypto_endpoint": "{{ output.crypto_endpoint.value }}",
+    "display_name": "{{ resourceName }}",
+    "freeform_tags": {
+      "Name": "{{ resourceName }}"
+    },
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "ACTIVE"
+  }
+]

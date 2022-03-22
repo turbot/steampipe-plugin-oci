@@ -34,7 +34,7 @@ func tableResourceManagerStack(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "name",
+					Name:    "display_name",
 					Require: plugin.Optional,
 				},
 			},
@@ -42,10 +42,9 @@ func tableResourceManagerStack(_ context.Context) *plugin.Table {
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "name",
+				Name:        "display_name",
 				Description: "Human-readable display name for the stack.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "id",
@@ -180,9 +179,9 @@ func listResourceManagerStacks(ctx context.Context, d *plugin.QueryData, _ *plug
 	}
 
 	// Check for additional filters
-	if equalQuals["name"] != nil {
-		name := equalQuals["name"].GetStringValue()
-		request.DisplayName = types.String(name)
+	if equalQuals["display_name"] != nil {
+		displayName := equalQuals["display_name"].GetStringValue()
+		request.DisplayName = types.String(displayName)
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()

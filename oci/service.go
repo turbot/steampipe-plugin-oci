@@ -38,6 +38,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
+	"github.com/oracle/oci-go-sdk/v44/resourcemanager"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
@@ -76,6 +77,7 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	ResourceSearchClient           resourcesearch.ResourceSearchClient
+	ResourceManagerClient          resourcemanager.ResourceManagerClient
 	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
@@ -1238,6 +1240,44 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	sess := &session{
 		TenancyID:            tenantId,
 		ResourceSearchClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// resourceManagerService returns the service client for OCI Resource Manager Service
+func resourceManagerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("resourcemanager-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("resourceManagerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := resourcemanager.NewResourceManagerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		ResourceManagerClient: client,
 	}
 
 	// save session in cache

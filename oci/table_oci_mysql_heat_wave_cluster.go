@@ -13,7 +13,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableGcpKmsKey(ctx context.Context) *plugin.Table {
+func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_heat_wave_cluster",
 		Description: "OCI MySQL heat wave cluster",
@@ -111,7 +111,7 @@ func getMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugin
 
 	dbSystemId := d.KeyColumnQuals["db_system_id"].GetStringValue()
 	region := ociRegionNameFromId(dbSystemId)
-	logger.Debug("listMySQLHeatWaveCluster", "DB System", dbSystemId, "OCI_REGION", region)
+	logger.Debug("getMySQLHeatWaveCluster", "DB System", dbSystemId, "OCI_REGION", region)
 
 	// Create Session
 	session, err := mySQLDBSystemService(ctx, d, string(region))

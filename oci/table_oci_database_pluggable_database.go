@@ -263,13 +263,13 @@ func pluggableDatabaseTags(_ context.Context, d *transform.TransformData) (inter
 
 	switch d.HydrateItem.(type) {
 	case database.PluggableDatabaseSummary:
-		database := d.HydrateItem.(database.PluggableDatabaseSummary)
-		freeformTags = database.FreeformTags
-		definedTags = database.DefinedTags
+		pDatabaseSummary := d.HydrateItem.(database.PluggableDatabaseSummary)
+		freeformTags = pDatabaseSummary.FreeformTags
+		definedTags = pDatabaseSummary.DefinedTags
 	case database.PluggableDatabase:
-		database := d.HydrateItem.(database.PluggableDatabase)
-		freeformTags = database.FreeformTags
-		definedTags = database.DefinedTags
+		pDatabase := d.HydrateItem.(database.PluggableDatabase)
+		freeformTags = pDatabase.FreeformTags
+		definedTags = pDatabase.DefinedTags
 	}
 
 	var tags map[string]interface{}

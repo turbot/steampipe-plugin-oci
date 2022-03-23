@@ -5,7 +5,6 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/mysql"
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
@@ -17,10 +16,6 @@ func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_heat_wave_cluster",
 		Description: "OCI MySQL heat wave cluster",
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.AllColumns([]string{"db_system_id"}),
-			Hydrate:    getMySQLHeatWaveCluster,
-		},
 		List: &plugin.ListConfig{
 			Hydrate:       listMySQLHeatWaveCluster,
 			ParentHydrate: listMySQLDBSystems,
@@ -31,6 +26,7 @@ func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 				Name:        "db_system_id",
 				Description: "The OCID of the parent DB System this HeatWave cluster is attached to.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -75,9 +71,9 @@ func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 
 func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	dbSystemId := h.Item.(mysql.DbSystemSummary).Id
-	region := ociRegionNameFromId(*dbSystemId)
-	logger.Debug("listMySQLHeatWaveCluster", "DB System", dbSystemId, "OCI_REGION", region)
+	dbSystem := h.Item.(mysql.DbSystemSummary)
+	region := ociRegionNameFromId(*dbSystem.Id)
+	logger.Debug("listMySQLHeatWaveCluster", "DB System", dbSystem, "OCI_REGION", region)
 
 	// Create Session
 	session, err := mySQLDBSystemService(ctx, d, string(region))
@@ -87,52 +83,22 @@ func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	// Build request parameters
 	request := mysql.GetHeatWaveClusterRequest{
-		DbSystemId: dbSystemId,
+		DbSystemId: dbSystem.Id,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.MySQLDBSystemClient.GetHeatWaveCluster(ctx, request)
-	if err != nil {
-		return nil, err
+	// Ignore if there is no heat wave cluster associated to DB System
+	if !*dbSystem.IsHeatWaveClusterAttached {
+		return nil, nil
 	}
 
-	heatWaveCluster := response.HeatWaveCluster
-	d.StreamListItem(ctx, heatWaveCluster)
+	response, err := session.MySQLDBSystemClient.GetHeatWaveCluster(ctx, request)
+	if err != nil {
+		return nil, nil
+	}
+	d.StreamListItem(ctx, response.HeatWaveCluster)
 
 	return nil, nil
-}
-
-//// HYDRATE FUNCTION
-
-func getMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-
-	dbSystemId := d.KeyColumnQuals["db_system_id"].GetStringValue()
-	region := ociRegionNameFromId(dbSystemId)
-	logger.Debug("getMySQLHeatWaveCluster", "DB System", dbSystemId, "OCI_REGION", region)
-
-	// Create Session
-	session, err := mySQLDBSystemService(ctx, d, string(region))
-	if err != nil {
-		return nil, err
-	}
-
-	// Build request parameters
-	request := mysql.GetHeatWaveClusterRequest{
-		DbSystemId: types.String(dbSystemId),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
-		},
-	}
-
-	response, err := session.MySQLDBSystemClient.GetHeatWaveCluster(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	heatWaveCluster := response.HeatWaveCluster
-
-	return heatWaveCluster, nil
 }

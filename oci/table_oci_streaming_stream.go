@@ -38,6 +38,10 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
+				{
+					Name:    "stream_pool_id",
+					Require: plugin.Optional,
+				},
 			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,

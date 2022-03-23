@@ -22,7 +22,6 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			ParentHydrate:     listDatabases,
 			Hydrate:           listPluggableDatabases,
 			KeyColumns: []*plugin.KeyColumn{
 				{
@@ -160,11 +159,8 @@ func listPluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 		return nil, err
 	}
 
-	databaseId := h.Item.(database.DatabaseSummary).Id
-
 	request := database.ListPluggableDatabasesRequest{
 		CompartmentId: types.String(compartment),
-		DatabaseId:    databaseId,
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),

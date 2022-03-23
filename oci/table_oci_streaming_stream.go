@@ -91,6 +91,7 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 				Name:        "stream_pool_id",
 				Description: "The OCID of the stream pool that contains the stream.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("StreamPoolId"),
 			},
 
 			// tags
@@ -181,6 +182,11 @@ func listStreams(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
 		request.LifecycleState = streaming.StreamLifecycleStateEnum(lifecycleState)
+	}
+
+	if equalQuals["stream_pool_id"] != nil {
+		streamPoolId := equalQuals["stream_pool_id"].GetStringValue()
+		request.StreamPoolId = types.String(streamPoolId)
 	}
 
 	limit := d.QueryContext.Limit

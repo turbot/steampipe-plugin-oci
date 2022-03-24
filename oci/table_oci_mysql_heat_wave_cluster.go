@@ -63,11 +63,13 @@ func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 			{
 				Name:        "cluster_nodes",
 				Description: "A HeatWave node is a compute host that is part of a HeatWave cluster.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_JSON,
 			},
 		},
 	}
 }
+
+//// LIST FUNCTION
 
 func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)

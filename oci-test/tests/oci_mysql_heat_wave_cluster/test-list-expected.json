@@ -1,0 +1,7 @@
+[
+  {
+    "db_system_id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "{{ output.lifecycle_state.value }}",
+    "cluster_size": "{{ output.cluster_size.value }}"
+  }
+]

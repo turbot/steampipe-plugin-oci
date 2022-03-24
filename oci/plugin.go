@@ -122,6 +122,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_db_system":                                          tableMySQLDBSystem(ctx),
 			"oci_mysql_db_system_metric_connections":                       tableOciMySQLDBSystemMetricConnections(ctx),
 			"oci_mysql_db_system_metric_connections_daily":                 tableOciMySQLDBSystemMetricConnectionsDaily(ctx),
+			"oci_mysql_db_system_metric_connections_hourly":                tableOciMySQLDBSystemMetricConnectionsHourly(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization":                   tableOciMySQLDBSystemMetricCpuUtilization(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization_daily":             tableOciMySQLDBSystemMetricCpuUtilizationDaily(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization_hourly":            tableOciMySQLDBSystemMetricCpuUtilizationHourly(ctx),

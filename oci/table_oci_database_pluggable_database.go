@@ -66,6 +66,7 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 				Name:        "container_database_id",
 				Description: "The OCID of the CDB.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "is_restricted",
@@ -88,7 +89,7 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -175,7 +176,9 @@ func listPluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = database.PluggableDatabaseSummaryLifecycleStateEnum(lifecycleState)
+		if isValidState(lifecycleState) {
+			request.LifecycleState = database.PluggableDatabaseSummaryLifecycleStateEnum(lifecycleState)
+		}
 	}
 
 	limit := d.QueryContext.Limit
@@ -290,4 +293,13 @@ func pluggableDatabaseTags(_ context.Context, d *transform.TransformData) (inter
 	}
 
 	return tags, nil
+}
+
+func isValidState(state string) bool {
+	stateType := database.PluggableDatabaseSummaryLifecycleStateEnum(state)
+	switch stateType {
+	case database.PluggableDatabaseSummaryLifecycleStateProvisioning, database.PluggableDatabaseSummaryLifecycleStateAvailable, database.PluggableDatabaseSummaryLifecycleStateFailed, database.PluggableDatabaseSummaryLifecycleStateTerminated, database.PluggableDatabaseSummaryLifecycleStateTerminating, database.PluggableDatabaseSummaryLifecycleStateUpdating:
+		return true
+	}
+	return false
 }

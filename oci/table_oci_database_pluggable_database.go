@@ -22,7 +22,7 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listPluggableDatabases,
+			Hydrate:           listDatabasePluggableDatabases,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -141,7 +141,7 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listPluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listDatabasePluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -209,7 +209,6 @@ func listPluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.
 			pagesLeft = false
 		}
 	}
-
 	return nil, err
 }
 
@@ -250,7 +249,6 @@ func getPluggableDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	if err != nil {
 		return nil, err
 	}
-
 	return response.PluggableDatabase, nil
 }
 
@@ -288,7 +286,6 @@ func pluggableDatabaseTags(_ context.Context, d *transform.TransformData) (inter
 			for key, value := range v {
 				tags[key] = value
 			}
-
 		}
 	}
 

@@ -20,11 +20,11 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 		Description: "OCI Stream",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getStream,
+			Hydrate:    getStreamingStream,
 		},
 		List: &plugin.ListConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listStreams,
+			Hydrate:           listStreamingStreams,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -72,13 +72,13 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_state_details",
 				Description: "Any additional details about the current state of the stream.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getStream,
+				Hydrate:     getStreamingStream,
 			},
 			{
 				Name:        "messages_endpoint",
 				Description: "The endpoint to use when creating the StreamClient to consume or publish messages in the stream.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getStream,
+				Hydrate:     getStreamingStream,
 			},
 			{
 				Name:        "partitions",
@@ -89,7 +89,7 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 				Name:        "retention_in_hours",
 				Description: "The retention period of the stream, in hours. This property is read-only.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getStream,
+				Hydrate:     getStreamingStream,
 			},
 			{
 				Name:        "stream_pool_id",
@@ -98,7 +98,7 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("StreamPoolId"),
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -150,7 +150,7 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listStreams(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -227,7 +227,7 @@ func listStreams(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 
 //// HYDRATE FUNCTION
 
-func getStream(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
@@ -314,4 +314,12 @@ func streamTags(_ context.Context, d *transform.TransformData) (interface{}, err
 	}
 
 	return tags, nil
+}
+
+func (ls streaming.StreamLifecycleStateEnum) IsValid() bool {
+	switch ls {
+	case streaming.StreamLifecycleStateCreating, streaming.StreamLifecycleStateActive, streaming.StreamLifecycleStateDeleted, streaming.StreamLifecycleStateDeleting, streaming.StreamLifecycleStateFailed, streaming.StreamLifecycleStateUpdating:
+		return true
+	}
+	return false
 }

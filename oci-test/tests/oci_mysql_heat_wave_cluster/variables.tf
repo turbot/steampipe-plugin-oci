@@ -11,8 +11,8 @@ variable "config_file_profile" {
 }
 
 variable "heat_wave_cluster_cluster_size" {
-  type        = string
-  default     = "2"
+  type        = number
+  default     = 2
   description = "The number of analytics-processing compute instances, of the specified shape, in the HeatWave cluster."
 }
 
@@ -72,6 +72,6 @@ output "lifecycle_state" {
   value = oci_mysql_heat_wave_cluster.named_test_resource.state
 }
 
-output "cluster_size" {
-  value = oci_mysql_heat_wave_cluster.named_test_resource.cluster_size
+output "shape_name" {
+  value = oci_mysql_heat_wave_cluster.named_test_resource.shape_name
 }

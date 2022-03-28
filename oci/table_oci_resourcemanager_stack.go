@@ -272,13 +272,13 @@ func resourceManagerStackTags(_ context.Context, d *transform.TransformData) (in
 
 	switch d.HydrateItem.(type) {
 	case resourcemanager.StackSummary:
-		table := d.HydrateItem.(resourcemanager.StackSummary)
-		freeformTags = table.FreeformTags
-		definedTags = table.DefinedTags
+		stacks := d.HydrateItem.(resourcemanager.StackSummary)
+		freeformTags = stacks.FreeformTags
+		definedTags = stacks.DefinedTags
 	case resourcemanager.Stack:
-		table := d.HydrateItem.(resourcemanager.Stack)
-		freeformTags = table.FreeformTags
-		definedTags = table.DefinedTags
+		stack := d.HydrateItem.(resourcemanager.Stack)
+		freeformTags = stack.FreeformTags
+		definedTags = stack.DefinedTags
 	}
 
 	var tags map[string]interface{}

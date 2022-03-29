@@ -95,7 +95,7 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 			{
 				Name:        "ipv6_cidr_block",
 				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
-				Type:        proto.ColumnType_JSON,
+				Type:        proto.ColumnType_CIDR,
 				Transform:   transform.FromField("Ipv6CidrBlock"),
 			},
 			{

@@ -114,6 +114,12 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Description: "The list of IPv4 CIDR blocks the VCN will use.",
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "ipv6_cidr_blocks",
+				Description: "For an IPv6-enabled VCN, this is the list of IPv6 CIDR blocks for the VCN's IP address space. The CIDRs are provided by Oracle and the sizes are always /56.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Ipv6CidrBlocks"),
+			},
 
 			// tags
 			{

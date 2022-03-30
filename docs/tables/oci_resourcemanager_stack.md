@@ -29,3 +29,19 @@ from
 where
   lifecycle_state <> 'ACTIVE';
 ```
+
+### List resource manager stacks older than 90 days
+
+```sql
+select
+  id,
+  display_name,
+  time_created,
+  lifecycle_state as state
+from
+  oci_resourcemanager_stack
+where
+  time_created <= (current_date - interval '90' day)
+order by
+  time_created;
+```

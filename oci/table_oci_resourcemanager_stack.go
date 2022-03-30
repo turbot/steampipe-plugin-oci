@@ -185,7 +185,11 @@ func listResourceManagerStacks(ctx context.Context, d *plugin.QueryData, _ *plug
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = resourcemanager.StackLifecycleStateEnum(lifecycleState)
+		if isValidState(lifecycleState) {
+			request.LifecycleState = resourcemanager.StackLifecycleStateEnum(lifecycleState)
+		} else {
+			return nil, nil
+		}
 	}
 
 	// Check for limit
@@ -303,4 +307,13 @@ func resourceManagerStackTags(_ context.Context, d *transform.TransformData) (in
 	}
 
 	return tags, nil
+}
+
+func isValidState(state string) bool {
+	stateType := resourcemanager.StackLifecycleStateEnum(state)
+	switch stateType {
+	case resourcemanager.StackLifecycleStateActive, resourcemanager.StackLifecycleStateCreating, resourcemanager.StackLifecycleStateDeleted, resourcemanager.StackLifecycleStateDeleting, resourcemanager.StackLifecycleStateFailed:
+		return true
+	}
+	return false
 }

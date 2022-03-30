@@ -185,7 +185,7 @@ func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		if isValidState(lifecycleState) {
+		if isValidStreamLifecycleStateEnum(lifecycleState) {
 			request.LifecycleState = streaming.StreamLifecycleStateEnum(lifecycleState)
 		} else {
 			return nil, nil
@@ -320,7 +320,7 @@ func streamTags(_ context.Context, d *transform.TransformData) (interface{}, err
 	return tags, nil
 }
 
-func isValidState(state string) bool {
+func isValidStreamLifecycleStateEnum(state string) bool {
 	stateType := streaming.StreamLifecycleStateEnum(state)
 
 	switch stateType {

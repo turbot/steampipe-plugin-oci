@@ -85,6 +85,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_db":                                              tableOciDatabase(ctx),
 			"oci_database_db_home":                                         tableOciDatabaseDBHome(ctx),
 			"oci_database_db_system":                                       tableOciDatabaseDBSystem(ctx),
+			"oci_database_pluggable_database":                              tableOciPluggableDatabase(ctx),
 			"oci_database_software_image":                                  tableOciDatabaseSoftwareImage(ctx),
 			"oci_dns_rrset":                                                tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                             tableDnsTsigKey(ctx),
@@ -144,6 +145,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_region":                                                   tableIdentityRegion(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
 			"oci_resourcemanager_stack":                                    tableResourceManagerStack(ctx),
+			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
 		},
 	}

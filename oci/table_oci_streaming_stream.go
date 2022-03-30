@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v44/streaming"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
@@ -14,27 +14,32 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreVcn(_ context.Context) *plugin.Table {
+func tableOciStreamingStream(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_vcn",
-		Description: "OCI Core VCN",
+		Name:        "oci_streaming_stream",
+		Description: "OCI Stream",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getVcn,
+			Hydrate:    getStreamingStream,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreVcns,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate:           listStreamingStreams,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "display_name",
+					Name:    "name",
 					Require: plugin.Optional,
 				},
 				{
 					Name:    "lifecycle_state",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "stream_pool_id",
 					Require: plugin.Optional,
 				},
 			},
@@ -42,86 +47,58 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "name",
+				Description: "The name of the stream.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The VCN's Oracle ID (OCID).",
+				Description: "The OCID of the stream.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The VCN's current state.",
+				Description: "The current state of the stream.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the VCN was created.",
+				Description: "The date and time the stream was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "cidr_block",
-				Description: "The first CIDR IP address from cidrBlocks.",
-				Type:        proto.ColumnType_CIDR,
-			},
-			{
-				Name:        "default_dhcp_options_id",
-				Description: "The OCID for the VCN's default set of DHCP options.",
+				Name:        "lifecycle_state_details",
+				Description: "Any additional details about the current state of the stream.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultDhcpOptionsId"),
+				Hydrate:     getStreamingStream,
 			},
 			{
-				Name:        "default_route_table_id",
-				Description: "The OCID of the instance.",
+				Name:        "messages_endpoint",
+				Description: "The endpoint to use when creating the StreamClient to consume or publish messages in the stream.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultRouteTableId"),
+				Hydrate:     getStreamingStream,
 			},
 			{
-				Name:        "default_security_list_id",
-				Description: "The OCID for the VCN's default security list.",
+				Name:        "partitions",
+				Description: "The number of partitions in the stream.",
+				Type:        proto.ColumnType_INT,
+			},
+			{
+				Name:        "retention_in_hours",
+				Description: "The retention period of the stream, in hours. This property is read-only.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getStreamingStream,
+			},
+			{
+				Name:        "stream_pool_id",
+				Description: "The OCID of the stream pool that contains the stream.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultSecurityListId"),
-			},
-			{
-				Name:        "dns_label",
-				Description: "A DNS label for the VCN, used in conjunction with the VNIC's hostname and subnet's DNS label to form a fully qualified domain name (FQDN) for each VNIC within this subnet.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DnsLabel"),
-			},
-			{
-				Name:        "ipv6_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
-				Type:        proto.ColumnType_CIDR,
-				Transform:   transform.FromField("Ipv6CidrBlock"),
-			},
-			{
-				Name:        "ipv6_public_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
-			},
-			{
-				Name:        "vcn_domain_name",
-				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "cidr_blocks",
-				Description: "The list of IPv4 CIDR blocks the VCN will use.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "ipv6_cidr_blocks",
-				Description: "For an IPv6-enabled VCN, this is the list of IPv6 CIDR blocks for the VCN's IP address space. The CIDRs are provided by Oracle and the sizes are always /56.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Ipv6CidrBlocks"),
+				Transform:   transform.FromField("StreamPoolId"),
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -133,21 +110,21 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard Steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(vcnTags),
+				Transform:   transform.From(streamTags),
 			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromField("Name"),
 			},
 
-			// Standard OCI columns
+			// OCI standard columns
 			{
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
@@ -173,11 +150,11 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listStreams", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -187,28 +164,37 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := streamAdminService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListVcnsRequest{
+	request := streaming.ListStreamsRequest{
 		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
+		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
 	// Check for additional filters
-	if equalQuals["display_name"] != nil {
-		displayName := equalQuals["display_name"].GetStringValue()
-		request.DisplayName = types.String(displayName)
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = core.VcnLifecycleStateEnum(lifecycleState)
+		if isValidStreamLifecycleStateEnum(lifecycleState) {
+			request.LifecycleState = streaming.StreamLifecycleStateEnum(lifecycleState)
+		} else {
+			return nil, nil
+		}
+	}
+
+	if equalQuals["stream_pool_id"] != nil {
+		streamPoolId := equalQuals["stream_pool_id"].GetStringValue()
+		request.StreamPoolId = types.String(streamPoolId)
 	}
 
 	limit := d.QueryContext.Limit
@@ -220,13 +206,13 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListVcns(ctx, request)
+		response, err := session.StreamAdminClient.ListStreams(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, network := range response.Items {
-			d.StreamListItem(ctx, network)
+		for _, stream := range response.Items {
+			d.StreamListItem(ctx, stream)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -245,60 +231,81 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 //// HYDRATE FUNCTION
 
-func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getVcn")
+func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getStreams", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(streaming.StreamSummary).Id
+	} else {
+
+		// Restrict the api call to only root compartment
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	// handle empty id in get call
+	if id == "" {
 		return nil, nil
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := streamAdminService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetVcnRequest{
-		VcnId: types.String(id),
+	request := streaming.GetStreamRequest{
+		StreamId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetVcn(ctx, request)
+	response, err := session.StreamAdminClient.GetStream(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Vcn, nil
+	return response.Stream, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vcn := d.HydrateItem.(core.Vcn)
+func streamTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	var freeformTags map[string]string
+	var definedTags map[string]map[string]interface{}
+
+	switch d.HydrateItem.(type) {
+	case streaming.StreamSummary:
+		streamSummary := d.HydrateItem.(streaming.StreamSummary)
+		freeformTags = streamSummary.FreeformTags
+		definedTags = streamSummary.DefinedTags
+	case streaming.Stream:
+		stream := d.HydrateItem.(streaming.Stream)
+		freeformTags = stream.FreeformTags
+		definedTags = stream.DefinedTags
+	}
 
 	var tags map[string]interface{}
 
-	if vcn.FreeformTags != nil {
+	if freeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range vcn.FreeformTags {
+		for k, v := range freeformTags {
 			tags[k] = v
 		}
 	}
 
-	if vcn.DefinedTags != nil {
+	if definedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range vcn.DefinedTags {
+		for _, v := range definedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -307,4 +314,14 @@ func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error)
 	}
 
 	return tags, nil
+}
+
+func isValidStreamLifecycleStateEnum(state string) bool {
+	stateType := streaming.StreamLifecycleStateEnum(state)
+
+	switch stateType {
+	case streaming.StreamLifecycleStateCreating, streaming.StreamLifecycleStateActive, streaming.StreamLifecycleStateDeleted, streaming.StreamLifecycleStateDeleting, streaming.StreamLifecycleStateFailed, streaming.StreamLifecycleStateUpdating:
+		return true
+	}
+	return false
 }

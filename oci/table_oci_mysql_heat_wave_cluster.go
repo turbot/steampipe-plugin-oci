@@ -19,6 +19,12 @@ func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate:       listMySQLHeatWaveCluster,
 			ParentHydrate: listMySQLDBSystems,
+			KeyColumns: plugin.KeyColumnSlice{
+				{
+					Name:    "db_system_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -76,6 +82,10 @@ func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugi
 	dbSystem := h.Item.(mysql.DbSystemSummary)
 	region := ociRegionNameFromId(*dbSystem.Id)
 	logger.Debug("listMySQLHeatWaveCluster", "DB System", dbSystem, "OCI_REGION", region)
+
+	if d.KeyColumnQualString("db_system_id") != "" && d.KeyColumnQualString("db_system_id") != *dbSystem.Id {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := mySQLDBSystemService(ctx, d, string(region))

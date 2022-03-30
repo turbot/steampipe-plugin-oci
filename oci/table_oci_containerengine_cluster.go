@@ -25,7 +25,8 @@ func tableContainerEngineCluster(_ context.Context) *plugin.Table {
 			Hydrate:           getContainerEngineCluster,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listContainerEngineClusters,
+			Hydrate:           listContainerEngineClusters,
+			ShouldIgnoreError: isNotFoundError([]string{"400"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "name",

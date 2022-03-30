@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -22,16 +22,16 @@ variable "region" {
   description = "OCI region used for the test. Does not work with default region in config, so must be defined here."
 }
 
-variable "template_id" {
-  type        = string
-  default     = "ocid1.ormtemplate.oc1.ap-mumbai-1.aaaaaaaa2ereypft5pb3vgmplr6arm767dpqvkfocugw4vdcbrgmmg2dbcsq"
-  description = "OCID of template."
-}
-
-variable "terraform-version" {
+variable "terraform_version" {
   type        = string
   default     = "0.12.x"
   description = "The version of Terraform to use with the stack."
+}
+
+variable "template_category_id" {
+  type        = string
+  default     = "0"
+  description = "The category in which the template belongs to"
 }
 
 provider "oci" {
@@ -40,18 +40,30 @@ provider "oci" {
 }
 
 locals {
-  path = "${path.cwd}/output.json"
+  template_path = "${path.cwd}/template-output.json"
+  resource_path = "${path.cwd}/resource-output.json"
+}
+
+resource "null_resource" "named_test_template" {
+  provisioner "local-exec" {
+    command = "oci resource-manager template list --compartment-id ${var.tenancy_ocid} --template-category-id ${var.template_category_id} --output json > ${local.template_path}"
+  }
+}
+
+data "local_file" "input_template" {
+  depends_on = [null_resource.named_test_template]
+  filename   = local.template_path
 }
 
 resource "null_resource" "named_test_resource" {
   provisioner "local-exec" {
-    command = "oci resource-manager stack create-from-template --compartment-id ${var.tenancy_ocid} --template-id ${var.template_id} --terraform-version ${var.terraform-version} --output json > ${local.path} --display-name ${var.resource_name}"
+    command = "oci resource-manager stack create-from-template --compartment-id ${var.tenancy_ocid} --template-id ${jsondecode(data.local_file.input_template.content).data.items[0].id} --terraform-version ${var.terraform_version} --display-name ${var.resource_name} --output json > ${local.resource_path}"
   }
 }
 
 data "local_file" "input" {
   depends_on = [null_resource.named_test_resource]
-  filename   = local.path
+  filename   = local.resource_path
 }
 
 output "display_name" {

@@ -1248,8 +1248,8 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	return sess, nil
 }
 
-// streamAdminClient returns the service client for OCI Stream Admin Service
-func streamAdminClient(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// streamAdminService returns the service client for OCI Stream Admin Service
+func streamAdminService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("streamadmin-%s", region)
 	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {

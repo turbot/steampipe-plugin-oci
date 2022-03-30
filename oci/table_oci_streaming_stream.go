@@ -164,7 +164,7 @@ func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	}
 
 	// Create Session
-	session, err := streamAdminClient(ctx, d, region)
+	session, err := streamAdminService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -187,6 +187,8 @@ func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
 		if isValidState(lifecycleState) {
 			request.LifecycleState = streaming.StreamLifecycleStateEnum(lifecycleState)
+		} else {
+			return nil, nil
 		}
 	}
 
@@ -257,7 +259,7 @@ func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	}
 
 	// Create Session
-	session, err := streamAdminClient(ctx, d, region)
+	session, err := streamAdminService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}

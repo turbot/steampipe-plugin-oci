@@ -16,7 +16,7 @@ from
   oci_database_pluggable_database;
 ```
 
-### List pluggable databases that are not available
+### List unavailable pluggable databases
 
 ```sql
 select

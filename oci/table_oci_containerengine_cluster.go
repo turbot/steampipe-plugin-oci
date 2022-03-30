@@ -25,8 +25,7 @@ func tableContainerEngineCluster(_ context.Context) *plugin.Table {
 			Hydrate:           getContainerEngineCluster,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listContainerEngineClusters,
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			Hydrate: listContainerEngineClusters,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "name",
@@ -261,12 +260,13 @@ func getContainerEngineCluster(ctx context.Context, d *plugin.QueryData, h *plug
 func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.Logger) (containerengine.ListClustersRequest, bool) {
 	request := containerengine.ListClustersRequest{}
 	isValid := true
-	if equalQuals["name"] != nil {
+
+	if equalQuals["name"] != nil && strings.Trim(equalQuals["name"].GetStringValue(), " ") != "" {
 		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		if isValidState(lifecycleState) {
+		if isValidContainerEngineClusterLifecycleState(lifecycleState) {
 			request.LifecycleState = []containerengine.ClusterLifecycleStateEnum{containerengine.ClusterLifecycleStateEnum(lifecycleState)}
 		} else {
 			isValid = false
@@ -275,7 +275,7 @@ func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap
 	return request, isValid
 }
 
-func isValidState(state string) bool {
+func isValidContainerEngineClusterLifecycleState(state string) bool {
 	stateType := containerengine.ClusterLifecycleStateEnum(state)
 	switch stateType {
 	case containerengine.ClusterLifecycleStateActive, containerengine.ClusterLifecycleStateCreating, containerengine.ClusterLifecycleStateDeleted, containerengine.ClusterLifecycleStateDeleting, containerengine.ClusterLifecycleStateFailed, containerengine.ClusterLifecycleStateUpdating:

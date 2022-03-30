@@ -45,3 +45,17 @@ where
 order by
   time_created;
 ```
+
+### List unrestricted pluggable databases
+
+```sql
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  is_restricted
+from
+  oci_database_pluggable_database
+where
+  not is_restricted;
+```

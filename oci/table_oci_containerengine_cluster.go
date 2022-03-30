@@ -56,7 +56,7 @@ func tableContainerEngineCluster(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The state of the cluster masters",
+				Description: "The state of the cluster masters.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

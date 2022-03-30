@@ -28,7 +28,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List Heat Wave clusters where cluster size is more than 2
+### List heat wave clusters with cluster size more than 2
 
 ```sql
 select

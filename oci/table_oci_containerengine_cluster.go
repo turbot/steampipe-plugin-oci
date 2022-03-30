@@ -170,7 +170,10 @@ func listContainerEngineClusters(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	// Build request parameters
-	request := buildContainerEngineClusterFilters(equalQuals, logger)
+	request, isValid := buildContainerEngineClusterFilters(equalQuals, logger)
+	if !isValid {
+		return nil, nil
+	}
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
@@ -254,9 +257,9 @@ func getContainerEngineCluster(ctx context.Context, d *plugin.QueryData, h *plug
 }
 
 // Build additional filters
-func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.Logger) containerengine.ListClustersRequest {
+func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.Logger) (containerengine.ListClustersRequest, bool) {
 	request := containerengine.ListClustersRequest{}
-
+	isValid := true
 	if equalQuals["display_name"] != nil {
 		request.Name = types.String(equalQuals["display_name"].GetStringValue())
 	}
@@ -264,10 +267,11 @@ func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
 		if isValidState(lifecycleState) {
 			request.LifecycleState = []containerengine.ClusterLifecycleStateEnum{containerengine.ClusterLifecycleStateEnum(lifecycleState)}
+		} else {
+			isValid = false
 		}
 	}
-
-	return request
+	return request, isValid
 }
 
 func isValidState(state string) bool {

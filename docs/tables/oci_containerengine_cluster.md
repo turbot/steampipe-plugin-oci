@@ -15,7 +15,7 @@ from
   oci_containerengine_cluster;
 ```
 
-### List Container Engine Clusters that are not available
+### List container engine clusters that are not available
 
 ```sql
 select
@@ -27,7 +27,7 @@ from
 where
   lifecycle_state <> 'AVAILABLE';
 ```
-### List Container Engine Clusters for which image policy is disabled
+### List container engine clusters for which image policy is disabled
 
 ```sql
 select

@@ -38,7 +38,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_cloud_guard_managed_list":                                 tableCloudGuardManagedList(ctx),
 			"oci_cloud_guard_responder_recipe":                             tableCloudGuardResponderRecipe(ctx),
 			"oci_cloud_guard_target":                                       tableCloudGuardTarget(ctx),
-			"oci_containerengine_cluster":                                  tableContainerEngineCluster(ctx),
+			"oci_containerengine_cluster":                                  tableOciContainerEngineCluster(ctx),
 			"oci_core_block_volume_replica":                                tableCoreBlockVolumeReplica(ctx),
 			"oci_core_boot_volume":                                         tableCoreBootVolume(ctx),
 			"oci_core_boot_volume_attachment":                              tableCoreBootVolumeAttachment(ctx),

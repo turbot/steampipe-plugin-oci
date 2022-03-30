@@ -15,7 +15,7 @@ from
   oci_mysql_heat_wave_cluster;
 ```
 
-### List Heat Wave clusters that are not active
+### List heat wave clusters that are not active
 
 ```sql
 select

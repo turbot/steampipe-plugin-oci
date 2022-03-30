@@ -16,7 +16,7 @@ from
   oci_resourcemanager_stack;
 ```
 
-### List Resource Manager Stacks that are not active
+### List resource manager stacks that are not active
 
 ```sql
 select

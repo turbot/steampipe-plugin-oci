@@ -16,7 +16,7 @@ from
   oci_database_pluggable_database;
 ```
 
-### List unavailable pluggable databases
+### List failed pluggable databases
 
 ```sql
 select
@@ -27,7 +27,7 @@ select
 from
   oci_database_pluggable_database
 where
-  lifecycle_state <> 'AVAILABLE';
+  lifecycle_state = 'FAILED';
 ```
 
 ### List pluggable databases older than 90 days

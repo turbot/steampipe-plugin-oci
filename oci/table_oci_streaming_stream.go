@@ -237,15 +237,11 @@ func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("getStreams", "Compartment", compartment, "OCI_REGION", region)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(streaming.StreamSummary).Id
 	} else {
+
 		// Restrict the api call to only root compartment
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil

@@ -143,6 +143,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_subscription":                                         tableOnsSubscription(ctx),
 			"oci_region":                                                   tableIdentityRegion(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
+			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
 		},
 	}

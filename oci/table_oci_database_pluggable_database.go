@@ -176,7 +176,7 @@ func listDatabasePluggableDatabases(ctx context.Context, d *plugin.QueryData, h 
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		if isValidState(lifecycleState) {
+		if isValidPluggableDatabaseSummaryLifecycleState(lifecycleState) {
 			request.LifecycleState = database.PluggableDatabaseSummaryLifecycleStateEnum(lifecycleState)
 		} else {
 			return nil, nil
@@ -294,7 +294,7 @@ func pluggableDatabaseTags(_ context.Context, d *transform.TransformData) (inter
 	return tags, nil
 }
 
-func isValidState(state string) bool {
+func isValidPluggableDatabaseSummaryLifecycleState(state string) bool {
 	stateType := database.PluggableDatabaseSummaryLifecycleStateEnum(state)
 	switch stateType {
 	case database.PluggableDatabaseSummaryLifecycleStateProvisioning, database.PluggableDatabaseSummaryLifecycleStateAvailable, database.PluggableDatabaseSummaryLifecycleStateFailed, database.PluggableDatabaseSummaryLifecycleStateTerminated, database.PluggableDatabaseSummaryLifecycleStateTerminating, database.PluggableDatabaseSummaryLifecycleStateUpdating:

@@ -29,3 +29,19 @@ from
 where
   lifecycle_state <> 'AVAILABLE';
 ```
+
+### List pluggable databases older than 90 days
+
+```sql
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_pluggable_database
+where
+  time_created <= (current_date - interval '90' day)
+order by
+  time_created;
+```

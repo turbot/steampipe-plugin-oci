@@ -15,7 +15,7 @@ from
   oci_containerengine_cluster;
 ```
 
-### List container engine clusters that are not available
+### List unavailable container engine clusters
 
 ```sql
 select

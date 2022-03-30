@@ -260,8 +260,8 @@ func getContainerEngineCluster(ctx context.Context, d *plugin.QueryData, h *plug
 func buildContainerEngineClusterFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.Logger) (containerengine.ListClustersRequest, bool) {
 	request := containerengine.ListClustersRequest{}
 	isValid := true
-	if equalQuals["display_name"] != nil {
-		request.Name = types.String(equalQuals["display_name"].GetStringValue())
+	if equalQuals["name"] != nil {
+		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()

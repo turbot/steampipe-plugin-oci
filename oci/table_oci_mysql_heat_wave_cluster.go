@@ -12,7 +12,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
+func tableOciMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_mysql_heat_wave_cluster",
 		Description: "OCI MySQL heat wave cluster",

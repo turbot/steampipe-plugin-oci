@@ -15,7 +15,7 @@ from
   oci_mysql_heat_wave_cluster;
 ```
 
-### List heat wave clusters that are not active
+### List failed heat wave clusters
 
 ```sql
 select
@@ -25,10 +25,10 @@ select
 from
   oci_mysql_heat_wave_cluster
 where
-  lifecycle_state <> 'ACTIVE';
+  lifecycle_state = 'FAILED';
 ```
 
-### List heat wave clusters with cluster size more than 2
+### List heat wave clusters older than 90 days
 
 ```sql
 select
@@ -39,5 +39,7 @@ select
 from
   oci_mysql_heat_wave_cluster
 where
-  cluster_size > 2;
+  time_created <= (current_date - interval '90' day)
+order by
+  time_created;
 ```

@@ -178,6 +178,8 @@ func listDatabasePluggableDatabases(ctx context.Context, d *plugin.QueryData, h 
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
 		if isValidState(lifecycleState) {
 			request.LifecycleState = database.PluggableDatabaseSummaryLifecycleStateEnum(lifecycleState)
+		} else {
+			return nil, nil
 		}
 	}
 

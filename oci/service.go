@@ -40,6 +40,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
+	"github.com/oracle/oci-go-sdk/v44/streaming"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
@@ -78,6 +79,7 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	ResourceSearchClient           resourcesearch.ResourceSearchClient
+	StreamAdminClient              streaming.StreamAdminClient
 	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
@@ -1280,6 +1282,44 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	sess := &session{
 		TenancyID:            tenantId,
 		ResourceSearchClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// streamAdminService returns the service client for OCI Stream Admin Service
+func streamAdminService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("streamadmin-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("resourceSearchService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := streaming.NewStreamAdminClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:         tenantId,
+		StreamAdminClient: client,
 	}
 
 	// save session in cache

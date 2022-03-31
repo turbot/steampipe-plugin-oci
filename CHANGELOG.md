@@ -1,3 +1,16 @@
+## v0.11.0 [2022-03-30]
+
+_What's new?_
+
+- New tables added
+  - [oci_database_pluggable_database](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_pluggable_database) ([#384](https://github.com/turbot/steampipe-plugin-oci/pull/384))
+  - [oci_mysql_db_system_metric_connections_hourly](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_db_system_metric_connections_hourly) ([#382](https://github.com/turbot/steampipe-plugin-oci/pull/382))
+  - [oci_streaming_stream](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_streaming_stream) ([#381](https://github.com/turbot/steampipe-plugin-oci/pull/381))
+
+_Enhancements_
+
+- Added column `ipv6_cidr_blocks` to the `oci_core_vcn` table ([#390](https://github.com/turbot/steampipe-plugin-oci/pull/390))
+
 ## v0.10.0 [2022-03-23]
 
 _Enhancements_

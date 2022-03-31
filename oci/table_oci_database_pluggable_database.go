@@ -5,32 +5,31 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
 )
 
-//// TABLE DEFINITION
-
-func tableCoreVcn(_ context.Context) *plugin.Table {
+func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_vcn",
-		Description: "OCI Core VCN",
+		Name:        "oci_database_pluggable_database",
+		Description: "OCI Pluggable Database",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getVcn,
+			Hydrate:    getPluggableDatabase,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreVcns,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate:           listDatabasePluggableDatabases,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "display_name",
+					Name:    "pdb_name",
 					Require: plugin.Optional,
 				},
 				{
@@ -42,86 +41,55 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 		GetMatrixItem: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Name:        "pdb_name",
+				Description: "The name for the pluggable database. The name is unique in the context of a Database. The name must begin with an alphabetic character and can contain a maximum of thirty alphanumeric characters. Special characters are not permitted. The pluggable database name should not be same as the container database name.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The VCN's Oracle ID (OCID).",
+				Description: "The OCID of the pluggable database.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The VCN's current state.",
+				Description: "The current state of the pluggable database.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the VCN was created.",
+				Description: "The date and time the pluggable database was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "cidr_block",
-				Description: "The first CIDR IP address from cidrBlocks.",
-				Type:        proto.ColumnType_CIDR,
-			},
-			{
-				Name:        "default_dhcp_options_id",
-				Description: "The OCID for the VCN's default set of DHCP options.",
+				Name:        "container_database_id",
+				Description: "The OCID of the CDB.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultDhcpOptionsId"),
+				Transform:   transform.FromCamel(),
 			},
 			{
-				Name:        "default_route_table_id",
-				Description: "The OCID of the instance.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultRouteTableId"),
+				Name:        "is_restricted",
+				Description: "The restricted mode of pluggableDatabase. If a pluggableDatabase is opened in restricted mode, the user needs both Create a session and restricted session privileges to connect to it.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "default_security_list_id",
-				Description: "The OCID for the VCN's default security list.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DefaultSecurityListId"),
-			},
-			{
-				Name:        "dns_label",
-				Description: "A DNS label for the VCN, used in conjunction with the VNIC's hostname and subnet's DNS label to form a fully qualified domain name (FQDN) for each VNIC within this subnet.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DnsLabel"),
-			},
-			{
-				Name:        "ipv6_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
-				Type:        proto.ColumnType_CIDR,
-				Transform:   transform.FromField("Ipv6CidrBlock"),
-			},
-			{
-				Name:        "ipv6_public_cidr_block",
-				Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
-			},
-			{
-				Name:        "vcn_domain_name",
-				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",
+				Name:        "lifecycle_details",
+				Description: "Detailed message for the lifecycle state.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "cidr_blocks",
-				Description: "The list of IPv4 CIDR blocks the VCN will use.",
+				Name:        "open_mode",
+				Description: "The mode that pluggableDatabase is in. Open mode can only be changed to READ_ONLY or MIGRATE directly from the backend.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "connection_strings",
+				Description: "The connection strings used to connect to the oracle pluggable database.",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "ipv6_cidr_blocks",
-				Description: "For an IPv6-enabled VCN, this is the list of IPv6 CIDR blocks for the VCN's IP address space. The CIDRs are provided by Oracle and the sizes are always /56.",
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Ipv6CidrBlocks"),
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -133,21 +101,21 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard Steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(vcnTags),
+				Transform:   transform.From(pluggableDatabaseTags),
 			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromField("PdbName"),
 			},
 
-			// Standard OCI columns
+			// OCI standard columns
 			{
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
@@ -173,11 +141,11 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listDatabasePluggableDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCoreVcns", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listPluggableDatabases", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -187,12 +155,12 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := databaseService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.ListVcnsRequest{
+	request := database.ListPluggableDatabasesRequest{
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
@@ -201,14 +169,18 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Check for additional filters
-	if equalQuals["display_name"] != nil {
-		displayName := equalQuals["display_name"].GetStringValue()
-		request.DisplayName = types.String(displayName)
+	if equalQuals["pdb_name"] != nil {
+		dbName := equalQuals["pdb_name"].GetStringValue()
+		request.PdbName = types.String(dbName)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
 		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = core.VcnLifecycleStateEnum(lifecycleState)
+		if isValidPluggableDatabaseSummaryLifecycleState(lifecycleState) {
+			request.LifecycleState = database.PluggableDatabaseSummaryLifecycleStateEnum(lifecycleState)
+		} else {
+			return nil, nil
+		}
 	}
 
 	limit := d.QueryContext.Limit
@@ -220,13 +192,13 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.VirtualNetworkClient.ListVcns(ctx, request)
+		response, err := session.DatabaseClient.ListPluggableDatabases(ctx, request)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, network := range response.Items {
-			d.StreamListItem(ctx, network)
+		for _, database := range response.Items {
+			d.StreamListItem(ctx, database)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -239,18 +211,16 @@ func listCoreVcns(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			pagesLeft = false
 		}
 	}
-
 	return nil, err
 }
 
 //// HYDRATE FUNCTION
 
-func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getVcn")
+func getPluggableDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci.getVcn", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getPluggableDatabase", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -259,52 +229,76 @@ func getVcn(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (in
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
 	// Create Session
-	session, err := coreVirtualNetworkService(ctx, d, region)
+	session, err := databaseService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
-	request := core.GetVcnRequest{
-		VcnId: types.String(id),
+	request := database.GetPluggableDatabaseRequest{
+		PluggableDatabaseId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
 	}
 
-	response, err := session.VirtualNetworkClient.GetVcn(ctx, request)
+	response, err := session.DatabaseClient.GetPluggableDatabase(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-
-	return response.Vcn, nil
+	return response.PluggableDatabase, nil
 }
 
 //// TRANSFORM FUNCTION
 
-func vcnTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	vcn := d.HydrateItem.(core.Vcn)
+func pluggableDatabaseTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	var freeformTags map[string]string
+	var definedTags map[string]map[string]interface{}
+
+	switch d.HydrateItem.(type) {
+	case database.PluggableDatabaseSummary:
+		pDatabaseSummary := d.HydrateItem.(database.PluggableDatabaseSummary)
+		freeformTags = pDatabaseSummary.FreeformTags
+		definedTags = pDatabaseSummary.DefinedTags
+	case database.PluggableDatabase:
+		pDatabase := d.HydrateItem.(database.PluggableDatabase)
+		freeformTags = pDatabase.FreeformTags
+		definedTags = pDatabase.DefinedTags
+	}
 
 	var tags map[string]interface{}
 
-	if vcn.FreeformTags != nil {
+	if freeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range vcn.FreeformTags {
+		for k, v := range freeformTags {
 			tags[k] = v
 		}
 	}
 
-	if vcn.DefinedTags != nil {
+	if definedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range vcn.DefinedTags {
+		for _, v := range definedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
-
 		}
 	}
 
 	return tags, nil
+}
+
+func isValidPluggableDatabaseSummaryLifecycleState(state string) bool {
+	stateType := database.PluggableDatabaseSummaryLifecycleStateEnum(state)
+	switch stateType {
+	case database.PluggableDatabaseSummaryLifecycleStateProvisioning, database.PluggableDatabaseSummaryLifecycleStateAvailable, database.PluggableDatabaseSummaryLifecycleStateFailed, database.PluggableDatabaseSummaryLifecycleStateTerminated, database.PluggableDatabaseSummaryLifecycleStateTerminating, database.PluggableDatabaseSummaryLifecycleStateUpdating:
+		return true
+	}
+	return false
 }

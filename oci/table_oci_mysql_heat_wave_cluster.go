@@ -93,17 +93,17 @@ func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugi
 		return nil, err
 	}
 
+	// Ignore if there is no heat wave cluster associated to DB System
+	if !*dbSystem.IsHeatWaveClusterAttached {
+		return nil, nil
+	}
+
 	// Build request parameters
 	request := mysql.GetHeatWaveClusterRequest{
 		DbSystemId: dbSystem.Id,
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(),
 		},
-	}
-
-	// Ignore if there is no heat wave cluster associated to DB System
-	if !*dbSystem.IsHeatWaveClusterAttached {
-		return nil, nil
 	}
 
 	response, err := session.MySQLDBSystemClient.GetHeatWaveCluster(ctx, request)

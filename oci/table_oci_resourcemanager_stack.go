@@ -14,7 +14,7 @@ import (
 
 //// TABLE DEFINITION
 
-func tableResourceManagerStack(_ context.Context) *plugin.Table {
+func tableOciResourceManagerStack(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_resourcemanager_stack",
 		Description: "OCI Resource Manager Table",

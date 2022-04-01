@@ -381,7 +381,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-  // set response cache
+        // set response cache
 	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
 
 	return response.Configuration, nil

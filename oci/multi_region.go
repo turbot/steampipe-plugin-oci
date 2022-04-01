@@ -360,7 +360,7 @@ func getRegionFromEnvVar() string {
 func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	cacheKey := "getCloudGuardConfiguration"
 	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
-		return cachedData.(interface{}), nil
+		return cachedData.(cloudguard.Configuration), nil
 	}
 
 	// Create Session
@@ -380,6 +380,9 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	if err != nil {
 		return nil, err
 	}
+
+        // set response cache
+	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
 
 	return response.Configuration, nil
 }

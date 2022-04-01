@@ -22,6 +22,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v44/common/auth"
+	"github.com/oracle/oci-go-sdk/v44/containerengine"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/oracle/oci-go-sdk/v44/dns"
@@ -57,6 +58,7 @@ type session struct {
 	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
+	ContainerEngineClient          containerengine.ContainerEngineClient
 	DatabaseClient                 database.DatabaseClient
 	DnsClient                      dns.DnsClient
 	EventsClient                   events.EventsClient
@@ -358,6 +360,46 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	sess := &session{
 		TenancyID:          tenantId,
 		BlockstorageClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// containerEngineService returns the service client for OCI Container Engine Service
+func containerEngineService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("containerengine-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("containerEngineService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := containerengine.NewContainerEngineClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		ContainerEngineClient: client,
 	}
 
 	// save session in cache

@@ -209,7 +209,11 @@ func listCoreCustomImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 
 		for _, image := range response.Items {
-			if image.BaseImageId != nil {
+			/* Custom immages can be created by two ways.
+			* 1. Importing the image from bucket (In this case we will have OperatingSystem value as 'Custom' and BaseImageId will be null)
+			* 2. Exporting an image from an instance (In this case we will have OperatingSystem value as as per the instance OS image and BaseImageId will not be null)
+			*/
+			if image.BaseImageId != nil || *image.OperatingSystem == "Custom" {
 				d.StreamListItem(ctx, image)
 			}
 

@@ -1,3 +1,12 @@
+## v0.12.0 [2022-04-06]
+
+_What's new?_
+
+- New tables added
+  - [oci_containerengine_cluster](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_containerengine_cluster) ([#386](https://github.com/turbot/steampipe-plugin-oci/pull/386))
+  - [oci_mysql_heat_wave_cluster](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_heat_wave_cluster) ([#385](https://github.com/turbot/steampipe-plugin-oci/pull/385))
+  - [oci_resourcemanager_stack](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_resourcemanager_stack) ([#387](https://github.com/turbot/steampipe-plugin-oci/pull/387))
+
 ## v0.11.0 [2022-03-30]
 
 _What's new?_

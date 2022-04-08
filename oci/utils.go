@@ -88,7 +88,13 @@ func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationR
 		// Creates a new exponential backoff using the starting value of
 		// minDelay and (minDelay * 3^retrycount) * jitter on each failure
 		// as example (23.25ms, 63ms, 238.5ms, 607.4ms, 2s, 5.22s, 20.31s...) up to max.
-		return time.Duration(int(float64(int(minRetryDelay.Nanoseconds())*int(math.Pow(3, float64(r.AttemptNumber)))) * jitter))
+		// Maximum delay should not be more than 3 min
+		maxDelayTime := time.Duration(int(float64(int(minRetryDelay.Nanoseconds())*int(math.Pow(3, float64(r.AttemptNumber)))) * jitter))
+		if maxDelayTime > time.Duration(3*time.Minute) {
+			return time.Duration(3*time.Minute)	
+		}
+
+		return maxDelayTime
 	}
 	policy := oci_common.NewRetryPolicy(n, fn, exponentialBackoff)
 	return &policy

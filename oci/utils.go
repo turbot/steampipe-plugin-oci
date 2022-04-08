@@ -3,6 +3,7 @@ package oci
 import (
 	"context"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -52,7 +53,7 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 // https://github.com/oracle/oci-go-sdk/blob/master/example/helpers/helper.go#L127
 func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 	// how many times to do the retry
-	attempts := uint(5)
+	attempts := uint(9)
 
 	/*
 		429	TooManyRequests	You have issued too many requests to the
@@ -76,7 +77,18 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationResponse) bool) *oci_common.RetryPolicy {
 	// the duration between each retry operation, you might want to waite longer each time the retry fails
 	exponentialBackoff := func(r oci_common.OCIOperationResponse) time.Duration {
-		return time.Duration(math.Pow(float64(2), float64(r.AttemptNumber-1))) * time.Second
+		// Minumum delay time
+		var minRetryDelay time.Duration = 25 * time.Millisecond
+
+		// If errors are caused by load, retries can be ineffective if all API request retry at the same time.
+		// To avoid this problem added a jitter of "+/-20%" with delay time.
+		// For example, if the delay is 25ms, the final delay could be between 20 and 30ms.
+		var jitter = float64(rand.Intn(120-80)+80) / 100
+
+		// Creates a new exponential backoff using the starting value of
+		// minDelay and (minDelay * 3^retrycount) * jitter on each failure
+		// as example (23.25ms, 63ms, 238.5ms, 607.4ms, 2s, 5.22s, 20.31s...) up to max.
+		return time.Duration(int(float64(int(minRetryDelay.Nanoseconds())*int(math.Pow(3, float64(r.AttemptNumber)))) * jitter))
 	}
 	policy := oci_common.NewRetryPolicy(n, fn, exponentialBackoff)
 	return &policy

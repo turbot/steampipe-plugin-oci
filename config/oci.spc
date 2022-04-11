@@ -1,7 +1,7 @@
 connection "oci" {
   plugin = "oci"
-  # config_file_profile = "DEFAULT"
-  # config_file_path = "~/.oci/config"
+  #config_file_profile = "DEFAULT"
+  #config_file_path = "~/.oci/config"
 
   # The maximum number of attempts (including the initial call) Steampipe will
   # make for failing API calls. Defaults to 9 and must be greater than or equal to 1.

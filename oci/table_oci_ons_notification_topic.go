@@ -163,7 +163,7 @@ func listOnsNotificationTopics(ctx context.Context, d *plugin.QueryData, _ *plug
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -238,7 +238,7 @@ func getOnsNotificationTopic(ctx context.Context, d *plugin.QueryData, h *plugin
 	request := ons.GetTopicRequest{
 		TopicId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

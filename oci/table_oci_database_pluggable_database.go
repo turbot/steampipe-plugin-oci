@@ -164,7 +164,7 @@ func listDatabasePluggableDatabases(ctx context.Context, d *plugin.QueryData, h 
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -243,7 +243,7 @@ func getPluggableDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	request := database.GetPluggableDatabaseRequest{
 		PluggableDatabaseId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

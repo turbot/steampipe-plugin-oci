@@ -107,7 +107,7 @@ func listIdentityCustomerSecretKeys(ctx context.Context, d *plugin.QueryData, h 
 	request := identity.ListCustomerSecretKeysRequest{
 		UserId: user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

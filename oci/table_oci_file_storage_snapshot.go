@@ -171,7 +171,7 @@ func listFileStorageSnapshots(ctx context.Context, d *plugin.QueryData, h *plugi
 		FileSystemId: fileSystem.Id,
 		Limit:        types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -250,7 +250,7 @@ func getFileStorageSnapshot(ctx context.Context, d *plugin.QueryData, h *plugin.
 	request := filestorage.GetSnapshotRequest{
 		SnapshotId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

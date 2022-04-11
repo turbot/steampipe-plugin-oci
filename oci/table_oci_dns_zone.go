@@ -197,7 +197,7 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int64(100)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -262,7 +262,7 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	request := dns.GetZoneRequest{
 		ZoneNameOrId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

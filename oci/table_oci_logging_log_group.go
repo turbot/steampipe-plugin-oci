@@ -146,7 +146,7 @@ func listLoggingLogGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -225,7 +225,7 @@ func getLoggingLogGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	request := logging.GetLogGroupRequest{
 		LogGroupId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

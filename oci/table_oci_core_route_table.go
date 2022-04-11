@@ -161,7 +161,7 @@ func listCoreRouteTables(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -226,7 +226,7 @@ func getCoreRouteTable(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	request := core.GetRouteTableRequest{
 		RtId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

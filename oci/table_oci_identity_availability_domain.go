@@ -85,7 +85,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 	request := identity.ListAvailabilityDomainsRequest{
 		CompartmentId: &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

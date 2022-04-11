@@ -157,7 +157,7 @@ func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -222,7 +222,7 @@ func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *pl
 	request := core.GetNetworkSecurityGroupRequest{
 		NetworkSecurityGroupId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -251,7 +251,7 @@ func listCoreNetworkSecurityGroupRules(ctx context.Context, d *plugin.QueryData,
 	request := core.ListNetworkSecurityGroupSecurityRulesRequest{
 		NetworkSecurityGroupId: types.String(NetworkSecurityGroupID),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

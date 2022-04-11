@@ -226,7 +226,7 @@ func listDatabases(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		DbHomeId:      homeId,
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -302,7 +302,7 @@ func getDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	request := database.GetDatabaseRequest{
 		DatabaseId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

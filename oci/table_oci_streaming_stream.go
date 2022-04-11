@@ -173,7 +173,7 @@ func listStreamingStreams(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -263,7 +263,7 @@ func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	request := streaming.GetStreamRequest{
 		StreamId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

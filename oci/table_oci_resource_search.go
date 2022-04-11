@@ -171,7 +171,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 				Query: common.String(query),
 			},
 			RequestMetadata: common.RequestMetadata{
-				RetryPolicy: getDefaultRetryPolicy(),
+				RetryPolicy: getDefaultRetryPolicy(d.Connection),
 			},
 		}
 
@@ -212,7 +212,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 				Text: common.String(text),
 			},
 			RequestMetadata: common.RequestMetadata{
-				RetryPolicy: getDefaultRetryPolicy(),
+				RetryPolicy: getDefaultRetryPolicy(d.Connection),
 			},
 		}
 		pagesLeft := true

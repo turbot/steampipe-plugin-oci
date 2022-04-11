@@ -125,7 +125,7 @@ func listIdentityAuthTokens(ctx context.Context, d *plugin.QueryData, h *plugin.
 	request := identity.ListAuthTokensRequest{
 		UserId: user.Id,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -196,7 +196,7 @@ func listFileStorageMountTargets(ctx context.Context, d *plugin.QueryData, h *pl
 	request.AvailabilityDomain = types.String(zone)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -267,7 +267,7 @@ func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plug
 	request := filestorage.GetMountTargetRequest{
 		MountTargetId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

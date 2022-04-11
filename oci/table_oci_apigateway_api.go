@@ -159,7 +159,7 @@ func listApiGatewayApis(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -242,7 +242,7 @@ func getApiGatewayApi(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	request := apigateway.GetApiRequest{
 		ApiId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

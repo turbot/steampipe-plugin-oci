@@ -135,7 +135,7 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -204,7 +204,7 @@ func getIdentityTagDefault(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	request := identity.GetTagDefaultRequest{
 		TagDefaultId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

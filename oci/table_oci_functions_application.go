@@ -168,7 +168,7 @@ func listFunctionsApplications(ctx context.Context, d *plugin.QueryData, _ *plug
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(50)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -238,7 +238,7 @@ func getFunctionsApplication(ctx context.Context, d *plugin.QueryData, h *plugin
 	request := functions.GetApplicationRequest{
 		ApplicationId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

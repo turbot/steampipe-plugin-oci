@@ -196,7 +196,7 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 		CompartmentId:               &compartmentId,
 		SummarizeMetricsDataDetails: metricDetails,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

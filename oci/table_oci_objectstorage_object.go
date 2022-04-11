@@ -212,7 +212,7 @@ func listObjectStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugi
 		Fields:        types.String("name,size,etag,timeCreated,md5,timeModified,storageTier,archivalState"),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -264,7 +264,7 @@ func getObjectStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.
 		BucketName:    &bucketName,
 		ObjectName:    &objectName,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

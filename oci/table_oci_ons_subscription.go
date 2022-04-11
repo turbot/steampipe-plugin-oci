@@ -159,7 +159,7 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -231,7 +231,7 @@ func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	request := ons.GetSubscriptionRequest{
 		SubscriptionId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

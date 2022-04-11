@@ -161,7 +161,7 @@ func listCoreBootVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *
 		CompartmentId:      types.String(compartment),
 		Limit:              types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -239,7 +239,7 @@ func getCoreBootVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *pl
 	request := core.GetBootVolumeAttachmentRequest{
 		BootVolumeAttachmentId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

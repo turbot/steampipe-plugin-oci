@@ -118,7 +118,7 @@ func listIdentityTenancies(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	request := identity.GetTenancyRequest{
 		TenancyId: &session.TenancyID,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -152,7 +152,7 @@ func getRetentionPeriod(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	request := audit.GetConfigurationRequest{
 		CompartmentId: &compartmentID,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

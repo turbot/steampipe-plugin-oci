@@ -199,7 +199,7 @@ func listVaultSecrets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	// Check for limit
@@ -277,7 +277,7 @@ func getVaultSecret(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 	request := vault.GetSecretRequest{
 		SecretId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

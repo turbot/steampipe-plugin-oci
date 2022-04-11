@@ -6,16 +6,18 @@ import (
 )
 
 type ociConfig struct {
-	Auth               *string  `cty:"auth"`
-	ConfigPath         *string  `cty:"config_path"`
-	Fingerprint        *string  `cty:"fingerprint"`
-	PrivateKey         *string  `cty:"private_key"`
-	PrivateKeyPassword *string  `cty:"private_key_password"`
-	PrivateKeyPath     *string  `cty:"private_key_path"`
-	Profile            *string  `cty:"config_file_profile"`
-	Regions            []string `cty:"regions"`
-	TenancyOCID        *string  `cty:"tenancy_ocid"`
-	UserOCID           *string  `cty:"user_ocid"`
+	Auth                  *string  `cty:"auth"`
+	ConfigPath            *string  `cty:"config_path"`
+	Fingerprint           *string  `cty:"fingerprint"`
+	PrivateKey            *string  `cty:"private_key"`
+	PrivateKeyPassword    *string  `cty:"private_key_password"`
+	PrivateKeyPath        *string  `cty:"private_key_path"`
+	Profile               *string  `cty:"config_file_profile"`
+	Regions               []string `cty:"regions"`
+	TenancyOCID           *string  `cty:"tenancy_ocid"`
+	UserOCID              *string  `cty:"user_ocid"`
+	MaxErrorRetryAttempts *int     `cty:"max_error_retry_attempts"`
+	MinErrorRetryDelay    *int     `cty:"min_error_retry_delay"`
 }
 
 var ConfigSchema = map[string]*schema.Attribute{
@@ -49,6 +51,12 @@ var ConfigSchema = map[string]*schema.Attribute{
 	},
 	"private_key_password": {
 		Type: schema.TypeString,
+	},
+	"max_error_retry_attempts": {
+		Type: schema.TypeInt,
+	},
+	"min_error_retry_delay": {
+		Type: schema.TypeInt,
 	},
 }
 

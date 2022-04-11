@@ -51,9 +51,20 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 }
 
 // https://github.com/oracle/oci-go-sdk/blob/master/example/helpers/helper.go#L127
-func getDefaultRetryPolicy() *oci_common.RetryPolicy {
+func getDefaultRetryPolicy(connection *plugin.Connection) *oci_common.RetryPolicy {
 	// how many times to do the retry
 	attempts := uint(9)
+	minRetryDelay := 25 * time.Millisecond
+
+	// Get config details for maximum error attempt and minimum delay time
+	config := GetConfig(connection)
+	if config.MaxErrorRetryAttempts != nil {
+		attempts = uint(*config.MaxErrorRetryAttempts)
+	}
+
+	if config.MinErrorRetryDelay != nil {
+		minRetryDelay = time.Duration(*config.MinErrorRetryDelay) * time.Millisecond
+	}
 
 	/*
 		429	TooManyRequests	You have issued too many requests to the
@@ -71,14 +82,12 @@ func getDefaultRetryPolicy() *oci_common.RetryPolicy {
 		}
 		return false
 	}
-	return getExponentialBackoffRetryPolicy(attempts, retryOnResponseCodes)
+	return getExponentialBackoffRetryPolicy(attempts, minRetryDelay, retryOnResponseCodes)
 }
 
-func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationResponse) bool) *oci_common.RetryPolicy {
+func getExponentialBackoffRetryPolicy(n uint, minRetryDelay time.Duration, fn func(r oci_common.OCIOperationResponse) bool) *oci_common.RetryPolicy {
 	// the duration between each retry operation, you might want to waite longer each time the retry fails
 	exponentialBackoff := func(r oci_common.OCIOperationResponse) time.Duration {
-		// Minumum delay time
-		var minRetryDelay time.Duration = 25 * time.Millisecond
 
 		// If errors are caused by load, retries can be ineffective if all API request retry at the same time.
 		// To avoid this problem added a jitter of "+/-20%" with delay time.
@@ -91,7 +100,7 @@ func getExponentialBackoffRetryPolicy(n uint, fn func(r oci_common.OCIOperationR
 		// Maximum delay should not be more than 3 min
 		maxDelayTime := time.Duration(int(float64(int(minRetryDelay.Nanoseconds())*int(math.Pow(3, float64(r.AttemptNumber)))) * jitter))
 		if maxDelayTime > time.Duration(3*time.Minute) {
-			return time.Duration(3*time.Minute)	
+			return time.Duration(3 * time.Minute)
 		}
 
 		return maxDelayTime

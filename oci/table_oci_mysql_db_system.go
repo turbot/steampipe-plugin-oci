@@ -288,7 +288,7 @@ func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -356,7 +356,7 @@ func getMySQLDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	request := mysql.GetDbSystemRequest{
 		DbSystemId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -92,9 +92,9 @@ connection "oci_tenant_y" {
 
 - `config_file_profile` (Optional) OCI profile name to use for credentials.
 - `config_path` (Optional) Path of the config file where subjected profile is available.
-- `regions` (Optional) List of OCI regions Steampipe will connect to.
 - `max_error_retry_attempts` (Optional) The maximum number of attempts (including the initial call) Steampipe will make for failing API calls. Defaults to 9 and must be greater than or equal to 1.
 - `min_error_retry_delay` (Optional) The minimum retry delay in milliseconds after which retries will be performed. This delay is also used as a base value when calculating the exponential backoff retry times. Defaults to 25ms and must be greater than or equal to 1ms.
+- `regions` (Optional) List of OCI regions Steampipe will connect to
 
 ## Get involved
 

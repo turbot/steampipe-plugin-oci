@@ -1,3 +1,9 @@
+## v0.13.0 [2022-04-13]
+
+_What's new?_
+
+- Added optional config arguments `max_error_retry_attempts` and `min_error_retry_delay` to allow customization of the error retry timings. For more information please see [OCI plugin configuration](https://hub.steampipe.io/plugins/turbot/oci#configuration). ([#397](https://github.com/turbot/steampipe-plugin-oci/pull/397))
+
 ## v0.12.0 [2022-04-06]
 
 _What's new?_

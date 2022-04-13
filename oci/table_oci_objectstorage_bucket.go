@@ -239,7 +239,7 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 		NamespaceName: &nameSpace.Value,
 		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -323,7 +323,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 		NamespaceName: &nameSpace,
 		BucketName:    &bucketName,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 	response, err := session.ObjectStorageClient.GetBucket(ctx, request)
@@ -351,7 +351,7 @@ func getObjectStorageBucketObjectLifecycle(ctx context.Context, d *plugin.QueryD
 		NamespaceName: nameSpace,
 		BucketName:    bucketName,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 	response, err := session.ObjectStorageClient.GetObjectLifecyclePolicy(ctx, request)

@@ -232,7 +232,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 		BudgetId: id,
 		Limit:    types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -309,7 +309,7 @@ func getBudgetAlertRule(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		BudgetId:    types.String(budgetId),
 		AlertRuleId: types.String(ruleId),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

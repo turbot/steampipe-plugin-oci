@@ -171,7 +171,7 @@ func listEventsRules(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -253,7 +253,7 @@ func getEventsRule(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	request := events.GetRuleRequest{
 		RuleId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

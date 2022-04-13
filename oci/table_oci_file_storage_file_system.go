@@ -194,7 +194,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 	request.AvailabilityDomain = types.String(zone)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -264,7 +264,7 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 	request := filestorage.GetFileSystemRequest{
 		FileSystemId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

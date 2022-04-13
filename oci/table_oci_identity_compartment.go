@@ -133,7 +133,7 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	rootRequest := identity.GetCompartmentRequest{
 		CompartmentId: &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -152,7 +152,7 @@ func listCompartments(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 		CompartmentIdInSubtree: types.Bool(true),
 		Limit:                  types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -215,7 +215,7 @@ func getCompartment(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	request := identity.GetCompartmentRequest{
 		CompartmentId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

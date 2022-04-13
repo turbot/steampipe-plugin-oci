@@ -141,7 +141,7 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 		CompartmentId: &session.TenancyID,
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -214,7 +214,7 @@ func getIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, h *plugi
 	request := identity.GetNetworkSourceRequest{
 		NetworkSourceId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

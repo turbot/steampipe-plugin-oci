@@ -195,7 +195,7 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	request.ApplicationId = &applicationId
 	request.Limit = types.Int(50)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -270,7 +270,7 @@ func getFunction(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	request := functions.GetFunctionRequest{
 		FunctionId: types.String(functionId),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

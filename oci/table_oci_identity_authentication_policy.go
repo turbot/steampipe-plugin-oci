@@ -90,7 +90,7 @@ func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugi
 	request := identity.GetAuthenticationPolicyRequest{
 		CompartmentId: &session.TenancyID,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

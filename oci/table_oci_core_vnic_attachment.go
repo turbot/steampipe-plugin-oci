@@ -245,7 +245,7 @@ func listVnicAttachments(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -322,7 +322,7 @@ func getVnicAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	request := core.GetVnicAttachmentRequest{
 		VnicAttachmentId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -368,7 +368,7 @@ func getVnic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (i
 	request := core.GetVnicRequest{
 		VnicId: types.String(vnicId),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

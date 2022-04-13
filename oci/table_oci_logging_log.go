@@ -171,7 +171,7 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	request.LogGroupId = logGroupId
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -238,7 +238,7 @@ func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		LogGroupId: types.String(logGroupId),
 		LogId:      types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

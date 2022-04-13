@@ -163,7 +163,7 @@ func listCoreServiceGateways(ctx context.Context, d *plugin.QueryData, _ *plugin
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -239,7 +239,7 @@ func getCoreServiceGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	request := core.GetServiceGatewayRequest{
 		ServiceGatewayId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

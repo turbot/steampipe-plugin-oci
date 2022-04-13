@@ -188,7 +188,7 @@ func listCoreNetworkLoadBalancers(ctx context.Context, d *plugin.QueryData, _ *p
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -265,7 +265,7 @@ func getCoreNetworkLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plu
 	request := networkloadbalancer.GetNetworkLoadBalancerRequest{
 		NetworkLoadBalancerId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -301,7 +301,7 @@ func getCoreNetworkLoadBalancerHealth(ctx context.Context, d *plugin.QueryData, 
 	request := networkloadbalancer.GetNetworkLoadBalancerHealthRequest{
 		NetworkLoadBalancerId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

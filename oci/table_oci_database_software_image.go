@@ -203,7 +203,7 @@ func listSoftwareImages(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -267,7 +267,7 @@ func getSoftwareImage(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	request := database.GetDatabaseSoftwareImageRequest{
 		DatabaseSoftwareImageId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

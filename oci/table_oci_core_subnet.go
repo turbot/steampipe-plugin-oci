@@ -223,7 +223,7 @@ func listCoreSubnets(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -287,7 +287,7 @@ func getCoreSubnet(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	request := core.GetSubnetRequest{
 		SubnetId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

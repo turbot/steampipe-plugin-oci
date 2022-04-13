@@ -211,7 +211,7 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -281,7 +281,7 @@ func getAnalyticsInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	request := analytics.GetAnalyticsInstanceRequest{
 		AnalyticsInstanceId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

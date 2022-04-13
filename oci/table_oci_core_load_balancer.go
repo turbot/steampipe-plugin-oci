@@ -217,7 +217,7 @@ func listCoreLoadBalancers(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int64(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -294,7 +294,7 @@ func getCoreLoadBalancer(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	request := loadbalancer.GetLoadBalancerRequest{
 		LoadBalancerId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -184,7 +184,7 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin
 	request.Limit = types.Int(1000)
 	request.Type = []mysql.ListConfigurationsTypeEnum{"DEFAULT"}
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -246,7 +246,7 @@ func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	request := mysql.GetConfigurationRequest{
 		ConfigurationId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -181,7 +181,7 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 		CompartmentId:      types.String(compartment),
 		Limit:              types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -258,7 +258,7 @@ func getCoreBlockVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plug
 	request := core.GetBlockVolumeReplicaRequest{
 		BlockVolumeReplicaId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

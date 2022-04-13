@@ -231,7 +231,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -295,7 +295,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	request := core.GetVolumeRequest{
 		VolumeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -309,9 +309,9 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getVolumeBackupPolicyAssignment")
-        region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 
-        volumeId := h.Item.(volumeInfo).Id
+	volumeId := h.Item.(volumeInfo).Id
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -322,17 +322,17 @@ func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h
 	request := core.GetVolumeBackupPolicyAssetAssignmentRequest{
 		AssetId: volumeId,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
 	response, err := session.BlockstorageClient.GetVolumeBackupPolicyAssetAssignment(ctx, request)
 	if err != nil {
-		plugin.Logger(ctx).Error("getVolumeBackupPolicyAssignment","err",err)
+		plugin.Logger(ctx).Error("getVolumeBackupPolicyAssignment", "err", err)
 		return nil, err
 	}
 
-        if len (response.Items) > 0{
+	if len(response.Items) > 0 {
 		return response.Items[0], nil
 	}
 

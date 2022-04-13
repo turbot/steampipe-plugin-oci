@@ -140,7 +140,7 @@ func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plug
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -209,7 +209,7 @@ func getIdentityTagNamespace(ctx context.Context, d *plugin.QueryData, h *plugin
 	request := identity.GetTagNamespaceRequest{
 		TagNamespaceId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

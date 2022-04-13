@@ -189,7 +189,7 @@ func listCloudGuardResponderRecipes(ctx context.Context, d *plugin.QueryData, h 
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -276,7 +276,7 @@ func getCloudGuardResponderRecipe(ctx context.Context, d *plugin.QueryData, h *p
 	request := cloudguard.GetResponderRecipeRequest{
 		ResponderRecipeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -245,7 +245,7 @@ func listCoreVolumeAttachments(ctx context.Context, d *plugin.QueryData, _ *plug
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -310,7 +310,7 @@ func getCoreVolumeAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin
 	request := core.GetVolumeAttachmentRequest{
 		VolumeAttachmentId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -175,7 +175,7 @@ func listCorePublicIPs(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 	request.Scope = "REGION"
 
@@ -233,7 +233,7 @@ func getCorePublicIP(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	request := core.GetPublicIpRequest{
 		PublicIpId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

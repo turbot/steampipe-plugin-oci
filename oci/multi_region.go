@@ -210,7 +210,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 		CompartmentId:          &session.TenancyID,
 		CompartmentIdInSubtree: types.Bool(true),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -262,7 +262,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 			request := identity.ListAvailabilityDomainsRequest{
 				CompartmentId: &session.TenancyID,
 				RequestMetadata: oci_common.RequestMetadata{
-					RetryPolicy: getDefaultRetryPolicy(),
+					RetryPolicy: getDefaultRetryPolicy(d.Connection),
 				},
 			}
 
@@ -287,7 +287,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 	request := identity.ListAvailabilityDomainsRequest{
 		CompartmentId: &session.TenancyID,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -372,7 +372,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	request := cloudguard.GetConfigurationRequest{
 		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -381,7 +381,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 		return nil, err
 	}
 
-        // set response cache
+	// set response cache
 	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
 
 	return response.Configuration, nil

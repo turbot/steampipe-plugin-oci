@@ -202,7 +202,7 @@ func listCloudGuardTargets(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -289,7 +289,7 @@ func getCloudGuardTarget(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	request := cloudguard.GetTargetRequest{
 		TargetId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

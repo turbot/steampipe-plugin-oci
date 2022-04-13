@@ -131,7 +131,7 @@ func listCoreDrgs(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -197,7 +197,7 @@ func getCoreDrg(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	request := core.GetDrgRequest{
 		DrgId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

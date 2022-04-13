@@ -344,7 +344,7 @@ func listDatabaseDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -412,7 +412,7 @@ func getDatabaseDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	request := database.GetDbSystemRequest{
 		DbSystemId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

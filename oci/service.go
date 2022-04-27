@@ -44,8 +44,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/streaming"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v3/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
 )
 
 type session struct {

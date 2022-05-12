@@ -599,7 +599,7 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 	return sess, nil
 }
 
-// limitsQuotaService returns the service client for OCI Quota Service
+// quotaService returns the service client for OCI Quota Service
 func quotaService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 
 	serviceCacheKey := fmt.Sprintf("quota-%s", region)

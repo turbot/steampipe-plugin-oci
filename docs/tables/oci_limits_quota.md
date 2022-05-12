@@ -16,7 +16,6 @@ from
   oci_limits_quota;
 ```
 
-
 ### List statements of a quota
 
 ```sql

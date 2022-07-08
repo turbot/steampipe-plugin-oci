@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
+  default     = ""
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -36,22 +36,6 @@ resource "oci_objectstorage_bucket" "named_test_resource" {
   name           = var.resource_name
   namespace      = data.oci_objectstorage_namespace.test_namespace.namespace
   freeform_tags  = { "Department" = "Finance" }
-}
-
-resource "oci_objectstorage_object_lifecycle_policy" "test_object_lifecycle_policy" {
-  depends_on = [oci_objectstorage_bucket.named_test_resource]
-  bucket     = var.resource_name
-  namespace  = data.oci_objectstorage_namespace.test_namespace.namespace
-
-  # Rules
-  rules {
-    action      = "ARCHIVE"
-    is_enabled  = true
-    name        = var.resource_name
-    time_amount = 30
-    time_unit   = "DAYS"
-    target      = "objects"
-  }
 }
 
 output "resource_name" {

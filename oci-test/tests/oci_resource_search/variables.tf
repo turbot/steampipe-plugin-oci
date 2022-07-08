@@ -6,7 +6,6 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -66,4 +65,8 @@ output "resource_id" {
 output "query" {
   depends_on = [null_resource.named_test_resource]
   value      = var.query
+}
+
+output "region" {
+  value      = var.region
 }

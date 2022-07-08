@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 

@@ -31,7 +31,7 @@ provider "oci" {
 resource "oci_dns_zone" "named_test_resource" {
   #Required
   compartment_id = var.tenancy_ocid
-  name           = "turbot.com"
+  name           = "${var.resource_name}.com"
   zone_type      = "PRIMARY"
 }
 

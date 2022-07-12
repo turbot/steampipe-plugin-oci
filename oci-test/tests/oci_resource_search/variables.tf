@@ -66,3 +66,7 @@ output "query" {
   depends_on = [null_resource.named_test_resource]
   value      = var.query
 }
+
+output "region" {
+  value      = var.region
+}

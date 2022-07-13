@@ -59,7 +59,7 @@ output "region" {
 }
 
 output "resource_id" {
-  value = oci_kms_key_version.named_test_resource.id
+  value = split("keyVersions/",oci_kms_key_version.named_test_resource.id)[1]
 }
 
 output "key_id" {

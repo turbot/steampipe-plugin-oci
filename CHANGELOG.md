@@ -1,3 +1,13 @@
+## v0.16.0 [2022-07-14]
+
+_Breaking changes_
+
+- Fixed the typo in the table name to use `oci_database_autonomous_db_metric_storage_utilization` instead of `oci_database_autonomous_dd_metric_storage_utilization`. ([#417](https://github.com/turbot/steampipe-plugin-oci/pull/417))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v3.3.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v332--2022-07-11) which includes several caching fixes. ([#418](https://github.com/turbot/steampipe-plugin-oci/pull/418))
+
 ## v0.15.0 [2022-07-01]
 
 _Enhancements_

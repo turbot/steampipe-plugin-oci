@@ -31,6 +31,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/functions"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/oracle/oci-go-sdk/v44/keymanagement"
+	"github.com/oracle/oci-go-sdk/v44/limits"
 	"github.com/oracle/oci-go-sdk/v44/loadbalancer"
 	"github.com/oracle/oci-go-sdk/v44/logging"
 	"github.com/oracle/oci-go-sdk/v44/monitoring"
@@ -67,6 +68,7 @@ type session struct {
 	IdentityClient                 identity.IdentityClient
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
+	QuotaClient                    limits.QuotasClient
 	LoggingManagementClient        logging.LoggingManagementClient
 	LoadBalancerClient             loadbalancer.LoadBalancerClient
 	MonitoringClient               monitoring.MonitoringClient
@@ -594,6 +596,42 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 	// save session in cache
 	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 
+	return sess, nil
+}
+
+// quotaService returns the service client for OCI Quota Service
+func quotaService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+
+	serviceCacheKey := fmt.Sprintf("quota-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := limits.NewQuotasClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:   tenantId,
+		QuotaClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 	return sess, nil
 }
 

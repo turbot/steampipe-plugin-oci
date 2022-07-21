@@ -1,0 +1,8 @@
+
+[
+  {
+    "id": "{{ output.resource_id.value }}",
+    "lifecycle_state": "{{ output.state.value }}",
+    "name": "{{ resourceName }}"
+  }
+]

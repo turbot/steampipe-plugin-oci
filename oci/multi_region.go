@@ -386,3 +386,29 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	return response.Configuration, nil
 }
+
+// Get home region
+func getHomeRegion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	request := identity.ListRegionSubscriptionsRequest{
+		TenancyId: &session.TenancyID,
+	}
+
+	// List all the subscribed regions for the tenant
+	subscribedRegions, err := session.IdentityClient.ListRegionSubscriptions(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, subscribedRegion := range subscribedRegions.Items {
+		if *subscribedRegion.IsHomeRegion {
+			return *subscribedRegion.RegionName, nil
+		}
+	}
+	return nil, nil
+}

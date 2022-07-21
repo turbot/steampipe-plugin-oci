@@ -27,15 +27,15 @@ func init() {
 }
 
 // BuildRegionList :: return a list of matrix items, one per region specified in the connection config
-func BuildRegionList(_ context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
 	// retrieve regions from connection config
 	ociConfig := GetConfig(connection)
 
 	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
-		if len(getInvalidRegions(regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ","))
+		if len(getInvalidRegions(ctx, pluginQueryData, regions)) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, pluginQueryData, regions), ","))
 		}
 
 		// validate regions list
@@ -105,8 +105,8 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	if ociConfig.Regions != nil {
 		regions := GetConfig(connection).Regions
 
-		if len(getInvalidRegions(regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
+		if len(getInvalidRegions(ctx, pluginQueryData, regions)) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, pluginQueryData, regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
 		}
 
 		// validate regions list
@@ -141,39 +141,44 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	return defaultMatrix
 }
 
-func getInvalidRegions(regions []string) []string {
-	ociRegions := []string{
-		"ap-chiyoda-1",
-		"ap-chuncheon-1",
-		"ap-hyderabad-1",
-		"ap-melbourne-1",
-		"ap-mumbai-1",
-		"ap-osaka-1",
-		"ap-seoul-1",
-		"ap-sydney-1",
-		"ap-tokyo-1",
-		"ca-montreal-1",
-		"ca-toronto-1",
-		"eu-amsterdam-1",
-		"eu-frankfurt-1",
-		"eu-zurich-1",
-		"me-dubai-1",
-		"me-jeddah-1",
-		"sa-santiago-1",
-		"sa-saopaulo-1",
-		"sa-vinhedo-1",
-		"uk-cardiff-1",
-		"uk-gov-cardiff-1",
-		"uk-gov-london-1",
-		"uk-london-1",
-		"us-ashburn-1",
-		"us-gov-ashburn-1",
-		"us-gov-chicago-1",
-		"us-gov-phoenix-1",
-		"us-langley-1",
-		"us-luke-1",
-		"us-phoenix-1",
-		"us-sanjose-1",
+// List out the regions supported by Oracle Cloud
+func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string, error) {
+	logger := plugin.Logger(ctx)
+	logger.Debug("listOciAvailableRegions")
+
+	cacheKey := "OciRegionList"
+	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]string), nil
+	}
+
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	var regionNames []string
+
+	regions, err := session.IdentityClient.ListRegions(ctx)
+	if err != nil {
+		logger.Error("listOciAvailableRegions", "ListRegions", err)
+		return nil, nil
+	}
+
+	for _, region := range regions.Items {
+		regionNames = append(regionNames, *region.Name)
+	}
+
+	d.ConnectionManager.Cache.Set(cacheKey, regionNames)
+	return regionNames, nil
+}
+
+func getInvalidRegions(ctx context.Context, d *plugin.QueryData, regions []string) []string {
+	// ociRegions := []string{}
+
+	ociRegions, err := listOciAvailableRegions(ctx, d)
+	if err != nil {
+		return []string{}
 	}
 
 	invalidRegions := []string{}

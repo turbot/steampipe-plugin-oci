@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v44/core"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,7 +19,7 @@ func tableOciCoreBootVolumeMetricWriteOpsHourly(_ context.Context) *plugin.Table
 			ParentHydrate: listBootVolumes,
 			Hydrate:       listCoreBootVolumeMetricWriteOpsHourly,
 		},
-		GetMatrixItem: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartementZonalList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

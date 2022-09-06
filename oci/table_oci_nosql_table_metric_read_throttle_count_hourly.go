@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v44/nosql"
-	"github.com/turbot/steampipe-plugin-sdk/v3/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v3/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,7 +19,7 @@ func tableOciNoSQLTableMetricReadThrottleCountHourly(_ context.Context) *plugin.
 			ParentHydrate: listNoSQLTables,
 			Hydrate:       listNoSQLTableMetricReadThrottleCountHourly,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

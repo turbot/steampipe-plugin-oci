@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -47,7 +47,7 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -117,6 +117,20 @@ func tableCoreVolume(_ context.Context) *plugin.Table {
 				Description: "The size of the volume in MBs.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("SizeInMBs"),
+			},
+			{
+				Name:        "volume_backup_policy_id",
+				Description: "The OCID of the volume backup policy that has been assigned to the volume.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getVolumeBackupPolicyAssignment,
+				Transform:   transform.FromField("PolicyId"),
+			},
+			{
+				Name:        "volume_backup_policy_assignment_id",
+				Description: "The OCID of the volume backup policy assignment.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getVolumeBackupPolicyAssignment,
+				Transform:   transform.FromField("Id"),
 			},
 			{
 				Name:        "vpus_per_gb",
@@ -217,7 +231,7 @@ func listCoreVolumes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -281,7 +295,7 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	request := core.GetVolumeRequest{
 		VolumeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -291,6 +305,38 @@ func getCoreVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	}
 
 	return volumeInfo{response.Volume, region}, nil
+}
+
+func getVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getVolumeBackupPolicyAssignment")
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+
+	volumeId := h.Item.(volumeInfo).Id
+
+	// Create Session
+	session, err := coreBlockStorageService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := core.GetVolumeBackupPolicyAssetAssignmentRequest{
+		AssetId: volumeId,
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	response, err := session.BlockstorageClient.GetVolumeBackupPolicyAssetAssignment(ctx, request)
+	if err != nil {
+		plugin.Logger(ctx).Error("getVolumeBackupPolicyAssignment", "err", err)
+		return nil, err
+	}
+
+	if len(response.Items) > 0 {
+		return response.Items[0], nil
+	}
+
+	return nil, nil
 }
 
 //// TRANSFORM FUNCTION

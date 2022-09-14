@@ -9,8 +9,8 @@ package oci
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 const pluginName = "steampipe-plugin-oci"
@@ -38,6 +38,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_cloud_guard_managed_list":                                 tableCloudGuardManagedList(ctx),
 			"oci_cloud_guard_responder_recipe":                             tableCloudGuardResponderRecipe(ctx),
 			"oci_cloud_guard_target":                                       tableCloudGuardTarget(ctx),
+			"oci_containerengine_cluster":                                  tableOciContainerEngineCluster(ctx),
 			"oci_core_block_volume_replica":                                tableCoreBlockVolumeReplica(ctx),
 			"oci_core_boot_volume":                                         tableCoreBootVolume(ctx),
 			"oci_core_boot_volume_attachment":                              tableCoreBootVolumeAttachment(ctx),
@@ -79,12 +80,13 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_autonomous_db_metric_cpu_utilization":            tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization_daily":      tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization_hourly":     tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationHourly(ctx),
-			"oci_database_autonomous_dd_metric_storage_utilization":        tableOciDatabaseAutonomousDatabaseMetricStorageUtilization(ctx),
+			"oci_database_autonomous_db_metric_storage_utilization":        tableOciDatabaseAutonomousDatabaseMetricStorageUtilization(ctx),
 			"oci_database_autonomous_db_metric_storage_utilization_daily":  tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(ctx),
 			"oci_database_autonomous_db_metric_storage_utilization_hourly": tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationHourly(ctx),
 			"oci_database_db":                                              tableOciDatabase(ctx),
 			"oci_database_db_home":                                         tableOciDatabaseDBHome(ctx),
 			"oci_database_db_system":                                       tableOciDatabaseDBSystem(ctx),
+			"oci_database_pluggable_database":                              tableOciPluggableDatabase(ctx),
 			"oci_database_software_image":                                  tableOciDatabaseSoftwareImage(ctx),
 			"oci_dns_rrset":                                                tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                             tableDnsTsigKey(ctx),
@@ -121,11 +123,13 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_db_system":                                          tableMySQLDBSystem(ctx),
 			"oci_mysql_db_system_metric_connections":                       tableOciMySQLDBSystemMetricConnections(ctx),
 			"oci_mysql_db_system_metric_connections_daily":                 tableOciMySQLDBSystemMetricConnectionsDaily(ctx),
+			"oci_mysql_db_system_metric_connections_hourly":                tableOciMySQLDBSystemMetricConnectionsHourly(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization":                   tableOciMySQLDBSystemMetricCpuUtilization(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization_daily":             tableOciMySQLDBSystemMetricCpuUtilizationDaily(ctx),
 			"oci_mysql_db_system_metric_cpu_utilization_hourly":            tableOciMySQLDBSystemMetricCpuUtilizationHourly(ctx),
 			"oci_mysql_db_system_metric_memory_utilization":                tableOciMySQLDBSystemMetricMemoryUtilization(ctx),
 			"oci_mysql_db_system_metric_memory_utilization_daily":          tableOciMySQLDBSystemMetricMemoryUtilizationDaily(ctx),
+			"oci_mysql_heat_wave_cluster":                                  tableOciMySQLHeatWaveCluster(ctx),
 			"oci_nosql_table":                                              tableNoSQLTable(ctx),
 			"oci_nosql_table_metric_read_throttle_count":                   tableOciNoSQLTableMetricReadThrottleCount(ctx),
 			"oci_nosql_table_metric_read_throttle_count_daily":             tableOciNoSQLTableMetricReadThrottleCountDaily(ctx),
@@ -142,6 +146,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_subscription":                                         tableOnsSubscription(ctx),
 			"oci_region":                                                   tableIdentityRegion(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
+			"oci_resourcemanager_stack":                                    tableOciResourceManagerStack(ctx),
+			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
 		},
 	}

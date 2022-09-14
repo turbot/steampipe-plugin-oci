@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -22,6 +21,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v44/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v44/common/auth"
+	"github.com/oracle/oci-go-sdk/v44/containerengine"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/oracle/oci-go-sdk/v44/database"
 	"github.com/oracle/oci-go-sdk/v44/dns"
@@ -38,11 +38,13 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/nosql"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/oracle/oci-go-sdk/v44/ons"
+	"github.com/oracle/oci-go-sdk/v44/resourcemanager"
 	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
+	"github.com/oracle/oci-go-sdk/v44/streaming"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 type session struct {
@@ -55,6 +57,7 @@ type session struct {
 	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
+	ContainerEngineClient          containerengine.ContainerEngineClient
 	DatabaseClient                 database.DatabaseClient
 	DnsClient                      dns.DnsClient
 	EventsClient                   events.EventsClient
@@ -76,6 +79,8 @@ type session struct {
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	ResourceSearchClient           resourcesearch.ResourceSearchClient
+	ResourceManagerClient          resourcemanager.ResourceManagerClient
+	StreamAdminClient              streaming.StreamAdminClient
 	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
 }
@@ -354,6 +359,46 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	sess := &session{
 		TenancyID:          tenantId,
 		BlockstorageClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// containerEngineService returns the service client for OCI Container Engine Service
+func containerEngineService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("containerengine-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("containerEngineService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := containerengine.NewContainerEngineClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		ContainerEngineClient: client,
 	}
 
 	// save session in cache
@@ -1246,6 +1291,81 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	return sess, nil
 }
 
+func resourceManagerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("resourcemanager-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("resourceManagerService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := resourcemanager.NewResourceManagerClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		ResourceManagerClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// streamAdminService returns the service client for OCI Stream Admin Service
+func streamAdminService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("streamadmin-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("resourceSearchService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := streaming.NewStreamAdminClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:         tenantId,
+		StreamAdminClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // vaultService returns the service client for OCI Vault Service
 func vaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1413,7 +1533,7 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 		}
 		if config.PrivateKeyPath != nil {
 			resolvedPath := expandPath(*config.PrivateKeyPath)
-			pemFileData, err := ioutil.ReadFile(resolvedPath)
+			pemFileData, err := os.ReadFile(resolvedPath)
 			if err != nil {
 				return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", *config.PrivateKeyPath, err)
 			}
@@ -1527,7 +1647,7 @@ func getHomeFolder() string {
 // Check for the profile in config file
 func checkProfile(profile string, path string) (err error) {
 	var profileRegex = regexp.MustCompile(`^\[(.*)\]`)
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -1583,7 +1703,7 @@ func getProviderFromCLIEnvironmentVariables() (oci_common.ConfigurationProvider,
 	pemFileContent := ""
 	if privateKeyPath != "" {
 		resolvedPath := expandPath(privateKeyPath)
-		pemFileData, err := ioutil.ReadFile(resolvedPath)
+		pemFileData, err := os.ReadFile(resolvedPath)
 		if err != nil {
 			return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", privateKeyPath, err)
 		}

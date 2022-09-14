@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/budget"
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -39,7 +39,7 @@ func tableBudget(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
@@ -206,7 +206,7 @@ func listBudgets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		Limit:         types.Int(1000),
 		TargetType:    "ALL",
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -281,7 +281,7 @@ func getBudget(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) 
 	request := budget.GetBudgetRequest{
 		BudgetId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

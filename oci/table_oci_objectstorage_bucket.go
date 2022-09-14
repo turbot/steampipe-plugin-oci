@@ -9,9 +9,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -39,7 +39,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -239,7 +239,7 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 		NamespaceName: &nameSpace.Value,
 		Limit:         types.Int(1000),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -323,7 +323,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 		NamespaceName: &nameSpace,
 		BucketName:    &bucketName,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 	response, err := session.ObjectStorageClient.GetBucket(ctx, request)
@@ -351,7 +351,7 @@ func getObjectStorageBucketObjectLifecycle(ctx context.Context, d *plugin.QueryD
 		NamespaceName: nameSpace,
 		BucketName:    bucketName,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 	response, err := session.ObjectStorageClient.GetObjectLifecyclePolicy(ctx, request)

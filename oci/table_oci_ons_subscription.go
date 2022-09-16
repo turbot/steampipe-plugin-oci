@@ -246,18 +246,23 @@ func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	return response.Subscription, nil
 }
 
-// This hydrate function is to get delivery policy column
-// In case of list call it just return delivery policy without doing any extra api call as list call  contains delivery policy data
-// In case of get call it calls extra list api using topicId as filer to get delivery policy data from the list call
+/*
+The delivery policy is returned in the list, but not get the call (https://github.com/turbot/steampipe-plugin-oci/issues/369).
+So if we're hydrated from the list call, return the delivery policy directly,
+but if we're hydrated from the get call, we need to make an extra list call and
+filter on the topic ID.
+*/
+
 func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Debug("getSubscriptionDeliveryPolicy")
 	logger := plugin.Logger(ctx)
+	logger.Debug("getSubscriptionDeliveryPolicy")
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
 
 	policy := deliveryPolicy(ctx, h.Item)
 
+	// If the subscription is from the list call, we already have the policy
 	if policy != nil {
 		return policy, nil
 	}
@@ -275,23 +280,13 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 		return nil, err
 	}
 
-	get := h.Item.(ons.Subscription)
+	subscriptionItem := h.Item.(ons.Subscription)
 	request := ons.ListSubscriptionsRequest{
 		CompartmentId: types.String(compartment),
-		TopicId:       types.String(*get.TopicId),
-		Limit:         types.Int(50),
+		TopicId:       types.String(*subscriptionItem.TopicId),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
-	}
-
-	// Check for additional filter
-
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < int64(*request.Limit) {
-			request.Limit = types.Int(int(*limit))
-		}
 	}
 
 	pagesLeft := true
@@ -302,7 +297,7 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 		}
 
 		for _, subscription := range response.Items {
-			if (*subscription.Id == (*get.Id)){
+			if (*subscription.Id == (*subscriptionItem.Id)){
 				return subscription.DeliveryPolicy, nil
 			}
 			// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -317,7 +312,7 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 		}
 	}
 
-	return nil, nil
+	return nil, err
 }
 
 

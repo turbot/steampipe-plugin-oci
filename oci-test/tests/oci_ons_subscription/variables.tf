@@ -6,13 +6,13 @@ variable "resource_name" {
 
 variable "config_file_profile" {
   type        = string
-  default     = "DEFAULT"
+  default     = "OCI"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 

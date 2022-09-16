@@ -2,6 +2,8 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/ons"
@@ -16,10 +18,14 @@ import (
 func tableOnsSubscription(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_ons_subscription",
-		Description: "OCI ONS Subscription",
-		List: &plugin.ListConfig{
-			Hydrate:           listOnsSubscriptions,
+		Description: "OCI Ons Subscription",
+		Get: &plugin.GetConfig{
+			KeyColumns:        plugin.SingleColumn("id"),
 			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			Hydrate:           getOnsSubscription,
+		},
+		List: &plugin.ListConfig{
+			Hydrate: listOnsSubscriptions,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -77,6 +83,8 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Name:        "delivery_policy",
 				Description: "Delivery Policy of the subscription.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getSubscriptionDeliveryPolicy,
+				Transform:   transform.FromValue(),
 			},
 
 			// tags
@@ -196,11 +204,127 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, err
 }
 
+//// HYDRATE FUNCTION
+
+func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getOnsSubscription")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	id := d.KeyColumnQuals["id"].GetStringValue()
+
+	// handle empty subscription id in get call
+	if strings.TrimSpace(id) == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := onsNotificationDataPlaneService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := ons.GetSubscriptionRequest{
+		SubscriptionId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	response, err := session.NotificationDataPlaneClient.GetSubscription(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Subscription, nil
+}
+
+// This hydrate function is to get delivery policy column
+// In case of list call it just return delivery policy without doing any extra api call as list call  contains delivery policy data
+// In case of get call it calls extra list api using topicId as filer to get delivery policy data from the list call
+func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Debug("getSubscriptionDeliveryPolicy")
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
+
+	policy := deliveryPolicy(ctx, h.Item)
+
+	if policy != nil {
+		return policy, nil
+	}
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := onsNotificationDataPlaneService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	get := h.Item.(ons.Subscription)
+	request := ons.ListSubscriptionsRequest{
+		CompartmentId: types.String(compartment),
+		TopicId:       types.String(*get.TopicId),
+		Limit:         types.Int(50),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	// Check for additional filter
+
+	limit := d.QueryContext.Limit
+	if d.QueryContext.Limit != nil {
+		if *limit < int64(*request.Limit) {
+			request.Limit = types.Int(int(*limit))
+		}
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NotificationDataPlaneClient.ListSubscriptions(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, subscription := range response.Items {
+			if (*subscription.Id == (*get.Id)){
+				return subscription.DeliveryPolicy, nil
+			}
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
+		}
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return nil, nil
+}
+
+
 //// TRANSFORM FUNCTION
 
 func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	allTags := d.HydrateItem.(ons.SubscriptionSummary)
-	freeformTags := allTags.FreeformTags
+	freeformTags := subscriptionFreeformTags(d.HydrateItem)
 
 	var tags map[string]interface{}
 
@@ -211,7 +335,7 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 		}
 	}
 
-	definedTags := allTags.DefinedTags
+	definedTags := subscriptionDefinedTags(d.HydrateItem)
 
 	if definedTags != nil {
 		if tags == nil {
@@ -226,4 +350,32 @@ func subscriptionTags(_ context.Context, d *transform.TransformData) (interface{
 	}
 
 	return tags, nil
+}
+
+func subscriptionFreeformTags(item interface{}) map[string]string {
+	switch item := item.(type) {
+	case ons.Subscription:
+		return item.FreeformTags
+	case ons.SubscriptionSummary:
+		return item.FreeformTags
+	}
+	return nil
+}
+
+func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{} {
+	switch item := item.(type) {
+	case ons.Subscription:
+		return item.DefinedTags
+	case ons.SubscriptionSummary:
+		return item.DefinedTags
+	}
+	return nil
+}
+
+func deliveryPolicy(ctx context.Context, item interface{}) *ons.DeliveryPolicy {
+	switch item := item.(type) {
+		case ons.SubscriptionSummary:
+		return item.DeliveryPolicy
+	}
+	return nil
 }

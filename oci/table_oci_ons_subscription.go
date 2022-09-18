@@ -284,6 +284,7 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 	request := ons.ListSubscriptionsRequest{
 		CompartmentId: types.String(compartment),
 		TopicId:       types.String(*subscriptionItem.TopicId),
+		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},

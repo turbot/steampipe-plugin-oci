@@ -252,7 +252,6 @@ So if we're hydrated from the list call, return the delivery policy directly,
 but if we're hydrated from the get call, we need to make an extra list call and
 filter on the topic ID.
 */
-
 func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	logger.Debug("getSubscriptionDeliveryPolicy")
@@ -313,6 +312,9 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 		}
 	}
 
+	// We shouldn't hit this error condition unless the subscription is deleted
+	// during the API call
+	logger.Error("oci.getOnsSubscription", "subscription_not_found_error", err)
 	return nil, err
 }
 

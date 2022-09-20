@@ -1,3 +1,9 @@
+## v0.17.1 [2022-09-19]
+
+_Bug fixes_
+
+- Fixed `delivery_policy` column not returning data in `oci_ons_subscription` table when specifying the `id` column. ([#370](https://github.com/turbot/steampipe-plugin-oci/pull/370))
+
 ## v0.17.0 [2022-09-06]
 
 _Dependencies_

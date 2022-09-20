@@ -10,5 +10,3 @@ on:
 jobs:
   golangci_lint_workflow:
     uses: turbot/steampipe-workflows/.github/workflows/golangci-lint.yml@main
-    with:
-      timeout: 10m

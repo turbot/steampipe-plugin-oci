@@ -1,3 +1,9 @@
+## v0.17.2 [2022-11-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.8](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v418-2022-09-08) which increases the default open file limit. ([#426](https://github.com/turbot/steampipe-plugin-oci/pull/426))
+
 ## v0.17.1 [2022-09-19]
 
 _Bug fixes_

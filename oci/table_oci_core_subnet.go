@@ -43,7 +43,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",

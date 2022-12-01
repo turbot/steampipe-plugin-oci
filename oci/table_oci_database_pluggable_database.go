@@ -38,7 +38,7 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "pdb_name",

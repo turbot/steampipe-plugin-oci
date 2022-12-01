@@ -41,7 +41,7 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartmentZonalList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",

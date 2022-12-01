@@ -20,7 +20,7 @@ func tableOciMySQLDBSystemMetricCpuUtilizationDaily(_ context.Context) *plugin.T
 			ParentHydrate: listMySQLDBSystems,
 			Hydrate:       listMySQLDBSystemMetricCpuUtilizationDaily,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

@@ -1447,7 +1447,7 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 }
 
 // get the configuration provider for the OCI plugin connection to intract with API's
-func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
+func getProvider(ctx context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
 	// if provider is already cached, return it
@@ -1481,6 +1481,8 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 	}
 
 	regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
+	// regionInfo := oci_common.NewRawConfigurationProvider("", "", "", "", "", nil)
+
 	provider, err := oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, oci_common.DefaultConfigProvider()})
 	if err != nil {
 		return nil, err
@@ -1510,7 +1512,8 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 func getProviderForAPIkey(region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	// config provider with region info
-	regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
+	// regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
+	regionInfo := oci_common.NewRawConfigurationProvider("", "", "", "", "", nil)
 
 	if config.Profile != nil {
 		configPath := ""

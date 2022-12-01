@@ -20,7 +20,7 @@ func tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationHourly(_ context.Cont
 			ParentHydrate: listAutonomousDatabases,
 			Hydrate:       listAutonomousDatabaseMetricCpuUtilizationHourly,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

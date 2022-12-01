@@ -20,7 +20,7 @@ func tableOciMySQLDBSystemMetricConnectionsDaily(_ context.Context) *plugin.Tabl
 			ParentHydrate: listMySQLDBSystems,
 			Hydrate:       listMySQLDBSystemMetricConnectionsDaily,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

@@ -19,7 +19,7 @@ func tableOciCoreBootVolumeMetricWriteOpsHourly(_ context.Context) *plugin.Table
 			ParentHydrate: listBootVolumes,
 			Hydrate:       listCoreBootVolumeMetricWriteOpsHourly,
 		},
-		GetMatrixItemFunc: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartmentZonalList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

@@ -20,7 +20,7 @@ func tableOciMySQLDBSystemMetricMemoryUtilization(_ context.Context) *plugin.Tab
 			ParentHydrate: listMySQLDBSystems,
 			Hydrate:       listMySQLDBSystemMetricMemoryUtilization,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

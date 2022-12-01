@@ -19,7 +19,7 @@ func tableOciCoreInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin.Ta
 			ParentHydrate: listCoreInstances,
 			Hydrate:       listCoreInstanceMetricCpuUtilizationDaily,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

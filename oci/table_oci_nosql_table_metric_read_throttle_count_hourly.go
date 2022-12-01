@@ -19,7 +19,7 @@ func tableOciNoSQLTableMetricReadThrottleCountHourly(_ context.Context) *plugin.
 			ParentHydrate: listNoSQLTables,
 			Hydrate:       listNoSQLTableMetricReadThrottleCountHourly,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

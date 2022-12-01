@@ -51,7 +51,7 @@ func tableMySQLBackup(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getMySQLBackup,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",

@@ -44,7 +44,7 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",

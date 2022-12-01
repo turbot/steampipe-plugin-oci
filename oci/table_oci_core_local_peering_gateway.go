@@ -35,7 +35,7 @@ func tableCoreLocalPeeringGateway(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCoreLocalPeeringGateway,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",

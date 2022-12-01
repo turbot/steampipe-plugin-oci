@@ -20,7 +20,7 @@ func tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(_ context.C
 			ParentHydrate: listAutonomousDatabases,
 			Hydrate:       listAutonomousDatabaseMetricStorageUtilizationDaily,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

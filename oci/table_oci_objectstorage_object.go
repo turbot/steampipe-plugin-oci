@@ -22,7 +22,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			Hydrate:       listObjectStorageObjects,
 			ParentHydrate: listObjectStorageBuckets,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",

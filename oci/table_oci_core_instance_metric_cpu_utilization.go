@@ -19,7 +19,7 @@ func tableOciCoreInstanceMetricCpuUtilization(_ context.Context) *plugin.Table {
 			ParentHydrate: listCoreInstances,
 			Hydrate:       listCoreInstanceMetricCpuUtilization,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

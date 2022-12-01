@@ -19,7 +19,7 @@ func tableOciNoSQLTableMetricStorageUtilization(_ context.Context) *plugin.Table
 			ParentHydrate: listNoSQLTables,
 			Hydrate:       listNoSQLTableMetricStorageUtilization,
 		},
-		GetMatrixItemFunc: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartmentRegionList,
 		Columns: MonitoringMetricColumns(
 			[]*plugin.Column{
 				{

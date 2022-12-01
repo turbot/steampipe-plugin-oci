@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -43,7 +43,7 @@ func tableCoreNetworkSecurityGroup(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
@@ -157,7 +157,7 @@ func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -222,7 +222,7 @@ func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *pl
 	request := core.GetNetworkSecurityGroupRequest{
 		NetworkSecurityGroupId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -251,7 +251,7 @@ func listCoreNetworkSecurityGroupRules(ctx context.Context, d *plugin.QueryData,
 	request := core.ListNetworkSecurityGroupSecurityRulesRequest{
 		NetworkSecurityGroupId: types.String(NetworkSecurityGroupID),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

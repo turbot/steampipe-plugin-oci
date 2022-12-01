@@ -5,9 +5,9 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/mysql"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -26,7 +26,7 @@ func tableOciMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "db_system_id",
@@ -102,7 +102,7 @@ func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugi
 	request := mysql.GetHeatWaveClusterRequest{
 		DbSystemId: dbSystem.Id,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

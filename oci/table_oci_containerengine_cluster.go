@@ -8,9 +8,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/containerengine"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -41,7 +41,7 @@ func tableOciContainerEngineCluster(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -177,7 +177,7 @@ func listContainerEngineClusters(ctx context.Context, d *plugin.QueryData, _ *pl
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -245,7 +245,7 @@ func getContainerEngineCluster(ctx context.Context, d *plugin.QueryData, h *plug
 	request := containerengine.GetClusterRequest{
 		ClusterId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

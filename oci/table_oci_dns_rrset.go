@@ -6,9 +6,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -35,7 +35,7 @@ func tableDnsRecordSet(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartmentList,
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "domain",
@@ -135,7 +135,7 @@ func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int64(100),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

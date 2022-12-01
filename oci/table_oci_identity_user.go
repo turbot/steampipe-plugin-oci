@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -205,7 +205,7 @@ func listUsers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	request.CompartmentId = &session.TenancyID
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -256,7 +256,7 @@ func getUser(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (i
 	request := identity.GetUserRequest{
 		UserId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -283,7 +283,7 @@ func getUserGroups(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 		CompartmentId: &session.TenancyID,
 		UserId:        user.Id,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

@@ -6,9 +6,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/objectstorage"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -22,7 +22,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			Hydrate:       listObjectStorageObjects,
 			ParentHydrate: listObjectStorageBuckets,
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -212,7 +212,7 @@ func listObjectStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugi
 		Fields:        types.String("name,size,etag,timeCreated,md5,timeModified,storageTier,archivalState"),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -264,7 +264,7 @@ func getObjectStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.
 		BucketName:    &bucketName,
 		ObjectName:    &objectName,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

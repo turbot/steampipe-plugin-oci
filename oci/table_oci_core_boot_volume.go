@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/core"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -39,7 +39,7 @@ func tableCoreBootVolume(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -225,7 +225,7 @@ func listBootVolumes(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 		AvailabilityDomain: types.String(zone),
 		Limit:              types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -297,7 +297,7 @@ func getBootVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	request := core.GetBootVolumeRequest{
 		BootVolumeId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -311,9 +311,9 @@ func getBootVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 
 func getBootVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getBootVolumeBackupPolicyAssignment")
-        region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 
-        volumeId := h.Item.(core.BootVolume).Id
+	volumeId := h.Item.(core.BootVolume).Id
 
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
@@ -324,17 +324,17 @@ func getBootVolumeBackupPolicyAssignment(ctx context.Context, d *plugin.QueryDat
 	request := core.GetVolumeBackupPolicyAssetAssignmentRequest{
 		AssetId: volumeId,
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
 	response, err := session.BlockstorageClient.GetVolumeBackupPolicyAssetAssignment(ctx, request)
 	if err != nil {
-		plugin.Logger(ctx).Error("getBootVolumeBackupPolicyAssignment","err",err)
+		plugin.Logger(ctx).Error("getBootVolumeBackupPolicyAssignment", "err", err)
 		return nil, err
 	}
 
-        if len (response.Items) > 0{
+	if len(response.Items) > 0 {
 		return response.Items[0], nil
 	}
 

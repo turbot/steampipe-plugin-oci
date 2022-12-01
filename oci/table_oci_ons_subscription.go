@@ -4,12 +4,13 @@ import (
 	"context"
 	"strings"
 
+
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/ons"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -36,7 +37,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
@@ -82,6 +83,8 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Name:        "delivery_policy",
 				Description: "Delivery Policy of the subscription.",
 				Type:        proto.ColumnType_JSON,
+				Hydrate:     getSubscriptionDeliveryPolicy,
+				Transform:   transform.FromValue(),
 			},
 
 			// tags
@@ -159,7 +162,7 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(50),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -231,7 +234,7 @@ func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	request := ons.GetSubscriptionRequest{
 		SubscriptionId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -242,6 +245,79 @@ func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	return response.Subscription, nil
 }
+
+/*
+The delivery policy is returned in the list, but not get the call (https://github.com/turbot/steampipe-plugin-oci/issues/369).
+So if we're hydrated from the list call, return the delivery policy directly,
+but if we're hydrated from the get call, we need to make an extra list call and
+filter on the topic ID.
+*/
+func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	logger.Debug("getSubscriptionDeliveryPolicy")
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
+
+	policy := deliveryPolicy(ctx, h.Item)
+
+	// If the subscription is from the list call, we already have the policy
+	if policy != nil {
+		return policy, nil
+	}
+
+	equalQuals := d.KeyColumnQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := onsNotificationDataPlaneService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	subscriptionItem := h.Item.(ons.Subscription)
+	request := ons.ListSubscriptionsRequest{
+		CompartmentId: types.String(compartment),
+		TopicId:       types.String(*subscriptionItem.TopicId),
+		Limit:         types.Int(50),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NotificationDataPlaneClient.ListSubscriptions(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, subscription := range response.Items {
+			if (*subscription.Id == (*subscriptionItem.Id)){
+				return subscription.DeliveryPolicy, nil
+			}
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
+		}
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	// We shouldn't hit this error condition unless the subscription is deleted
+	// during the API call
+	logger.Error("oci.getOnsSubscription", "subscription_not_found_error", err)
+	return nil, err
+}
+
 
 //// TRANSFORM FUNCTION
 
@@ -290,6 +366,14 @@ func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{}
 		return item.DefinedTags
 	case ons.SubscriptionSummary:
 		return item.DefinedTags
+	}
+	return nil
+}
+
+func deliveryPolicy(ctx context.Context, item interface{}) *ons.DeliveryPolicy {
+	switch item := item.(type) {
+		case ons.SubscriptionSummary:
+		return item.DeliveryPolicy
 	}
 	return nil
 }

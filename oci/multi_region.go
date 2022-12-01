@@ -10,32 +10,31 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/identity"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 const matrixKeyRegion = "region"
 const matrixKeyCompartment = "compartment"
 const matrixKeyZone = "zone"
 
-var pluginQueryData *plugin.QueryData
+// var pluginQueryData *plugin.QueryData
 
-func init() {
-	pluginQueryData = &plugin.QueryData{
-		ConnectionManager: connection.NewManager(),
-	}
-}
+// func init() {
+// 	pluginQueryData = &plugin.QueryData{
+// 		ConnectionManager: connection.NewManager(),
+// 	}
+// }
 
 // BuildRegionList :: return a list of matrix items, one per region specified in the connection config
-func BuildRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildRegionList(ctx context.Context, connection *plugin.Connection, d *plugin.QueryData) []map[string]interface{} {
 	// retrieve regions from connection config
-	ociConfig := GetConfig(connection)
+	ociConfig := GetConfig(d.Connection)
 
 	if ociConfig.Regions != nil {
-		regions := GetConfig(connection).Regions
+		regions := GetConfig(d.Connection).Regions
 
-		if len(getInvalidRegions(ctx, pluginQueryData, regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, pluginQueryData, regions), ","))
+		if len(getInvalidRegions(ctx, d, regions)) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, d, regions), ","))
 		}
 
 		// validate regions list
@@ -52,16 +51,16 @@ func BuildRegionList(ctx context.Context, connection *plugin.Connection) []map[s
 }
 
 // BuildCompartmentList :: return a list of matrix items, one per compartment specified in the connection config
-func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildCompartmentList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 	// cache compartment matrix
 	cacheKey := "CompartmentList"
 
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
 	// get all the compartments in the tenant
-	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	compartments, err := listAllCompartments(ctx, d)
 	if err != nil {
 		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
 			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
@@ -75,23 +74,23 @@ func BuildCompartmentList(ctx context.Context, connection *plugin.Connection) []
 		matrix[i] = map[string]interface{}{matrixKeyCompartment: *compartment.Id}
 	}
 	// set CompartmentList cache
-	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+	d.ConnectionManager.Cache.Set(cacheKey, matrix)
 
 	return matrix
 }
 
 // BuildCompartmentRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
-func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 
 	// cache compartment region matrix
 	cacheKey := "CompartmentRegionList"
 
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
 	// get all the compartments in the tenant
-	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	compartments, err := listAllCompartments(ctx, d)
 	if err != nil {
 		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
 			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
@@ -100,13 +99,13 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	}
 
 	// retrieve regions from connection config
-	ociConfig := GetConfig(connection)
+	ociConfig := GetConfig(d.Connection)
 
 	if ociConfig.Regions != nil {
-		regions := GetConfig(connection).Regions
+		regions := GetConfig(d.Connection).Regions
 
-		if len(getInvalidRegions(ctx, pluginQueryData, regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, pluginQueryData, regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
+		if len(getInvalidRegions(ctx, d, regions)) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(ctx, d, regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
 		}
 
 		// validate regions list
@@ -122,7 +121,7 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 		}
 
 		// set CompartmentRegionList cache
-		pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+		d.ConnectionManager.Cache.Set(cacheKey, matrix)
 		return matrix
 	}
 
@@ -136,7 +135,7 @@ func BuildCompartementRegionList(ctx context.Context, connection *plugin.Connect
 	}
 
 	// set CompartmentRegionList cache
-	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, defaultMatrix)
+	d.ConnectionManager.Cache.Set(cacheKey, defaultMatrix)
 
 	return defaultMatrix
 }
@@ -147,7 +146,7 @@ func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string
 	logger.Debug("listOciAvailableRegions")
 
 	cacheKey := "OciRegionList"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]string), nil
 	}
 
@@ -190,16 +189,15 @@ func getInvalidRegions(ctx context.Context, d *plugin.QueryData, regions []strin
 	return invalidRegions
 }
 
-func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *plugin.Connection) ([]identity.Compartment, error) {
+func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.Compartment, error) {
 	// Create Session
-	pluginQueryData.Connection = connection
-	session, err := identityService(ctx, pluginQueryData)
+	session, err := identityService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
 
 	serviceCacheKey := "listAllCompartments"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
 		return cachedData.([]identity.Compartment), nil
 	}
 
@@ -215,7 +213,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 		CompartmentId:          &session.TenancyID,
 		CompartmentIdInSubtree: types.Bool(true),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -240,7 +238,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData, connection *p
 	}
 
 	// save compartments in cache
-	pluginQueryData.ConnectionManager.Cache.Set(serviceCacheKey, compartments)
+	d.ConnectionManager.Cache.Set(serviceCacheKey, compartments)
 
 	return compartments, err
 }
@@ -250,15 +248,15 @@ type zoneInfo struct {
 	Region string
 }
 
-func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.Connection) ([]zoneInfo, error) {
+func listAllzones(ctx context.Context, d *plugin.QueryData) ([]zoneInfo, error) {
 
 	zonesList := []zoneInfo{}
 
-	regions := GetConfig(connection).Regions
+	regions := GetConfig(d.Connection).Regions
 
 	if regions != nil {
 		for _, region := range regions {
-			session, err := identityServiceRegional(ctx, pluginQueryData, region)
+			session, err := identityServiceRegional(ctx, d, region)
 			if err != nil {
 				return nil, err
 			}
@@ -267,7 +265,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 			request := identity.ListAvailabilityDomainsRequest{
 				CompartmentId: &session.TenancyID,
 				RequestMetadata: oci_common.RequestMetadata{
-					RetryPolicy: getDefaultRetryPolicy(),
+					RetryPolicy: getDefaultRetryPolicy(d.Connection),
 				},
 			}
 
@@ -283,7 +281,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 		return zonesList, nil
 	}
 	region := getRegionFromEnvVar()
-	session, err := identityServiceRegional(ctx, pluginQueryData, region)
+	session, err := identityServiceRegional(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +290,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 	request := identity.ListAvailabilityDomainsRequest{
 		CompartmentId: &session.TenancyID,
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -308,13 +306,13 @@ func listAllzones(ctx context.Context, d *plugin.QueryData, connection *plugin.C
 }
 
 // BuildCompartmentZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config
-func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connection) []map[string]interface{} {
+func BuildCompartementZonalList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 	cacheKey := "CompartmentZonalList"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
-	compartments, err := listAllCompartments(ctx, pluginQueryData, connection)
+	compartments, err := listAllCompartments(ctx, d)
 	if err != nil {
 		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
 			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
@@ -324,7 +322,7 @@ func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connecti
 
 	plugin.Logger(ctx).Debug("compartments", "compartments", compartments)
 
-	zones, err := listAllzones(ctx, pluginQueryData, connection)
+	zones, err := listAllzones(ctx, d)
 	if err != nil {
 		if strings.Contains(err.Error(), "proper configuration for region") || strings.Contains(err.Error(), "OCI_REGION") {
 			panic("\n\n'regions' must be set in the connection configuration. Edit your connection configuration file and then restart Steampipe")
@@ -346,7 +344,7 @@ func BuildCompartementZonalList(ctx context.Context, connection *plugin.Connecti
 	}
 
 	// set CompartmentZonalList cache
-	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, matrix)
+	d.ConnectionManager.Cache.Set(cacheKey, matrix)
 
 	return matrix
 }
@@ -364,7 +362,7 @@ func getRegionFromEnvVar() string {
 
 func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	cacheKey := "getCloudGuardConfiguration"
-	if cachedData, ok := pluginQueryData.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
 		return cachedData.(cloudguard.Configuration), nil
 	}
 
@@ -377,7 +375,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	request := cloudguard.GetConfigurationRequest{
 		CompartmentId: types.String(session.TenancyID),
 		RequestMetadata: oci_common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
@@ -387,7 +385,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// set response cache
-	pluginQueryData.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
+	d.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
 
 	return response.Configuration, nil
 }

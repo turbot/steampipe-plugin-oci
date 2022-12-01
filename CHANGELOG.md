@@ -1,3 +1,66 @@
+## v0.17.2 [2022-11-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.8](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v418-2022-09-08) which increases the default open file limit. ([#426](https://github.com/turbot/steampipe-plugin-oci/pull/426))
+
+## v0.17.1 [2022-09-19]
+
+_Bug fixes_
+
+- Fixed `delivery_policy` column not returning data in `oci_ons_subscription` table when specifying the `id` column. ([#370](https://github.com/turbot/steampipe-plugin-oci/pull/370))
+
+## v0.17.0 [2022-09-06]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.6](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v416-2022-09-02) which includes several caching and memory management improvements. ([#422](https://github.com/turbot/steampipe-plugin-oci/pull/422))
+- Recompiled plugin with Go version `1.19`. ([#422](https://github.com/turbot/steampipe-plugin-oci/pull/422))
+
+## v0.16.0 [2022-07-14]
+
+_Breaking changes_
+
+- Fixed the typo in the table name to use `oci_database_autonomous_db_metric_storage_utilization` instead of `oci_database_autonomous_dd_metric_storage_utilization`. ([#417](https://github.com/turbot/steampipe-plugin-oci/pull/417))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v3.3.2](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v332--2022-07-11) which includes several caching fixes. ([#418](https://github.com/turbot/steampipe-plugin-oci/pull/418))
+
+## v0.15.0 [2022-07-01]
+
+_Enhancements_
+
+- Recompiled plugin with [steampipe-plugin-sdk v3.3.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v331--2022-06-30). ([#412](https://github.com/turbot/steampipe-plugin-oci/pull/412))
+
+## v0.14.1 [2022-05-23]
+
+_Bug fixes_
+
+- Fixed the Slack community links in README and docs/index.md files. ([#407](https://github.com/turbot/steampipe-plugin-oci/pull/407))
+
+## v0.14.0 [2022-04-27]
+
+_Enhancements_
+
+- Added support for native Linux ARM and Mac M1 builds. ([#401](https://github.com/turbot/steampipe-plugin-oci/pull/401))
+- Recompiled plugin with [steampipe-plugin-sdk v3.1.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v310--2022-03-30) and Go version `1.18`. ([#400](https://github.com/turbot/steampipe-plugin-oci/pull/400))
+
+## v0.13.0 [2022-04-13]
+
+_What's new?_
+
+- Added optional config arguments `max_error_retry_attempts` and `min_error_retry_delay` to allow customization of the error retry timings. For more information please see [OCI plugin configuration](https://hub.steampipe.io/plugins/turbot/oci#configuration). ([#397](https://github.com/turbot/steampipe-plugin-oci/pull/397))
+
+## v0.12.0 [2022-04-06]
+
+_What's new?_
+
+- New tables added
+  - [oci_containerengine_cluster](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_containerengine_cluster) ([#386](https://github.com/turbot/steampipe-plugin-oci/pull/386))
+  - [oci_mysql_heat_wave_cluster](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_mysql_heat_wave_cluster) ([#385](https://github.com/turbot/steampipe-plugin-oci/pull/385))
+  - [oci_resourcemanager_stack](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_resourcemanager_stack) ([#387](https://github.com/turbot/steampipe-plugin-oci/pull/387))
+
 ## v0.11.0 [2022-03-30]
 
 _What's new?_

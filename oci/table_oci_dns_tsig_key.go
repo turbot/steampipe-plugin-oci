@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/dns"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -43,7 +43,7 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getDnsTsigKey,
 		},
-		GetMatrixItem: BuildCompartmentList,
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "name",
@@ -162,7 +162,7 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int64(100)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -227,7 +227,7 @@ func getDnsTsigKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	request := dns.GetTsigKeyRequest{
 		TsigKeyId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

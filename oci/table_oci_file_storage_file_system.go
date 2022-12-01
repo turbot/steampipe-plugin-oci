@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/common"
 	"github.com/oracle/oci-go-sdk/v44/filestorage"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -48,7 +48,7 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItem: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartementZonalList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
@@ -194,7 +194,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 	request.AvailabilityDomain = types.String(zone)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(),
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
 	limit := d.QueryContext.Limit
@@ -264,7 +264,7 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 	request := filestorage.GetFileSystemRequest{
 		FileSystemId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(),
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 

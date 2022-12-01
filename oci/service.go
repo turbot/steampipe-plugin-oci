@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -44,8 +43,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v44/streaming"
 	"github.com/oracle/oci-go-sdk/v44/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v2/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v2/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v4/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )
 
 type session struct {
@@ -1534,7 +1533,7 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 		}
 		if config.PrivateKeyPath != nil {
 			resolvedPath := expandPath(*config.PrivateKeyPath)
-			pemFileData, err := ioutil.ReadFile(resolvedPath)
+			pemFileData, err := os.ReadFile(resolvedPath)
 			if err != nil {
 				return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", *config.PrivateKeyPath, err)
 			}
@@ -1648,7 +1647,7 @@ func getHomeFolder() string {
 // Check for the profile in config file
 func checkProfile(profile string, path string) (err error) {
 	var profileRegex = regexp.MustCompile(`^\[(.*)\]`)
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -1704,7 +1703,7 @@ func getProviderFromCLIEnvironmentVariables() (oci_common.ConfigurationProvider,
 	pemFileContent := ""
 	if privateKeyPath != "" {
 		resolvedPath := expandPath(privateKeyPath)
-		pemFileData, err := ioutil.ReadFile(resolvedPath)
+		pemFileData, err := os.ReadFile(resolvedPath)
 		if err != nil {
 			return nil, fmt.Errorf("can not read private key from: '%s', Error: %q", privateKeyPath, err)
 		}

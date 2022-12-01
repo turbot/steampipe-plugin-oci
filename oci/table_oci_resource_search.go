@@ -22,7 +22,7 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.AnyColumn([]string{"query", "text"}),
 			Hydrate:    listResourceSearch,
 		},
-		GetMatrixItemFunc: BuildRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "identifier",

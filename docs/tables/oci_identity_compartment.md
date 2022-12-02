@@ -34,35 +34,41 @@ order by
 ### Full path of the compartments
 
 ```sql
-WITH RECURSIVE compartments AS (
-      SELECT
-        name,
-        id,
-        compartment_id,
-        tenant_id,
-        name AS path,
-        name as lastname,
-        id as lastid
-      FROM oci_identity_compartment
-      WHERE lifecycle_state = 'ACTIVE'
-   UNION ALL
-      SELECT
-        oci_identity_compartment.name,
-        oci_identity_compartment.id,
-        oci_identity_compartment.compartment_id,
-        oci_identity_compartment.tenant_id,
-        oci_identity_compartment.name || '\' || compartments.path,
-        compartments.lastname,
-        compartments.lastid
-      FROM oci_identity_compartment
-         JOIN compartments ON oci_identity_compartment.id = compartments.compartment_id
-)
+with recursive compartments as (
+select
+  name,
+  id,
+  compartment_id,
+  tenant_id,
+  name as path,
+  name as lastname,
+  id as lastid
+from 
+  oci_identity_compartment
+where
+  lifecycle_state = 'ACTIVE'
 
-SELECT
+union all
+
+select
+  oci_identity_compartment.name,
+  oci_identity_compartment.id,
+  oci_identity_compartment.compartment_id,
+  oci_identity_compartment.tenant_id,
+  oci_identity_compartment.name || '\' || compartments.path,
+  compartments.lastname,
+  compartments.lastid
+from 
+  oci_identity_compartment join 
+  compartments on oci_identity_compartment.id = compartments.compartment_id
+)
+select
   lastid as compartment_id,
   lastname as name,
   path
- from compartments
-   where compartment_id = tenant_id
-   order by path
-```
+from 
+  compartments
+where 
+  compartment_id = tenant_id
+order by 
+  path;

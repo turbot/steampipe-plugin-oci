@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/oracle/oci-go-sdk/v44/database"
+	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"

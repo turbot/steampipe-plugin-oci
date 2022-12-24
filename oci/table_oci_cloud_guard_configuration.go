@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	"github.com/oracle/oci-go-sdk/v44/cloudguard"
+	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"

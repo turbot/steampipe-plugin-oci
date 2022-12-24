@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/hashicorp/go-hclog v1.2.2
-	github.com/oracle/oci-go-sdk/v44 v44.0.0
+	github.com/oracle/oci-go-sdk/v65 v65.28.0
 	github.com/turbot/go-kit v0.4.0
 	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.8
 )
@@ -30,6 +30,7 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
+	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
@@ -56,6 +57,7 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/sethvargo/go-retry v0.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/stevenle/topsort v0.0.0-20130922064739-8130c1d7596b // indirect
 	github.com/tkrajina/go-reflector v0.5.4 // indirect

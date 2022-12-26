@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/oracle/oci-go-sdk/v44/identity"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"

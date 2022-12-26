@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/oracle/oci-go-sdk/v44/nosql"
+	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableOciNoSQLTableMetricStorageUtilizationDaily(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_nosql_table_metric_storage_utilization_daily",

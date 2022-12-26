@@ -13,35 +13,35 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v44/analytics"
-	"github.com/oracle/oci-go-sdk/v44/apigateway"
-	"github.com/oracle/oci-go-sdk/v44/audit"
-	"github.com/oracle/oci-go-sdk/v44/autoscaling"
-	"github.com/oracle/oci-go-sdk/v44/budget"
-	"github.com/oracle/oci-go-sdk/v44/cloudguard"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
-	oci_common_auth "github.com/oracle/oci-go-sdk/v44/common/auth"
-	"github.com/oracle/oci-go-sdk/v44/containerengine"
-	"github.com/oracle/oci-go-sdk/v44/core"
-	"github.com/oracle/oci-go-sdk/v44/database"
-	"github.com/oracle/oci-go-sdk/v44/dns"
-	"github.com/oracle/oci-go-sdk/v44/events"
-	"github.com/oracle/oci-go-sdk/v44/filestorage"
-	"github.com/oracle/oci-go-sdk/v44/functions"
-	"github.com/oracle/oci-go-sdk/v44/identity"
-	"github.com/oracle/oci-go-sdk/v44/keymanagement"
-	"github.com/oracle/oci-go-sdk/v44/loadbalancer"
-	"github.com/oracle/oci-go-sdk/v44/logging"
-	"github.com/oracle/oci-go-sdk/v44/monitoring"
-	"github.com/oracle/oci-go-sdk/v44/mysql"
-	"github.com/oracle/oci-go-sdk/v44/networkloadbalancer"
-	"github.com/oracle/oci-go-sdk/v44/nosql"
-	"github.com/oracle/oci-go-sdk/v44/objectstorage"
-	"github.com/oracle/oci-go-sdk/v44/ons"
-	"github.com/oracle/oci-go-sdk/v44/resourcemanager"
-	"github.com/oracle/oci-go-sdk/v44/resourcesearch"
-	"github.com/oracle/oci-go-sdk/v44/streaming"
-	"github.com/oracle/oci-go-sdk/v44/vault"
+	"github.com/oracle/oci-go-sdk/v65/analytics"
+	"github.com/oracle/oci-go-sdk/v65/apigateway"
+	"github.com/oracle/oci-go-sdk/v65/audit"
+	"github.com/oracle/oci-go-sdk/v65/autoscaling"
+	"github.com/oracle/oci-go-sdk/v65/budget"
+	"github.com/oracle/oci-go-sdk/v65/cloudguard"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
+	oci_common_auth "github.com/oracle/oci-go-sdk/v65/common/auth"
+	"github.com/oracle/oci-go-sdk/v65/containerengine"
+	"github.com/oracle/oci-go-sdk/v65/core"
+	"github.com/oracle/oci-go-sdk/v65/database"
+	"github.com/oracle/oci-go-sdk/v65/dns"
+	"github.com/oracle/oci-go-sdk/v65/events"
+	"github.com/oracle/oci-go-sdk/v65/filestorage"
+	"github.com/oracle/oci-go-sdk/v65/functions"
+	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/oracle/oci-go-sdk/v65/keymanagement"
+	"github.com/oracle/oci-go-sdk/v65/loadbalancer"
+	"github.com/oracle/oci-go-sdk/v65/logging"
+	"github.com/oracle/oci-go-sdk/v65/monitoring"
+	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
+	"github.com/oracle/oci-go-sdk/v65/nosql"
+	"github.com/oracle/oci-go-sdk/v65/objectstorage"
+	"github.com/oracle/oci-go-sdk/v65/ons"
+	"github.com/oracle/oci-go-sdk/v65/resourcemanager"
+	"github.com/oracle/oci-go-sdk/v65/resourcesearch"
+	"github.com/oracle/oci-go-sdk/v65/streaming"
+	"github.com/oracle/oci-go-sdk/v65/vault"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v4/connection"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
@@ -1493,12 +1493,14 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 }
 
 /*
-	#  Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+# Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+
 	connection "oci" {
 		config_file_profile = "DEFAULT"
 		config_path = "~/Desktop/config"
 		regions = ["ap-mumbai-1", "us-ashburn-1"]
 	}
+
 	connection "oci" {
 		tenancy_ocid = "tenancy_ocid"
 		user_ocid = "user_ocid"
@@ -1562,7 +1564,8 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 }
 
 /*
-	# Provider for SecurityToken Authentication
+# Provider for SecurityToken Authentication
+
 	connection "oci" {
 		auth = "SecurityToken"
 		config_file_profile= "config_file_profile"
@@ -1593,6 +1596,7 @@ func getProviderForSecurityToken(region string, config ociConfig) (oci_common.Co
 
 /*
 # Provider for Instance Principal based authentication
+
 	connection "oci" {
 		plugin 		= "oci"
 		auth 			= "InstancePrincipal"

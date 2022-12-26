@@ -3,7 +3,7 @@ package oci
 import (
 	"strconv"
 
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 )

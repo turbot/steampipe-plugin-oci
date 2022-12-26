@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -106,7 +106,7 @@ output "tenancy_ocid" {
 
 output "instance_id" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.instance_id 
+  value = oci_core_vnic_attachment.named_test_resource.instance_id
 }
 
 output "resource_id" {
@@ -116,7 +116,7 @@ output "resource_id" {
 
 output "state" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.state 
+  value = oci_core_vnic_attachment.named_test_resource.state
 }
 
 output "vnic_id" {

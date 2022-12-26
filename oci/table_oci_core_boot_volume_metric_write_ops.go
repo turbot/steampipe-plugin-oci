@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/oracle/oci-go-sdk/v44/core"
+	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableOciCoreBootVolumeMetricWriteOps(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_core_boot_volume_metric_write_ops",

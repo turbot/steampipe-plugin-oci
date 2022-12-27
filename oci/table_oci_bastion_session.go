@@ -53,12 +53,12 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "target_resource_details",
-				Description: "TBC",
+				Description: "Details about a bastion session's target resource.\n\n",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "key_details",
-				Description: "TBC",
+				Description: "Public key details for a bastion session.",
 				Hydrate:     getBastionSession,
 				Type:        proto.ColumnType_JSON,
 			},

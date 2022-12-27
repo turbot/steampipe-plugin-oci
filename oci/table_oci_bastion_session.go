@@ -53,7 +53,7 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "target_resource_details",
-				Description: "Details about a bastion session's target resource.\n\n",
+				Description: "Details about a bastion session's target resource.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
 	"github.com/oracle/oci-go-sdk/v65/audit"
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
+	"github.com/oracle/oci-go-sdk/v65/bastion"
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
@@ -53,6 +54,7 @@ type session struct {
 	ApiGatewayClient               apigateway.ApiGatewayClient
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
+	BastionClient                  bastion.BastionClient
 	BlockstorageClient             core.BlockstorageClient
 	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
@@ -1438,6 +1440,48 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 	sess := &session{
 		TenancyID:       tenantId,
 		AnalyticsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// bastionService returns the service client for OCI Bastion service
+func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("bastion-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("bastionService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get analytics service client
+	client, err := bastion.NewBastionClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:       tenantId,
+		BastionClient:   client,
 	}
 
 	// save session in cache

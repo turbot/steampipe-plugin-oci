@@ -198,7 +198,12 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	logger.Debug("getBastionSession", "OCI_REGION", region)
 
 	var id string
-	id = *h.Item.(bastion.SessionSummary).Id
+	if h.Item != nil {
+		id = *h.Item.(bastion.SessionSummary).Id
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+
+	}
 
 	// handle empty id in get call
 	if id == "" {

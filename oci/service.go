@@ -35,6 +35,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/logging"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
@@ -76,6 +77,7 @@ type session struct {
 	MySQLBackupClient              mysql.DbBackupsClient
 	MySQLDBSystemClient            mysql.DbSystemClient
 	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
+	NetworkFirewallClient          networkfirewall.NetworkFirewallClient
 	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
@@ -1467,7 +1469,7 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 		return nil, err
 	}
 
-	// get analytics service client
+	// get bastion service client
 	client, err := bastion.NewBastionClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
@@ -1480,8 +1482,50 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 	}
 
 	sess := &session{
-		TenancyID:       tenantId,
-		BastionClient:   client,
+		TenancyID:     tenantId,
+		BastionClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// bastionService returns the service client for OCI Network Firewall service
+func networkFirewallService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("networkFirewall-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkFirewallService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get network firewall service client
+	client, err := networkfirewall.NewNetworkFirewallClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		NetworkFirewallClient: client,
 	}
 
 	// save session in cache
@@ -1537,12 +1581,14 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 }
 
 /*
-	#  Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+# Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+
 	connection "oci" {
 		config_file_profile = "DEFAULT"
 		config_path = "~/Desktop/config"
 		regions = ["ap-mumbai-1", "us-ashburn-1"]
 	}
+
 	connection "oci" {
 		tenancy_ocid = "tenancy_ocid"
 		user_ocid = "user_ocid"
@@ -1606,7 +1652,8 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 }
 
 /*
-	# Provider for SecurityToken Authentication
+# Provider for SecurityToken Authentication
+
 	connection "oci" {
 		auth = "SecurityToken"
 		config_file_profile= "config_file_profile"
@@ -1637,6 +1684,7 @@ func getProviderForSecurityToken(region string, config ociConfig) (oci_common.Co
 
 /*
 # Provider for Instance Principal based authentication
+
 	connection "oci" {
 		plugin 		= "oci"
 		auth 			= "InstancePrincipal"

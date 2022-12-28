@@ -88,7 +88,7 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail.",
-				Type:        proto.ColumnType_JSON,
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "lifecycle_state",

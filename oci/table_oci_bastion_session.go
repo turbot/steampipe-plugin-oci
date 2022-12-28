@@ -17,6 +17,10 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 		Name:             "oci_bastion_session",
 		Description:      "OCI Bastion Session",
 		DefaultTransform: transform.FromCamel(),
+		Get: &plugin.GetConfig{
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getBastionSession,
+		},
 		List: &plugin.ListConfig{
 			Hydrate: listBastionSessions,
 			KeyColumns: []*plugin.KeyColumn{

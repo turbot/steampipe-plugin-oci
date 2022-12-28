@@ -289,6 +289,10 @@ func bastionTags(_ context.Context, d *transform.TransformData) (interface{}, er
 		bastion := d.HydrateItem.(bastion.Bastion)
 		freeformTags = bastion.FreeformTags
 		definedTags = bastion.DefinedTags
+	case bastion.BastionSummary:
+		bastion := d.HydrateItem.(bastion.BastionSummary)
+		freeformTags = bastion.FreeformTags
+		definedTags = bastion.DefinedTags
 	}
 
 	var tags map[string]interface{}

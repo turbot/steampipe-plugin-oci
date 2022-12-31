@@ -24,6 +24,10 @@ func tableAutoscalingAutoScalingPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listAutoscalingAutoScalingPolicies,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "auto_scaling_configuration_id",
+					Require: plugin.Required,
+				},
+				{
 					Name:    "display_name",
 					Require: plugin.Optional,
 				},
@@ -44,8 +48,14 @@ func tableAutoscalingAutoScalingPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "auto_scaling_configuration_id",
+				Description: "The OCID of the autoscaling configuration.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("auto_scaling_configuration_id"),
 			},
 			{
 				Name:        "is_enabled",
@@ -162,7 +172,8 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 	}
 
 	request := autoscaling.GetAutoScalingPolicyRequest{
-		AutoScalingPolicyId: types.String(id),
+		AutoScalingPolicyId:        types.String(id),
+		AutoScalingConfigurationId: types.String(d.KeyColumnQuals["auto_scaling_configuration_id"].GetStringValue()),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
@@ -178,6 +189,10 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 // Build additional filters
 func buildAutoscalingAutoScalingPolicyFilters(equalQuals plugin.KeyColumnEqualsQualMap) autoscaling.ListAutoScalingPoliciesRequest {
 	request := autoscaling.ListAutoScalingPoliciesRequest{}
+
+	if equalQuals["auto_scaling_configuration_id"] != nil {
+		request.AutoScalingConfigurationId = types.String(equalQuals["auto_scaling_configuration_id"].GetStringValue())
+	}
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())

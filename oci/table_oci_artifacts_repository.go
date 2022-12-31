@@ -74,7 +74,7 @@ func tableArtifactsRepository(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "TBC",
+				Description: "The current state of the repository.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactsRepository,
 			},

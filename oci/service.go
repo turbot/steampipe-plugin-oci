@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/adm"
 	"github.com/oracle/oci-go-sdk/v65/aianomalydetection"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
@@ -51,44 +52,87 @@ import (
 )
 
 type session struct {
-	TenancyID                      string
-	AnalyticsClient                analytics.AnalyticsClient
-	AnomalyDetectionClient         aianomalydetection.AnomalyDetectionClient
-	ApiGatewayClient               apigateway.ApiGatewayClient
-	AuditClient                    audit.AuditClient
-	AutoScalingClient              autoscaling.AutoScalingClient
-	BastionClient                  bastion.BastionClient
-	BlockstorageClient             core.BlockstorageClient
-	BudgetClient                   budget.BudgetClient
-	CloudGuardClient               cloudguard.CloudGuardClient
-	ComputeClient                  core.ComputeClient
-	ContainerEngineClient          containerengine.ContainerEngineClient
-	DatabaseClient                 database.DatabaseClient
-	DnsClient                      dns.DnsClient
-	EventsClient                   events.EventsClient
-	FileStorageClient              filestorage.FileStorageClient
-	FunctionsManagementClient      functions.FunctionsManagementClient
-	IdentityClient                 identity.IdentityClient
-	KmsManagementClient            keymanagement.KmsManagementClient
-	KmsVaultClient                 keymanagement.KmsVaultClient
-	LoggingManagementClient        logging.LoggingManagementClient
-	LoadBalancerClient             loadbalancer.LoadBalancerClient
-	MonitoringClient               monitoring.MonitoringClient
-	MySQLConfigurationClient       mysql.MysqlaasClient
-	MySQLChannelClient             mysql.ChannelsClient
-	MySQLBackupClient              mysql.DbBackupsClient
-	MySQLDBSystemClient            mysql.DbSystemClient
-	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
-	NetworkFirewallClient          networkfirewall.NetworkFirewallClient
-	NoSQLClient                    nosql.NosqlClient
-	NotificationControlPlaneClient ons.NotificationControlPlaneClient
-	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
-	ObjectStorageClient            objectstorage.ObjectStorageClient
-	ResourceSearchClient           resourcesearch.ResourceSearchClient
-	ResourceManagerClient          resourcemanager.ResourceManagerClient
-	StreamAdminClient              streaming.StreamAdminClient
-	VaultClient                    vault.VaultsClient
-	VirtualNetworkClient           core.VirtualNetworkClient
+	TenancyID                             string
+	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
+	AnalyticsClient                       analytics.AnalyticsClient
+	AnomalyDetectionClient                aianomalydetection.AnomalyDetectionClient
+	ApiGatewayClient                      apigateway.ApiGatewayClient
+	AuditClient                           audit.AuditClient
+	AutoScalingClient                     autoscaling.AutoScalingClient
+	BastionClient                         bastion.BastionClient
+	BlockstorageClient                    core.BlockstorageClient
+	BudgetClient                          budget.BudgetClient
+	CloudGuardClient                      cloudguard.CloudGuardClient
+	ComputeClient                         core.ComputeClient
+	ContainerEngineClient                 containerengine.ContainerEngineClient
+	DatabaseClient                        database.DatabaseClient
+	DnsClient                             dns.DnsClient
+	EventsClient                          events.EventsClient
+	FileStorageClient                     filestorage.FileStorageClient
+	FunctionsManagementClient             functions.FunctionsManagementClient
+	IdentityClient                        identity.IdentityClient
+	KmsManagementClient                   keymanagement.KmsManagementClient
+	KmsVaultClient                        keymanagement.KmsVaultClient
+	LoggingManagementClient               logging.LoggingManagementClient
+	LoadBalancerClient                    loadbalancer.LoadBalancerClient
+	MonitoringClient                      monitoring.MonitoringClient
+	MySQLConfigurationClient              mysql.MysqlaasClient
+	MySQLChannelClient                    mysql.ChannelsClient
+	MySQLBackupClient                     mysql.DbBackupsClient
+	MySQLDBSystemClient                   mysql.DbSystemClient
+	NetworkLoadBalancerClient             networkloadbalancer.NetworkLoadBalancerClient
+	NetworkFirewallClient                 networkfirewall.NetworkFirewallClient
+	NoSQLClient                           nosql.NosqlClient
+	NotificationControlPlaneClient        ons.NotificationControlPlaneClient
+	NotificationDataPlaneClient           ons.NotificationDataPlaneClient
+	ObjectStorageClient                   objectstorage.ObjectStorageClient
+	ResourceSearchClient                  resourcesearch.ResourceSearchClient
+	ResourceManagerClient                 resourcemanager.ResourceManagerClient
+	StreamAdminClient                     streaming.StreamAdminClient
+	VaultClient                           vault.VaultsClient
+	VirtualNetworkClient                  core.VirtualNetworkClient
+}
+
+// admService returns the service client for OCI Adm service
+func admService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("adm-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("admService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Adm service client
+	client, err := adm.NewApplicationDependencyManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                             tenantId,
+		ApplicationDependencyManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // aiAnomalyDetectionService returns the service client for OCI AiAnomalyDetection service

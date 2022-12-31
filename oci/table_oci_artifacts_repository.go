@@ -50,25 +50,25 @@ func tableArtifactsRepository(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
-				Description: "TBC",
+				Description: "The OCID of the repository's compartment.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactsRepository,
 			},
 			{
 				Name:        "display_name",
-				Description: "TBC",
+				Description: "The repository name.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactsRepository,
 			},
 			{
 				Name:        "description",
-				Description: "TBC",
+				Description: "The repository description.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactsRepository,
 			},
 			{
 				Name:        "is_immutable",
-				Description: "TBC",
+				Description: "Whether the repository is immutable. The artifacts of an immutable repository cannot be overwritten.",
 				Type:        proto.ColumnType_BOOL,
 				Hydrate:     getArtifactsRepository,
 			},
@@ -80,19 +80,19 @@ func tableArtifactsRepository(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "TBC",
+				Description: "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getArtifactsRepository,
 			},
 			{
 				Name:        "defined_tags",
-				Description: "TBC",
+				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getArtifactsRepository,
 			},
 			{
 				Name:        "repository_type",
-				Description: "TBC",
+				Description: "The repository's supported artifact type.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactsRepository,
 			},

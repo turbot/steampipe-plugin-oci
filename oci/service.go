@@ -348,8 +348,8 @@ func auditService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	return sess, nil
 }
 
-// autoScalingService returns the service client for OCI Auto Scaling Service
-func autoScalingService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// autoscalingService returns the service client for OCI Autoscaling service
+func autoscalingService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
@@ -358,20 +358,22 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 		return cachedData.(*session), nil
 	}
 
-	// get oci config info
+	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
 	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
 	if err != nil {
-		logger.Error("autoScalingService", "getProvider.Error", err)
+		logger.Error("autoscalingService", "getProvider.Error", err)
 		return nil, err
 	}
 
+	// get Autoscaling service client
 	client, err := autoscaling.NewAutoScalingClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
 	}
 
+	// get tenant ocid from provider
 	tenantId, err := provider.TenancyOCID()
 	if err != nil {
 		return nil, err

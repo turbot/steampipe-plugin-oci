@@ -18,6 +18,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
 	"github.com/oracle/oci-go-sdk/v65/applicationmigration"
+	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/audit"
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
 	"github.com/oracle/oci-go-sdk/v65/bastion"
@@ -59,6 +60,7 @@ type session struct {
 	AnomalyDetectionClient                aianomalydetection.AnomalyDetectionClient
 	ApiGatewayClient                      apigateway.ApiGatewayClient
 	ApplicationMigrationClient            applicationmigration.ApplicationMigrationClient
+	ArtifactsClient                       artifacts.ArtifactsClient
 	AuditClient                           audit.AuditClient
 	AutoScalingClient                     autoscaling.AutoScalingClient
 	BastionClient                         bastion.BastionClient
@@ -257,6 +259,48 @@ func applicationMigrationService(ctx context.Context, d *plugin.QueryData, regio
 	sess := &session{
 		TenancyID:                  tenantId,
 		ApplicationMigrationClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// artifactsService returns the service client for OCI Artifacts service
+func artifactsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("artifacts-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("artifactsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Artifacts service client
+	client, err := artifacts.NewArtifactsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:       tenantId,
+		ArtifactsClient: client,
 	}
 
 	// save session in cache

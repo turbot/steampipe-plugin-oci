@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/certificates"
+	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"net"
 	"net/http"
 	"os"
@@ -66,6 +68,8 @@ type session struct {
 	BastionClient                         bastion.BastionClient
 	BlockstorageClient                    core.BlockstorageClient
 	BudgetClient                          budget.BudgetClient
+	CertificatesClient                    certificates.CertificatesClient
+	CertificatesManagementClient          certificatesmanagement.CertificatesManagementClient
 	CloudGuardClient                      cloudguard.CloudGuardClient
 	ComputeClient                         core.ComputeClient
 	ContainerEngineClient                 containerengine.ContainerEngineClient
@@ -2030,4 +2034,88 @@ func buildHttpClient() (httpClient *http.Client) {
 		},
 	}
 	return
+}
+
+// certificatesManagementService returns the service client for OCI CertificatesManagement service
+func certificatesManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificatesmanagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get CertificatesManagement service client
+	client, err := certificatesmanagement.NewCertificatesManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                    tenantId,
+		CertificatesManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// certificatesService returns the service client for OCI Certificates service
+func certificatesService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificates-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Certificates service client
+	client, err := certificates.NewCertificatesClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		CertificatesClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }

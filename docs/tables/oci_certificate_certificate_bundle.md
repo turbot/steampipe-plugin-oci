@@ -1,4 +1,4 @@
-# Table: oci_certificates_certificate_bundle
+# Table: oci_certificate_certificate_bundle
 
 The contents of the certificate, properties of the certificate (and certificate version), and user-provided contextual metadata.
 
@@ -21,7 +21,7 @@ select
     revocation_status,
     certificate_bundle_type
 from
-oci_certificates_certificate_bundle;
+oci_certificate_certificate_bundle;
 ```
 
 ### Get all certificate bundles
@@ -40,7 +40,7 @@ select
     ccb.revocation_status,
     ccb.certificate_bundle_type
 from
-    oci_certificates_certificate_bundle ccb
-inner join oci_certificates_management_certificate cmc
+    oci_certificate_certificate_bundle ccb
+inner join oci_certificate_management_certificate cmc
 on ccb.certificate_id = cmc.id;
 ```

@@ -1,4 +1,4 @@
-# Table: oci_certificates_certificate_authority_bundle
+# Table: oci_certificate_certificate_authority_bundle
 
 The contents of the certificate authority, properties of the certificate authority (and certificate authority version), and user-provided contextual metadata.
 
@@ -19,7 +19,7 @@ select
     version_name,
     revocation_status
 from
-oci_certificates_certificate_authority_bundle;
+oci_certificate_certificate_authority_bundle;
 ```
 
 ### Get all certificate authority bundles
@@ -36,7 +36,7 @@ select
     ccab.version_name,
     ccab.revocation_status
 from
-    oci_certificates_certificate_authority_bundle ccab
-inner join oci_certificates_management_certificate_authority cmca
-on ccab.certificate_authority_id = cmca.id
+    oci_certificate_certificate_authority_bundle ccab
+inner join oci_certificate_management_certificate_authority cmca
+on ccab.certificate_authority_id = cmca.id;
 ```

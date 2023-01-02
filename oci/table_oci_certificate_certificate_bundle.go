@@ -13,7 +13,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesCertificateBundle(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificates_certificate_bundle",
+		Name:             "oci_certificate_certificate_bundle",
 		Description:      "OCI Certificate Bundle",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{

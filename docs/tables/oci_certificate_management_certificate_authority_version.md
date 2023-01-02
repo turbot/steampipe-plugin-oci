@@ -1,4 +1,4 @@
-# Table: oci_certificates_management_certificate_authority_version
+# Table: oci_certificate_management_certificate_authority_version
 
 The metadata details of the certificate authority (CA) version.
 
@@ -19,7 +19,7 @@ select
     validity,
     revocation_status
 from
-oci_certificates_management_certificate_authority_version;
+oci_certificate_management_certificate_authority_version;
 ```
 
 ### Get all certificate authority versions
@@ -36,7 +36,7 @@ select
     cmcav.validity,
     cmcav.revocation_status
 from
-    oci_certificates_management_certificate_authority_version cmcav
-inner join oci_certificates_management_certificate_authority cmca
+    oci_certificate_management_certificate_authority_version cmcav
+inner join oci_certificate_management_certificate_authority cmca
 on cmca.id = cmcav.certificate_authority_id;
 ```

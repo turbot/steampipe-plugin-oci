@@ -14,7 +14,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesManagementAssociation(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificates_management_association",
+		Name:             "oci_certificate_management_association",
 		Description:      "OCI Association",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{

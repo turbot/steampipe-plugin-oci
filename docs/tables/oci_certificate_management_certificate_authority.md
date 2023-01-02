@@ -1,4 +1,4 @@
-# Table: oci_certificates_management_certificate_authority
+# Table: oci_certificate_management_certificate_authority
 
 The metadata details of the certificate authority (CA). This object does not contain the CA contents. For certificate contents see oci_certificates_certificate_authority_bundle.
 
@@ -23,5 +23,5 @@ select
     signing_algorithm,
     lifecycle_state as state
 from
-oci_certificates_management_certificate_authority;
+oci_certificate_management_certificate_authority;
 ```

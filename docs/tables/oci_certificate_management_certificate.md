@@ -1,4 +1,4 @@
-# Table: oci_certificates_management_certificate
+# Table: oci_certificate_management_certificate
 
 The details of the certificate. This object does not contain the certificate contents. For certificate contents see oci_certificates_certificate_bundle.
 
@@ -24,5 +24,5 @@ select
     certificate_profile_type,
     lifecycle_state as state
 from
-oci_certificates_management_certificate;
+oci_certificate_management_certificate;
 ```

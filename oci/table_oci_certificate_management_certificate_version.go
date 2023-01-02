@@ -11,15 +11,15 @@ import (
 )
 
 // TABLE DEFINITION
-func tableCertificatesManagementCertificateAuthorityVersion(_ context.Context) *plugin.Table {
+func tableCertificatesManagementCertificateVersion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificates_management_certificate_authority_version",
-		Description:      "OCI Certificate Authority Version",
+		Name:             "oci_certificate_management_certificate_version",
+		Description:      "OCI Certificate Version",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "certificate_authority_id",
+					Name:    "certificate_id",
 					Require: plugin.Required,
 				},
 				{
@@ -27,13 +27,13 @@ func tableCertificatesManagementCertificateAuthorityVersion(_ context.Context) *
 					Require: plugin.Required,
 				},
 			},
-			Hydrate: getCertificatesManagementCertificateAuthorityVersion,
+			Hydrate: getCertificatesManagementCertificateVersion,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCertificatesManagementCertificateAuthorityVersions,
+			Hydrate: listCertificatesManagementCertificateVersions,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "certificate_authority_id",
+					Name:    "certificate_id",
 					Require: plugin.Required,
 				},
 				{
@@ -45,18 +45,18 @@ func tableCertificatesManagementCertificateAuthorityVersion(_ context.Context) *
 		GetMatrixItemFunc: BuildRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "certificate_authority_id",
-				Description: "The OCID of the CA.",
+				Name:        "certificate_id",
+				Description: "The OCID of the certificate.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "version_number",
-				Description: "The version number of this CA.",
+				Description: "The version number of the certificate.",
 				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "stages",
-				Description: "A list of rotation states for this CA version.",
+				Description: "A list of stages of this entity.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -66,39 +66,38 @@ func tableCertificatesManagementCertificateAuthorityVersion(_ context.Context) *
 			},
 			{
 				Name:        "issuer_ca_version_number",
-				Description: "The version number of the issuing CA.",
+				Description: "The version number of the issuing certificate authority (CA).",
 				Type:        proto.ColumnType_INT,
 			},
 			{
 				Name:        "version_name",
-				Description: "The name of the CA version. When the value is not null, a name is unique across versions for a given CA.",
+				Description: "The name of the certificate version. When the value is not null, a name is unique across versions of a given certificate.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "subject_alternative_names",
-				Description: "A list of subject alternative names. A subject alternative name specifies the domain names, including subdomains, and IP addresses covered by the certificates issued by this CA.",
+				Description: "A list of subject alternative names.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getCertificatesManagementCertificateAuthorityVersion,
 			},
 			{
 				Name:        "time_of_deletion",
-				Description: "An optional property indicating when to delete the CA version.",
+				Description: "An optional property indicating when to delete the certificate version.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},
 			{
 				Name:        "validity",
-				Description: "Certificate Authority validity details.",
+				Description: "Certificate validity details.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "revocation_status",
-				Description: "Revocation details for the CA.",
+				Description: "Revocation details for the certificate.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that the Certificate Authority Version was created.",
+				Description: "Time that the Certificate Version was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -123,10 +122,10 @@ func tableCertificatesManagementCertificateAuthorityVersion(_ context.Context) *
 }
 
 // LIST FUNCTION
-func listCertificatesManagementCertificateAuthorityVersions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCertificatesManagementCertificateVersions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("listCertificatesManagementCertificateAuthorityVersions", "OCI_REGION", region)
+	logger.Debug("listCertificatesManagementCertificateVersions", "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 	// Create Session
@@ -136,7 +135,7 @@ func listCertificatesManagementCertificateAuthorityVersions(ctx context.Context,
 	}
 
 	//Build request parameters
-	request := buildListCertificatesManagementCertificateAuthorityVersionFilters(equalQuals)
+	request := buildListCertificatesManagementCertificateVersionFilters(equalQuals)
 	request.Limit = types.Int(20)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -151,7 +150,7 @@ func listCertificatesManagementCertificateAuthorityVersions(ctx context.Context,
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.CertificatesManagementClient.ListCertificateAuthorityVersions(ctx, request)
+		response, err := session.CertificatesManagementClient.ListCertificateVersions(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -174,36 +173,36 @@ func listCertificatesManagementCertificateAuthorityVersions(ctx context.Context,
 }
 
 // HYDRATE FUNCTION
-func getCertificatesManagementCertificateAuthorityVersion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getCertificatesManagementCertificateVersion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("getCertificatesManagementCertificateAuthorityVersion", "OCI_REGION", region)
+	logger.Debug("getCertificatesManagementCertificateVersion", "OCI_REGION", region)
 
-	request := buildGetCertificatesManagementCertificateAuthorityVersionFilters(d.KeyColumnQuals, h)
+	request := buildGetCertificatesManagementCertificateVersionFilters(d.KeyColumnQuals, h)
 
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("getCertificatesManagementCertificateAuthorityVersion", "error_CertificatesManagementService", err)
+		logger.Error("getCertificatesManagementCertificateVersion", "error_CertificatesManagementService", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
-	response, err := session.CertificatesManagementClient.GetCertificateAuthorityVersion(ctx, request)
+	response, err := session.CertificatesManagementClient.GetCertificateVersion(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	return response.CertificateAuthorityVersion, nil
+	return response.CertificateVersion, nil
 }
 
 // Build additional list filters
-func buildListCertificatesManagementCertificateAuthorityVersionFilters(equalQuals plugin.KeyColumnEqualsQualMap) certificatesmanagement.ListCertificateAuthorityVersionsRequest {
-	request := certificatesmanagement.ListCertificateAuthorityVersionsRequest{}
+func buildListCertificatesManagementCertificateVersionFilters(equalQuals plugin.KeyColumnEqualsQualMap) certificatesmanagement.ListCertificateVersionsRequest {
+	request := certificatesmanagement.ListCertificateVersionsRequest{}
 
-	if equalQuals["certificate_authority_id"] != nil {
-		request.CertificateAuthorityId = types.String(equalQuals["certificate_authority_id"].GetStringValue())
+	if equalQuals["certificate_id"] != nil {
+		request.CertificateId = types.String(equalQuals["certificate_id"].GetStringValue())
 	}
 
 	if equalQuals["version_number"] != nil {
@@ -214,15 +213,15 @@ func buildListCertificatesManagementCertificateAuthorityVersionFilters(equalQual
 }
 
 // Build additional filters
-func buildGetCertificatesManagementCertificateAuthorityVersionFilters(equalQuals plugin.KeyColumnEqualsQualMap, h *plugin.HydrateData) certificatesmanagement.GetCertificateAuthorityVersionRequest {
-	request := certificatesmanagement.GetCertificateAuthorityVersionRequest{}
+func buildGetCertificatesManagementCertificateVersionFilters(equalQuals plugin.KeyColumnEqualsQualMap, h *plugin.HydrateData) certificatesmanagement.GetCertificateVersionRequest {
+	request := certificatesmanagement.GetCertificateVersionRequest{}
 
 	if h.Item != nil {
-		request.CertificateAuthorityId = h.Item.(certificatesmanagement.CertificateAuthorityVersionSummary).CertificateAuthorityId
-		request.CertificateAuthorityVersionNumber = h.Item.(certificatesmanagement.CertificateAuthorityVersionSummary).VersionNumber
+		request.CertificateId = h.Item.(certificatesmanagement.CertificateVersionSummary).CertificateId
+		request.CertificateVersionNumber = h.Item.(certificatesmanagement.CertificateVersionSummary).VersionNumber
 	} else {
-		request.CertificateAuthorityId = types.String(equalQuals["certificate_authority_id"].GetStringValue())
-		request.CertificateAuthorityVersionNumber = types.Int64(equalQuals["version_number"].GetInt64Value())
+		request.CertificateId = types.String(equalQuals["certificate_id"].GetStringValue())
+		request.CertificateVersionNumber = types.Int64(equalQuals["version_number"].GetInt64Value())
 	}
 
 	return request

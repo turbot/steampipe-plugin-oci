@@ -12,17 +12,17 @@ import (
 )
 
 // TABLE DEFINITION
-func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
+func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificates_management_certificate",
-		Description:      "OCI Certificate",
+		Name:             "oci_certificate_management_ca_bundle",
+		Description:      "OCI Ca Bundle",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getCertificatesManagementCertificate,
+			Hydrate:    getCertificatesManagementCaBundle,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCertificatesManagementCertificates,
+			Hydrate: listCertificatesManagementCaBundles,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -36,91 +36,33 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 					Name:    "name",
 					Require: plugin.Optional,
 				},
-				{
-					Name:    "issuer_certificate_authority_id",
-					Require: plugin.Optional,
-				},
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",
-				Description: "The OCID of the certificate.",
+				Description: "The OCID of the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "name",
-				Description: "A user-friendly name for the certificate.",
+				Description: "A user-friendly name for the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current lifecycle state of the certificate.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "config_type",
-				Description: "The origin of the certificate.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "issuer_certificate_authority_id",
-				Description: "The OCID of the certificate authority (CA) that issued the certificate.",
+				Description: "The current lifecycle state of the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "description",
-				Description: "A brief description of the certificate.",
+				Description: "A brief description of the CA bundle.",
 				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "certificate_rules",
-				Description: "A list of rules that control how the certificate is used and managed.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "time_of_deletion",
-				Description: "An optional property indicating when to delete the certificate version.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},
 			{
 				Name:        "lifecycle_details",
-				Description: "Additional information about the current lifecycle state of the certificate.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getCertificatesManagementCertificate,
-			},
-			{
-				Name:        "current_version",
-				Description: "Details about the current version of the certificate.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getCertificatesManagementCertificate,
-			},
-			{
-				Name:        "subject",
-				Description: "Certificate subject informnation.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "certificate_revocation_list_details",
-				Description: "Certificate revocation details.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getCertificatesManagementCertificate,
-			},
-			{
-				Name:        "key_algorithm",
-				Description: "The algorithm used to create key pairs.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "signature_algorithm",
-				Description: "The algorithm used to sign the public key certificate.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "certificate_profile_type",
-				Description: "The name of the profile used to create the certificate.",
+				Description: "Additional information about the current lifecycle state of the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -135,7 +77,7 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that the Certificate was created.",
+				Description: "Time that the Ca Bundle was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -145,7 +87,7 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(certificatesManagementCertificateTags),
+				Transform:   transform.From(certificatesManagementCaBundleTags),
 			},
 			{
 				Name:        "title",
@@ -172,11 +114,11 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 }
 
 // LIST FUNCTION
-func listCertificatesManagementCertificates(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listCertificatesManagementCaBundles(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listCertificatesManagementCertificates", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listCertificatesManagementCaBundles", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 	// Return nil, if given compartment_id doesn't match
@@ -190,7 +132,7 @@ func listCertificatesManagementCertificates(ctx context.Context, d *plugin.Query
 	}
 
 	//Build request parameters
-	request := buildListCertificatesManagementCertificateFilters(equalQuals)
+	request := buildListCertificatesManagementCaBundleFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(20)
 	request.RequestMetadata = common.RequestMetadata{
@@ -206,7 +148,7 @@ func listCertificatesManagementCertificates(ctx context.Context, d *plugin.Query
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.CertificatesManagementClient.ListCertificates(ctx, request)
+		response, err := session.CertificatesManagementClient.ListCaBundles(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -229,45 +171,45 @@ func listCertificatesManagementCertificates(ctx context.Context, d *plugin.Query
 }
 
 // HYDRATE FUNCTION
-func getCertificatesManagementCertificate(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getCertificatesManagementCaBundle(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getCertificatesManagementCertificate", "Compartment", compartment, "OCI_REGION", region)
-	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	logger.Debug("getCertificatesManagementCaBundle", "Compartment", compartment, "OCI_REGION", region)
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
-	request := buildGetCertificatesManagementCertificateFilters(d.KeyColumnQuals, h)
+	request := buildGetCertificatesManagementCaBundleFilters(d.KeyColumnQuals, h)
 
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("getCertificatesManagementCertificate", "error_CertificatesManagementService", err)
+		logger.Error("getCertificatesManagementCaBundle", "error_CertificatesManagementService", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
-	response, err := session.CertificatesManagementClient.GetCertificate(ctx, request)
+	response, err := session.CertificatesManagementClient.GetCaBundle(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	return response.Certificate, nil
+	return response.CaBundle, nil
 }
 
 // TRANSFORM FUNCTION
-func certificatesManagementCertificateTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func certificatesManagementCaBundleTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {
-	case certificatesmanagement.Certificate:
-		obj := d.HydrateItem.(certificatesmanagement.Certificate)
+	case certificatesmanagement.CaBundle:
+		obj := d.HydrateItem.(certificatesmanagement.CaBundle)
 		freeformTags = obj.FreeformTags
 		definedTags = obj.DefinedTags
-	case certificatesmanagement.CertificateSummary:
-		obj := d.HydrateItem.(certificatesmanagement.CertificateSummary)
+	case certificatesmanagement.CaBundleSummary:
+		obj := d.HydrateItem.(certificatesmanagement.CaBundleSummary)
 		freeformTags = obj.FreeformTags
 		definedTags = obj.DefinedTags
 	}
@@ -294,39 +236,35 @@ func certificatesManagementCertificateTags(_ context.Context, d *transform.Trans
 }
 
 // Build additional list filters
-func buildListCertificatesManagementCertificateFilters(equalQuals plugin.KeyColumnEqualsQualMap) certificatesmanagement.ListCertificatesRequest {
-	request := certificatesmanagement.ListCertificatesRequest{}
+func buildListCertificatesManagementCaBundleFilters(equalQuals plugin.KeyColumnEqualsQualMap) certificatesmanagement.ListCaBundlesRequest {
+	request := certificatesmanagement.ListCaBundlesRequest{}
 
 	if equalQuals["compartment_id"] != nil {
 		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
 	}
 	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = certificatesmanagement.ListCertificatesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+		request.LifecycleState = certificatesmanagement.ListCaBundlesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = certificatesmanagement.ListCertificatesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+		request.LifecycleState = certificatesmanagement.ListCaBundlesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}
 
 	if equalQuals["name"] != nil {
 		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
 
-	if equalQuals["issuer_certificate_authority_id"] != nil {
-		request.IssuerCertificateAuthorityId = types.String(equalQuals["issuer_certificate_authority_id"].GetStringValue())
-	}
-
 	return request
 }
 
 // Build additional filters
-func buildGetCertificatesManagementCertificateFilters(equalQuals plugin.KeyColumnEqualsQualMap, h *plugin.HydrateData) certificatesmanagement.GetCertificateRequest {
-	request := certificatesmanagement.GetCertificateRequest{}
+func buildGetCertificatesManagementCaBundleFilters(equalQuals plugin.KeyColumnEqualsQualMap, h *plugin.HydrateData) certificatesmanagement.GetCaBundleRequest {
+	request := certificatesmanagement.GetCaBundleRequest{}
 
 	if h.Item != nil {
-		request.CertificateId = h.Item.(certificatesmanagement.CertificateSummary).Id
+		request.CaBundleId = h.Item.(certificatesmanagement.CaBundleSummary).Id
 	} else {
-		request.CertificateId = types.String(equalQuals["id"].GetStringValue())
+		request.CaBundleId = types.String(equalQuals["id"].GetStringValue())
 	}
 
 	return request

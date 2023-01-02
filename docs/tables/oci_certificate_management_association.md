@@ -1,4 +1,4 @@
-# Table: oci_certificates_management_association
+# Table: oci_certificate_management_association
 
 Information about certificates and their associated OCI resources such as Load Balancers and API Gateways.
 
@@ -15,5 +15,5 @@ select
     association_type,
     lifecycle_state as state
 from
-oci_certificates_management_association;
+oci_certificate_management_association;
 ```

@@ -51,7 +51,7 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "name",
-				Description: "A user-friendly name for the certificate. Names are unique within a compartment. Avoid entering confidential information. Valid characters are uppercase or lowercase letters, numbers, hyphens, underscores, and periods.",
+				Description: "A user-friendly name for the certificate.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -71,7 +71,7 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "description",
-				Description: "A brief description of the certificate. Avoid entering confidential information.",
+				Description: "A brief description of the certificate.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -81,7 +81,7 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_of_deletion",
-				Description: "An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.",
+				Description: "An optional property indicating when to delete the certificate version.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},
@@ -93,18 +93,18 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "current_version",
-				Description: "TBC",
+				Description: "Details about the current version of the certificate.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCertificatesManagementCertificate,
 			},
 			{
 				Name:        "subject",
-				Description: "TBC",
+				Description: "Certificate subject informnation.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "certificate_revocation_list_details",
-				Description: "TBC",
+				Description: "Certificate revocation details.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCertificatesManagementCertificate,
 			},
@@ -120,17 +120,17 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "certificate_profile_type",
-				Description: "The name of the profile used to create the certificate, which depends on the type of certificate you need.",
+				Description: "The name of the profile used to create the certificate.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.",
+				Description: "Free-form tags for this resource.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "defined_tags",
-				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
+				Description: "Defined tags for this resource.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

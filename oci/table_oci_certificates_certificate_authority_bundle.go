@@ -79,7 +79,7 @@ func tableCertificatesCertificateAuthorityBundle(_ context.Context) *plugin.Tabl
 			},
 			{
 				Name:        "validity",
-				Description: "TBC",
+				Description: "Validatity details for the certificate authority.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -99,7 +99,7 @@ func tableCertificatesCertificateAuthorityBundle(_ context.Context) *plugin.Tabl
 			},
 			{
 				Name:        "revocation_status",
-				Description: "TBC",
+				Description: "The revocation status for the certificate authority.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

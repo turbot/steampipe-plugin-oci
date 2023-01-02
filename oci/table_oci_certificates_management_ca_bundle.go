@@ -47,7 +47,7 @@ func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "name",
-				Description: "A user-friendly name for the CA bundle. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.",
+				Description: "A user-friendly name for the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -67,12 +67,12 @@ func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.",
+				Description: "Free-form tags for this resource.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "defined_tags",
-				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
+				Description: "Defined tags for this resource.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

@@ -51,7 +51,7 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 			},
 			{
 				Name:        "name",
-				Description: "A user-friendly name for the CA. Names are unique within a compartment. Avoid entering confidential information. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.",
+				Description: "A user-friendly name for the CA.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -76,7 +76,7 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 			},
 			{
 				Name:        "time_of_deletion",
-				Description: "An optional property indicating when to delete the CA version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.",
+				Description: "An optional property indicating when to delete the CA version.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},
@@ -98,19 +98,19 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 			},
 			{
 				Name:        "current_version",
-				Description: "TBC",
+				Description: "Details about the current version of the CA.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCertificatesManagementCertificateAuthority,
 			},
 			{
 				Name:        "certificate_revocation_list_details",
-				Description: "TBC",
+				Description: "Details about the CA revocation list.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getCertificatesManagementCertificateAuthority,
 			},
 			{
 				Name:        "subject",
-				Description: "TBC",
+				Description: "Subject information for the CA.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -120,12 +120,12 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 			},
 			{
 				Name:        "freeform_tags",
-				Description: "Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.",
+				Description: "Simple key-value pair that is applied without any predefined name.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "defined_tags",
-				Description: "Usage of predefined tag keys. These predefined keys are scoped to namespaces.",
+				Description: "Usage of predefined tag keys.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

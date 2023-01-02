@@ -81,18 +81,18 @@ func tableCertificatesManagementCertificateVersion(_ context.Context) *plugin.Ta
 			},
 			{
 				Name:        "time_of_deletion",
-				Description: "An optional property indicating when to delete the certificate version, expressed in RFC 3339 (https://tools.ietf.org/html/rfc3339) timestamp format.",
+				Description: "An optional property indicating when to delete the certificate version.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeOfDeletion.Time"),
 			},
 			{
 				Name:        "validity",
-				Description: "TBC",
+				Description: "Certificate validity details.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "revocation_status",
-				Description: "TBC",
+				Description: "Revocation details for the certificate.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{

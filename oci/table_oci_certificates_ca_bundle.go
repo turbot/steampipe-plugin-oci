@@ -34,7 +34,7 @@ func tableCertificatesCaBundle(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "name",
-				Description: "A user-friendly name for the CA bundle. Names are unique within a compartment. Valid characters include uppercase or lowercase letters, numbers, hyphens, underscores, and periods.",
+				Description: "A user-friendly name for the CA bundle. Names are unique within a compartment.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

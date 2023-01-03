@@ -106,6 +106,13 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 
 			//json fields
 			{
+				Name:        "exports",
+				Description: "A list of export resources by file system.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getFileStorageFileSystemExports,
+				Transform:   transform.FromValue(),
+			},
+			{
 				Name:        "source_details",
 				Description: "Source information for the file system.",
 				Type:        proto.ColumnType_JSON,
@@ -276,6 +283,51 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 	return response.FileSystem, nil
 }
 
+func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("getFileStorageFileSystem", "Compartment", compartment, "OCI_ZONE", zone)
+
+	var id string
+	if h.Item != nil {
+		id = getFileSystemID(h.Item)
+	} else {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+		// Restrict the api call to only root compartment and one zone/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty application id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := fileStorageService(ctx, d, region)
+	if err != nil {
+		return nil, err
+	}
+
+	request := filestorage.ListExportsRequest{
+		FileSystemId:  types.String(id),
+		CompartmentId: &compartment,
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	response, err := session.FileStorageClient.ListExports(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Items, nil
+}
+
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
@@ -347,4 +399,15 @@ func buildFileStorageFileSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap)
 	}
 
 	return request
+}
+
+func getFileSystemID(item interface{}) string {
+	switch item := item.(type) {
+	case filestorage.FileSystemSummary:
+		return *item.Id
+	case filestorage.FileSystem:
+		return *item.Id
+	}
+
+	return ""
 }

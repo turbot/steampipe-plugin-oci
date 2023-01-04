@@ -288,7 +288,6 @@ func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("getFileStorageFileSystem", "Compartment", compartment, "OCI_ZONE", zone)
 
 	var id string
 	if h.Item != nil {
@@ -309,6 +308,7 @@ func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h
 	// Create Session
 	session, err := fileStorageService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_file_storage_file_system.getFileStorageFileSystemExports", "connection_error", err)
 		return nil, err
 	}
 
@@ -322,6 +322,7 @@ func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h
 
 	response, err := session.FileStorageClient.ListExports(ctx, request)
 	if err != nil {
+		logger.Error("oci_file_storage_file_system.getFileStorageFileSystemExports", "api_error", err)
 		return nil, err
 	}
 

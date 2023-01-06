@@ -799,7 +799,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// coreComputeService returns the service client for OCI Core Compute service
+// coreComputeManagementService returns the service client for OCI Core Compute service
 func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 

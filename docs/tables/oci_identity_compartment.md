@@ -54,7 +54,7 @@ with recursive compartments as
     oci_identity_compartment.id,
     oci_identity_compartment.compartment_id,
     oci_identity_compartment.tenant_id,
-    oci_identity_compartment.name || '\' || compartments.path,
+    oci_identity_compartment.name || '/' || compartments.path,
     compartments.last_name,
     compartments.last_id
   from

@@ -240,15 +240,14 @@ func getArtifactsRepository(ctx context.Context, d *plugin.QueryData, h *plugin.
 func artifactsRepositoryTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
-	switch d.HydrateItem.(type) {
-	case artifacts.Repository:
-		obj := d.HydrateItem.(artifacts.Repository)
-		freeformTags = obj.GetFreeformTags()
-		definedTags = obj.GetDefinedTags()
-	case artifacts.RepositorySummary:
-		obj := d.HydrateItem.(artifacts.RepositorySummary)
-		freeformTags = obj.GetFreeformTags()
-		definedTags = obj.GetDefinedTags()
+	if repositoryData := d.HydrateItem.(artifacts.Repository); repositoryData != nil {
+		freeformTags = repositoryData.GetFreeformTags()
+		definedTags = repositoryData.GetDefinedTags()
+	}
+
+	if repositorySummaryData := d.HydrateItem.(artifacts.RepositorySummary); repositorySummaryData != nil {
+		freeformTags = repositorySummaryData.GetFreeformTags()
+		definedTags = repositorySummaryData.GetDefinedTags()
 	}
 
 	var tags map[string]interface{}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/certificates"
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"net"
@@ -67,6 +68,7 @@ type session struct {
 	AuditClient                           audit.AuditClient
 	AutoScalingClient                     autoscaling.AutoScalingClient
 	BastionClient                         bastion.BastionClient
+	BdsClient                             bds.BdsClient
 	BlockstorageClient                    core.BlockstorageClient
 	BudgetClient                          budget.BudgetClient
 	CertificatesClient                    certificates.CertificatesClient
@@ -2113,6 +2115,48 @@ func certificatesService(ctx context.Context, d *plugin.QueryData, region string
 	sess := &session{
 		TenancyID:          tenantId,
 		CertificatesClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// bdsService returns the service client for OCI Bds service
+func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("bds-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("bdsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Bds service client
+	client, err := bds.NewBdsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		BdsClient: client,
 	}
 
 	// save session in cache

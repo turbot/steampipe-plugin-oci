@@ -23,5 +23,5 @@ select
     version,
     lifecycle_state as state
 from
-oci_artifacts_container_image;
+    oci_artifacts_container_image;
 ```

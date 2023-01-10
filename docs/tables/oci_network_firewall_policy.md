@@ -20,5 +20,5 @@ select
     url_lists,
     lifecycle_state as state
 from
-  oci_network_firewall_policy;
+    oci_network_firewall_policy;
 ```

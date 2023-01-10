@@ -14,5 +14,5 @@ select
     is_enabled,
     policy_type
 from
-oci_autoscaling_auto_scaling_policy;
+    oci_autoscaling_auto_scaling_policy;
 ```

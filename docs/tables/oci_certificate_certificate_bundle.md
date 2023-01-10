@@ -21,7 +21,7 @@ select
     revocation_status,
     certificate_bundle_type
 from
-oci_certificate_certificate_bundle;
+    oci_certificate_certificate_bundle;
 ```
 
 ### Get all certificate bundles
@@ -41,6 +41,7 @@ select
     ccb.certificate_bundle_type
 from
     oci_certificate_certificate_bundle ccb
-inner join oci_certificate_management_certificate cmc
-on ccb.certificate_id = cmc.id;
+        inner join
+    oci_certificate_management_certificate cmc
+    on ccb.certificate_id = cmc.id;
 ```

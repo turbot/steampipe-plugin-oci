@@ -14,5 +14,5 @@ select
     lifecycle_details,
     lifecycle_state as state
 from
-oci_application_migration_source;
+    oci_application_migration_source;
 ```

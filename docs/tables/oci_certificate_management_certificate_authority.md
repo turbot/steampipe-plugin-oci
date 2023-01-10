@@ -23,5 +23,5 @@ select
     signing_algorithm,
     lifecycle_state as state
 from
-oci_certificate_management_certificate_authority;
+    oci_certificate_management_certificate_authority;
 ```

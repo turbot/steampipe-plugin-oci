@@ -16,7 +16,7 @@ select
     kms_key_version_id,
     message,
     signature,
-      signing_algorithm
+    signing_algorithm
 from
-oci_artifacts_container_image_signature;
+    oci_artifacts_container_image_signature;
 ```

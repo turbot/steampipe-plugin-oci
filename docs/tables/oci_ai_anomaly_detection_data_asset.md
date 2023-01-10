@@ -15,5 +15,5 @@ select
     private_endpoint_id,
     lifecycle_state as state
 from
-oci_ai_anomaly_detection_data_asset;
+    oci_ai_anomaly_detection_data_asset;
 ```

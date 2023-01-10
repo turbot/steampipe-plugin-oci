@@ -24,5 +24,5 @@ select
     certificate_profile_type,
     lifecycle_state as state
 from
-oci_certificate_management_certificate;
+    oci_certificate_management_certificate;
 ```

@@ -22,5 +22,5 @@ select
     migration_state,
     lifecycle_state as state
 from
-oci_application_migration_migration;
+    oci_application_migration_migration;
 ```

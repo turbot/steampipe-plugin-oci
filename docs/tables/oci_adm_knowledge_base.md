@@ -12,5 +12,5 @@ select
     display_name,
     lifecycle_state as state
 from
-oci_adm_knowledge_base;
+    oci_adm_knowledge_base
 ```

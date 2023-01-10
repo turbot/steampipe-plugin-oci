@@ -15,5 +15,5 @@ select
     association_type,
     lifecycle_state as state
 from
-oci_certificate_management_association;
+    oci_certificate_management_association;
 ```

@@ -17,5 +17,5 @@ select
     attached_data_assets,
     lifecycle_state as state
 from
-oci_ai_anomaly_detection_ai_private_endpoint;
+    oci_ai_anomaly_detection_ai_private_endpoint;
 ```

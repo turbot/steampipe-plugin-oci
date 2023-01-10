@@ -22,7 +22,7 @@ select
     target_subnet_id,
     lifecycle_state as state
 from
-  oci_bastion_bastion;
+    oci_bastion_bastion;
 ```
 
 ### Show Bastions that allow access from the Internet (0.0.0.0/0)
@@ -34,6 +34,11 @@ select
     bastion_type,
     client_cidr_block_allow_list,
     private_endpoint_ip_address
-from oci_bastion_bastion 
-where (client_cidr_block_allow_list)::jsonb ? '0.0.0.0/0'
+from
+    oci_bastion_bastion
+where
+    (
+        client_cidr_block_allow_list
+        )
+    ::jsonb ? '0.0.0.0/0'
 ```

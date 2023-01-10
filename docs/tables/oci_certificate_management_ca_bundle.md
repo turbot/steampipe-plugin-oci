@@ -14,5 +14,5 @@ select
     lifecycle_details,
     lifecycle_state as state
 from
-oci_certificate_management_ca_bundle;
+    oci_certificate_management_ca_bundle;
 ```

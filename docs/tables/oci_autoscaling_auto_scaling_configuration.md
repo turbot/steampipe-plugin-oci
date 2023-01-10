@@ -17,5 +17,5 @@ select
     max_resource_count,
     min_resource_count
 from
-oci_autoscaling_auto_scaling_configuration;
+    oci_autoscaling_auto_scaling_configuration;
 ```

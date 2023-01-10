@@ -15,5 +15,5 @@ select
     lifecycle_details,
     lifecycle_state as state
 from
-oci_ai_anomaly_detection_model;
+    oci_ai_anomaly_detection_model;
 ```

@@ -19,9 +19,11 @@ select
     s.ssh_metadata,
     s.key_type,
     s.lifecycle_state as state
-from oci_bastion_session s
-INNER JOIN oci_bastion_bastion b
-ON b.id = s.bastion_id
+from
+    oci_bastion_session s
+        INNER JOIN
+    oci_bastion_bastion b
+    ON b.id = s.bastion_id
 ```
 
 ### Show port forwarding bastion sessions
@@ -39,7 +41,9 @@ select
     ssh_metadata,
     key_type,
     lifecycle_state as state
-from oci_bastion_session
-where bastion_id = 'ocid'
-and target_resource_details->'sessionType' = '"MANAGED_SSH"'
+from
+    oci_bastion_session
+where
+    bastion_id = 'ocid'
+  and target_resource_details -> 'sessionType' = '"MANAGED_SSH"'
 ```

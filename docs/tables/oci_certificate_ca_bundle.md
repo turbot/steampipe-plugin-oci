@@ -12,7 +12,7 @@ select
     name,
     ca_bundle_pem
 from
-oci_certificate_ca_bundle;
+    oci_certificate_ca_bundle;
 ```
 ### Get all Certificate Authority bundles
 
@@ -23,6 +23,7 @@ select
     cca.ca_bundle_pem
 from
     oci_certificate_ca_bundle cca
-    inner join oci_certificate_management_ca_bundle cmca
+        inner join
+    oci_certificate_management_ca_bundle cmca
     on cca.ca_bundle_id = cmca.id;
 ```

@@ -18,5 +18,5 @@ select
     subnet_id,
     lifecycle_state as state
 from
-  oci_network_firewall_firewall;
+    oci_network_firewall_firewall;
 ```

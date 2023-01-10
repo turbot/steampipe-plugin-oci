@@ -15,5 +15,5 @@ select
     repository_type,
     lifecycle_state as state
 from
-oci_artifacts_repository;
+    oci_artifacts_repository;
 ```

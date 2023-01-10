@@ -17,5 +17,5 @@ select
     size_in_bytes,
     lifecycle_state as state
 from
-oci_artifacts_generic_artifact;
+    oci_artifacts_generic_artifact;
 ```

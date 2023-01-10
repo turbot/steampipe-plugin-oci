@@ -19,7 +19,7 @@ select
     validity,
     revocation_status
 from
-oci_certificate_management_certificate_authority_version;
+    oci_certificate_management_certificate_authority_version;
 ```
 
 ### Get all certificate authority versions
@@ -37,6 +37,7 @@ select
     cmcav.revocation_status
 from
     oci_certificate_management_certificate_authority_version cmcav
-inner join oci_certificate_management_certificate_authority cmca
-on cmca.id = cmcav.certificate_authority_id;
+        inner join
+    oci_certificate_management_certificate_authority cmca
+    on cmca.id = cmcav.certificate_authority_id;
 ```

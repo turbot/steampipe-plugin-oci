@@ -20,5 +20,5 @@ select
     time_last_pushed,
     lifecycle_state as state
 from
-oci_artifacts_container_repository;
+    oci_artifacts_container_repository;
 ```

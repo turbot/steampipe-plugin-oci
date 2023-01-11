@@ -30,7 +30,11 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "volume_group_id",
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -41,6 +45,7 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the cluster network.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id"),
 			},
 			{
 				Name:        "display_name",
@@ -146,11 +151,19 @@ func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	request := core.ListClusterNetworksRequest{
-		CompartmentId:      types.String(compartment),
-		Limit:              types.Int(1000),
+		CompartmentId: types.String(compartment),
+		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
+	}
+	displayName := d.KeyColumnQualString("display_name")
+	if displayName != "" {
+		request.DisplayName = &displayName
+	}
+	lifecycleState := d.KeyColumnQualString("lifecycle_state")
+	if lifecycleState != "" {
+		request.DisplayName = &lifecycleState
 	}
 
 	limit := d.QueryContext.Limit
@@ -206,13 +219,12 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, nil
 	}
 
-		// Create Session
+	// Create Session
 	session, err := coreComputeManagementService(ctx, d, region)
 	if err != nil {
 		logger.Debug("oci_core_cluster_network.getClusterNetwork", "Compartment", compartment, "OCI_Zone", zone)
 		return nil, err
 	}
-
 
 	request := core.GetClusterNetworkRequest{
 		ClusterNetworkId: types.String(id),
@@ -236,26 +248,45 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 // 2. Defined Tags
 // 3. Free-form tags
 func clusterNetworkTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	clusterNetwork := d.HydrateItem.(core.ClusterNetworkSummary)
-
 	var tags map[string]interface{}
-
-	if clusterNetwork.FreeformTags != nil {
-		tags = map[string]interface{}{}
-		for k, v := range clusterNetwork.FreeformTags {
-			tags[k] = v
-		}
-	}
-
-	if clusterNetwork.DefinedTags != nil {
-		if tags == nil {
+	switch item := d.HydrateItem.(type) {
+	case core.ClusterNetworkSummary:
+		if item.FreeformTags != nil {
 			tags = map[string]interface{}{}
-		}
-		for _, v := range clusterNetwork.DefinedTags {
-			for key, value := range v {
-				tags[key] = value
+			for k, v := range item.FreeformTags {
+				tags[k] = v
 			}
+		}
 
+		if item.DefinedTags != nil {
+			if tags == nil {
+				tags = map[string]interface{}{}
+			}
+			for _, v := range item.DefinedTags {
+				for key, value := range v {
+					tags[key] = value
+				}
+
+			}
+		}
+	case core.GetClusterNetworkResponse:
+		if item.FreeformTags != nil {
+			tags = map[string]interface{}{}
+			for k, v := range item.FreeformTags {
+				tags[k] = v
+			}
+		}
+
+		if item.DefinedTags != nil {
+			if tags == nil {
+				tags = map[string]interface{}{}
+			}
+			for _, v := range item.DefinedTags {
+				for key, value := range v {
+					tags[key] = value
+				}
+
+			}
 		}
 	}
 

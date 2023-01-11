@@ -194,8 +194,8 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume backup policy id in get call
-	if id == "" {
+	// handle empty volume backup policy id and region check in get call
+	if id == "" || !strings.Contains(id, region){
 		return nil, nil
 	}
 

@@ -132,9 +132,7 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci_core_cluster_network.listClusterNetworks", "Compartment", compartment, "OCI_Zone", zone)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -146,7 +144,7 @@ func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// Create Session
 	session, err := coreComputeManagementService(ctx, d, region)
 	if err != nil {
-		logger.Debug("oci_core_cluster_network.listClusterNetworks", "Compartment", compartment, "OCI_Zone", zone)
+		logger.Error("oci_core_cluster_network.ListClusterNetworks", "connection_error", err)
 		return nil, err
 	}
 
@@ -177,6 +175,7 @@ func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	for pagesLeft {
 		response, err := session.ComputeManagementClient.ListClusterNetworks(ctx, request)
 		if err != nil {
+			logger.Error("oci_core_cluster_network.ListClusterNetworks", "api_error", err)
 			return nil, err
 		}
 
@@ -205,7 +204,6 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("oci_core_cluster_network.getClusterNetwork", "Compartment", compartment, "OCI_zone", zone)
 
 	// Restrict the api call to only root compartment and one zone/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
@@ -222,7 +220,7 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	// Create Session
 	session, err := coreComputeManagementService(ctx, d, region)
 	if err != nil {
-		logger.Debug("oci_core_cluster_network.getClusterNetwork", "Compartment", compartment, "OCI_Zone", zone)
+		logger.Error("oci_core_cluster_network.getClusterNetwork", "connection_error", err)
 		return nil, err
 	}
 
@@ -235,6 +233,7 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	response, err := session.ComputeManagementClient.GetClusterNetwork(ctx, request)
 	if err != nil {
+		logger.Error("oci_core_cluster_network.getClusterNetwork", "api_error", err)
 		return nil, err
 	}
 

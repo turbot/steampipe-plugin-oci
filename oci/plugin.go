@@ -55,6 +55,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_image":                                               tableCoreImage(ctx),
 			"oci_core_image_custom":                                        tableCoreImageCustom(ctx),
 			"oci_core_instance":                                            tableCoreInstance(ctx),
+			"oci_core_instance_configuration":                              tableCoreInstanceConfiguration(ctx),
 			"oci_core_instance_metric_cpu_utilization":                     tableOciCoreInstanceMetricCpuUtilization(ctx),
 			"oci_core_instance_metric_cpu_utilization_daily":               tableOciCoreInstanceMetricCpuUtilizationDaily(ctx),
 			"oci_core_instance_metric_cpu_utilization_hourly":              tableOciCoreInstanceMetricCpuUtilizationHourly(ctx),

@@ -174,7 +174,6 @@ func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ 
 //// HYDRATE FUNCTION
 
 func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getUser")
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)

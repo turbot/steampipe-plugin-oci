@@ -233,6 +233,9 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	response, err := session.ComputeManagementClient.GetClusterNetwork(ctx, request)
 	if err != nil {
+		if strings.Contains(err.Error(), "InvalidParameter") {
+			return nil, nil
+		}
 		logger.Error("oci_core_cluster_network.getClusterNetwork", "api_error", err)
 		return nil, err
 	}

@@ -44,7 +44,7 @@ where
   lifecycle_state = 'AVAIALABLE';
 ```
 
-### Lis cluster networks created in last 30 days
+### List cluster networks created in the last 30 days
 
 ```sql
 select

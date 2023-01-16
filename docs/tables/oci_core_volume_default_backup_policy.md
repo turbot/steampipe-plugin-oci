@@ -2,7 +2,7 @@
 
 The Oracle Cloud Infrastructure Block Volume service provides you with the capability to perform volume backups and volume group backups automatically on a schedule and retain them based on the selected backup policy.
 
-There are three Oracle defined backup policies, Bronze, Silver, and Gold. Each backup policy is comprised of schedules with a set backup frequency and a retention period that you cannot modify.Oracle defined backup policies are not supported for scheduled volume group backups.
+There are three Oracle defined backup policies: `Bronze`, `Silver`, and `Gold`. Each backup policy is comprised of schedules with a set backup frequency and a retention period that you cannot modify. Oracle defined backup policies are not supported for scheduled volume group backups.
 
 ## Examples
 

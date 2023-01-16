@@ -31,8 +31,7 @@ from
     on (inst.compartment_id = comp.id)
 order by
   comp.name,
-  inst.region,
-  inst.shape;
+  inst.region;
 ```
 
 ### List instance configurations that are created in last 30 days

@@ -43,14 +43,6 @@ func tableCoreVolumeDefaultBackupPolicy(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
-			// other columns
-
-			{
-				Name:        "destination_region",
-				Description: "The paired destination region for copying scheduled backups to.",
-				Type:        proto.ColumnType_STRING,
-			},
-
 			// json fields
 			{
 				Name:        "schedules",
@@ -58,25 +50,7 @@ func tableCoreVolumeDefaultBackupPolicy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// tags
-			{
-				Name:        "defined_tags",
-				Description: ColumnDescriptionDefinedTags,
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "freeform_tags",
-				Description: ColumnDescriptionFreefromTags,
-				Type:        proto.ColumnType_JSON,
-			},
-
 			// Standard Steampipe columns
-			{
-				Name:        "tags",
-				Description: ColumnDescriptionTags,
-				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(volumeDefaultBackupPolicyTags),
-			},
 			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
@@ -85,18 +59,6 @@ func tableCoreVolumeDefaultBackupPolicy(_ context.Context) *plugin.Table {
 			},
 
 			// Standard OCI columns
-			{
-				Name:        "region",
-				Description: ColumnDescriptionRegion,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Id").Transform(ociRegionName),
-			},
-			{
-				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
 			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenant,
@@ -120,7 +82,6 @@ func listCoreVolumeDefaultBackupPolicies(ctx context.Context, d *plugin.QueryDat
 	}
 
 	request := core.ListVolumeBackupPoliciesRequest{
-		Limit: types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
@@ -193,37 +154,4 @@ func getCoreVolumeDefaultBackupPolicy(ctx context.Context, d *plugin.QueryData, 
 	}
 
 	return response.VolumeBackupPolicy, nil
-}
-
-//// TRANSFORM FUNCTION
-
-// Priority order for tags
-// 1. Free-form tags
-// 2. Defined Tags
-
-func volumeDefaultBackupPolicyTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volumeBackupPolicy := d.HydrateItem.(core.VolumeBackupPolicy)
-
-	var tags map[string]interface{}
-
-	if volumeBackupPolicy.FreeformTags != nil {
-		tags = map[string]interface{}{}
-		for k, v := range volumeBackupPolicy.FreeformTags {
-			tags[k] = v
-		}
-	}
-
-	if volumeBackupPolicy.DefinedTags != nil {
-		if tags == nil {
-			tags = map[string]interface{}{}
-		}
-		for _, v := range volumeBackupPolicy.DefinedTags {
-			for key, value := range v {
-				tags[key] = value
-			}
-
-		}
-	}
-
-	return tags, nil
 }

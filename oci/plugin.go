@@ -86,6 +86,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume_attachment":                                   tableCoreVolumeAttachment(ctx),
 			"oci_core_volume_backup":                                       tableCoreVolumeBackup(ctx),
 			"oci_core_volume_backup_policy":                                tableCoreVolumeBackupPolicy(ctx),
+			"oci_core_volume_default_backup_policy":                        tableCoreVolumeDefaultBackupPolicy(ctx),
 			"oci_database_autonomous_database":                             tableOciDatabaseAutonomousDatabase(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization":            tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization_daily":      tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(ctx),

@@ -8,11 +8,11 @@ Information and metadata for the certificate authority.
 
 ```sql
 select
-    id,
-    name,
-    description,
-    lifecycle_details,
-    lifecycle_state as state
+  id,
+  name,
+  description,
+  lifecycle_details,
+  lifecycle_state as state 
 from
-    oci_certificate_management_ca_bundle;
+  oci_certificate_management_ca_bundle;
 ```

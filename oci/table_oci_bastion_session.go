@@ -219,7 +219,7 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getBastionSession", "error_BastionService", err)
+		logger.Error("oci_bastion_session.getBastionSession", "connection_error", err)
 		return nil, err
 	}
 

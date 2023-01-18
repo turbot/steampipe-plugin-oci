@@ -175,6 +175,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	for pagesLeft {
 		response, err := session.BastionClient.ListSessions(ctx, request)
 		if err != nil {
+		        plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "api_error", err")
 			return nil, err
 		}
 

@@ -8,9 +8,9 @@ Use the Application Dependency Management API to create knowledge bases and vuln
 
 ```sql
 select
-    id,
-    display_name,
-    lifecycle_state as state
+  id,
+  display_name,
+  lifecycle_state as state 
 from
-    oci_adm_knowledge_base
+  oci_adm_knowledge_base
 ```

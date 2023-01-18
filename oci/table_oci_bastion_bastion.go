@@ -16,7 +16,7 @@ import (
 func tableBastion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_bastion_bastion",
-		Description:      "OCI Bastion",
+		Description:      "OCI Bastion Bastion",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),

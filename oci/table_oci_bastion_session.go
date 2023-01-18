@@ -147,6 +147,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
+	       plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "connection_error", err")
 		return nil, err
 	}
 

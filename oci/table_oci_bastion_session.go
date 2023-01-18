@@ -201,7 +201,6 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("getBastionSession", "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {

@@ -8,12 +8,12 @@ A data asset is an asset related to the anomaly detection project.
 
 ```sql
 select
-    id,
-    display_name,
-    project_id,
-    description,
-    private_endpoint_id,
-    lifecycle_state as state
+  id,
+  display_name,
+  project_id,
+  description,
+  private_endpoint_id,
+  lifecycle_state as state 
 from
-    oci_ai_anomaly_detection_data_asset;
+  oci_ai_anomaly_detection_data_asset;
 ```

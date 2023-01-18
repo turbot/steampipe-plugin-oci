@@ -146,7 +146,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
-	       plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "connection_error", err)
+		plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "connection_error", err)
 		return nil, err
 	}
 
@@ -174,7 +174,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	for pagesLeft {
 		response, err := session.BastionClient.ListSessions(ctx, request)
 		if err != nil {
-		        plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "api_error", err")
+			plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "api_error", err)
 			return nil, err
 		}
 
@@ -231,7 +231,7 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	response, err := session.BastionClient.GetSession(ctx, request)
 
 	if err != nil {
-	       logger.Error("oci_bastion_session.getBastionSession", "api_error", err)
+		logger.Error("oci_bastion_session.getBastionSession", "api_error", err)
 		return nil, err
 	}
 	return response.Session, nil

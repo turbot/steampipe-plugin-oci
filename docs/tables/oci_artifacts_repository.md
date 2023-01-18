@@ -8,12 +8,12 @@ OCI Artifacts repository.
 
 ```sql
 select
-    id,
-    display_name,
-    description,
-    is_immutable,
-    repository_type,
-    lifecycle_state as state
+  id,
+  display_name,
+  description,
+  is_immutable,
+  repository_type,
+  lifecycle_state as state 
 from
-    oci_artifacts_repository;
+  oci_artifacts_repository;
 ```

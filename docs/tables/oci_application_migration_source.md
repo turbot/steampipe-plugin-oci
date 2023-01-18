@@ -8,11 +8,11 @@ The properties that define a source. Source refers to the source environment fro
 
 ```sql
 select
-    id,
-    display_name,
-    description,
-    lifecycle_details,
-    lifecycle_state as state
+  id,
+  display_name,
+  description,
+  lifecycle_details,
+  lifecycle_state as state 
 from
-    oci_application_migration_source;
+  oci_application_migration_source;
 ```

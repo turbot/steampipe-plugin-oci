@@ -1,3 +1,14 @@
+## v0.18.0 [2023-01-06]
+
+_Enhancements_
+
+- Added column `exports` to the `oci_file_storage_file_system` table. ([#450](https://github.com/turbot/steampipe-plugin-oci/pull/450))
+- Added an example query in the `oci_identity_compartment` table that lists out the full path of OCI compartments. ([#428](https://github.com/turbot/steampipe-plugin-oci/pull/428)) (Thanks [@AnykeyNL](https://github.com/AnykeyNL) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [oci-go-sdk v65.28.0](https://github.com/oracle/oci-go-sdk/blob/master/CHANGELOG.md#65280---2022-12-13). ([#433](https://github.com/turbot/steampipe-plugin-oci/pull/433)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+
 ## v0.17.2 [2022-11-11]
 
 _Dependencies_

@@ -1,6 +1,6 @@
 # Table: oci_autoscaling_auto_scaling_configuration
 
-An autoscaling configuration lets you dynamically scale the resources in a Compute instance pool.
+The Oracle Cloud Infrastructure autoscaling configuration allows you to dynamically scale the resources in a Compute instance pool.
 
 ## Examples
 

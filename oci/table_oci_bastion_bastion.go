@@ -58,7 +58,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "dns_proxy_status",
-				Description: "The current dns proxy status of the bastion.",
+				Description: "The current DNS proxy status of the bastion.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

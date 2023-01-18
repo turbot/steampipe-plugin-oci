@@ -8,16 +8,16 @@ The Oracle Cloud Infrastructure autoscaling configuration allows you to dynamica
 
 ```sql
 select
-    id,
-    resource,
-    policies,
-    display_name,
-    cool_down_in_seconds,
-    is_enabled,
-    max_resource_count,
-    min_resource_count
+  id,
+  resource,
+  policies,
+  display_name,
+  cool_down_in_seconds,
+  is_enabled,
+  max_resource_count,
+  min_resource_count 
 from
-    oci_autoscaling_auto_scaling_configuration;
+  oci_autoscaling_auto_scaling_configuration;
 ```
 
 ### List enabled autoscaling configurations

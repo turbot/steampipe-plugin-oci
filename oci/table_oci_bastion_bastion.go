@@ -166,7 +166,6 @@ func tableBastion(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 

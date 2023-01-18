@@ -9,13 +9,13 @@ A private network reverse connection creates a connection from service to custom
 
 ```sql
 select
-    id,
-    subnet_id,
-    dns_zones,
-    display_name,
-    lifecycle_details,
-    attached_data_assets,
-    lifecycle_state as state
+  id,
+  subnet_id,
+  dns_zones,
+  display_name,
+  lifecycle_details,
+  attached_data_assets,
+  lifecycle_state as state 
 from
-    oci_ai_anomaly_detection_ai_private_endpoint;
+  oci_ai_anomaly_detection_ai_private_endpoint;
 ```

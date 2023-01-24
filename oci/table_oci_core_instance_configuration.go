@@ -127,9 +127,7 @@ func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ 
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
-
-	// Build request parameters
-	// request := buildCoreInstanceFilters(equalQuals)
+	
 	request := core.ListInstanceConfigurationsRequest{
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
@@ -282,23 +280,3 @@ func extractInstanceConfigurationRegion(_ context.Context, d *transform.Transfor
 
 	return strings.Split(id, ".")[3], nil
 }
-
-// Build additional filters
-// func buildCoreInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListInstancesRequest {
-// 	request := core.ListInstancesRequest{}
-
-// 	if equalQuals["availability_domain"] != nil {
-// 		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
-// 	}
-// 	if equalQuals["capacity_reservation_id"] != nil {
-// 		request.CapacityReservationId = types.String(equalQuals["capacity_reservation_id"].GetStringValue())
-// 	}
-// 	if equalQuals["display_name"] != nil {
-// 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
-// 	}
-// 	if equalQuals["lifecycle_state"] != nil {
-// 		request.LifecycleState = core.InstanceLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
-// 	}
-
-// 	return request
-// }

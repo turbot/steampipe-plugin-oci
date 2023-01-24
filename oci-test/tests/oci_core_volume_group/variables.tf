@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
+  default     = ""
   description = "OCI tenancy id."
 }
 
@@ -44,16 +44,8 @@ resource "oci_core_volume_group" "test_volume_group" {
     }
 
     #Optional
-    # defined_tags = {"Name"= var.resource_name}
     display_name = var.resource_name
     freeform_tags = {"Department"= var.resource_name}
-    # volume_group_replicas {
-    #     #Required
-    #     availability_domain = var.oci_ad
-
-    #     #Optional
-    #     display_name = var.resource_name
-    # }
 }
 
 output "tenancy_ocid" {

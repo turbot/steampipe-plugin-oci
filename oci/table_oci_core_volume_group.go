@@ -236,7 +236,7 @@ func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume id in get call
+	// handle empty volume group id in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -269,22 +269,22 @@ func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 // 1. Defined Tags
 // 2. Free-form tags
 func volumeGroupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volume := d.HydrateItem.(volumeGroupInfo).VolumeGroup
+	volumeGroup := d.HydrateItem.(volumeGroupInfo).VolumeGroup
 
 	var tags map[string]interface{}
 
-	if volume.FreeformTags != nil {
+	if volumeGroup.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range volume.FreeformTags {
+		for k, v := range volumeGroup.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if volume.DefinedTags != nil {
+	if volumeGroup.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range volume.DefinedTags {
+		for _, v := range volumeGroup.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}

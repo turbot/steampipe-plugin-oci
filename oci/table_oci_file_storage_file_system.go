@@ -287,15 +287,17 @@ func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	// There is a mismatch between the file system compartment id and the value of the build compartment function, resulting in an empty answer.
+	// We are picking the compartment id from list/get call response.
+	compartment := getFileSystemCompartmentID(h.Item)
 
 	var id string
 	if h.Item != nil {
 		id = getFileSystemID(h.Item)
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the API call to only the root compartment and one zone/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
+		// Restrict the API call to only the one zone/ per region
+		if !strings.HasSuffix(zone, "AD-1") {
 			return nil, nil
 		}
 	}
@@ -408,6 +410,17 @@ func getFileSystemID(item interface{}) string {
 		return *item.Id
 	case filestorage.FileSystem:
 		return *item.Id
+	}
+
+	return ""
+}
+
+func getFileSystemCompartmentID(item interface{}) string {
+	switch item := item.(type) {
+	case filestorage.FileSystemSummary:
+		return *item.CompartmentId
+	case filestorage.FileSystem:
+		return *item.CompartmentId
 	}
 
 	return ""

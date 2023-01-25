@@ -3,9 +3,9 @@ package oci
 import (
 	"context"
 
-	"github.com/oracle/oci-go-sdk/v44/audit"
-	oci_common "github.com/oracle/oci-go-sdk/v44/common"
-	"github.com/oracle/oci-go-sdk/v44/identity"
+	"github.com/oracle/oci-go-sdk/v65/audit"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
+	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"

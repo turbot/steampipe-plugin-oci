@@ -198,11 +198,13 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 				Name:        "kms_key_id",
 				Description: "The OCID of the key container that is used as the master encryption key in database transparent data encryption (TDE) operations.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("KmsKeyId"),
 			},
 			{
 				Name:        "kms_key_version_id",
 				Description: "The OCID of the key container version that is used in database transparent data encryption (TDE) operations KMS Key can have multiple key versions.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("KmsKeyVersionId"),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -340,6 +342,7 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 				Name:        "vault_id",
 				Description: "The OCID of the Oracle Cloud Infrastructure vault.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("VaultId"),
 			},
 			{
 				Name:        "apex_details",

@@ -337,7 +337,7 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("UsedDataStorageSizeInTBs"),
 			},
 			{
-				Name:        "VaultId",
+				Name:        "vault_id",
 				Description: "The OCID of the Oracle Cloud Infrastructure vault.",
 				Type:        proto.ColumnType_STRING,
 			},

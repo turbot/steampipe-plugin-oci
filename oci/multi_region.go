@@ -127,7 +127,6 @@ func BuildCompartmentRegionList(ctx context.Context, d *plugin.QueryData) []map[
 // List out the regions supported by Oracle Cloud
 func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string, error) {
 	logger := plugin.Logger(ctx)
-	logger.Debug("listOciAvailableRegions")
 
 	cacheKey := "OciRegionList"
 	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
@@ -139,11 +138,15 @@ func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string
 	if err != nil {
 		return nil, err
 	}
+	endpointRegion := GetConfig(d.Connection).Regions[0]
 
 	var regionNames []string
 
 	regions, err := session.IdentityClient.ListRegions(ctx)
 	if err != nil {
+		if strings.Contains(err.Error(), "no such host") {
+			panic("\n\nConnection config has invalid region: " + endpointRegion + ". Edit your connection configuration file and then restart Steampipe")
+		}
 		logger.Error("listOciAvailableRegions", "ListRegions", err)
 		return nil, nil
 	}
@@ -168,6 +171,7 @@ func getInvalidRegions(ctx context.Context, d *plugin.QueryData, regions []strin
 			invalidRegions = append(invalidRegions, region)
 		}
 	}
+
 	return invalidRegions, nil
 }
 

@@ -1481,8 +1481,6 @@ func getProvider(ctx context.Context, d *connection.Manager, region string, conf
 	}
 
 	regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
-	// regionInfo := oci_common.NewRawConfigurationProvider("", "", "", "", "", nil)
-
 	provider, err := oci_common.ComposingConfigurationProvider([]oci_common.ConfigurationProvider{regionInfo, oci_common.DefaultConfigProvider()})
 	if err != nil {
 		return nil, err
@@ -1512,8 +1510,7 @@ func getProvider(ctx context.Context, d *connection.Manager, region string, conf
 func getProviderForAPIkey(region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	// config provider with region info
-	// regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
-	regionInfo := oci_common.NewRawConfigurationProvider("", "", "", "", "", nil)
+	regionInfo := oci_common.NewRawConfigurationProvider("", "", region, "", "", nil)
 
 	if config.Profile != nil {
 		configPath := ""

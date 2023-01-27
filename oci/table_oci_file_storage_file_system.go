@@ -286,26 +286,6 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	// There is a mismatch between the file system compartment id and the value of the build compartment function, resulting in an empty answer.
-	// We are picking the compartment id from list/get call response.
-	compartment := getFileSystemCompartmentID(h.Item)
-
-	var id string
-	if h.Item != nil {
-		id = getFileSystemID(h.Item)
-	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
-		// Restrict the API call to only the one zone/ per region
-		if !strings.HasSuffix(zone, "AD-1") {
-			return nil, nil
-		}
-	}
-
-	// handle empty application id in get call
-	if id == "" {
-		return nil, nil
-	}
 
 	// Create Session
 	session, err := fileStorageService(ctx, d, region)
@@ -315,8 +295,8 @@ func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h
 	}
 
 	request := filestorage.ListExportsRequest{
-		FileSystemId:  types.String(id),
-		CompartmentId: &compartment,
+		FileSystemId:  getFileSystemID(h.Item),
+		CompartmentId: getFileSystemCompartmentID(h.Item),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
@@ -404,24 +384,24 @@ func buildFileStorageFileSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap)
 	return request
 }
 
-func getFileSystemID(item interface{}) string {
+func getFileSystemID(item interface{}) *string {
 	switch item := item.(type) {
 	case filestorage.FileSystemSummary:
-		return *item.Id
+		return item.Id
 	case filestorage.FileSystem:
-		return *item.Id
+		return item.Id
 	}
 
-	return ""
+	return nil
 }
 
-func getFileSystemCompartmentID(item interface{}) string {
+func getFileSystemCompartmentID(item interface{}) *string {
 	switch item := item.(type) {
 	case filestorage.FileSystemSummary:
-		return *item.CompartmentId
+		return item.CompartmentId
 	case filestorage.FileSystem:
-		return *item.CompartmentId
+		return item.CompartmentId
 	}
 
-	return ""
+	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
@@ -202,7 +203,7 @@ func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
 	// Restrict the api call to only root compartment/ per region
@@ -212,13 +213,17 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
+	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
+	// For all other regions, the full region name is returned.
+	region := oci_common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
+
 	// handle empty id and region check in get call
-	if id == "" || !strings.Contains(id, region) {
+	if id == "" || region != oci_common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
-
+	logger.Error("region", region)
 	// Create Session
-	session, err := coreComputeManagementService(ctx, d, region)
+	session, err := coreComputeManagementService(ctx, d, matrixRegion)
 	if err != nil {
 		logger.Error("oci_core_cluster_network.getClusterNetwork", "connection_error", err)
 		return nil, err

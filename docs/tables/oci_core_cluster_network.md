@@ -22,15 +22,15 @@ from
 select
   c.display_name,
   p -> 'availabilityDomains' as availability_domains,
-  p -> 'instanceConfigurationId' as instance_configuration_id,
-  p -> 'lifecycleState' as instance_pool_state,
-  p -> 'size' as instance_pool_size
+  p ->> 'instanceConfigurationId' as instance_configuration_id,
+  p ->> 'lifecycleState' as instance_pool_state,
+  p ->> 'size' as instance_pool_size
 from
   oci_core_cluster_network as c,
   jsonb_array_elements(instance_pools) as p;
 ```
 
-### List available cluster networks
+### List stopped cluster networks
 
 ```sql
 select
@@ -41,7 +41,7 @@ select
 from
   oci_core_cluster_network
 where
-  lifecycle_state = 'AVAIALABLE';
+  lifecycle_state = 'STOPPED';
 ```
 
 ### List cluster networks created in the last 30 days

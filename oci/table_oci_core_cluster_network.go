@@ -19,8 +19,9 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 		Name:        "oci_core_cluster_network",
 		Description: "OCI Core Cluster Network",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getClusterNetwork,
+			KeyColumns:        plugin.SingleColumn("id"),
+			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			Hydrate:           getClusterNetwork,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listClusterNetworks,
@@ -202,18 +203,17 @@ func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
-	// Restrict the api call to only root compartment and one zone/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty cluster network id in get call
-	if strings.TrimSpace(id) == "" {
+	// handle empty id and region check in get call
+	if id == "" || !strings.Contains(id, region) {
 		return nil, nil
 	}
 
@@ -233,9 +233,6 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	response, err := session.ComputeManagementClient.GetClusterNetwork(ctx, request)
 	if err != nil {
-		if strings.Contains(err.Error(), "InvalidParameter") {
-			return nil, nil
-		}
 		logger.Error("oci_core_cluster_network.getClusterNetwork", "api_error", err)
 		return nil, err
 	}

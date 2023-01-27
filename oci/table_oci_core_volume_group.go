@@ -140,6 +140,7 @@ func tableCoreVolumeGroup(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -156,11 +157,6 @@ func tableCoreVolumeGroup(_ context.Context) *plugin.Table {
 			},
 		},
 	}
-}
-
-type volumeGroupInfo struct {
-	core.VolumeGroup
-	Region string
 }
 
 //// LIST FUNCTION
@@ -207,7 +203,7 @@ func listCoreVolumeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 		}
 
 		for _, volumeGroup := range response.Items {
-			d.StreamListItem(ctx, volumeGroupInfo{volumeGroup, region})
+			d.StreamListItem(ctx, volumeGroup)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -227,7 +223,7 @@ func listCoreVolumeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 //// HYDRATE FUNCTION
 
 func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
 	// Restrict the api call to only root compartment/ per region
@@ -236,13 +232,17 @@ func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	}
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume group id in get call
-	if id == "" {
+	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
+	// For all other regions, the full region name is returned.
+	region := common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
+
+	// handle empty id and region check in get call
+	if id == "" || region != common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d, region)
+	session, err := coreBlockStorageService(ctx, d, matrixRegion)
 	if err != nil {
 		plugin.Logger(ctx).Error("oci_core_volume_group.getCoreVolumeGroup", "session_error", err)
 		return nil, err
@@ -260,7 +260,7 @@ func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 		return nil, err
 	}
 
-	return volumeGroupInfo{response.VolumeGroup, region}, nil
+	return response.VolumeGroup, nil
 }
 
 //// TRANSFORM FUNCTION
@@ -269,7 +269,7 @@ func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 // 1. Defined Tags
 // 2. Free-form tags
 func volumeGroupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volumeGroup := d.HydrateItem.(volumeGroupInfo).VolumeGroup
+	volumeGroup := d.HydrateItem.(core.VolumeGroup)
 
 	var tags map[string]interface{}
 

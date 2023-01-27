@@ -220,7 +220,7 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if id == "" || region != common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
-	logger.Error("region", region)
+
 	// Create Session
 	session, err := coreComputeManagementService(ctx, d, matrixRegion)
 	if err != nil {

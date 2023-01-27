@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
+	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
@@ -19,11 +20,12 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 		Name:        "oci_core_instance_configuration",
 		Description: "OCI Core Instance Configuration",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getInstanceConfiguration,
+			KeyColumns:        plugin.SingleColumn("id"),
+			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			Hydrate:           getInstanceConfiguration,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreInstanceConfigurations,
+			Hydrate: listInstanceConfigurations,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
@@ -52,7 +54,7 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "instance_details",
-				Description: "The intance configuration details.",
+				Description: "The instance configuration details.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getInstanceConfiguration,
 			},
@@ -88,7 +90,7 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel().Transform(extractInstanceConfigurationRegion),
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -109,17 +111,10 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-
-	// Create Session
-	session, err := coreComputeManagementService(ctx, d, region)
-	if err != nil {
-		logger.Error("oci_core_instance_configuration.listCoreInstanceConfigurations", "connection_error", err)
-		return nil, err
-	}
 
 	equalQuals := d.KeyColumnQuals
 
@@ -127,7 +122,14 @@ func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ 
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
-	
+
+	// Create Session
+	session, err := coreComputeManagementService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_core_instance_configuration.listInstanceConfigurations", "connection_error", err)
+		return nil, err
+	}
+
 	request := core.ListInstanceConfigurationsRequest{
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
@@ -147,7 +149,7 @@ func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ 
 	for pagesLeft {
 		response, err := session.ComputeManagementClient.ListInstanceConfigurations(ctx, request)
 		if err != nil {
-			logger.Error("oci_core_instance_configuration.listCoreInstanceConfigurations", "api_error", err)
+			logger.Error("oci_core_instance_configuration.listInstanceConfigurations", "api_error", err)
 			return nil, err
 		}
 
@@ -171,24 +173,32 @@ func listCoreInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ 
 
 //// HYDRATE FUNCTION
 
-func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	var id string
+	if h.Item != nil {
+		id = *h.Item.(core.InstanceConfigurationSummary).Id
+	} else {
+		// Restrict the api call to only root compartment/ per region
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
 
-	// Return nil, if no input provided
-	if id == "" {
+		id = d.KeyColumnQuals["id"].GetStringValue()
+	}
+
+	region := oci_common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
+
+	// handle empty id and region check in get call
+	if id == "" || region != oci_common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreComputeManagementService(ctx, d, region)
+	session, err := coreComputeManagementService(ctx, d, matrixRegion)
 	if err != nil {
 		logger.Error("oci_core_instance_configuration.getInstanceConfiguration", "connection_error", err)
 		return nil, err
@@ -265,18 +275,4 @@ func instanceConfigurationTags(_ context.Context, d *transform.TransformData) (i
 	}
 
 	return tags, nil
-}
-
-// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
-// For all other regions, the full region name is returned.
-func extractInstanceConfigurationRegion(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	var id string
-	switch d.HydrateItem.(type) {
-	case core.InstanceConfiguration:
-		id = *d.HydrateItem.(core.InstanceConfiguration).Id
-	case core.InstanceConfigurationSummary:
-		id = *d.HydrateItem.(core.InstanceConfigurationSummary).Id
-	}
-
-	return strings.Split(id, ".")[3], nil
 }

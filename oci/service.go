@@ -799,7 +799,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// coreComputeManagementService returns the service client for OCI Core Compute service
+// coreComputeManagementService returns the service client for OCI Core Compute Management service
 func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
@@ -818,7 +818,7 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 		return nil, err
 	}
 
-	// get compute service client
+	// get compute management service client
 	client, err := core.NewComputeManagementClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
@@ -831,7 +831,7 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:               tenantId,
 		ComputeManagementClient: client,
 	}
 
@@ -1098,48 +1098,6 @@ func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string
 	sess := &session{
 		TenancyID:          tenantID,
 		MySQLChannelClient: client,
-	}
-
-	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
-
-	return sess, nil
-}
-
-// coreComputeManagementService returns the service client for OCI Core Compute service
-func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
-	logger := plugin.Logger(ctx)
-
-	// have we already created and cached the service?
-	serviceCacheKey := fmt.Sprintf("computemanagement-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
-		return cachedData.(*session), nil
-	}
-
-	// get oci config info from steampipe connection
-	ociConfig := GetConfig(d.Connection)
-
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
-	if err != nil {
-		logger.Error("coreComputeManagementService", "getProvider.Error", err)
-		return nil, err
-	}
-
-	// get compute service client
-	client, err := core.NewComputeManagementClientWithConfigurationProvider(provider)
-	if err != nil {
-		return nil, err
-	}
-
-	// get tenant ocid from provider
-	tenantId, err := provider.TenancyOCID()
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &session{
-		TenancyID:               tenantId,
-		ComputeManagementClient: client,
 	}
 
 	// save session in cache

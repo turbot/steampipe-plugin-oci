@@ -14,19 +14,28 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
+func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_volume_backup_policy",
-		Description: "OCI Core Volume Backup Policy",
+		Name:        "oci_core_cluster_network",
+		Description: "OCI Core Cluster Network",
 		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getCoreVolumeBackupPolicy,
+			KeyColumns:        plugin.SingleColumn("id"),
+			ShouldIgnoreError: isNotFoundError([]string{"400"}),
+			Hydrate:           getClusterNetwork,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreVolumeBackupPolicies,
+			Hydrate: listClusterNetworks,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -34,35 +43,38 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
+				Name:        "id",
+				Description: "The OCID of the cluster network.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id"),
+			},
+			{
 				Name:        "display_name",
-				Description: "A user-friendly name for volume backup policy.",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "id",
-				Description: "The OCID of the volume backup policy.",
+				Name:        "lifecycle_state",
+				Description: "The current state of the cluster network.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the volume backup policy was created.",
+				Description: "The date and time the resource was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
-
-			// other columns
-
 			{
-				Name:        "destination_region",
-				Description: "The paired destination region for copying scheduled backups to.",
-				Type:        proto.ColumnType_STRING,
+				Name:        "time_updated",
+				Description: "The date and time the resource was updated.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 
 			// json fields
 			{
-				Name:        "schedules",
-				Description: "The collection of schedules that this policy will apply.",
+				Name:        "instance_pools",
+				Description: "The instance pools in the cluster network.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -83,7 +95,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(volumeBackupPolicyTags),
+				Transform:   transform.From(clusterNetworkTags),
 			},
 			{
 				Name:        "title",
@@ -118,11 +130,10 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listClusterNetworks(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("core.listCoreVolumeBackupPolicies", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -132,20 +143,28 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 	}
 
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d, region)
+	session, err := coreComputeManagementService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_core_cluster_network.ListClusterNetworks", "connection_error", err)
 		return nil, err
 	}
 
-	request := core.ListVolumeBackupPoliciesRequest{
+	request := core.ListClusterNetworksRequest{
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
+	displayName := d.KeyColumnQualString("display_name")
+	if displayName != "" {
+		request.DisplayName = &displayName
+	}
+	lifecycleState := d.KeyColumnQualString("lifecycle_state")
+	if lifecycleState != "" {
+		request.DisplayName = &lifecycleState
+	}
 
-	// Check for limit
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
@@ -155,13 +174,14 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.BlockstorageClient.ListVolumeBackupPolicies(ctx, request)
+		response, err := session.ComputeManagementClient.ListClusterNetworks(ctx, request)
 		if err != nil {
+			logger.Error("oci_core_cluster_network.ListClusterNetworks", "api_error", err)
 			return nil, err
 		}
 
-		for _, volumes := range response.Items {
-			d.StreamListItem(ctx, volumes)
+		for _, computeManagement := range response.Items {
+			d.StreamListItem(ctx, computeManagement)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -180,12 +200,10 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 
 //// HYDRATE FUNCTION
 
-func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getCoreVolumeBackupPolicy")
+func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("core.getCoreVolumeBackupPolicy", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -194,59 +212,80 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume backup policy id and region check in get call
-	if id == "" || !strings.Contains(id, region){
+	// handle empty id and region check in get call
+	if id == "" || !strings.Contains(id, region) {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d, region)
+	session, err := coreComputeManagementService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_core_cluster_network.getClusterNetwork", "connection_error", err)
 		return nil, err
 	}
 
-	request := core.GetVolumeBackupPolicyRequest{
-		PolicyId: types.String(id),
+	request := core.GetClusterNetworkRequest{
+		ClusterNetworkId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
-	response, err := session.BlockstorageClient.GetVolumeBackupPolicy(ctx, request)
+	response, err := session.ComputeManagementClient.GetClusterNetwork(ctx, request)
 	if err != nil {
+		logger.Error("oci_core_cluster_network.getClusterNetwork", "api_error", err)
 		return nil, err
 	}
 
-	return response.VolumeBackupPolicy, nil
+	return response, nil
 }
 
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
-// 1. Free-form tags
+// 1. System Tags
 // 2. Defined Tags
-
-func volumeBackupPolicyTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volumeBackupPolicy := d.HydrateItem.(core.VolumeBackupPolicy)
-
+// 3. Free-form tags
+func clusterNetworkTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var tags map[string]interface{}
-
-	if volumeBackupPolicy.FreeformTags != nil {
-		tags = map[string]interface{}{}
-		for k, v := range volumeBackupPolicy.FreeformTags {
-			tags[k] = v
-		}
-	}
-
-	if volumeBackupPolicy.DefinedTags != nil {
-		if tags == nil {
+	switch item := d.HydrateItem.(type) {
+	case core.ClusterNetworkSummary:
+		if item.FreeformTags != nil {
 			tags = map[string]interface{}{}
-		}
-		for _, v := range volumeBackupPolicy.DefinedTags {
-			for key, value := range v {
-				tags[key] = value
+			for k, v := range item.FreeformTags {
+				tags[k] = v
 			}
+		}
 
+		if item.DefinedTags != nil {
+			if tags == nil {
+				tags = map[string]interface{}{}
+			}
+			for _, v := range item.DefinedTags {
+				for key, value := range v {
+					tags[key] = value
+				}
+
+			}
+		}
+	case core.GetClusterNetworkResponse:
+		if item.FreeformTags != nil {
+			tags = map[string]interface{}{}
+			for k, v := range item.FreeformTags {
+				tags[k] = v
+			}
+		}
+
+		if item.DefinedTags != nil {
+			if tags == nil {
+				tags = map[string]interface{}{}
+			}
+			for _, v := range item.DefinedTags {
+				for key, value := range v {
+					tags[key] = value
+				}
+
+			}
 		}
 	}
 

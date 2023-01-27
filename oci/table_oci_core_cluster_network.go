@@ -39,7 +39,7 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartementZonalList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "id",

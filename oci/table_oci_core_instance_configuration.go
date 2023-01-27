@@ -190,6 +190,8 @@ func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
+	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
+	// For all other regions, the full region name is returned.
 	region := oci_common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
 
 	// handle empty id and region check in get call

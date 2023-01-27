@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
-	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
@@ -215,10 +214,10 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 
 	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
 	// For all other regions, the full region name is returned.
-	region := oci_common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
+	region := common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
 
 	// handle empty id and region check in get call
-	if id == "" || region != oci_common.StringToRegion(matrixRegion) {
+	if id == "" || region != common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
 	logger.Error("region", region)

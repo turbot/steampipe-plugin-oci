@@ -183,9 +183,9 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getCoreVolumeBackupPolicy")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("core.getCoreVolumeBackupPolicy", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("core.getCoreVolumeBackupPolicy", "Compartment", compartment, "OCI_REGION", matrixRegion)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -194,13 +194,17 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
-	// handle empty volume backup policy id and region check in get call
-	if id == "" || !strings.Contains(id, region){
+	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
+	// For all other regions, the full region name is returned.
+	region := common.StringToRegion(types.SafeString(strings.Split(id, ".")[3]))
+
+	// handle empty id and region check in get call
+	if id == "" || region != common.StringToRegion(matrixRegion) {
 		return nil, nil
 	}
 
 	// Create Session
-	session, err := coreBlockStorageService(ctx, d, region)
+	session, err := coreBlockStorageService(ctx, d, matrixRegion)
 	if err != nil {
 		return nil, err
 	}

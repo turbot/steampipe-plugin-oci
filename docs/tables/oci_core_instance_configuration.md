@@ -34,7 +34,7 @@ order by
   inst.region;
 ```
 
-### List instance configurations that are created in last 30 days
+### List instance configurations created in the last 30 days
 
 ```sql
 select

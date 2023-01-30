@@ -16,7 +16,7 @@ from
   oci_core_volume_group;
 ```
 
-### List volume groups with a faulty state
+### List volume groups in a faulty state
 
 ```sql
 select
@@ -59,7 +59,7 @@ where
   compartment_id = tenant_id;
 ```
 
-### List volume groups that are created in the last 30 days
+### List volume groups created in the last 30 days
 
 ```sql
 select

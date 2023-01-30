@@ -1,3 +1,25 @@
+## v0.19.0 [2023-01-30]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_cluster_network](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_cluster_network) ([#452](https://github.com/turbot/steampipe-plugin-oci/pull/452))
+  - [oci_core_instance_configuration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_instance_configuration) ([#464](https://github.com/turbot/steampipe-plugin-oci/pull/464))
+  - [oci_core_volume_default_backup_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_default_backup_policy) ([#463](https://github.com/turbot/steampipe-plugin-oci/pull/463))
+  - [oci_core_volume_group](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_group) ([#467](https://github.com/turbot/steampipe-plugin-oci/pull/467))
+
+_Enhancements_
+
+- Added columns `kms_key_id`, `kms_key_version_id` and `vault_id` to `oci_database_autonomous_database` table. ([#469](https://github.com/turbot/steampipe-plugin-oci/pull/469))
+
+_Bug fixes_
+
+- Fixed the `exports` column in `oci_file_storage_file_system` to correctly return data instead of `null` when an `id` is passed in the `where` clause. ([#466](https://github.com/turbot/steampipe-plugin-oci/pull/466))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.11](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v4111-2023-01-24) which fixes the issue of non-caching of all the columns of the queried table. ([#474](https://github.com/turbot/steampipe-plugin-oci/pull/474))
+
 ## v0.18.0 [2023-01-06]
 
 _Enhancements_

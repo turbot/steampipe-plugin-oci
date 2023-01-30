@@ -225,9 +225,8 @@ func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugi
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
-// 1. System Tags
-// 2. Defined Tags
-// 3. Free-form tags
+// 1. Defined Tags
+// 2. Free-form tags
 func instanceConfigurationTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 
 	var tags map[string]interface{}
@@ -235,12 +234,6 @@ func instanceConfigurationTags(_ context.Context, d *transform.TransformData) (i
 	switch d.HydrateItem.(type) {
 	case core.InstanceConfiguration:
 		configuration := d.HydrateItem.(core.InstanceConfiguration)
-		if configuration.FreeformTags != nil {
-			tags = map[string]interface{}{}
-			for k, v := range configuration.FreeformTags {
-				tags[k] = v
-			}
-		}
 
 		if configuration.DefinedTags != nil {
 			if tags == nil {
@@ -253,14 +246,16 @@ func instanceConfigurationTags(_ context.Context, d *transform.TransformData) (i
 
 			}
 		}
+
+		if configuration.FreeformTags != nil {
+			tags = map[string]interface{}{}
+			for k, v := range configuration.FreeformTags {
+				tags[k] = v
+			}
+		}
+
 	case core.InstanceConfigurationSummary:
 		configuration := d.HydrateItem.(core.InstanceConfigurationSummary)
-		if configuration.FreeformTags != nil {
-			tags = map[string]interface{}{}
-			for k, v := range configuration.FreeformTags {
-				tags[k] = v
-			}
-		}
 
 		if configuration.DefinedTags != nil {
 			if tags == nil {
@@ -271,6 +266,13 @@ func instanceConfigurationTags(_ context.Context, d *transform.TransformData) (i
 					tags[key] = value
 				}
 
+			}
+		}
+
+		if configuration.FreeformTags != nil {
+			tags = map[string]interface{}{}
+			for k, v := range configuration.FreeformTags {
+				tags[k] = v
 			}
 		}
 

@@ -109,7 +109,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the Bastion.",
+				Description: "The current state of the bastion.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

@@ -1467,7 +1467,7 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 		return nil, err
 	}
 
-	// get analytics service client
+	// get bastion service client
 	client, err := bastion.NewBastionClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err

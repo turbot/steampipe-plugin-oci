@@ -21,12 +21,9 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			Hydrate:    getBastionSession,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBastionSessions,
+			ParentHydrate: listBastions,
+			Hydrate: 			 listBastionSessions,
 			KeyColumns: []*plugin.KeyColumn{
-				{
-					Name:    "bastion_id",
-					Require: plugin.Required,
-				},
 				{
 					Name:    "display_name",
 					Require: plugin.Optional,
@@ -136,12 +133,9 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	region := d.KeyColumnQuals["region"].GetStringValue()
 	equalQuals := d.KeyColumnQuals
-	bastionId := equalQuals["bastion_id"].GetStringValue()
+	// bastionId := h.Item.(bastion.Bastion).Id
 
-	// handle empty keyId, endpoint and region in list call
-	if bastionId == "" {
-		return nil, nil
-	}
+	bastionIdValue := h.Item.(bastion.Bastion)
 
 	// Create Session
 	session, err := bastionService(ctx, d, region)
@@ -151,7 +145,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	request := bastion.ListSessionsRequest{
-		BastionId: types.String(bastionId),
+		BastionId: bastionIdValue.Id,
 		Limit:     types.Int(100),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),

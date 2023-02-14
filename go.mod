@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-hclog v1.2.2
 	github.com/oracle/oci-go-sdk/v65 v65.28.0
 	github.com/turbot/go-kit v0.4.0
-	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.12
+	github.com/turbot/steampipe-plugin-sdk/v4 v4.1.13
 )
 
 require (

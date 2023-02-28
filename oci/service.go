@@ -38,6 +38,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/oracle/oci-go-sdk/v65/ons"
+	"github.com/oracle/oci-go-sdk/v65/queue"
 	"github.com/oracle/oci-go-sdk/v65/resourcemanager"
 	"github.com/oracle/oci-go-sdk/v65/resourcesearch"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
@@ -79,6 +80,7 @@ type session struct {
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
+	QueueAdminClient               queue.QueueAdminClient
 	ResourceSearchClient           resourcesearch.ResourceSearchClient
 	ResourceManagerClient          resourcemanager.ResourceManagerClient
 	StreamAdminClient              streaming.StreamAdminClient
@@ -1295,6 +1297,45 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 
 	return sess, nil
 }
+
+// queueService returns the service client for OCI Queue Service
+func queueService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("queue-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("queueService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := queue.NewQueueAdminClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:        tenantId,
+		QueueAdminClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 
 // resourceSearchService returns the service client for OCI Resource Search Service
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {

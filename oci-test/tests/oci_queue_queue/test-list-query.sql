@@ -1,3 +1,3 @@
 select id, display_name, lifecycle_state
-from oci.oci_queue
+from oci.oci_queue_queue
 where display_name = '{{ output.display_name.value }}';

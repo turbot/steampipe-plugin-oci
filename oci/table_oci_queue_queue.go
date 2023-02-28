@@ -18,10 +18,10 @@ import (
 
 //// TABLE DEFINITION
 
-func tableQueue(_ context.Context) *plugin.Table {
+func tableQueueQueue(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_queue",
-		Description: "OCI Queue",
+		Name:        "oci_queue_queue",
+		Description: "OCI Queue Queue",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getQueue,
@@ -176,12 +176,10 @@ func tableQueue(_ context.Context) *plugin.Table {
 	}
 }
 
-// TODO add columns based on details: https://pkg.go.dev/github.com/oracle/oci-go-sdk/v65@v65.28.0/queue#Queue
-
-type ociQueue struct {
-	Region string
-	queue.QueueSummary
-}
+// type ociQueue struct {
+// 	Region string
+// 	queue.QueueSummary
+// }
 
 //// LIST FUNCTION
 
@@ -232,7 +230,7 @@ func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 		}
 
 		for _, queueSummary := range response.Items {
-			d.StreamListItem(ctx, ociQueue{region, queueSummary})
+			d.StreamListItem(ctx, queueSummary)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -260,14 +258,14 @@ func getQueue(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (
 
 	var id string
 	if h.Item != nil {
-		switch h.Item.(type) {
-		case queue.QueueSummary:
+		// switch h.Item.(type) {
+		// case queue.QueueSummary:
 			id = *h.Item.(queue.QueueSummary).Id
-		case ociQueue:
-			id = *h.Item.(ociQueue).Id
-		default:
-			return nil, nil
-		}
+		// case ociQueue:
+		// 	id = *h.Item.(ociQueue).Id
+		// default:
+		// 	return nil, nil
+		// }
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
@@ -318,9 +316,9 @@ func queueTags(ctx context.Context, d *transform.TransformData) (interface{}, er
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {
-	case ociQueue:
-		freeFormTags = d.HydrateItem.(ociQueue).FreeformTags
-		definedTags = d.HydrateItem.(ociQueue).DefinedTags
+	case queue.QueueSummary:
+		freeFormTags = d.HydrateItem.(queue.QueueSummary).FreeformTags
+		definedTags = d.HydrateItem.(queue.QueueSummary).DefinedTags
 	case queue.Queue:
 		freeFormTags = d.HydrateItem.(queue.Queue).FreeformTags
 		definedTags = d.HydrateItem.(queue.Queue).DefinedTags

@@ -28,7 +28,7 @@ provider "oci" {
   region              = var.region
 }
 
-resource "oci_queue" "test_queue" {
+resource "oci_queue_queue" "test_queue" {
   compartment_id = var.tenancy_ocid
   display_name   = var.resource_name
   freeform_tags  = { "Department" = "Finance" }
@@ -47,13 +47,13 @@ output "region" {
 }
 
 output "freeform_tags" {
-  value = oci_queue.test_queue.freeform_tags
+  value = oci_queue_queue.test_queue.freeform_tags
 }
 
 output "resource_id" {
-  value = oci_queue.test_queue.id
+  value = oci_queue_queue.test_queue.id
 }
 
 output "display_name" {
-  value = oci_queue.test_queue.display_name
+  value = oci_queue_queue.test_queue.display_name
 }

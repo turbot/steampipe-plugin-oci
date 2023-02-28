@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
@@ -158,6 +157,7 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id").Transform(ociRegionName),
 			},
 			{
 				Name:        "compartment_id",
@@ -176,11 +176,6 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 	}
 }
 
-// type ociQueue struct {
-// 	Region string
-// 	queue.QueueSummary
-// }
-
 //// LIST FUNCTION
 
 func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -194,10 +189,8 @@ func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		fmt.Print("create session, 5")
 		return nil, nil
 	}
-	logger.Info("create session")
 	// Create Session
 	session, err := queueService(ctx, d, region)
 	if err != nil {
@@ -258,14 +251,7 @@ func getQueue(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (
 
 	var id string
 	if h.Item != nil {
-		// switch h.Item.(type) {
-		// case queue.QueueSummary:
-			id = *h.Item.(queue.QueueSummary).Id
-		// case ociQueue:
-		// 	id = *h.Item.(ociQueue).Id
-		// default:
-		// 	return nil, nil
-		// }
+		id = *h.Item.(queue.QueueSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region

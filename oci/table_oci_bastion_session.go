@@ -23,7 +23,11 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listBastions,
 			Hydrate: 			 listBastionSessions,
-			KeyColumns: []*plugin.KeyColumn{
+			KeyColumns:    []*plugin.KeyColumn{
+				{
+					Name:    "bastion_id",
+					Require: plugin.Optional,
+				},
 				{
 					Name:    "display_name",
 					Require: plugin.Optional,
@@ -136,6 +140,12 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	bastionIdValue := h.Item.(bastion.Bastion)
 
+	if equalQuals["bastion_id"] != nil {
+		if types.String(equalQuals["bastion_id"].GetStringValue()) != bastionIdValue.Id {
+			return nil, nil
+		}
+	}
+
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
@@ -150,6 +160,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
+
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())

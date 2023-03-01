@@ -20,7 +20,7 @@ select
   phone_book_entry,
   target_vcn_id,
   target_subnet_id,
-  lifecycle_state as state 
+  lifecycle_state as state
 from
   oci_bastion_bastion;
 ```
@@ -33,12 +33,12 @@ select
   name,
   bastion_type,
   client_cidr_block_allow_list,
-  private_endpoint_ip_address 
+  private_endpoint_ip_address
 from
-  oci_bastion_bastion 
+  oci_bastion_bastion
 where
   (
     client_cidr_block_allow_list
   )
-  ::jsonb ? '0.0.0.0/0'
+  ::jsonb ? '0.0.0.0/0';
 ```

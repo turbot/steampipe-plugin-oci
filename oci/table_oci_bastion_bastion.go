@@ -192,9 +192,9 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Check for additional filters
-	if equalQuals["id"] != nil {
-		bastionId := equalQuals["id"].GetStringValue()
-		request.BastionId = types.String(bastionId)
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
@@ -247,6 +247,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		id = *h.Item.(bastion.BastionSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
+		// Restrict the api call to only root compartment and one zone/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
@@ -281,6 +282,9 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 //// TRANSFORM FUNCTION
 
+// Priority order for tags
+// 1. Free-form tags
+// 2. Defined Tags
 func bastionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

@@ -133,7 +133,6 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	region := d.KeyColumnQuals["region"].GetStringValue()
 	equalQuals := d.KeyColumnQuals
-	// bastionId := h.Item.(bastion.Bastion).Id
 
 	bastionIdValue := h.Item.(bastion.Bastion)
 
@@ -154,6 +153,11 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.SessionLifecycleState = bastion.ListSessionsSessionLifecycleStateEnum(lifecycleState)
 	}
 
 	// Check for limit
@@ -200,7 +204,6 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		id = *h.Item.(bastion.SessionSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-
 	}
 
 	// handle empty id in get call

@@ -114,7 +114,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that bastion was created.",
+				Description: "Time when the bastion was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -179,6 +179,7 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_bastion_bastion.listBastions", "connection_error", err)
 		return nil, err
 	}
 
@@ -212,6 +213,7 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	for pagesLeft {
 		response, err := session.BastionClient.ListBastions(ctx, request)
 		if err != nil {
+			plugin.Logger(ctx).Error("oci_bastion_bastion.listBastions", "api_error", err)
 			return nil, err
 		}
 		for _, bastion := range response.Items {
@@ -258,7 +260,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getBastion", "error_BastionService", err)
+		logger.Error("oci_bastion_bastion.getBastion", "connection_error", err)
 		return nil, err
 	}
 
@@ -271,6 +273,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 	response, err := session.BastionClient.GetBastion(ctx, request)
 	if err != nil {
+		logger.Error("oci_bastion_bastion.getBastion", "api_error", err)
 		return nil, err
 	}
 	return response.Bastion, nil

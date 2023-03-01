@@ -16,7 +16,7 @@ import (
 func tableBastion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_bastion_bastion",
-		Description:      "OCI Bastion",
+		Description:      "OCI Bastion Bastion",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -58,7 +58,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "dns_proxy_status",
-				Description: "The current dns proxy status of the bastion.",
+				Description: "The current DNS proxy status of the bastion.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -109,17 +109,17 @@ func tableBastion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "lifecycle_state",
-				Description: "The current state of the Bastion.",
+				Description: "The current state of the bastion.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that bastion was created.",
+				Description: "Time when the bastion was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -131,7 +131,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// Standard Steampipe columns
+			// Steampipe standard columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
@@ -166,10 +166,8 @@ func tableBastion(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("listBastions", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -181,6 +179,7 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_bastion_bastion.listBastions", "connection_error", err)
 		return nil, err
 	}
 
@@ -193,9 +192,9 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	}
 
 	// Check for additional filters
-	if equalQuals["id"] != nil {
-		bastionId := equalQuals["id"].GetStringValue()
-		request.BastionId = types.String(bastionId)
+	if equalQuals["name"] != nil {
+		name := equalQuals["name"].GetStringValue()
+		request.Name = types.String(name)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
@@ -214,6 +213,7 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	for pagesLeft {
 		response, err := session.BastionClient.ListBastions(ctx, request)
 		if err != nil {
+			plugin.Logger(ctx).Error("oci_bastion_bastion.listBastions", "api_error", err)
 			return nil, err
 		}
 		for _, bastion := range response.Items {
@@ -247,12 +247,13 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		id = *h.Item.(bastion.BastionSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
+		// Restrict the api call to only root compartment and one zone/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
 		}
 	}
 
-	// handle empty id in get call
+	// Handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -260,7 +261,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getBastion", "error_BastionService", err)
+		logger.Error("oci_bastion_bastion.getBastion", "connection_error", err)
 		return nil, err
 	}
 
@@ -273,6 +274,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 	response, err := session.BastionClient.GetBastion(ctx, request)
 	if err != nil {
+		logger.Error("oci_bastion_bastion.getBastion", "api_error", err)
 		return nil, err
 	}
 	return response.Bastion, nil
@@ -280,6 +282,9 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 
 //// TRANSFORM FUNCTION
 
+// Priority order for tags
+// 1. Free-form tags
+// 2. Defined Tags
 func bastionTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

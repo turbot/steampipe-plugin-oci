@@ -8,19 +8,19 @@ A bastion resource. A bastion provides secured, public access to target resource
 
 ```sql
 select
-    id,
-    name,
-    bastion_type,
-    dns_proxy_status,
-    client_cidr_block_allow_list,
-    max_session_ttl_in_seconds,
-    max_sessions_allowed,
-    private_endpoint_ip_address,
-    static_jump_host_ip_address,
-    phone_book_entry,
-    target_vcn_id,
-    target_subnet_id,
-    lifecycle_state as state
+  id,
+  name,
+  bastion_type,
+  dns_proxy_status,
+  client_cidr_block_allow_list,
+  max_session_ttl_in_seconds,
+  max_sessions_allowed,
+  private_endpoint_ip_address,
+  static_jump_host_ip_address,
+  phone_book_entry,
+  target_vcn_id,
+  target_subnet_id,
+  lifecycle_state as state
 from
   oci_bastion_bastion;
 ```
@@ -29,11 +29,30 @@ from
 
 ```sql
 select
-    id,
-    name,
-    bastion_type,
-    client_cidr_block_allow_list,
-    private_endpoint_ip_address
-from oci_bastion_bastion 
-where (client_cidr_block_allow_list)::jsonb ? '0.0.0.0/0'
+  id,
+  name,
+  bastion_type,
+  client_cidr_block_allow_list,
+  private_endpoint_ip_address
+from
+  oci_bastion_bastion
+where
+  (
+    client_cidr_block_allow_list
+  )
+  ::jsonb ? '0.0.0.0/0';
+```
+
+### List bastions which are not active
+
+```sql
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_bastion_bastion
+where
+  lifecycle_state <> 'ACTIVE';
 ```

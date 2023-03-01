@@ -16,17 +16,17 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_bastion_session",
 		Description:      "OCI Bastion Session",
-		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getBastionSession,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listBastionSessions,
-			KeyColumns: []*plugin.KeyColumn{
+			ParentHydrate: listBastions,
+			Hydrate: 			 listBastionSessions,
+			KeyColumns:    []*plugin.KeyColumn{
 				{
 					Name:    "bastion_id",
-					Require: plugin.Required,
+					Require: plugin.Optional,
 				},
 				{
 					Name:    "display_name",
@@ -137,29 +137,39 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	region := d.KeyColumnQuals["region"].GetStringValue()
 	equalQuals := d.KeyColumnQuals
-	bastionId := equalQuals["bastion_id"].GetStringValue()
 
-	// handle empty keyId, endpoint and region in list call
-	if bastionId == "" {
-		return nil, nil
+	bastionIdValue := h.Item.(bastion.Bastion)
+
+	// Return nil if bastion_id does not match
+	if equalQuals["bastion_id"] != nil {
+		if types.String(equalQuals["bastion_id"].GetStringValue()) != bastionIdValue.Id {
+			return nil, nil
+		}
 	}
 
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "connection_error", err)
 		return nil, err
 	}
 
 	request := bastion.ListSessionsRequest{
-		BastionId: types.String(bastionId),
+		BastionId: bastionIdValue.Id,
 		Limit:     types.Int(100),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
+
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+
+	if equalQuals["lifecycle_state"] != nil {
+		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		request.SessionLifecycleState = bastion.ListSessionsSessionLifecycleStateEnum(lifecycleState)
 	}
 
 	// Check for limit
@@ -174,6 +184,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	for pagesLeft {
 		response, err := session.BastionClient.ListSessions(ctx, request)
 		if err != nil {
+			plugin.Logger(ctx).Error("oci_bastion_session.listBastionSessions", "api_error", err)
 			return nil, err
 		}
 
@@ -195,21 +206,19 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	logger.Debug("getBastionSession", "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(bastion.SessionSummary).Id
 	} else {
 		id = d.KeyColumnQuals["id"].GetStringValue()
-
 	}
 
-	// handle empty id in get call
+	// Handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -217,7 +226,7 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	// Create Session
 	session, err := bastionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getBastionSession", "error_BastionService", err)
+		logger.Error("oci_bastion_session.getBastionSession", "connection_error", err)
 		return nil, err
 	}
 
@@ -231,6 +240,7 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	response, err := session.BastionClient.GetSession(ctx, request)
 
 	if err != nil {
+		logger.Error("oci_bastion_session.getBastionSession", "api_error", err)
 		return nil, err
 	}
 	return response.Session, nil

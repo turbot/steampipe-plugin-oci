@@ -59,6 +59,7 @@ type session struct {
 	BudgetClient                   budget.BudgetClient
 	CloudGuardClient               cloudguard.CloudGuardClient
 	ComputeClient                  core.ComputeClient
+	ComputeManagementClient        core.ComputeManagementClient
 	ContainerEngineClient          containerengine.ContainerEngineClient
 	DatabaseClient                 database.DatabaseClient
 	DnsClient                      dns.DnsClient
@@ -800,6 +801,48 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
+// coreComputeManagementService returns the service client for OCI Core Compute Management service
+func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("computemanagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("coreComputeManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get compute management service client
+	client, err := core.NewComputeManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:               tenantId,
+		ComputeManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // coreVirtualNetworkService returns the service client for OCI Core VirtualNetwork Service
 func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1467,7 +1510,7 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 		return nil, err
 	}
 
-	// get analytics service client
+	// get bastion service client
 	client, err := bastion.NewBastionClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
@@ -1537,12 +1580,14 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 }
 
 /*
-	#  Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+# Configure the Oracle Cloud Infrastructure provider with an API Key / or a profile
+
 	connection "oci" {
 		config_file_profile = "DEFAULT"
 		config_path = "~/Desktop/config"
 		regions = ["ap-mumbai-1", "us-ashburn-1"]
 	}
+
 	connection "oci" {
 		tenancy_ocid = "tenancy_ocid"
 		user_ocid = "user_ocid"
@@ -1606,7 +1651,8 @@ func getProviderForAPIkey(region string, config ociConfig) (oci_common.Configura
 }
 
 /*
-	# Provider for SecurityToken Authentication
+# Provider for SecurityToken Authentication
+
 	connection "oci" {
 		auth = "SecurityToken"
 		config_file_profile= "config_file_profile"
@@ -1637,6 +1683,7 @@ func getProviderForSecurityToken(region string, config ociConfig) (oci_common.Co
 
 /*
 # Provider for Instance Principal based authentication
+
 	connection "oci" {
 		plugin 		= "oci"
 		auth 			= "InstancePrincipal"

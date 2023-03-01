@@ -14,19 +14,31 @@ import (
 
 //// TABLE DEFINITION
 
-func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
+func tableCoreVolumeGroup(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_core_volume_backup_policy",
-		Description: "OCI Core Volume Backup Policy",
+		Name:        "oci_core_volume_group",
+		Description: "OCI Core Volume Group",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getCoreVolumeBackupPolicy,
+			Hydrate:    getCoreVolumeGroup,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listCoreVolumeBackupPolicies,
+			Hydrate: listCoreVolumeGroups,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "availability_domain",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "display_name",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -34,35 +46,66 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name for volume backup policy.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "id",
-				Description: "The OCID of the volume backup policy.",
+				Description: "The OCID for the volume group.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "display_name",
+				Description: "A user-friendly name.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The current state of a volume group.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "availability_domain",
+				Description: "The availability domain of the volume group.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "time_created",
-				Description: "The date and time the volume backup policy was created.",
+				Description: "The date and time the volume group was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// other columns
-
 			{
-				Name:        "destination_region",
-				Description: "The paired destination region for copying scheduled backups to.",
-				Type:        proto.ColumnType_STRING,
+				Name:        "is_hydrated",
+				Description: "Specifies whether the cloned volume's data has finished copying from the source volume group or backup.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
+				Name:        "size_in_gbs",
+				Description: "The aggregate size of the volume group in GBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInGBs"),
+			},
+			{
+				Name:        "size_in_mbs",
+				Description: "The aggregate size of the volume group in MBs.",
+				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("SizeInMBs"),
 			},
 
 			// json fields
 			{
-				Name:        "schedules",
-				Description: "The collection of schedules that this policy will apply.",
+				Name:        "source_details",
+				Description: "The volume group source, either an existing volume group in the same availability domain or a volume group backup.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "volume_ids",
+				Description: "OCIDs for the volumes in this volume group.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "volume_group_replicas",
+				Description: "The list of volume group replicas of this volume group.",
 				Type:        proto.ColumnType_JSON,
 			},
 
@@ -83,7 +126,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(volumeBackupPolicyTags),
+				Transform:   transform.From(volumeGroupTags),
 			},
 			{
 				Name:        "title",
@@ -101,7 +144,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
+				Description: "ColumnDescriptionCompartment",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
@@ -118,11 +161,9 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
+func listCoreVolumeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("core.listCoreVolumeBackupPolicies", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.KeyColumnQuals
 
@@ -134,18 +175,18 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, region)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_core_volume_group.listCoreVolumeGroups", "session_error", err)
 		return nil, err
 	}
 
-	request := core.ListVolumeBackupPoliciesRequest{
-		CompartmentId: types.String(compartment),
-		Limit:         types.Int(1000),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(d.Connection),
-		},
+	// Build request parameters
+	request := buildCoreVolumeGroupFilters(equalQuals)
+	request.CompartmentId = types.String(compartment)
+	request.Limit = types.Int(1000)
+	request.RequestMetadata = common.RequestMetadata{
+		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
-	// Check for limit
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
@@ -155,13 +196,14 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.BlockstorageClient.ListVolumeBackupPolicies(ctx, request)
+		response, err := session.BlockstorageClient.ListVolumeGroups(ctx, request)
 		if err != nil {
+			plugin.Logger(ctx).Error("oci_core_volume_group.listCoreVolumeGroups", "api_error", err)
 			return nil, err
 		}
 
-		for _, volumes := range response.Items {
-			d.StreamListItem(ctx, volumes)
+		for _, volumeGroup := range response.Items {
+			d.StreamListItem(ctx, volumeGroup)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.QueryStatus.RowsRemaining(ctx) == 0 {
@@ -180,18 +222,14 @@ func listCoreVolumeBackupPolicies(ctx context.Context, d *plugin.QueryData, _ *p
 
 //// HYDRATE FUNCTION
 
-func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getCoreVolumeBackupPolicy")
-	logger := plugin.Logger(ctx)
+func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	logger.Debug("core.getCoreVolumeBackupPolicy", "Compartment", compartment, "OCI_REGION", matrixRegion)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-
 	id := d.KeyColumnQuals["id"].GetStringValue()
 
 	// For the us-phoenix-1 and us-ashburn-1 regions, `phx` and `iad` are returned by ListInstances api, respectively.
@@ -206,47 +244,47 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 	// Create Session
 	session, err := coreBlockStorageService(ctx, d, matrixRegion)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_core_volume_group.getCoreVolumeGroup", "session_error", err)
 		return nil, err
 	}
 
-	request := core.GetVolumeBackupPolicyRequest{
-		PolicyId: types.String(id),
+	request := core.GetVolumeGroupRequest{
+		VolumeGroupId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
-	response, err := session.BlockstorageClient.GetVolumeBackupPolicy(ctx, request)
+	response, err := session.BlockstorageClient.GetVolumeGroup(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.VolumeBackupPolicy, nil
+	return response.VolumeGroup, nil
 }
 
 //// TRANSFORM FUNCTION
 
 // Priority order for tags
-// 1. Free-form tags
-// 2. Defined Tags
-
-func volumeBackupPolicyTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	volumeBackupPolicy := d.HydrateItem.(core.VolumeBackupPolicy)
+// 1. Defined Tags
+// 2. Free-form tags
+func volumeGroupTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	volumeGroup := d.HydrateItem.(core.VolumeGroup)
 
 	var tags map[string]interface{}
 
-	if volumeBackupPolicy.FreeformTags != nil {
+	if volumeGroup.FreeformTags != nil {
 		tags = map[string]interface{}{}
-		for k, v := range volumeBackupPolicy.FreeformTags {
+		for k, v := range volumeGroup.FreeformTags {
 			tags[k] = v
 		}
 	}
 
-	if volumeBackupPolicy.DefinedTags != nil {
+	if volumeGroup.DefinedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
-		for _, v := range volumeBackupPolicy.DefinedTags {
+		for _, v := range volumeGroup.DefinedTags {
 			for key, value := range v {
 				tags[key] = value
 			}
@@ -255,4 +293,21 @@ func volumeBackupPolicyTags(_ context.Context, d *transform.TransformData) (inte
 	}
 
 	return tags, nil
+}
+
+// Build additional filters
+func buildCoreVolumeGroupFilters(equalQuals plugin.KeyColumnEqualsQualMap) core.ListVolumeGroupsRequest {
+	request := core.ListVolumeGroupsRequest{}
+
+	if equalQuals["availability_domain"] != nil {
+		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())
+	}
+	if equalQuals["display_name"] != nil {
+		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	}
+	if equalQuals["lifecycle_state"] != nil {
+		request.LifecycleState = core.VolumeGroupLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }

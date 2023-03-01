@@ -140,6 +140,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	bastionIdValue := h.Item.(bastion.Bastion)
 
+	// Return nil if bastion_id does not match
 	if equalQuals["bastion_id"] != nil {
 		if types.String(equalQuals["bastion_id"].GetStringValue()) != bastionIdValue.Id {
 			return nil, nil
@@ -205,7 +206,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
@@ -217,7 +218,7 @@ func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		id = d.KeyColumnQuals["id"].GetStringValue()
 	}
 
-	// handle empty id in get call
+	// Handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}

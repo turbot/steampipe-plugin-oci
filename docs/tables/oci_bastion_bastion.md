@@ -42,3 +42,17 @@ where
   )
   ::jsonb ? '0.0.0.0/0';
 ```
+
+### List bastions which are not active
+
+```sql
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_bastion_bastion
+where
+  lifecycle_state <> 'ACTIVE';
+```

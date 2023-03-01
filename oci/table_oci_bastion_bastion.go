@@ -119,7 +119,7 @@ func tableBastion(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
-			// tags
+			// Tags
 			{
 				Name:        "defined_tags",
 				Description: ColumnDescriptionDefinedTags,
@@ -253,7 +253,7 @@ func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 		}
 	}
 
-	// handle empty id in get call
+	// Handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}

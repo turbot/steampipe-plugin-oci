@@ -42,8 +42,24 @@ select
   key_type,
   lifecycle_state as state
 from
-  oci_bastion_session 
+  oci_bastion_session
 where
   bastion_id = 'ocid'
   and target_resource_details -> 'sessionType' = '"MANAGED_SSH"';
+```
+
+### List bastion sessions which are not active
+
+```sql
+select
+  display_name,
+  id,
+  bastion_name,
+  bastion_id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_bastion_session
+where
+  lifecycle_state <> 'ACTIVE';
 ```

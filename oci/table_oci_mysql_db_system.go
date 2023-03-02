@@ -170,6 +170,20 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 				Hydrate:     getMySQLDBSystem,
 			},
 			{
+				Name:        "cpu_core_count",
+				Description: "The number of CPU Cores the Instance provides. These are OCPU's.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getMySQLDBSystemShape,
+				Transform:   transform.FromField("CpuCoreCount"),
+			},
+			{
+				Name:        "memory_size_in_gbs",
+				Description: "The amount of RAM the Instance provides. This is an IEC base-2 number.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getMySQLDBSystemShape,
+				Transform:   transform.FromField("MemorySizeInGBs"),
+			},
+			{
 				Name:        "time_updated",
 				Description: "The time the DB System was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -366,6 +380,43 @@ func getMySQLDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	return response.DbSystem, nil
+}
+
+func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	logger.Debug("getMySQLDBSystemShape", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	switch h.Item.(type) {
+	case mysql.DbSystemSummary:
+		id = *h.Item.(mysql.DbSystemSummary).ShapeName
+	case mysql.DbSystem:
+		id = *h.Item.(mysql.DbSystem).ShapeName
+	}
+
+	// Create Session
+	session, err := mySQLConfigurationService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "connection_error", err)
+		return nil, err
+	}
+
+	request := mysql.ListShapesRequest{
+		Name:          types.String(id),
+		CompartmentId: types.String(compartment),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	response, err := session.MySQLConfigurationClient.ListShapes(ctx, request)
+	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "api_error", err)
+		return nil, err
+	}
+	return response.Items[0], nil
 }
 
 //// TRANSFORM FUNCTION

@@ -112,7 +112,7 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_INT,
 			},
 			{
-				Name:        "custom_encryption_key_id ",
+				Name:        "custom_encryption_key_id",
 				Description: "ID of the custom master encryption key which will be used to encrypt messages content.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,

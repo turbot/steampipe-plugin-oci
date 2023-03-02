@@ -29,6 +29,21 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
+### List queues that are not encrypted
+
+```sql
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  compartment_id,
+  region
+from
+  oci_queue_queue
+where 
+  custom_encryption_key_id is null;
+```  
+
 ### Get details for each queue
 
 ```sql

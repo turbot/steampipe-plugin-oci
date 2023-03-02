@@ -396,11 +396,6 @@ func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		id = *h.Item.(mysql.DbSystem).ShapeName
 	}
 
-	// handle empty ID in get call
-	if id == "" {
-		return nil, nil
-	}
-
 	// Create Session
 	session, err := mySQLConfigurationService(ctx, d, region)
 	if err != nil {

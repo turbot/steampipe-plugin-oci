@@ -44,3 +44,18 @@ where
   lifecycle_state = 'ACTIVE'
   and backup_policy -> 'isEnabled' <> 'true';
 ```
+
+### List the CPU and RAM configuration of DB systems
+
+```sql
+select
+  id,
+  display_name,
+  lifecycle_state as state,
+  cpu_core_count,
+  memory_size_in_gbs
+from
+  oci_mysql_db_system
+where
+  lifecycle_state = 'ACTIVE';
+```

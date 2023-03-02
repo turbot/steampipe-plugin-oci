@@ -396,7 +396,7 @@ func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		id = *h.Item.(mysql.DbSystem).ShapeName
 	}
 
-	// handle empty id in get call
+	// handle empty ID in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -404,6 +404,7 @@ func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	// Create Session
 	session, err := mySQLConfigurationService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "connection_error", err)
 		return nil, err
 	}
 
@@ -417,6 +418,7 @@ func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	response, err := session.MySQLConfigurationClient.ListShapes(ctx, request)
 	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "api_error", err)
 		return nil, err
 	}
 	return response.Items[0], nil

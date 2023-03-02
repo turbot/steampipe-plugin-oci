@@ -21,6 +21,7 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:        "oci_queue_queue",
 		Description: "OCI Queue Queue",
+		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getQueue,
@@ -58,25 +59,21 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the queue.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "messages_endpoint",
 				Description: "The endpoint to use to get or put messages in the queue.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the Queue.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",
@@ -95,35 +92,30 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 				Description: "The retention period of the messages in the queue, in seconds.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "visibility_in_seconds",
 				Description: "The default visibility of the messages consumed from the queue.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "timeout_in_seconds",
 				Description: "The default polling timeout of the messages in the queue, in seconds.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "dead_letter_queue_delivery_count",
 				Description: "The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "custom_encryption_key_id ",
 				Description: "ID of the custom master encryption key which will be used to encrypt messages content.",
 				Hydrate:     getQueue,
 				Type:        proto.ColumnType_INT,
-				Transform:   transform.FromCamel(),
 			},
 
 			// tags

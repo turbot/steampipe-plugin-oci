@@ -3,8 +3,8 @@
 _What's new?_
 
 - New tables added
-  - [oci_bastion_bastion](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_bastion)([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
-  - [oci_bastion_session](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_session)([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_bastion_bastion](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_bastion) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_bastion_session](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_session) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
   - [oci_queue_queue](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_queue_queue) ([#481](https://github.com/turbot/steampipe-plugin-oci/pull/481)) (Thanks [@lucasjellema](https://github.com/lucasjellema) for the contribution!)
 
 _Enhancements_

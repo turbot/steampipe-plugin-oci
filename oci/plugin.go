@@ -150,6 +150,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_objectstorage_object":                                     tableObjectStorageObject(ctx),
 			"oci_ons_notification_topic":                                   tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                                         tableOnsSubscription(ctx),
+			"oci_queue_queue":                                              tableQueueQueue(ctx),
 			"oci_region":                                                   tableIdentityRegion(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
 			"oci_resourcemanager_stack":                                    tableOciResourceManagerStack(ctx),

@@ -44,7 +44,7 @@ where
   custom_encryption_key_id is null;
 ```  
 
-### Get details for each queue
+### Get details of each queue
 
 ```sql
 select

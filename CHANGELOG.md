@@ -1,3 +1,16 @@
+## v0.20.0 [2023-03-03]
+
+_What's new?_
+
+- New tables added
+  - [oci_bastion_bastion](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_bastion) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_bastion_session](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_session) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_queue_queue](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_queue_queue) ([#481](https://github.com/turbot/steampipe-plugin-oci/pull/481)) (Thanks [@lucasjellema](https://github.com/lucasjellema) for the contribution!)
+
+_Enhancements_
+
+- Added columns `cpu_core_count` and `memory_size_in_gbs` to `oci_mysql_db_system` table. ([#483](https://github.com/turbot/steampipe-plugin-oci/pull/483)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+
 ## v0.19.1 [2023-02-10]
 
 _Dependencies_

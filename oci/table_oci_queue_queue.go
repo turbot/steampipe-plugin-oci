@@ -19,8 +19,8 @@ import (
 
 func tableQueueQueue(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:        "oci_queue_queue",
-		Description: "OCI Queue Queue",
+		Name:             "oci_queue_queue",
+		Description:      "OCI Queue Queue",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -186,7 +186,7 @@ func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	// Create Session
 	session, err := queueService(ctx, d, region)
 	if err != nil {
-    logger.Error("oci_queue_queue.listQueues", "connection_error", err)
+		logger.Error("oci_queue_queue.listQueues", "connection_error", err)
 		return nil, err
 	}
 
@@ -212,7 +212,7 @@ func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 	for pagesLeft {
 		response, err := session.QueueAdminClient.ListQueues(ctx, request)
 		if err != nil {
-      logger.Error("oci_queue_queue.listQueues", "api_error", err)
+			logger.Error("oci_queue_queue.listQueues", "api_error", err)
 			return nil, err
 		}
 
@@ -260,7 +260,7 @@ func getQueue(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (
 	// Create Session
 	session, err := queueService(ctx, d, region)
 	if err != nil {
-    logger.Error("oci_queue_queue.getQueue", "connection_error", err)
+		logger.Error("oci_queue_queue.getQueue", "connection_error", err)
 		return nil, err
 	}
 
@@ -272,7 +272,7 @@ func getQueue(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (
 	}
 	response, err := session.QueueAdminClient.GetQueue(ctx, request)
 	if err != nil {
-    logger.Error("oci_queue_queue.getQueue", "api_error", err)
+		logger.Error("oci_queue_queue.getQueue", "api_error", err)
 		return nil, err
 	}
 

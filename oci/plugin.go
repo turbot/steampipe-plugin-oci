@@ -152,6 +152,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ons_subscription":                                         tableOnsSubscription(ctx),
 			"oci_queue_queue":                                              tableQueueQueue(ctx),
 			"oci_region":                                                   tableIdentityRegion(ctx),
+			"oci_releasenote":                                              tableReleaseNote(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
 			"oci_resourcemanager_stack":                                    tableOciResourceManagerStack(ctx),
 			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),

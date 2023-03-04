@@ -41,7 +41,6 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 					Name:    "id",
 					Require: plugin.Optional,
 				},
-
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
@@ -50,7 +49,11 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The name of the project.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name"),
+			},
+			{
+				Name:        "description",
+				Description: "The description of the project.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
@@ -70,6 +73,28 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 
+			{
+				Name:        "lifecycle_details",
+				Description: "A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.",
+				Type:        proto.ColumnType_STRING,
+			},
+
+			{
+				Name:        "lifecycle_state",
+				Description: "The current state of the project.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "namespace",
+				Description: "Namespace associated with the project.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "notification_topic_id",
+				Description: "The topic ID for the topic where project notifications will be published to.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.From(transformNotificationTopic),
+			},
 			// tags
 			{
 				Name:        "defined_tags",
@@ -87,7 +112,7 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(queueTags),
+				Transform:   transform.From(projectTags),
 			},
 
 			// Standard OCI columns
@@ -163,7 +188,7 @@ func listProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			return nil, err
 		}
 
-		for _, projectSummary  := range response.Items {
+		for _, projectSummary := range response.Items {
 			d.StreamListItem(ctx, projectSummary)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -235,6 +260,17 @@ func buildProjectFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.
 		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
 	return request, isValid
+}
+
+func transformNotificationTopic(ctx context.Context, d *transform.TransformData) (interface{}, error) {
+	var topicId string
+	switch d.HydrateItem.(type) {
+	case devops.ProjectSummary:
+		topicId = *d.HydrateItem.(devops.ProjectSummary).NotificationConfig.TopicId
+	case devops.Project:
+		topicId = *d.HydrateItem.(devops.Project).NotificationConfig.TopicId
+	}
+	return topicId, nil
 }
 
 // Priority order for tags

@@ -52,3 +52,19 @@ from
 where 
   all_services  ? 'Speech' 
 ```
+
+### List release notes related to service Speech
+
+When the service is filtered on (with equals operator)
+
+```sql
+select 
+  title,
+  summary, 
+  release_date,
+  all_services 
+from 
+  oci_releasenote 
+where 
+  service  = 'Speech' 
+```

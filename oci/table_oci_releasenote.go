@@ -22,6 +22,12 @@ func tableReleaseNote(_ context.Context) *plugin.Table {
 		Description: "OCI Release Note",
 		List: &plugin.ListConfig{
 			Hydrate: listReleaseNotes,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "service",
+					Require: plugin.Optional,
+				},
+			},
 		},
 		Columns: []*plugin.Column{
 			{
@@ -86,19 +92,37 @@ type ReleaseNote struct {
 // TODO the url is composed of https://docs.oracle.com/en-us/iaas/releasenotes/services/<url encoded name of the sercice>/
 // TODO when the where clause contains a reference to the service, the data can be fetched from this far smaller subset of focused data
 
-// TODO define and populate column to provide a list of all services references by a release note
-
 func listReleaseNotes(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	logger.Debug("listReleaseNotes")
 
-	//limit := d.QueryContext.Limit
+	equalQuals := d.KeyColumnQuals
+	serviceFilter := strings.ToLower(strings.ReplaceAll(equalQuals["service"].GetStringValue(), " ", "-"))
+
+	// TODO: some services have a special mapping to the corresponding URL; for example:
+	// application-performance-monitoring => apm
+	// artifact-registry => artifacts
+	// block-volume => blockvolume
+	if serviceFilter == "application-performance-monitoring" {
+		serviceFilter = "apm"
+	}
+	if serviceFilter == "artifact-registry" {
+		serviceFilter = "artifacts"
+	}
+	if serviceFilter == "block-volume" {
+		serviceFilter = "blockvolume"
+	}
+	if serviceFilter == "file-storage" {
+		serviceFilter = "filestorage"
+	}
+
+	logger.Debug("listReleaseNotes, filter on service " + serviceFilter)
 
 	pagesLeft := true
 	currentPage := 0
 	for pagesLeft {
 		currentPage++
-		releaseNotes, numberOfPages, err := getOCIReleaseNotes(currentPage)
+		releaseNotes, numberOfPages, err := getOCIReleaseNotes(serviceFilter, currentPage)
 		if err != nil {
 			logger.Error("oci_releasenote.listReleaseNotes", "scrape data error", err)
 			return nil, err
@@ -110,7 +134,8 @@ func listReleaseNotes(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 				return nil, nil
 			}
 		}
-		pagesLeft = currentPage < numberOfPages
+		// no futher data retrieval when the current page is the last page or when the service filter was defined
+		pagesLeft = currentPage < numberOfPages && serviceFilter == ""
 	}
 	return nil, nil
 }
@@ -132,7 +157,7 @@ const ALLOWED_DOMAIN = "docs.oracle.com"
 const RELEASE_NOTES_BASE_URL = "https://docs.oracle.com/en-us/iaas/releasenotes/"
 const BASE_DOCUMENTATION_URL = "https://docs.oracle.com"
 
-func getOCIReleaseNotes(page int) (releaseNotes []ReleaseNote, numberOfPages int, err error) {
+func getOCIReleaseNotes(service string, page int) (releaseNotes []ReleaseNote, numberOfPages int, err error) {
 	c := colly.NewCollector(
 		colly.AllowedDomains(ALLOWED_DOMAIN),
 	)
@@ -169,7 +194,16 @@ func getOCIReleaseNotes(page int) (releaseNotes []ReleaseNote, numberOfPages int
 			return
 		}
 	})
-	c.Visit(RELEASE_NOTES_BASE_URL + "?page=" + strconv.Itoa(page))
+
+	if service == "" {
+		c.Visit(RELEASE_NOTES_BASE_URL + "?page=" + strconv.Itoa(page))
+	}
+	if service != "" {
+		// derive service specific page with release notes!
+		// https://docs.oracle.com/en-us/iaas/releasenotes/services/speech/
+
+		c.Visit(RELEASE_NOTES_BASE_URL + "/services/" + service + "/")
+	}
 	return
 }
 

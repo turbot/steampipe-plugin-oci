@@ -14,6 +14,7 @@ The most recent 50 release notes are published in this RSS Feed: https://docs.or
 select 
   title,
   service, 
+  all_services,
   summary, 
   release_date 
 from 
@@ -33,4 +34,21 @@ from
   oci_releasenote 
 where 
   release_date  > current_date - interval '1' month;
+```
+
+
+### List release notes related to service Speech
+
+Column all_services contains a JSON arrary of strings with the names of all services that are referenced from the release note; usually that is just one but on some occasions two, three or even more services can be associated with a release note. 
+
+```sql
+select 
+  title,
+  summary, 
+  release_date,
+  all_services 
+from 
+  oci_releasenote 
+where 
+  all_services  ? 'Speech' 
 ```

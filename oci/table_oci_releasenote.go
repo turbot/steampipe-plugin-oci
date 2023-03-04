@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -48,6 +49,13 @@ func tableReleaseNote(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Default:     false,
 				Transform:   transform.FromField("Service"),
+			},
+			{
+				Name:        "all_services",
+				Description: "Array of all OCI Services related to this release.",
+				Type:        proto.ColumnType_JSON,
+				Default:     false,
+				Transform:   transform.From(transformAllServices),
 			},
 			{
 				Name:        "url",
@@ -133,7 +141,13 @@ func getOCIReleaseNotes(page int) (releaseNotes []ReleaseNote, numberOfPages int
 		article := ReleaseNote{}
 		article.Title = e.ChildText(" h3 a[href]")
 		article.URL = BASE_DOCUMENTATION_URL + e.ChildAttr("h3 a", "href")
-		services := strings.Split(e.ChildText(" ul  li:nth-child(1) a "), ",")
+		services := make([]string, 0, 20)
+		e.ForEach("ul li:nth-child(1) a[href]", func(index int, a *colly.HTMLElement) {
+			services = append(services, a.Text)
+		})
+
+		article.AllServices = make([]string, 0, len(services))
+		copy(article.AllServices, services[:])
 		article.Service = services[0]
 		article.AllServices = services
 		article.Summary = e.ChildText(" div.uk-panel p ")
@@ -172,4 +186,16 @@ func getNumberOfPages(text string) (int, error) {
 		return 0, err
 	}
 	return numberOfPages, nil
+}
+
+// produce a valid JSON representation of the slice of strings in field AllServices
+func transformAllServices(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	releaseNote := d.HydrateItem.(ReleaseNote)
+	allServices := releaseNote.AllServices
+	allServicesJSON, err := json.Marshal(allServices)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(allServicesJSON), nil
 }

@@ -97,6 +97,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_dns_rrset":                                                tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                             tableDnsTsigKey(ctx),
 			"oci_dns_zone":                                                 tableDnsZone(ctx),
+			"oci_devops_project":                                           tableDevopsProject(ctx),
 			"oci_events_rule":                                              tableEventsRule(ctx),
 			"oci_file_storage_file_system":                                 tableFileStorageFileSystem(ctx),
 			"oci_file_storage_mount_target":                                tableFileStorageMountTarget(ctx),

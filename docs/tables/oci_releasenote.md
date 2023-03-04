@@ -66,5 +66,5 @@ select
 from 
   oci_releasenote 
 where 
-  service  = 'Speech' 
+  service  = 'Anomaly Detection' 
 ```

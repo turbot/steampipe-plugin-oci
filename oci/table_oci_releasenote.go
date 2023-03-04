@@ -196,13 +196,20 @@ func getOCIReleaseNotes(service string, page int) (releaseNotes []ReleaseNote, n
 	})
 
 	if service == "" {
-		c.Visit(RELEASE_NOTES_BASE_URL + "?page=" + strconv.Itoa(page))
+		err = c.Visit(RELEASE_NOTES_BASE_URL + "?page=" + strconv.Itoa(page))
+		if (err != nil) {
+			return
+		}
+
 	}
 	if service != "" {
 		// derive service specific page with release notes!
 		// https://docs.oracle.com/en-us/iaas/releasenotes/services/speech/
 
-		c.Visit(RELEASE_NOTES_BASE_URL + "/services/" + service + "/")
+		err = c.Visit(RELEASE_NOTES_BASE_URL + "/services/" + service + "/")
+		if (err != nil) {
+			return
+		}
 	}
 	return
 }

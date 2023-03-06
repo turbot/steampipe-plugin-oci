@@ -9,9 +9,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -224,7 +224,7 @@ func listVnicAttachments(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Trace("listVnicAttachments", "Compartment", compartment, "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -279,7 +279,7 @@ func listVnicAttachments(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 			d.StreamListItem(ctx, attachment)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -305,7 +305,7 @@ func getVnicAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
 
 	// handle empty VNIC attachment id in get call
 	if id == "" {
@@ -350,7 +350,7 @@ func getVnic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (i
 			return nil, nil
 		}
 
-		vnicId = d.KeyColumnQuals["vnic_id"].GetStringValue()
+		vnicId = d.EqualsQuals["vnic_id"].GetStringValue()
 	}
 
 	// handle empty VNIC id in get call

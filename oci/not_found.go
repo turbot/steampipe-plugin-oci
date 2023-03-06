@@ -5,7 +5,7 @@ import (
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 // function which returns an ErrorPredicate for OCI API calls

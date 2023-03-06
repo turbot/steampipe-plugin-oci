@@ -9,9 +9,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -190,7 +190,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	vaultData := h.Item.(keymanagement.VaultSummary)
 
@@ -278,7 +278,7 @@ func getKmsKeyAsyncData(ctx context.Context, d *plugin.QueryData, request keyman
 			d.StreamListItem(ctx, KeyInfo{key, *vaultData.ManagementEndpoint, *vaultData.DisplayName})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil
 			}
 		}

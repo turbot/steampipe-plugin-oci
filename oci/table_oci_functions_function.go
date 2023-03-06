@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/functions"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -169,7 +169,7 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Trace("listFunctions", "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	var applicationId string
 
 	if equalQuals["application_id"] != nil {
@@ -221,7 +221,7 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 			d.StreamListItem(ctx, item)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -248,7 +248,7 @@ func getFunction(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	if h.Item != nil {
 		functionId = *h.Item.(functions.FunctionSummary).Id
 	} else {
-		functionId = d.KeyColumnQuals["id"].GetStringValue()
+		functionId = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil

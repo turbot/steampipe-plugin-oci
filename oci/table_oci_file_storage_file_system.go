@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/filestorage"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -177,7 +177,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	logger.Debug("listFileStorageFileSystems", "Compartment", compartment, "zone", zone)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -222,7 +222,7 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 			d.StreamListItem(ctx, fileSystems)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -250,7 +250,7 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 		fileSystem := h.Item.(filestorage.FileSystemSummary)
 		id = *fileSystem.Id
 	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
+		id = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment and one zone/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
 			return nil, nil

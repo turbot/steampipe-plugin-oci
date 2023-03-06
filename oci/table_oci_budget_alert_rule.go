@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -217,7 +217,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 	logger := plugin.Logger(ctx)
 	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	logger.Debug("listBudgets", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
@@ -264,7 +264,7 @@ func listBudgetAlertRules(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 			d.StreamListItem(ctx, AlertRuleInfo{rule.Id, rule.BudgetId, rule.DisplayName, rule.Type, rule.Threshold, rule.ThresholdType, rule.LifecycleState, rule.Recipients, rule.TimeCreated, rule.TimeUpdated, rule.Message, rule.Description, rule.Version, rule.FreeformTags, rule.DefinedTags, compartment})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -291,8 +291,8 @@ func getBudgetAlertRule(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		return nil, nil
 	}
 
-	budgetId := d.KeyColumnQuals["budget_id"].GetStringValue()
-	ruleId := d.KeyColumnQuals["id"].GetStringValue()
+	budgetId := d.EqualsQuals["budget_id"].GetStringValue()
+	ruleId := d.EqualsQuals["id"].GetStringValue()
 
 	// handle empty id in get call
 	if budgetId == "" || ruleId == "" {

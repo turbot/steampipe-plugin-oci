@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/logging"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -156,7 +156,7 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
 	logger.Debug("listLoggingLogs", "Compartment", compartment, "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Create Session
 	session, err := loggingManagementService(ctx, d, region)
@@ -192,7 +192,7 @@ func listLoggingLogs(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrate
 			d.StreamListItem(ctx, log)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -220,8 +220,8 @@ func getLoggingLog(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 		return nil, nil
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
-	logGroupId := d.KeyColumnQuals["log_group_id"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
+	logGroupId := d.EqualsQuals["log_group_id"].GetStringValue()
 
 	// handle empty log and log group id in get call
 	if id == "" || logGroupId == "" {

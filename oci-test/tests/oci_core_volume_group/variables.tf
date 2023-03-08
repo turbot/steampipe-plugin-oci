@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI tenancy id."
 }
 
@@ -34,18 +34,18 @@ resource "oci_core_volume" "test_volume" {
 }
 
 resource "oci_core_volume_group" "test_volume_group" {
+  #Required
+  availability_domain = var.oci_ad
+  compartment_id      = var.tenancy_ocid
+  source_details {
     #Required
-    availability_domain = var.oci_ad
-    compartment_id = var.tenancy_ocid
-    source_details {
-        #Required
-        type = "volumeIds"
-        volume_ids = [oci_core_volume.test_volume.id]
-    }
+    type       = "volumeIds"
+    volume_ids = [oci_core_volume.test_volume.id]
+  }
 
-    #Optional
-    display_name = var.resource_name
-    freeform_tags = {"Department"= var.resource_name}
+  #Optional
+  display_name  = var.resource_name
+  freeform_tags = { "Department" = var.resource_name }
 }
 
 output "tenancy_ocid" {

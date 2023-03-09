@@ -167,8 +167,8 @@ func tableBastion(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	equalQuals := d.EqualsQuals
 
@@ -239,8 +239,8 @@ func listBastions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 func getBastion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getBastion", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string

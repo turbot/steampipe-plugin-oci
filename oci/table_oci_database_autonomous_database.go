@@ -449,8 +449,8 @@ func tableOciDatabaseAutonomousDatabase(_ context.Context) *plugin.Table {
 
 func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listAutonomousDatabases", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -511,8 +511,8 @@ func listAutonomousDatabases(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 func getAutonomousDatabase(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getAutonomousDatabase", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region

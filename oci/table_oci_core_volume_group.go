@@ -162,8 +162,8 @@ func tableCoreVolumeGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listCoreVolumeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	equalQuals := d.EqualsQuals
 
@@ -223,8 +223,8 @@ func listCoreVolumeGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 //// HYDRATE FUNCTION
 
 func getCoreVolumeGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	matrixRegion := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

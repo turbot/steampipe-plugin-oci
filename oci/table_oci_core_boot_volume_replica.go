@@ -159,9 +159,9 @@ func tableCoreBootVolumeReplica(_ context.Context) *plugin.Table {
 
 func listCoreBootVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	zone := d.EqualsQualString(matrixKeyZone)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listCoreBootVolumeReplicas", "Compartment", compartment, "OCI_Zone", zone)
 
 	equalQuals := d.EqualsQuals
@@ -238,9 +238,9 @@ func listCoreBootVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *plu
 
 func getCoreBootVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	zone := d.EqualsQualString(matrixKeyZone)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getCoreBootVolumeReplica", "Compartment", compartment, "OCI_Zone", zone)
 
 	// Restrict the api call to only root compartment and one zone/ per region

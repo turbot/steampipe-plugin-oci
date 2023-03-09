@@ -210,7 +210,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 //// HYDRATE FUNCTION
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 
 	var id string
 	if h.Item != nil {

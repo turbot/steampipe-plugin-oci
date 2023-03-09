@@ -141,7 +141,7 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 
 func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.listDnsTsigKeys", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -201,7 +201,7 @@ func listDnsTsigKeys(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrate
 
 func getDnsTsigKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getDnsTsigKey", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment

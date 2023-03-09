@@ -271,8 +271,8 @@ func tableCoreInstance(_ context.Context) *plugin.Table {
 
 func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.listCoreInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
@@ -333,8 +333,8 @@ func listCoreInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 func getInstance(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getUser")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getInstance", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region

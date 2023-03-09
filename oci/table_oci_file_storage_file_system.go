@@ -172,9 +172,9 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 
 func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	zone := d.EqualsQualString(matrixKeyZone)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("listFileStorageFileSystems", "Compartment", compartment, "zone", zone)
 
 	equalQuals := d.EqualsQuals
@@ -240,9 +240,9 @@ func listFileStorageFileSystems(ctx context.Context, d *plugin.QueryData, _ *plu
 
 func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	zone := d.EqualsQualString(matrixKeyZone)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getFileStorageFileSystem", "Compartment", compartment, "OCI_ZONE", zone)
 
 	var id string
@@ -285,7 +285,7 @@ func getFileStorageFileSystem(ctx context.Context, d *plugin.QueryData, h *plugi
 
 func getFileStorageFileSystemExports(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 
 	// Create Session
 	session, err := fileStorageService(ctx, d, region)

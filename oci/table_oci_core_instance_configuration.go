@@ -113,8 +113,8 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 
 func listInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	equalQuals := d.EqualsQuals
 
@@ -175,8 +175,8 @@ func listInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ *plu
 
 func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	matrixRegion := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	matrixRegion := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	var id string
 	if h.Item != nil {

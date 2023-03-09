@@ -140,8 +140,8 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 
 func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.listOnsSubscriptions", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -208,8 +208,8 @@ func listOnsSubscriptions(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 func getOnsSubscription(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getOnsSubscription")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
@@ -254,8 +254,8 @@ filter on the topic ID.
 func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	logger.Debug("getSubscriptionDeliveryPolicy")
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getOnsSubscription", "Compartment", compartment, "OCI_REGION", region)
 
 	policy := deliveryPolicy(ctx, h.Item)

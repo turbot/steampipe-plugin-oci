@@ -322,8 +322,8 @@ func tableOciDatabaseDBSystem(_ context.Context) *plugin.Table {
 
 func listDatabaseDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listDatabaseDBSystems", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -383,8 +383,8 @@ func listDatabaseDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 
 func getDatabaseDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getDatabaseDBSystem", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string

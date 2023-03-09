@@ -189,8 +189,8 @@ func tableAnalyticsInstance(_ context.Context) *plugin.Table {
 
 func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listAnalyticsInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -251,8 +251,8 @@ func listAnalyticsInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 func getAnalyticsInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getAnalyticsInstance")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getAnalyticsInstance", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string

@@ -146,8 +146,8 @@ func tableFunctionsApplication(_ context.Context) *plugin.Table {
 
 func listFunctionsApplications(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listFunctionsApplications", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -208,8 +208,8 @@ func listFunctionsApplications(ctx context.Context, d *plugin.QueryData, _ *plug
 func getFunctionsApplication(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getFunctionsApplication")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getFunctionsApplication", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string

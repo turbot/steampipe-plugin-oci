@@ -176,7 +176,7 @@ func tableDnsZone(_ context.Context) *plugin.Table {
 
 func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.listDnsZones", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -236,7 +236,7 @@ func listDnsZones(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 
 func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getDnsZone", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment

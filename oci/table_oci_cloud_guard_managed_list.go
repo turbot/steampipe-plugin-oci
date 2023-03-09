@@ -168,7 +168,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 
 func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.listCloudGuardManagedLists", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -236,7 +236,7 @@ func listCloudGuardManagedLists(ctx context.Context, d *plugin.QueryData, h *plu
 
 func getCloudGuardManagedList(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getCloudGuardManagedList", "Compartment", compartment)
 
 	// Restrict the api call to only root compartment/ per region

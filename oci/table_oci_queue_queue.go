@@ -172,8 +172,8 @@ func tableQueueQueue(_ context.Context) *plugin.Table {
 
 func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	region := d.EqualsQualString(matrixKeyRegion)
 
 	logger.Debug("listQueues", "Compartment", compartment, "OCI_REGION", region)
 
@@ -239,8 +239,8 @@ func listQueues(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 func getQueue(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getQueue")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getQueue", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string

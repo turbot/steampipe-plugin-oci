@@ -189,7 +189,7 @@ type objectInfo struct {
 
 func listObjectStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Trace("listObjectStorageObjects", "OCI_REGION", region)
 
 	bucketName := *h.Item.(bucketInfo).Name
@@ -241,7 +241,7 @@ func listObjectStorageObjects(ctx context.Context, d *plugin.QueryData, h *plugi
 func getObjectStorageObject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getObjectStorageObject")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("getObjectStorageObject", "OCI_REGION", region)
 
 	var bucketName, namespace, objectName string

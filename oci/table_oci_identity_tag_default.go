@@ -115,7 +115,7 @@ func tableIdentityTagDefault(_ context.Context) *plugin.Table {
 
 func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Trace("oci.listIdentityTagDefaults", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -180,7 +180,7 @@ func listIdentityTagDefaults(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 func getIdentityTagDefault(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getIdentityTagDefault", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment

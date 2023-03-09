@@ -143,7 +143,7 @@ type searchInfo struct {
 
 func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("listResourceSearch", "OCI_REGION", region)
 
 	query := d.EqualsQuals["query"].GetStringValue()

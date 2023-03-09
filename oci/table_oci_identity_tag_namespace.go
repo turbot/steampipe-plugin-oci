@@ -120,7 +120,7 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 
 func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Trace("oci.listIdentityTagNamespaces", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -185,7 +185,7 @@ func listIdentityTagNamespaces(ctx context.Context, d *plugin.QueryData, _ *plug
 
 func getIdentityTagNamespace(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getIdentityTagNamespace", "Compartment", compartment)
 
 	// Restrict the api call to only root compartment

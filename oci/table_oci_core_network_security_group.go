@@ -135,8 +135,8 @@ func tableCoreNetworkSecurityGroup(_ context.Context) *plugin.Table {
 
 func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listCoreNetworkSecurityGroups", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -197,8 +197,8 @@ func listCoreNetworkSecurityGroups(ctx context.Context, d *plugin.QueryData, _ *
 func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getCoreNetworkSecurityGroup")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getCoreNetworkSecurityGroup", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
@@ -236,7 +236,7 @@ func getCoreNetworkSecurityGroup(ctx context.Context, d *plugin.QueryData, _ *pl
 
 func listCoreNetworkSecurityGroupRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("listCoreNetworkSecurityGroupRules", "OCI_REGION", region)
 
 	// Create Session

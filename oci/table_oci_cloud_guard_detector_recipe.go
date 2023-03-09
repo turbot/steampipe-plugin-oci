@@ -160,7 +160,7 @@ func tableCloudGuardDetectorRecipe(_ context.Context) *plugin.Table {
 
 func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Trace("oci.listCloudGuardDetectorRecipes", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals
@@ -239,7 +239,7 @@ func listCloudGuardDetectorRecipes(ctx context.Context, d *plugin.QueryData, h *
 
 func getCloudGuardDetectorRecipe(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getCloudGuardDetectorRecipe", "Compartment", compartment)
 
 	var id string

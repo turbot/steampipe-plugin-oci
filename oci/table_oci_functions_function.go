@@ -166,7 +166,7 @@ func tableFunctionsFunction(_ context.Context) *plugin.Table {
 
 func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Trace("listFunctions", "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -240,8 +240,8 @@ func listFunctions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 func getFunction(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getFunction")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getFunction", "Compartment", compartment, "OCI_REGION", region)
 
 	var functionId string

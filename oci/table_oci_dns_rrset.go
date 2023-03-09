@@ -112,7 +112,7 @@ type dnsRecordInfo struct {
 
 func listDnsRecordSets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("dns.listDnsRecordSets", "Compartment", compartment)
 
 	equalQuals := d.EqualsQuals

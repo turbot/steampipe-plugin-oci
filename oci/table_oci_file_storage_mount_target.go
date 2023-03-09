@@ -167,9 +167,9 @@ func tableFileStorageMountTarget(_ context.Context) *plugin.Table {
 
 func listFileStorageMountTargets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	zone := d.EqualsQualString(matrixKeyZone)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("listFileStorageMountTargets", "Compartment", compartment, "zone", zone)
 
 	equalQuals := d.EqualsQuals
@@ -237,9 +237,9 @@ func listFileStorageMountTargets(ctx context.Context, d *plugin.QueryData, h *pl
 func getFileStorageMountTarget(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getFileStorageMountTarget")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	zone := plugin.GetMatrixItem(ctx)[matrixKeyZone].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	zone := d.EqualsQualString(matrixKeyZone)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getFileStorageMountTarget", "Compartment", compartment, "OCI_ZONE", zone)
 
 	var id string

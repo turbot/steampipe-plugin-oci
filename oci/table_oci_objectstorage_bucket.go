@@ -9,9 +9,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -212,11 +212,11 @@ type bucketInfo struct {
 
 func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Error("listObjectStorageBuckets", "Compartment", compartment, "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -265,7 +265,7 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 			d.StreamListItem(ctx, bucketInfo{region, bucketSummary})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -283,8 +283,8 @@ func listObjectStorageBuckets(ctx context.Context, d *plugin.QueryData, _ *plugi
 func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getObjectStorageBucket")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getObjectStorageBucket", "Compartment", compartment, "OCI_REGION", region)
 
 	var bucketName, nameSpace string
@@ -293,7 +293,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 		bucketName = *bucket.Name
 		nameSpace = *bucket.Namespace
 	} else {
-		bucketName = d.KeyColumnQuals["name"].GetStringValue()
+		bucketName = d.EqualsQuals["name"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil

@@ -5,9 +5,9 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -83,7 +83,7 @@ func listMySQLHeatWaveCluster(ctx context.Context, d *plugin.QueryData, h *plugi
 	region := ociRegionNameFromId(*dbSystem.Id)
 	logger.Debug("listMySQLHeatWaveCluster", "DB System", dbSystem, "OCI_REGION", region)
 
-	if d.KeyColumnQualString("db_system_id") != "" && d.KeyColumnQualString("db_system_id") != *dbSystem.Id {
+	if d.EqualsQualString("db_system_id") != "" && d.EqualsQualString("db_system_id") != *dbSystem.Id {
 		return nil, nil
 	}
 

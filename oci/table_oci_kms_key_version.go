@@ -6,9 +6,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -119,9 +119,9 @@ type KeyVersionInfo struct {
 //// LIST FUNCTION
 
 func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	keyId := d.KeyColumnQuals["key_id"].GetStringValue()
-	endpoint := d.KeyColumnQuals["management_endpoint"].GetStringValue()
-	region := d.KeyColumnQuals["region"].GetStringValue()
+	keyId := d.EqualsQuals["key_id"].GetStringValue()
+	endpoint := d.EqualsQuals["management_endpoint"].GetStringValue()
+	region := d.EqualsQuals["region"].GetStringValue()
 
 	// handle empty keyId, endpoint and region in list call
 	if keyId == "" || endpoint == "" || region == "" {
@@ -161,7 +161,7 @@ func listKmsKeyVersions(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 			d.StreamListItem(ctx, KeyVersionInfo{keyVersion, endpoint, region})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}

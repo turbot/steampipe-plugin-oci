@@ -2,12 +2,13 @@ package oci
 
 import (
 	"context"
+
 	"github.com/oracle/oci-go-sdk/v65/bastion"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -135,8 +136,8 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	region := d.KeyColumnQuals["region"].GetStringValue()
-	equalQuals := d.KeyColumnQuals
+	region := d.EqualsQuals["region"].GetStringValue()
+	equalQuals := d.EqualsQuals
 
 	bastionIdValue := h.Item.(bastion.Bastion)
 
@@ -192,7 +193,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 			d.StreamListItem(ctx, bastionSession)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -209,13 +210,13 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 //// HYDRATE FUNCTION
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(bastion.SessionSummary).Id
 	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
+		id = d.EqualsQuals["id"].GetStringValue()
 	}
 
 	// Handle empty id in get call

@@ -7,9 +7,9 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/turbot/go-kit/helpers"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -104,7 +104,7 @@ func listIdentityApiKeys(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	user := h.Item.(identity.User)
 
 	// Return nil, if given user_id doesn't match
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 	if equalQuals["user_id"] != nil && equalQuals["user_id"].GetStringValue() != *user.Id {
 		return nil, nil
 	}

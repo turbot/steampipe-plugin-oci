@@ -40,7 +40,7 @@ func tableOciResourceManagerStack(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "Human-readable display name for the stack.",
@@ -145,7 +145,7 @@ func tableOciResourceManagerStack(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

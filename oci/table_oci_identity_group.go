@@ -34,7 +34,7 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name assign to the group during creation.",
@@ -99,7 +99,7 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

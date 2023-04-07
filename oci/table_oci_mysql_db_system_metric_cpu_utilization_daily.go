@@ -21,7 +21,7 @@ func tableOciMySQLDBSystemMetricCpuUtilizationDaily(_ context.Context) *plugin.T
 			Hydrate:       listMySQLDBSystemMetricCpuUtilizationDaily,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -29,7 +29,7 @@ func tableOciMySQLDBSystemMetricCpuUtilizationDaily(_ context.Context) *plugin.T
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

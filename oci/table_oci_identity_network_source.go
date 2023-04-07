@@ -34,7 +34,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name you assign to the network source during creation.",
@@ -121,7 +121,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

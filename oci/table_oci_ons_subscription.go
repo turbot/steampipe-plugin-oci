@@ -37,7 +37,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The OCID of the subscription.",
@@ -132,7 +132,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

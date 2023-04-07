@@ -40,7 +40,7 @@ func tableEventsRule(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The OCID of this rule.",
@@ -142,7 +142,7 @@ func tableEventsRule(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

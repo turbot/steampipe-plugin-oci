@@ -44,7 +44,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartmentList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "ManagedList display name.",
@@ -160,7 +160,7 @@ func tableCloudGuardManagedList(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

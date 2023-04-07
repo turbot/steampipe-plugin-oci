@@ -21,7 +21,7 @@ func tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(_ context.Context) *
 			Hydrate:       listAutonomousDatabaseMetricCpuUtilization,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -29,7 +29,7 @@ func tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(_ context.Context) *
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

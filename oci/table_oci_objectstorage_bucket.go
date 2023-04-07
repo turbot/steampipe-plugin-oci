@@ -40,7 +40,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the bucket.",
@@ -199,7 +199,7 @@ func tableObjectStorageBucket(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

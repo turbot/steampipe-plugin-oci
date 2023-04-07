@@ -21,7 +21,7 @@ func tableOciMySQLDBSystemMetricConnectionsDaily(_ context.Context) *plugin.Tabl
 			Hydrate:       listMySQLDBSystemMetricConnectionsDaily,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -29,7 +29,7 @@ func tableOciMySQLDBSystemMetricConnectionsDaily(_ context.Context) *plugin.Tabl
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

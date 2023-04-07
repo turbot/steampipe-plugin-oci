@@ -44,7 +44,7 @@ func tableCoreBootVolumeReplica(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementZonalList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The boot volume replica's Oracle ID (OCID).",
@@ -151,7 +151,7 @@ func tableCoreBootVolumeReplica(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

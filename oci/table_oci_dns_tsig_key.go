@@ -44,7 +44,7 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 			Hydrate:    getDnsTsigKey,
 		},
 		GetMatrixItemFunc: BuildCompartmentList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "A globally unique domain name identifying the key for a given pair of hosts.",
@@ -133,7 +133,7 @@ func tableDnsTsigKey(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

@@ -20,7 +20,7 @@ func tableOciNoSQLTableMetricReadThrottleCountDaily(_ context.Context) *plugin.T
 			Hydrate:       listNoSQLTableMetricReadThrottleCountDaily,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "name",
@@ -28,7 +28,7 @@ func tableOciNoSQLTableMetricReadThrottleCountDaily(_ context.Context) *plugin.T
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

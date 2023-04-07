@@ -43,7 +43,7 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The user's login for the Console.",
@@ -185,7 +185,7 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

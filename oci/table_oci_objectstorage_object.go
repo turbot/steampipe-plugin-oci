@@ -23,7 +23,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 			ParentHydrate: listObjectStorageBuckets,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the object.",
@@ -174,7 +174,7 @@ func tableObjectStorageObject(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

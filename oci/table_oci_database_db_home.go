@@ -52,7 +52,7 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 			Hydrate:    getDatabaseDBHome,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "The user-friendly name for the database home. It does not have to be unique.",
@@ -176,7 +176,7 @@ func tableOciDatabaseDBHome(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

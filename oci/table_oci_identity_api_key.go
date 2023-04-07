@@ -28,7 +28,7 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "key_id",
 				Description: "An Oracle-assigned identifier for the key.",
@@ -89,7 +89,7 @@ func tableIdentityApiKey(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

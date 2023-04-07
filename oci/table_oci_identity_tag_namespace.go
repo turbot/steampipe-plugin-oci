@@ -36,7 +36,7 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartmentList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the tag namespace. It must be unique across all tag namespaces in the tenancy and cannot be changed.",
@@ -112,7 +112,7 @@ func tableIdentityTagNamespace(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

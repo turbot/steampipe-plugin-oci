@@ -53,7 +53,7 @@ func tableFileStorageMountTarget(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementZonalList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "A user-friendly name of the Mount Target.",
@@ -159,7 +159,7 @@ func tableFileStorageMountTarget(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

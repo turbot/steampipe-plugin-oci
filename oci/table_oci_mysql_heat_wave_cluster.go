@@ -27,7 +27,7 @@ func tableOciMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "db_system_id",
 				Description: "The OCID of the parent DB System this HeatWave cluster is attached to.",
@@ -71,7 +71,7 @@ func tableOciMySQLHeatWaveCluster(ctx context.Context) *plugin.Table {
 				Description: "A HeatWave node is a compute host that is part of a HeatWave cluster.",
 				Type:        proto.ColumnType_JSON,
 			},
-		},
+		}),
 	}
 }
 

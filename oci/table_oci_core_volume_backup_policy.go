@@ -32,7 +32,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "A user-friendly name for volume backup policy.",
@@ -112,7 +112,7 @@ func tableCoreVolumeBackupPolicy(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

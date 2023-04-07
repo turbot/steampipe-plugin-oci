@@ -36,7 +36,7 @@ func tableAutoScalingConfiguration(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The OCID of the autoscaling configuration.",
@@ -136,7 +136,7 @@ func tableAutoScalingConfiguration(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

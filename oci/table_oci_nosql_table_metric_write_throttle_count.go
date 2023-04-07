@@ -20,7 +20,7 @@ func tableOciNoSQLTableMetricWriteThrottleCount(_ context.Context) *plugin.Table
 			Hydrate:       listNoSQLTableMetricWriteThrottleCount,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "name",
@@ -28,7 +28,7 @@ func tableOciNoSQLTableMetricWriteThrottleCount(_ context.Context) *plugin.Table
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

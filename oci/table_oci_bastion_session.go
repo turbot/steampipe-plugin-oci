@@ -40,7 +40,7 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The unique identifier (OCID) of the session.",
@@ -129,7 +129,7 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

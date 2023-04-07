@@ -20,7 +20,7 @@ func tableOciCoreBootVolumeMetricWriteOpsHourly(_ context.Context) *plugin.Table
 			Hydrate:       listCoreBootVolumeMetricWriteOpsHourly,
 		},
 		GetMatrixItemFunc: BuildCompartementZonalList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -28,7 +28,7 @@ func tableOciCoreBootVolumeMetricWriteOpsHourly(_ context.Context) *plugin.Table
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

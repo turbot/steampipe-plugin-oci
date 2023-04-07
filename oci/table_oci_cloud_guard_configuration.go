@@ -18,7 +18,7 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listCloudGuardConfigurations,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "reporting_region",
 				Description: "The reporting region value.",
@@ -43,7 +43,7 @@ func tableCloudGuardConfiguration(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

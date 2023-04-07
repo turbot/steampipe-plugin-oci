@@ -56,7 +56,7 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			Hydrate:    getMySQLDBSystem,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "The user-friendly name for the DB System. It does not have to be unique.",
@@ -272,7 +272,7 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

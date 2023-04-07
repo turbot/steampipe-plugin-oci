@@ -23,7 +23,7 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 			Hydrate:    listResourceSearch,
 		},
 		GetMatrixItemFunc: BuildRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "identifier",
 				Description: "The unique identifier for this particular resource, usually an OCID.",
@@ -128,7 +128,7 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

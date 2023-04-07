@@ -18,7 +18,7 @@ func tableIdentityRegion(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listRegions,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the region.",
@@ -61,7 +61,7 @@ func tableIdentityRegion(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

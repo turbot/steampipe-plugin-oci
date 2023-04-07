@@ -34,7 +34,7 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			// top columns
 			{
 				Name:        "name",
@@ -115,7 +115,7 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

@@ -48,7 +48,7 @@ func tableMySQLChannel(_ context.Context) *plugin.Table {
 			Hydrate:    getMySQLChannel,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "The user-friendly name for the Channel. It does not have to be unique.",
@@ -155,7 +155,7 @@ func tableMySQLChannel(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

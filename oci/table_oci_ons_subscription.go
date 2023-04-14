@@ -127,7 +127,7 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
@@ -296,7 +296,7 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 		}
 
 		for _, subscription := range response.Items {
-			if (*subscription.Id == (*subscriptionItem.Id)){
+			if *subscription.Id == (*subscriptionItem.Id) {
 				return subscription.DeliveryPolicy, nil
 			}
 			// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -316,7 +316,6 @@ func getSubscriptionDeliveryPolicy(ctx context.Context, d *plugin.QueryData, h *
 	logger.Error("oci.getOnsSubscription", "subscription_not_found_error", err)
 	return nil, err
 }
-
 
 //// TRANSFORM FUNCTION
 
@@ -371,7 +370,7 @@ func subscriptionDefinedTags(item interface{}) map[string]map[string]interface{}
 
 func deliveryPolicy(ctx context.Context, item interface{}) *ons.DeliveryPolicy {
 	switch item := item.(type) {
-		case ons.SubscriptionSummary:
+	case ons.SubscriptionSummary:
 		return item.DeliveryPolicy
 	}
 	return nil

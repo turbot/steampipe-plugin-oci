@@ -20,7 +20,7 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 			ParentHydrate: listRegions,
 			Hydrate:       lisAvailabilityDomains,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the Availability Domain.",
@@ -49,11 +49,11 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

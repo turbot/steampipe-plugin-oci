@@ -20,7 +20,7 @@ func tableOciCoreInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin.Ta
 			Hydrate:       listCoreInstanceMetricCpuUtilizationDaily,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -28,7 +28,7 @@ func tableOciCoreInstanceMetricCpuUtilizationDaily(_ context.Context) *plugin.Ta
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

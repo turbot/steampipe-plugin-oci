@@ -22,7 +22,7 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.AllColumns([]string{"key_id", "management_endpoint", "region"}),
 			Hydrate:    listKmsKeyVersions,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The OCID of the key version.",
@@ -99,12 +99,12 @@ func tableKmsKeyVersion(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

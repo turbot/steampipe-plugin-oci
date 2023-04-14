@@ -20,7 +20,7 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 			ParentHydrate: listUsers,
 			Hydrate:       listIdentityCustomerSecretKeys,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The OCID of the secret key.",
@@ -77,12 +77,12 @@ func tableIdentityCustomerSecretKey(_ context.Context) *plugin.Table {
 			// Standard OCI columns
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

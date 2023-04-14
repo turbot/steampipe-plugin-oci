@@ -15,16 +15,16 @@ import (
 
 func tableBastionSession(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_bastion_session",
-		Description:      "OCI Bastion Session",
+		Name:        "oci_bastion_session",
+		Description: "OCI Bastion Session",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getBastionSession,
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listBastions,
-			Hydrate: 			 listBastionSessions,
-			KeyColumns:    []*plugin.KeyColumn{
+			Hydrate:       listBastionSessions,
+			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "bastion_id",
 					Require: plugin.Optional,
@@ -40,7 +40,7 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The unique identifier (OCID) of the session.",
@@ -124,12 +124,12 @@ func tableBastionSession(_ context.Context) *plugin.Table {
 			// Standard OCI columns
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -162,7 +162,6 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
-
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
@@ -207,7 +206,7 @@ func listBastionSessions(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+// // HYDRATE FUNCTION
 func getBastionSession(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)

@@ -44,7 +44,7 @@ func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementZonalList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "id",
 				Description: "The block volume replica's Oracle ID (OCID).",
@@ -140,12 +140,12 @@ func tableCoreBlockVolumeReplica(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -233,7 +233,7 @@ func listCoreBlockVolumeReplicas(ctx context.Context, d *plugin.QueryData, h *pl
 func getCoreBlockVolumeReplica(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
-	zone :=  d.EqualsQualString(matrixKeyZone)
+	zone := d.EqualsQualString(matrixKeyZone)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getCoreBlockVolumeReplica", "Compartment", compartment, "OCI_Zone", zone)
 

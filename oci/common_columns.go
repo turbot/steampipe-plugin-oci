@@ -15,7 +15,7 @@ const (
 	ColumnDescriptionAkas        = "Array of globally unique identifier strings (also known as) for the resource."
 	ColumnDescriptionTags        = "A map of tags for the resource."
 	ColumnDescriptionTitle       = "Title of the resource."
-	ColumnDescriptionTenantId      = "The OCID of the Tenant in which the resource is located."
+	ColumnDescriptionTenantId    = "The OCID of the Tenant in which the resource is located."
 	ColumnDescriptionTenantName  = "The name of the Tenant in which the resource is located."
 	ColumnDescriptionCompartment = "The OCID of the compartment in Tenant in which the resource is located."
 	ColumnDescriptionRegion      = "The OCI region in which the resource is located."
@@ -38,7 +38,7 @@ func commonColumnsForAllResource(columns []*plugin.Column) []*plugin.Column {
 	}...)
 }
 
-// get columns which are returned with all tables: tenant_id, tenant_name
+// returns the tenant_name common column which is added across all the tables
 func getCommonColumns(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Trace logging to debug cache and execution flows
@@ -53,8 +53,8 @@ func getCommonColumns(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	tenancyData = tenancy.(identity.Tenancy)
-
-	plugin.Logger(ctx).Error("getCommonColumns", "status", "starting", "connection_name", d.Connection.Name, "common_column_data", tenancyData)
+        
+	plugin.Logger(ctx).Debug("getCommonColumns", "status", "finished", "connection_name", d.Connection.Name, "tenancyData", tenancyData)
 
 	return tenancyData, nil
 }

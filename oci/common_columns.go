@@ -16,7 +16,7 @@ const (
 	ColumnDescriptionTags        = "A map of tags for the resource."
 	ColumnDescriptionTitle       = "Title of the resource."
 	ColumnDescriptionTenant      = "The OCID of the Tenant in which the resource is located."
-	ColumnDescriptionTenantName  = "The name of the tenancy."
+	ColumnDescriptionTenantName  = "The name of the Tenant in which the resource is located."
 	ColumnDescriptionCompartment = "The OCID of the compartment in Tenant in which the resource is located."
 	ColumnDescriptionRegion      = "The OCI region in which the resource is located."
 
@@ -42,7 +42,7 @@ func commonColumnsForAllResource(columns []*plugin.Column) []*plugin.Column {
 func getCommonColumns(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 
 	// Trace logging to debug cache and execution flows
-	plugin.Logger(ctx).Trace("getCommonColumns", "status", "starting", "connection_name", d.Connection.Name)
+	plugin.Logger(ctx).Debug("getCommonColumns", "status", "starting", "connection_name", d.Connection.Name)
 
 	var tenancyData identity.Tenancy
 
@@ -65,7 +65,7 @@ func getTenancydataUncached(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
-		plugin.Logger(ctx).Error("getTenancydataUncached", "status", "failed", "connection_name", d.Connection.Name, "client_error", err)
+		plugin.Logger(ctx).Error("getTenancydataUncached", "status", "failed", "connection_name", d.Connection.Name, "session_error", err)
 		return nil, err
 	}
 

@@ -26,7 +26,7 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 				ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the tenancy.",
@@ -101,7 +101,7 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

@@ -1,3 +1,9 @@
+## v0.23.0 [2023-04-14]
+
+_Enhancements_
+
+- Added column `tenant_name` across all the tables. ([#495](https://github.com/turbot/steampipe-plugin-oci/pull/495))
+
 ## v0.22.0 [2023-04-11]
 
 _Dependencies_

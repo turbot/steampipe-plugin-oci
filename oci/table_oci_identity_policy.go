@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -25,6 +26,10 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listPolicy,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -34,6 +39,7 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				},
 			},
 		},
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			// top columns
 			{
@@ -122,7 +128,15 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
 	equalQuals := d.EqualsQuals
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Trace("oci.listPolicy", "Compartment", compartment)
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -132,7 +146,7 @@ func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListPoliciesRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -185,8 +199,14 @@ func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 //// HYDRATE FUNCTIONS
 
 func getPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getPolicy")
+	logger := plugin.Logger(ctx)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci.getPolicy", "Compartment", compartment)
 
+	// Restrict the api call to only root compartment
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 	id := d.EqualsQuals["id"].GetStringValue()
 
 	// Create Session

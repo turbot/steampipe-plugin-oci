@@ -28,6 +28,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"oci_adm_knowledge_base":                                       tableAdmKnowledgeBase(ctx),
+			"oci_adm_vulnerability_audit":                                  tableAdmVulnerabilityAudit(ctx),
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),

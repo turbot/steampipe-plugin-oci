@@ -2,27 +2,28 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
 // // TABLE DEFINITION
-func tableArtifactsContainerImageSignature(_ context.Context) *plugin.Table {
+func tableArtifactContainerImageSignature(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifacts_container_image_signature",
+		Name:             "oci_artifact_container_image_signature",
 		Description:      "OCI Container Image Signature",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactsContainerImageSignature,
+			Hydrate:    getArtifactContainerImageSignature,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactsContainerImageSignatures,
+			Hydrate: listArtifactContainerImageSignatures,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -56,7 +57,7 @@ func tableArtifactsContainerImageSignature(_ context.Context) *plugin.Table {
 				Name:        "created_by",
 				Description: "The id of the user or principal that created the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactsContainerImageSignature,
+				Hydrate:     getArtifactContainerImageSignature,
 			},
 			{
 				Name:        "display_name",
@@ -133,11 +134,11 @@ func tableArtifactsContainerImageSignature(_ context.Context) *plugin.Table {
 }
 
 // // LIST FUNCTION
-func listArtifactsContainerImageSignatures(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listArtifactContainerImageSignatures(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactsContainerImageSignatures", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listArtifactContainerImageSignatures", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -145,13 +146,13 @@ func listArtifactsContainerImageSignatures(ctx context.Context, d *plugin.QueryD
 		return nil, nil
 	}
 	// Create Session
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactsContainerImageSignatureFilters(equalQuals)
+	request := buildArtifactContainerImageSignatureFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -167,7 +168,7 @@ func listArtifactsContainerImageSignatures(ctx context.Context, d *plugin.QueryD
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactsClient.ListContainerImageSignatures(ctx, request)
+		response, err := session.ArtifactClient.ListContainerImageSignatures(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -190,11 +191,11 @@ func listArtifactsContainerImageSignatures(ctx context.Context, d *plugin.QueryD
 }
 
 // // HYDRATE FUNCTION
-func getArtifactsContainerImageSignature(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactContainerImageSignature(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactsContainerImageSignature", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactContainerImageSignature", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -213,9 +214,9 @@ func getArtifactsContainerImageSignature(ctx context.Context, d *plugin.QueryDat
 
 	// Create Session
 
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactsContainerImageSignature", "error_ArtifactsService", err)
+		logger.Error("getArtifactContainerImageSignature", "error_ArtifactService", err)
 		return nil, err
 	}
 
@@ -226,7 +227,7 @@ func getArtifactsContainerImageSignature(ctx context.Context, d *plugin.QueryDat
 		},
 	}
 
-	response, err := session.ArtifactsClient.GetContainerImageSignature(ctx, request)
+	response, err := session.ArtifactClient.GetContainerImageSignature(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +235,7 @@ func getArtifactsContainerImageSignature(ctx context.Context, d *plugin.QueryDat
 }
 
 // Build additional filters
-func buildArtifactsContainerImageSignatureFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImageSignaturesRequest {
+func buildArtifactContainerImageSignatureFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImageSignaturesRequest {
 	request := artifacts.ListContainerImageSignaturesRequest{}
 
 	if equalQuals["compartment_id"] != nil {

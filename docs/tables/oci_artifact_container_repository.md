@@ -1,4 +1,4 @@
-# Table: oci_artifacts_container_repository
+# Table: oci_artifact_container_repository
 
 OCI Artifacts Container Repositories are a service provided by Oracle Cloud Infrastructure (OCI) for storing and managing container images. These repositories allow you to securely store, share, and deploy container images within OCI. They provide a central location to store and manage your container images, enabling you to easily distribute and deploy them across your OCI environment. OCI Artifacts Container Repositories support popular container image formats and can be integrated with other OCI services such as Oracle Container Engine for Kubernetes (OKE) for seamless container image deployment.
 
@@ -19,7 +19,7 @@ select
   time_last_pushed,
   lifecycle_state as state
 from
-  oci_artifacts_container_repository;
+  oci_artifact_container_repository;
 ```
 
 ### List repositories that are not public
@@ -33,7 +33,7 @@ select
   is_public,
   layer_count
 from
-  oci_artifacts_container_repository
+  oci_artifact_container_repository
 where
   not is_public;
 ```
@@ -49,7 +49,7 @@ select
   layer_count,
   layers_size_in_bytes
 from
-  oci_artifacts_container_repository
+  oci_artifact_container_repository
 where
   is_immutable;
 ```
@@ -64,7 +64,7 @@ select
   created_by,
   lifecycle_state
 from
-  oci_artifacts_container_repository
+  oci_artifact_container_repository
 where
   time_created >= now() - interval '30' day;
 ```
@@ -77,7 +77,7 @@ select
   layer_count,
   layers_size_in_bytes
 from
-  oci_artifacts_container_repository;
+  oci_artifact_container_repository;
 ```
 
 ### List top 5 billable repositories
@@ -89,7 +89,7 @@ select
   is_public,
   billable_size_in_g_bs
 from
-  oci_artifacts_container_repository
+  oci_artifact_container_repository
 order by
   billable_size_in_g_bs desc limit 5;
 ```
@@ -104,7 +104,7 @@ select
   created_by,
   lifecycle_state
 from
-  oci_artifacts_container_repository
+  oci_artifact_container_repository
 where
   lifecycle_state = 'AVAILABLE';
 ```

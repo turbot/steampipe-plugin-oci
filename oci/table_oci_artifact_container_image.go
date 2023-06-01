@@ -12,17 +12,17 @@ import (
 )
 
 // // TABLE DEFINITION
-func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
+func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifacts_container_image",
+		Name:             "oci_artifact_container_image",
 		Description:      "OCI Container Image",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactsContainerImage,
+			Hydrate:    getArtifactContainerImage,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactsContainerImages,
+			Hydrate: listArtifactContainerImages,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -56,7 +56,7 @@ func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
 				Name:        "created_by",
 				Description: "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user or principal that created the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "digest",
@@ -77,13 +77,13 @@ func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
 				Name:        "layers",
 				Description: "Layers of which the image is composed, ordered by the layer digest.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "layers_size_in_bytes",
 				Description: "The total size of the container image layers in bytes.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "lifecycle_state",
@@ -94,13 +94,13 @@ func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
 				Name:        "manifest_size_in_bytes",
 				Description: "The size of the container image manifest in bytes.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "pull_count",
 				Description: "Total number of pulls.",
 				Type:        proto.ColumnType_INT,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "repository_id",
@@ -116,13 +116,13 @@ func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
 				Name:        "versions",
 				Description: "The versions associated with this image.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 			},
 			{
 				Name:        "time_last_pulled",
 				Description: "An RFC 3339 timestamp indicating when the image was last pulled.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getArtifactsContainerImage,
+				Hydrate:     getArtifactContainerImage,
 				Transform:   transform.FromField("TimeLastPulled.Time"),
 			},
 			{
@@ -165,11 +165,11 @@ func tableArtifactsContainerImage(_ context.Context) *plugin.Table {
 }
 
 // // LIST FUNCTION
-func listArtifactsContainerImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactsContainerImages", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listArtifactContainerImages", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -177,13 +177,13 @@ func listArtifactsContainerImages(ctx context.Context, d *plugin.QueryData, _ *p
 		return nil, nil
 	}
 	// Create Session
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactsContainerImageFilters(equalQuals)
+	request := buildArtifactContainerImageFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -199,7 +199,7 @@ func listArtifactsContainerImages(ctx context.Context, d *plugin.QueryData, _ *p
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactsClient.ListContainerImages(ctx, request)
+		response, err := session.ArtifactClient.ListContainerImages(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -222,11 +222,11 @@ func listArtifactsContainerImages(ctx context.Context, d *plugin.QueryData, _ *p
 }
 
 // // HYDRATE FUNCTION
-func getArtifactsContainerImage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactsContainerImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactContainerImage", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -245,9 +245,9 @@ func getArtifactsContainerImage(ctx context.Context, d *plugin.QueryData, h *plu
 
 	// Create Session
 
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactsContainerImage", "error_ArtifactsService", err)
+		logger.Error("getArtifactContainerImage", "error_ArtifactService", err)
 		return nil, err
 	}
 
@@ -258,7 +258,7 @@ func getArtifactsContainerImage(ctx context.Context, d *plugin.QueryData, h *plu
 		},
 	}
 
-	response, err := session.ArtifactsClient.GetContainerImage(ctx, request)
+	response, err := session.ArtifactClient.GetContainerImage(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +266,7 @@ func getArtifactsContainerImage(ctx context.Context, d *plugin.QueryData, h *plu
 }
 
 // Build additional filters
-func buildArtifactsContainerImageFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImagesRequest {
+func buildArtifactContainerImageFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImagesRequest {
 	request := artifacts.ListContainerImagesRequest{}
 
 	if equalQuals["compartment_id"] != nil {

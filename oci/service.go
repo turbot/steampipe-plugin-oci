@@ -54,7 +54,7 @@ type session struct {
 	TenancyID                      string
 	AnalyticsClient                analytics.AnalyticsClient
 	ApiGatewayClient               apigateway.ApiGatewayClient
-	ArtifactsClient                artifacts.ArtifactsClient
+	ArtifactClient                artifacts.ArtifactsClient
 	AuditClient                    audit.AuditClient
 	AutoScalingClient              autoscaling.AutoScalingClient
 	BastionClient                  bastion.BastionClient
@@ -136,8 +136,8 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 	return sess, nil
 }
 
-// artifactsService returns the service client for OCI Artifact service
-func artifactsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+// artifactService returns the service client for OCI Artifact service
+func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
 	// have we already created and cached the service?
@@ -171,7 +171,7 @@ func artifactsService(ctx context.Context, d *plugin.QueryData, region string) (
 
 	sess := &session{
 		TenancyID:       tenantId,
-		ArtifactsClient: client,
+		ArtifactClient: client,
 	}
 
 	// save session in cache

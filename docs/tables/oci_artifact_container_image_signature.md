@@ -1,4 +1,4 @@
-# Table: oci_artifacts_container_image_signature
+# Table: oci_artifact_container_image_signature
 
 OCI artifacts container image signature.
 
@@ -18,5 +18,5 @@ select
   signature,
   signing_algorithm
 from
-  oci_artifacts_container_image_signature;
+  oci_artifact_container_image_signature;
 ```

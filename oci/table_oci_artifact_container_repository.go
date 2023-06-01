@@ -13,17 +13,17 @@ import (
 )
 
 // // TABLE DEFINITION
-func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
+func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifacts_container_repository",
+		Name:             "oci_artifact_container_repository",
 		Description:      "OCI Container Repository",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactsContainerRepository,
+			Hydrate:    getArtifactContainerRepository,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactsContainerRepositories,
+			Hydrate: listArtifactContainerRepositories,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -59,7 +59,7 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 				Name:        "created_by",
 				Description: "The id of the user or principal that created the resource.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactsContainerRepository,
+				Hydrate:     getArtifactContainerRepository,
 			},
 			{
 				Name:        "time_created",
@@ -76,7 +76,7 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 				Name:        "is_immutable",
 				Description: "Whether the repository is immutable. Images cannot be overwritten in an immutable repository.",
 				Type:        proto.ColumnType_BOOL,
-				Hydrate:     getArtifactsContainerRepository,
+				Hydrate:     getArtifactContainerRepository,
 			},
 			{
 				Name:        "is_public",
@@ -107,7 +107,7 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 				Name:        "time_last_pushed",
 				Description: "An RFC 3339 timestamp indicating when an image was last pushed to the repository.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getArtifactsContainerRepository,
+				Hydrate:     getArtifactContainerRepository,
 				Transform:   transform.FromField("TimeLastPushed.Time"),
 			},
 
@@ -140,11 +140,11 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 
 //// LIST FUNCTION
 
-func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listArtifactContainerRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactsContainerRepositories", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listArtifactContainerRepositories", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -153,14 +153,14 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 	}
 
 	// Create Session
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifacts_container_repository.listArtifactsContainerRepositories", "connection_error", err)
+		logger.Error("oci_artifact_container_repository.listArtifactContainerRepositories", "connection_error", err)
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactsContainerRepositoryFilters(equalQuals)
+	request := buildArtifactContainerRepositoryFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -176,9 +176,9 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactsClient.ListContainerRepositories(ctx, request)
+		response, err := session.ArtifactClient.ListContainerRepositories(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifacts_container_repository.listArtifactsContainerRepositories", "api_error", err)
+			logger.Error("oci_artifact_container_repository.listArtifactContainerRepositories", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -201,11 +201,11 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 
 //// HYDRATE FUNCTION
 
-func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactContainerRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactsContainerRepository", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactContainerRepository", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -224,9 +224,9 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 
 	// Create Session
 
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifacts_container_repository.getArtifactsContainerRepository", "connection_error", err)
+		logger.Error("oci_artifact_container_repository.getArtifactContainerRepository", "connection_error", err)
 		return nil, err
 	}
 
@@ -237,16 +237,16 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 		},
 	}
 
-	response, err := session.ArtifactsClient.GetContainerRepository(ctx, request)
+	response, err := session.ArtifactClient.GetContainerRepository(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifacts_container_repository.getArtifactsContainerRepository", "api_error", err)
+		logger.Error("oci_artifact_container_repository.getArtifactContainerRepository", "api_error", err)
 		return nil, err
 	}
 	return response.ContainerRepository, nil
 }
 
 // Build additional filters
-func buildArtifactsContainerRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerRepositoriesRequest {
+func buildArtifactContainerRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerRepositoriesRequest {
 	request := artifacts.ListContainerRepositoriesRequest{}
 
 	if equalQuals["display_name"] != nil {

@@ -1,4 +1,4 @@
-# Table: oci_artifacts_generic_artifact
+# Table: oci_artifact_generic_artifact
 
 OCI container artifact information.
 
@@ -17,5 +17,5 @@ select
   size_in_bytes,
   lifecycle_state as state
 from
-  oci_artifacts_generic_artifact;
+  oci_artifact_generic_artifact;
 ```

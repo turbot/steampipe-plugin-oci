@@ -13,17 +13,17 @@ import (
 )
 
 // // TABLE DEFINITION
-func tableArtifactsRepository(_ context.Context) *plugin.Table {
+func tableArtifactRepository(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifacts_repository",
+		Name:             "oci_artifact_repository",
 		Description:      "OCI Artifact Repository",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactsRepository,
+			Hydrate:    getArtifactRepository,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactsRepositories,
+			Hydrate: listArtifactRepositories,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -92,7 +92,7 @@ func tableArtifactsRepository(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(artifactsRepositoryTags),
+				Transform:   transform.From(artifactRepositoryTags),
 			},
 			{
 				Name:        "title",
@@ -120,11 +120,11 @@ func tableArtifactsRepository(_ context.Context) *plugin.Table {
 }
 
 // // LIST FUNCTION
-func listArtifactsRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listArtifactRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifacts_repository.listArtifactsRepositories", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifact_repository.listArtifactRepositories", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -132,14 +132,14 @@ func listArtifactsRepositories(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, nil
 	}
 	// Create Session
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifacts_repository.listArtifactsRepositories", "connection_error", err)
+		logger.Error("oci_artifact_repository.listArtifactRepositories", "connection_error", err)
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactsRepositoryFilters(equalQuals)
+	request := buildArtifactRepositoryFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -155,9 +155,9 @@ func listArtifactsRepositories(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactsClient.ListRepositories(ctx, request)
+		response, err := session.ArtifactClient.ListRepositories(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifacts_repository.listArtifactsRepositories", "api_error", err)
+			logger.Error("oci_artifact_repository.listArtifactRepositories", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -180,11 +180,11 @@ func listArtifactsRepositories(ctx context.Context, d *plugin.QueryData, _ *plug
 
 //// HYDRATE FUNCTION
 
-func getArtifactsRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactsRepository", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactRepository", "Compartment", compartment, "OCI_REGION", region)
 
 	id := d.EqualsQuals["id"].GetStringValue()
 
@@ -199,9 +199,9 @@ func getArtifactsRepository(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// Create Session
 
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifacts_repository.getArtifactsRepository", "connection_error", err)
+		logger.Error("oci_artifact_repository.getArtifactRepository", "connection_error", err)
 		return nil, err
 	}
 
@@ -212,16 +212,16 @@ func getArtifactsRepository(ctx context.Context, d *plugin.QueryData, h *plugin.
 		},
 	}
 
-	response, err := session.ArtifactsClient.GetRepository(ctx, request)
+	response, err := session.ArtifactClient.GetRepository(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifacts_repository.getArtifactsRepository", "api_error", err)
+		logger.Error("oci_artifact_repository.getArtifactRepository", "api_error", err)
 		return nil, err
 	}
 	return response.Repository, nil
 }
 
 // // TRANSFORM FUNCTION
-func artifactsRepositoryTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func artifactRepositoryTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {
@@ -257,7 +257,7 @@ func artifactsRepositoryTags(_ context.Context, d *transform.TransformData) (int
 }
 
 // Build additional filters
-func buildArtifactsRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListRepositoriesRequest {
+func buildArtifactRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListRepositoriesRequest {
 	request := artifacts.ListRepositoriesRequest{}
 
 	if equalQuals["compartment_id"] != nil {

@@ -1,4 +1,4 @@
-# Table: oci_artifacts_repository
+# Table: oci_artifact_repository
 
 OCI Artifact Repository is a service provided by Oracle Cloud Infrastructure (OCI) that allows you to store and manage various types of artifacts, such as software packages, container images, and other binary files.
 
@@ -14,7 +14,7 @@ select
   description,
   lifecycle_state as state
 from
-  oci_artifacts_repository;
+  oci_artifact_repository;
 ```
 
 ### List immutable repositories
@@ -28,7 +28,7 @@ select
   description,
   lifecycle_state
 from
-  oci_artifacts_repository
+  oci_artifact_repository
 where
   is_immutable;
 ```
@@ -44,7 +44,7 @@ select
   description,
   lifecycle_state
 from
-  oci_artifacts_repository
+  oci_artifact_repository
 where
   time_created >= now() - interval '30' day;
 ```
@@ -58,7 +58,7 @@ select
   time_created,
   lifecycle_state
 from
-  oci_artifacts_repository
+  oci_artifact_repository
 where
   lifecycle_state = 'AVAILABLE';
 ```

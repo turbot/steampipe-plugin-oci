@@ -1,4 +1,4 @@
-# Table: oci_artifacts_container_image
+# Table: oci_artifact_container_image
 
 OCI artifacts container image.
 
@@ -23,5 +23,5 @@ select
   version,
   lifecycle_state as state
 from
-  oci_artifacts_container_image;
+  oci_artifact_container_image;
 ```

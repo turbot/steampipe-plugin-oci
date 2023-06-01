@@ -12,17 +12,17 @@ import (
 )
 
 // // TABLE DEFINITION
-func tableArtifactsGenericArtifact(_ context.Context) *plugin.Table {
+func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifacts_generic_artifact",
+		Name:             "oci_artifact_generic_artifact",
 		Description:      "OCI Generic Artifact",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactsGenericArtifact,
+			Hydrate:    getArtifactGenericArtifact,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactsGenericArtifacts,
+			Hydrate: listArtifactGenericArtifact,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -122,7 +122,7 @@ func tableArtifactsGenericArtifact(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(artifactsGenericArtifactTags),
+				Transform:   transform.From(artifactGenericArtifactTags),
 			},
 			{
 				Name:        "title",
@@ -150,11 +150,11 @@ func tableArtifactsGenericArtifact(_ context.Context) *plugin.Table {
 }
 
 // // LIST FUNCTION
-func listArtifactsGenericArtifacts(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+func listArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactsGenericArtifacts", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("listArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -162,13 +162,13 @@ func listArtifactsGenericArtifacts(ctx context.Context, d *plugin.QueryData, _ *
 		return nil, nil
 	}
 	// Create Session
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactsGenericArtifactFilters(equalQuals)
+	request := buildArtifactGenericArtifactFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -184,7 +184,7 @@ func listArtifactsGenericArtifacts(ctx context.Context, d *plugin.QueryData, _ *
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactsClient.ListGenericArtifacts(ctx, request)
+		response, err := session.ArtifactClient.ListGenericArtifacts(ctx, request)
 		if err != nil {
 			return nil, err
 		}
@@ -207,11 +207,11 @@ func listArtifactsGenericArtifacts(ctx context.Context, d *plugin.QueryData, _ *
 }
 
 // // HYDRATE FUNCTION
-func getArtifactsGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactsGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -230,9 +230,9 @@ func getArtifactsGenericArtifact(ctx context.Context, d *plugin.QueryData, h *pl
 
 	// Create Session
 
-	session, err := artifactsService(ctx, d, region)
+	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactsGenericArtifact", "error_ArtifactsService", err)
+		logger.Error("getArtifactGenericArtifact", "error_Artifactervice", err)
 		return nil, err
 	}
 
@@ -243,7 +243,7 @@ func getArtifactsGenericArtifact(ctx context.Context, d *plugin.QueryData, h *pl
 		},
 	}
 
-	response, err := session.ArtifactsClient.GetGenericArtifact(ctx, request)
+	response, err := session.ArtifactClient.GetGenericArtifact(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +251,7 @@ func getArtifactsGenericArtifact(ctx context.Context, d *plugin.QueryData, h *pl
 }
 
 // // TRANSFORM FUNCTION
-func artifactsGenericArtifactTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func artifactGenericArtifactTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {
@@ -287,7 +287,7 @@ func artifactsGenericArtifactTags(_ context.Context, d *transform.TransformData)
 }
 
 // Build additional filters
-func buildArtifactsGenericArtifactFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListGenericArtifactsRequest {
+func buildArtifactGenericArtifactFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListGenericArtifactsRequest {
 	request := artifacts.ListGenericArtifactsRequest{}
 
 	if equalQuals["compartment_id"] != nil {

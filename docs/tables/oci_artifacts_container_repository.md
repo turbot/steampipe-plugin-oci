@@ -22,7 +22,7 @@ from
   oci_artifacts_container_repository;
 ```
 
-### List repositories that are not publlic
+### List repositories that are not public
 
 ```sql
 select
@@ -66,7 +66,7 @@ select
 from
   oci_artifacts_container_repository
 where
-  time_created >= now() - interval 30 'day';
+  time_created >= now() - interval '30' day;
 ```
 
 ### Get layer details of repositories

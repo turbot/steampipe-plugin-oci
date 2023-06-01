@@ -34,6 +34,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_artifacts_container_image_signature":                      tableArtifactsContainerImageSignature(ctx),
 			"oci_artifacts_container_repository":                           tableArtifactsContainerRepository(ctx),
 			"oci_artifacts_generic_artifact":                               tableArtifactsGenericArtifact(ctx),
+			"oci_artifacts_repository":                                     tableArtifactsRepository(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),
 			"oci_bastion_bastion":                                          tableBastion(ctx),
 			"oci_bastion_session":                                          tableBastionSession(ctx),

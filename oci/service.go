@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/aianomalydetection"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
 	"github.com/oracle/oci-go-sdk/v65/audit"
@@ -51,6 +52,7 @@ import (
 
 type session struct {
 	TenancyID                      string
+	AnomalyDetectionClient         aianomalydetection.AnomalyDetectionClient
 	AnalyticsClient                analytics.AnalyticsClient
 	ApiGatewayClient               apigateway.ApiGatewayClient
 	AuditClient                    audit.AuditClient
@@ -88,6 +90,48 @@ type session struct {
 	StreamAdminClient              streaming.StreamAdminClient
 	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
+}
+
+// aiAnomalyDetectionService returns the service client for OCI AiAnomalyDetection service
+func aiAnomalyDetectionService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("aianomalydetection-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("aiAnomalyDetectionService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get AiAnomalyDetection service client
+	client, err := aianomalydetection.NewAnomalyDetectionClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:              tenantId,
+		AnomalyDetectionClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // apiGatewayService returns the service client for OCI ApiGateway service
@@ -1338,7 +1382,6 @@ func queueService(ctx context.Context, d *plugin.QueryData, region string) (*ses
 	return sess, nil
 }
 
-
 // resourceSearchService returns the service client for OCI Resource Search Service
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1564,8 +1607,8 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 	}
 
 	sess := &session{
-		TenancyID:       tenantId,
-		BastionClient:   client,
+		TenancyID:     tenantId,
+		BastionClient: client,
 	}
 
 	// save session in cache

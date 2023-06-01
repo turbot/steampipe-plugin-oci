@@ -5,6 +5,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -19,7 +20,14 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listRegions,
 			Hydrate:       lisAvailabilityDomains,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
@@ -65,7 +73,13 @@ type availabilityDomainInfo struct {
 //// LIST FUNCTION
 
 func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Debug("lisAvailabilityDomains")
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	equalQuals := d.EqualsQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	region := *h.Item.(ociRegion).Name
 	status := h.Item.(ociRegion).Status
@@ -83,7 +97,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListAvailabilityDomainsRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},

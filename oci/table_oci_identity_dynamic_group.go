@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -25,6 +26,10 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 			Hydrate: listIdentityDynamicGroups,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -34,6 +39,7 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 				},
 			},
 		},
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
@@ -114,7 +120,13 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	equalQuals := d.EqualsQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -124,7 +136,7 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListDynamicGroupsRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -177,12 +189,12 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 //// HYDRATE FUNCTIONS
 
 func getIdentityDynamicGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getIdentityDynamicGroup")
-
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	// handle empty dynamic group id in get call
-	if id == "" {
+	// Restrict the api call to only root compartment
+	// Handle empty dynamic group id in get call
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || id == "" {
 		return nil, nil
 	}
 

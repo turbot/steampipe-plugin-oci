@@ -5,6 +5,7 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
+	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -18,7 +19,14 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 		Description: "OCI Identity Authentication Policy",
 		List: &plugin.ListConfig{
 			Hydrate: listAuthenticationPolicy,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			// Password Policy
 			{
@@ -80,6 +88,14 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	equalQuals := d.EqualsQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
@@ -88,7 +104,7 @@ func listAuthenticationPolicy(ctx context.Context, d *plugin.QueryData, _ *plugi
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.GetAuthenticationPolicyRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},

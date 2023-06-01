@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -25,6 +26,10 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 			Hydrate: listGroup,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -34,6 +39,7 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 				},
 			},
 		},
+		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
@@ -106,7 +112,13 @@ func tableIdentityGroup(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	equalQuals := d.EqualsQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -116,7 +128,7 @@ func listGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListGroupsRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -169,9 +181,14 @@ func listGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 //// HYDRATE FUNCTIONS
 
 func getGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getGroup")
-
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	id := d.EqualsQuals["id"].GetStringValue()
+
+	// Restrict the api call to only root compartment
+	// Handle empty dynamic group id in get call
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || id == "" {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)

@@ -46,12 +46,6 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "created_by",
-				Description: "The id of the user or principal that created the resource.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactsContainerRepository,
-			},
-			{
 				Name:        "display_name",
 				Description: "The container repository name.",
 				Type:        proto.ColumnType_STRING,
@@ -60,6 +54,18 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the container repository.",
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "created_by",
+				Description: "The id of the user or principal that created the resource.",
+				Type:        proto.ColumnType_STRING,
+				Hydrate:     getArtifactsContainerRepository,
+			},
+			{
+				Name:        "time_created",
+				Description: "Time that Container Repository was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "image_count",
@@ -104,12 +110,6 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 				Hydrate:     getArtifactsContainerRepository,
 				Transform:   transform.FromField("TimeLastPushed.Time"),
 			},
-			{
-				Name:        "time_created",
-				Description: "Time that Container Repository was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
 
 			// Standard Steampipe columns
 			{
@@ -138,7 +138,8 @@ func tableArtifactsContainerRepository(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -150,9 +151,11 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
+
 	// Create Session
 	session, err := artifactsService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_artifacts_container_repository.listArtifactsContainerRepositories", "connection_error", err)
 		return nil, err
 	}
 
@@ -175,6 +178,7 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 	for pagesLeft {
 		response, err := session.ArtifactsClient.ListContainerRepositories(ctx, request)
 		if err != nil {
+			logger.Error("oci_artifacts_container_repository.listArtifactsContainerRepositories", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -195,7 +199,8 @@ func listArtifactsContainerRepositories(ctx context.Context, d *plugin.QueryData
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
+
 func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -212,7 +217,7 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 		}
 	}
 
-	// handle empty id in get call
+	// handle empty ID in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -221,7 +226,7 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 
 	session, err := artifactsService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactsContainerRepository", "error_ArtifactsService", err)
+		logger.Error("oci_artifacts_container_repository.getArtifactsContainerRepository", "connection_error", err)
 		return nil, err
 	}
 
@@ -234,6 +239,7 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 
 	response, err := session.ArtifactsClient.GetContainerRepository(ctx, request)
 	if err != nil {
+		logger.Error("oci_artifacts_container_repository.getArtifactsContainerRepository", "api_error", err)
 		return nil, err
 	}
 	return response.ContainerRepository, nil
@@ -242,10 +248,6 @@ func getArtifactsContainerRepository(ctx context.Context, d *plugin.QueryData, h
 // Build additional filters
 func buildArtifactsContainerRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerRepositoriesRequest {
 	request := artifacts.ListContainerRepositoriesRequest{}
-
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())

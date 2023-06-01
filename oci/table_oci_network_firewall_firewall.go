@@ -91,7 +91,7 @@ func tableNetworkFirewall(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "network_firewall_policy_id",
-				Description: "The OCID of the Network Firewall.",
+				Description: "The OCID of the Network Firewall Policy.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

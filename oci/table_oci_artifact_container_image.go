@@ -2,16 +2,18 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
+
 func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_artifact_container_image",
@@ -53,17 +55,6 @@ func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "created_by",
-				Description: "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user or principal that created the resource.",
-				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactContainerImage,
-			},
-			{
-				Name:        "digest",
-				Description: "The container image digest.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "display_name",
 				Description: "The repository name and the most recent version associated with the image.",
 				Type:        proto.ColumnType_STRING,
@@ -74,9 +65,20 @@ func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "layers",
-				Description: "Layers of which the image is composed, ordered by the layer digest.",
-				Type:        proto.ColumnType_JSON,
+				Name:        "digest",
+				Description: "The container image digest.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "Time that Container Image was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "created_by",
+				Description: "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the user or principal that created the resource.",
+				Type:        proto.ColumnType_STRING,
 				Hydrate:     getArtifactContainerImage,
 			},
 			{
@@ -103,6 +105,13 @@ func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 				Hydrate:     getArtifactContainerImage,
 			},
 			{
+				Name:        "time_last_pulled",
+				Description: "An RFC 3339 timestamp indicating when the image was last pulled.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Hydrate:     getArtifactContainerImage,
+				Transform:   transform.FromField("TimeLastPulled.Time"),
+			},
+			{
 				Name:        "repository_id",
 				Description: "The OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm) of the container repository.",
 				Type:        proto.ColumnType_STRING,
@@ -113,28 +122,21 @@ func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "versions",
-				Description: "The versions associated with this image.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getArtifactContainerImage,
-			},
-			{
-				Name:        "time_last_pulled",
-				Description: "An RFC 3339 timestamp indicating when the image was last pulled.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getArtifactContainerImage,
-				Transform:   transform.FromField("TimeLastPulled.Time"),
-			},
-			{
 				Name:        "version",
 				Description: "The most recent version associated with this image.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "time_created",
-				Description: "Time that Container Image was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
+				Name:        "layers",
+				Description: "Layers of which the image is composed, ordered by the layer digest.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getArtifactContainerImage,
+			},
+			{
+				Name:        "versions",
+				Description: "The versions associated with this image.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getArtifactContainerImage,
 			},
 
 			// Standard Steampipe columns
@@ -164,12 +166,13 @@ func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactContainerImages", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifact_container_image.listArtifactContainerImages", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -179,6 +182,7 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_artifact_container_image.listArtifactContainerImages", "connection_error", err)
 		return nil, err
 	}
 
@@ -201,6 +205,7 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.ArtifactClient.ListContainerImages(ctx, request)
 		if err != nil {
+			logger.Error("oci_artifact_container_image.listArtifactContainerImages", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -221,12 +226,13 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
+
 func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactContainerImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifact_container_image.getArtifactContainerImage", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -247,7 +253,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactContainerImage", "error_ArtifactService", err)
+		logger.Error("oci_artifact_container_image.getArtifactContainerImage", "connection_error", err)
 		return nil, err
 	}
 
@@ -260,6 +266,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 
 	response, err := session.ArtifactClient.GetContainerImage(ctx, request)
 	if err != nil {
+		logger.Error("oci_artifact_container_image.getArtifactContainerImage", "api_error", err)
 		return nil, err
 	}
 	return response.ContainerImage, nil

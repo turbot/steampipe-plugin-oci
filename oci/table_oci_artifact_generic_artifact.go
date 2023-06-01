@@ -2,13 +2,14 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
 // // TABLE DEFINITION
@@ -22,22 +23,19 @@ func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 			Hydrate:    getArtifactGenericArtifact,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactGenericArtifact,
+			ParentHydrate: listArtifactRepositories,
+			Hydrate:       listArtifactGenericArtifacts,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
-					Require: plugin.Required,
-				},
-				{
-					Name:    "repository_id",
-					Require: plugin.Required,
-				},
-				{
-					Name:    "id",
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "display_name",
+					Name:    "repository_id",
+					Require: plugin.Optional,
+				},
+				{
+					Name:    "name",
 					Require: plugin.Optional,
 				},
 				{
@@ -60,15 +58,28 @@ func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
+			// The column 'display_name' has been renamed to 'name' in this table due to its relationship with the table 'oci_artifact_repository'.
+			// The table 'oci_artifact_repository' has an optional qualifier called 'display_name' in its list configuration.
+			// Additionally, this table has a property named 'DisplayName' which can also be used as an optional key qualifier.
+			// When running a query like 'select * from oci_artifact_generic_artifact where display_name = 'test/artifact:1'', the value of 'display_name' is passed as a parameter to the 'listArtifactRepositories' API of the 'oci_artifact_repository' table, which is its parent table.
+			// However, this results in an error when the 'listArtifactRepositories' function is called, with the following details: Error: Error returned by Artifacts Service. Http Status Code: 400. Error Code: BadRequest. Opc request id: c1f7fce0f00b215e711b20e9c28c58c6/2bfb17a9e4750c67c6b384c1. Message: Repository name invalid: 'test/artifact:1'.
+			// The operation name associated with this error is 'ListRepositories'.
+			{
+				Name:        "name",
+				Description: "The artifact name with the format of `<artifact-path>:<artifact-version>`. The artifact name is truncated to a maximum length of 255.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
+			},
 			{
 				Name:        "id",
 				Description: "The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the artifact.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "display_name",
-				Description: "The artifact name with the format of `<artifact-path>:<artifact-version>`. The artifact name is truncated to a maximum length of 255.",
-				Type:        proto.ColumnType_STRING,
+				Name:        "time_created",
+				Description: "Time that Generic Artifact was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
 				Name:        "repository_id",
@@ -110,12 +121,6 @@ func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 				Description: "Defined tags for this resource. Each key is predefined and scoped to a",
 				Type:        proto.ColumnType_JSON,
 			},
-			{
-				Name:        "time_created",
-				Description: "Time that Generic Artifact was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
-			},
 
 			// Standard Steampipe columns
 			{
@@ -149,27 +154,37 @@ func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
-func listArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+//// LIST FUNCTION
+
+func listArtifactGenericArtifacts(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
+	repository := h.Item.(artifacts.RepositorySummary)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
+
+	// Return nil, if given repository_id doesn't match
+	if equalQuals["repository_id"] != nil && *repository.GetId() != equalQuals["repository_id"].GetStringValue() {
+		return nil, nil
+	}
+
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "connection_error", err)
 		return nil, err
 	}
 
 	//Build request parameters
 	request := buildArtifactGenericArtifactFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
+	request.RepositoryId = repository.GetId()
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -186,6 +201,7 @@ func listArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.ArtifactClient.ListGenericArtifacts(ctx, request)
 		if err != nil {
+			logger.Error("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -206,21 +222,17 @@ func listArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, _ *pl
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
+
 func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifact_generic_artifact.getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
 
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(artifacts.GenericArtifactSummary).Id
-	} else {
-		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-			return nil, nil
-		}
+	id := d.EqualsQuals["id"].GetStringValue()
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
 	}
 
 	// handle empty id in get call
@@ -232,7 +244,7 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("getArtifactGenericArtifact", "error_Artifactervice", err)
+		logger.Error("oci_artifact_generic_artifact.getArtifactGenericArtifact", "connection_error", err)
 		return nil, err
 	}
 
@@ -245,12 +257,14 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 
 	response, err := session.ArtifactClient.GetGenericArtifact(ctx, request)
 	if err != nil {
+		logger.Error("oci_artifact_generic_artifact.getArtifactGenericArtifact", "api_error", err)
 		return nil, err
 	}
 	return response.GenericArtifact, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTION
+
 func artifactGenericArtifactTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -290,20 +304,8 @@ func artifactGenericArtifactTags(_ context.Context, d *transform.TransformData) 
 func buildArtifactGenericArtifactFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListGenericArtifactsRequest {
 	request := artifacts.ListGenericArtifactsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
-
-	if equalQuals["repository_id"] != nil {
-		request.RepositoryId = types.String(equalQuals["repository_id"].GetStringValue())
-	}
-
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-	}
-
-	if equalQuals["display_name"] != nil {
-		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
+	if equalQuals["name"] != nil {
+		request.DisplayName = types.String(equalQuals["name"].GetStringValue())
 	}
 
 	if equalQuals["artifact_path"] != nil {

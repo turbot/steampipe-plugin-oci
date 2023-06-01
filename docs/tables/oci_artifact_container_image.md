@@ -117,7 +117,7 @@ where
   time_created >= now() - interval '30' day;
 ```
 
-### Get total number of pull count of images
+### Retrive the total number of pull count for images
 
 ```sql
 select

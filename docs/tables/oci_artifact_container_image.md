@@ -1,6 +1,6 @@
 # Table: oci_artifact_container_image
 
-OCI artifacts container image.
+OCI artifact container image is a standardized format for packaging and distributing software applications, libraries, and dependencies. It is based on the Open Container Initiative (OCI) specifications and provides a consistent way to store and share container images across different container runtimes and platforms. OCI artifact container images typically include the application code, runtime environment, system libraries, and other dependencies needed to run the software. They are used to create and deploy containerized applications in cloud environments and container orchestration platforms.
 
 ## Examples
 

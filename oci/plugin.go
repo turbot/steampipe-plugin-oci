@@ -30,6 +30,10 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
+			"oci_artifacts_container_image":                                tableArtifactsContainerImage(ctx),
+			"oci_artifacts_container_image_signature":                      tableArtifactsContainerImageSignature(ctx),
+			"oci_artifacts_container_repository":                           tableArtifactsContainerRepository(ctx),
+			"oci_artifacts_generic_artifact":                               tableArtifactsGenericArtifact(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),
 			"oci_bastion_bastion":                                          tableBastion(ctx),
 			"oci_bastion_session":                                          tableBastionSession(ctx),

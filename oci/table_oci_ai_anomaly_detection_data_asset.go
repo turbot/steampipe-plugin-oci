@@ -12,11 +12,12 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
+
 func tableAiAnomalyDetectionDataAsset(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_data_asset",
-		Description:      "OCI Data Asset",
+		Description:      "OCI Anomaly Detection Data Asset",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -61,6 +62,12 @@ func tableAiAnomalyDetectionDataAsset(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "time_created",
+				Description: "Time that Data Asset was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "project_id",
 				Description: "The Unique project id which is created at project creation that is immutable on creation.",
 				Type:        proto.ColumnType_STRING,
@@ -84,12 +91,6 @@ func tableAiAnomalyDetectionDataAsset(_ context.Context) *plugin.Table {
 				Name:        "defined_tags",
 				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that Data Asset was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// Standard Steampipe columns
@@ -124,12 +125,13 @@ func tableAiAnomalyDetectionDataAsset(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listAiAnomalyDetectionDataAssets(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listAiAnomalyDetectionDataAssets", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_data_asset.listAiAnomalyDetectionDataAssets", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -139,6 +141,7 @@ func listAiAnomalyDetectionDataAssets(ctx context.Context, d *plugin.QueryData, 
 	// Create Session
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_data_asset.listAiAnomalyDetectionDataAssets", "connection_error", err)
 		return nil, err
 	}
 
@@ -161,6 +164,7 @@ func listAiAnomalyDetectionDataAssets(ctx context.Context, d *plugin.QueryData, 
 	for pagesLeft {
 		response, err := session.AnomalyDetectionClient.ListDataAssets(ctx, request)
 		if err != nil {
+			logger.Error("oci_ai_anomaly_detection_data_asset.listAiAnomalyDetectionDataAssets", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -181,12 +185,13 @@ func listAiAnomalyDetectionDataAssets(ctx context.Context, d *plugin.QueryData, 
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
+
 func getAiAnomalyDetectionDataAsset(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getAiAnomalyDetectionDataAsset", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_data_asset.getAiAnomalyDetectionDataAsset", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -207,7 +212,7 @@ func getAiAnomalyDetectionDataAsset(ctx context.Context, d *plugin.QueryData, h 
 
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAiAnomalyDetectionDataAsset", "error_AiAnomalyDetectionService", err)
+		logger.Error("oci_ai_anomaly_detection_data_asset.getAiAnomalyDetectionDataAsset", "connection_error", err)
 		return nil, err
 	}
 
@@ -220,12 +225,14 @@ func getAiAnomalyDetectionDataAsset(ctx context.Context, d *plugin.QueryData, h 
 
 	response, err := session.AnomalyDetectionClient.GetDataAsset(ctx, request)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_data_asset.getAiAnomalyDetectionDataAsset", "api_error", err)
 		return nil, err
 	}
 	return response.DataAsset, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
+
 func aiAnomalyDetectionDataAssetTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -265,9 +272,6 @@ func aiAnomalyDetectionDataAssetTags(_ context.Context, d *transform.TransformDa
 func buildAiAnomalyDetectionDataAssetFilters(equalQuals plugin.KeyColumnEqualsQualMap) aianomalydetection.ListDataAssetsRequest {
 	request := aianomalydetection.ListDataAssetsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
 	if equalQuals["project_id"] != nil {
 		request.ProjectId = types.String(equalQuals["project_id"].GetStringValue())
 	}

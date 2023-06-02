@@ -12,11 +12,12 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
+
 func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_ai_private_endpoint",
-		Description:      "OCI Ai Private Endpoint",
+		Description:      "OCI Anomaly Detection Ai Private Endpoint",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -51,6 +52,17 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "display_name",
+				Description: "Private Reverse Connection Endpoint display name.",
+				Type:        proto.ColumnType_STRING,
+			},
+						{
+				Name:        "time_created",
+				Description: "Time that AI Private Endpoint was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "subnet_id",
 				Description: "Subnet Identifier.",
 				Type:        proto.ColumnType_STRING,
@@ -58,21 +70,6 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 			{
 				Name:        "dns_zones",
 				Description: "List of DNS zones to be used by the data assets.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "display_name",
-				Description: "Private Reverse Connection Endpoint display name.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "freeform_tags",
-				Description: "Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "defined_tags",
-				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -86,16 +83,20 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "freeform_tags",
+				Description: "Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "defined_tags",
+				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "attached_data_assets",
 				Description: "The list of dataAssets using the private reverse connection endpoint.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getAiAnomalyDetectionAiPrivateEndpoint,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that AI Private Endpoint was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// Standard Steampipe columns
@@ -130,12 +131,13 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listAiAnomalyDetectionAiPrivateEndpoints(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listAiAnomalyDetectionAiPrivateEndpoints", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_ai_private_endpoint.listAiAnomalyDetectionAiPrivateEndpoints", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -145,6 +147,7 @@ func listAiAnomalyDetectionAiPrivateEndpoints(ctx context.Context, d *plugin.Que
 	// Create Session
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_ai_private_endpoint.listAiAnomalyDetectionAiPrivateEndpoints", "connection_error", err)
 		return nil, err
 	}
 
@@ -167,6 +170,7 @@ func listAiAnomalyDetectionAiPrivateEndpoints(ctx context.Context, d *plugin.Que
 	for pagesLeft {
 		response, err := session.AnomalyDetectionClient.ListAiPrivateEndpoints(ctx, request)
 		if err != nil {
+			logger.Error("oci_ai_anomaly_detection_ai_private_endpoint.listAiAnomalyDetectionAiPrivateEndpoints", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -187,12 +191,13 @@ func listAiAnomalyDetectionAiPrivateEndpoints(ctx context.Context, d *plugin.Que
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
+
 func getAiAnomalyDetectionAiPrivateEndpoint(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getAiAnomalyDetectionAiPrivateEndpoint", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_ai_private_endpoint.getAiAnomalyDetectionAiPrivateEndpoint", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -213,7 +218,7 @@ func getAiAnomalyDetectionAiPrivateEndpoint(ctx context.Context, d *plugin.Query
 
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAiAnomalyDetectionAiPrivateEndpoint", "error_AiAnomalyDetectionService", err)
+		logger.Error("oci_ai_anomaly_detection_ai_private_endpoint.getAiAnomalyDetectionAiPrivateEndpoint", "connection_error", err)
 		return nil, err
 	}
 
@@ -226,12 +231,14 @@ func getAiAnomalyDetectionAiPrivateEndpoint(ctx context.Context, d *plugin.Query
 
 	response, err := session.AnomalyDetectionClient.GetAiPrivateEndpoint(ctx, request)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_ai_private_endpoint.getAiAnomalyDetectionAiPrivateEndpoint", "api_error", err)
 		return nil, err
 	}
 	return response.AiPrivateEndpoint, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
+
 func aiAnomalyDetectionAiPrivateEndpointTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -271,9 +278,6 @@ func aiAnomalyDetectionAiPrivateEndpointTags(_ context.Context, d *transform.Tra
 func buildAiAnomalyDetectionAiPrivateEndpointFilters(equalQuals plugin.KeyColumnEqualsQualMap) aianomalydetection.ListAiPrivateEndpointsRequest {
 	request := aianomalydetection.ListAiPrivateEndpointsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = aianomalydetection.AiPrivateEndpointLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}

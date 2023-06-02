@@ -12,11 +12,12 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
+
 func tableAiAnomalyDetectionModel(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_model",
-		Description:      "OCI Model",
+		Description:      "OCI Anomaly Detection Model",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -61,6 +62,12 @@ func tableAiAnomalyDetectionModel(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "time_created",
+				Description: "Time that Model was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "lifecycle_state",
 				Description: "The state of the model.",
 				Type:        proto.ColumnType_STRING,
@@ -85,12 +92,6 @@ func tableAiAnomalyDetectionModel(_ context.Context) *plugin.Table {
 				Name:        "defined_tags",
 				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that Model was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// Standard Steampipe columns
@@ -125,13 +126,14 @@ func tableAiAnomalyDetectionModel(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listAiAnomalyDetectionModels(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 
-	logger.Debug("listAiAnomalyDetectionModels", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_model.listAiAnomalyDetectionModels", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -141,6 +143,7 @@ func listAiAnomalyDetectionModels(ctx context.Context, d *plugin.QueryData, _ *p
 	// Create Session
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_model.listAiAnomalyDetectionModels", "connection_error", err)
 		return nil, err
 	}
 
@@ -163,6 +166,7 @@ func listAiAnomalyDetectionModels(ctx context.Context, d *plugin.QueryData, _ *p
 	for pagesLeft {
 		response, err := session.AnomalyDetectionClient.ListModels(ctx, request)
 		if err != nil {
+			logger.Error("oci_ai_anomaly_detection_model.listAiAnomalyDetectionModels", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -183,12 +187,13 @@ func listAiAnomalyDetectionModels(ctx context.Context, d *plugin.QueryData, _ *p
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
+
 func getAiAnomalyDetectionModel(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getAiAnomalyDetectionModel", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_model.getAiAnomalyDetectionModel", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -206,10 +211,9 @@ func getAiAnomalyDetectionModel(ctx context.Context, d *plugin.QueryData, h *plu
 	}
 
 	// Create Session
-
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAiAnomalyDetectionModel", "error_AiAnomalyDetectionService", err)
+		logger.Error("oci_ai_anomaly_detection_model.getAiAnomalyDetectionModel", "connection_error", err)
 		return nil, err
 	}
 
@@ -222,12 +226,14 @@ func getAiAnomalyDetectionModel(ctx context.Context, d *plugin.QueryData, h *plu
 
 	response, err := session.AnomalyDetectionClient.GetModel(ctx, request)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_model.getAiAnomalyDetectionModel", "api_error", err)
 		return nil, err
 	}
 	return response.Model, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
+
 func aiAnomalyDetectionModelTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -267,9 +273,6 @@ func aiAnomalyDetectionModelTags(_ context.Context, d *transform.TransformData) 
 func buildAiAnomalyDetectionModelFilters(equalQuals plugin.KeyColumnEqualsQualMap) aianomalydetection.ListModelsRequest {
 	request := aianomalydetection.ListModelsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
 	if equalQuals["project_id"] != nil {
 		request.ProjectId = types.String(equalQuals["project_id"].GetStringValue())
 	}

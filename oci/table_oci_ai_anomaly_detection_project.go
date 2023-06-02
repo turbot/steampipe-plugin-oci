@@ -12,11 +12,12 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITIONS
+
 func tableAiAnomalyDetectionProject(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_project",
-		Description:      "OCI Project",
+		Description:      "OCI Anomaly Detection Project",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -52,6 +53,12 @@ func tableAiAnomalyDetectionProject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "time_created",
+				Description: "Time that Project was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
 				Name:        "lifecycle_state",
 				Description: "The lifecycle state of the Project.",
 				Type:        proto.ColumnType_STRING,
@@ -70,12 +77,6 @@ func tableAiAnomalyDetectionProject(_ context.Context) *plugin.Table {
 				Name:        "defined_tags",
 				Description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that Project was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// Standard Steampipe columns
@@ -110,12 +111,13 @@ func tableAiAnomalyDetectionProject(_ context.Context) *plugin.Table {
 	}
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listAiAnomalyDetectionProjects(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listAiAnomalyDetectionProjects", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_project.listAiAnomalyDetectionProjects", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -125,6 +127,7 @@ func listAiAnomalyDetectionProjects(ctx context.Context, d *plugin.QueryData, _ 
 	// Create Session
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_project.listAiAnomalyDetectionProjects", "connection_error", err)
 		return nil, err
 	}
 
@@ -147,6 +150,7 @@ func listAiAnomalyDetectionProjects(ctx context.Context, d *plugin.QueryData, _ 
 	for pagesLeft {
 		response, err := session.AnomalyDetectionClient.ListProjects(ctx, request)
 		if err != nil {
+			logger.Error("oci_ai_anomaly_detection_project.listAiAnomalyDetectionProjects", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -167,12 +171,13 @@ func listAiAnomalyDetectionProjects(ctx context.Context, d *plugin.QueryData, _ 
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
+
 func getAiAnomalyDetectionProject(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getAiAnomalyDetectionProject", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_ai_anomaly_detection_project.getAiAnomalyDetectionProject", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -190,10 +195,9 @@ func getAiAnomalyDetectionProject(ctx context.Context, d *plugin.QueryData, h *p
 	}
 
 	// Create Session
-
 	session, err := aiAnomalyDetectionService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAiAnomalyDetectionProject", "error_AiAnomalyDetectionService", err)
+		logger.Error("oci_ai_anomaly_detection_project.getAiAnomalyDetectionProject", "connection_error", err)
 		return nil, err
 	}
 
@@ -206,12 +210,14 @@ func getAiAnomalyDetectionProject(ctx context.Context, d *plugin.QueryData, h *p
 
 	response, err := session.AnomalyDetectionClient.GetProject(ctx, request)
 	if err != nil {
+		logger.Error("oci_ai_anomaly_detection_project.getAiAnomalyDetectionProject", "api_error", err)
 		return nil, err
 	}
 	return response.Project, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
+
 func aiAnomalyDetectionProjectTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -251,9 +257,6 @@ func aiAnomalyDetectionProjectTags(_ context.Context, d *transform.TransformData
 func buildAiAnomalyDetectionProjectFilters(equalQuals plugin.KeyColumnEqualsQualMap) aianomalydetection.ListProjectsRequest {
 	request := aianomalydetection.ListProjectsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = aianomalydetection.ProjectLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}

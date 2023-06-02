@@ -140,6 +140,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_db_system_metric_memory_utilization":                tableOciMySQLDBSystemMetricMemoryUtilization(ctx),
 			"oci_mysql_db_system_metric_memory_utilization_daily":          tableOciMySQLDBSystemMetricMemoryUtilizationDaily(ctx),
 			"oci_mysql_heat_wave_cluster":                                  tableOciMySQLHeatWaveCluster(ctx),
+			"oci_network_firewall_firewall":                                tableNetworkFirewall(ctx),
+			"oci_network_firewall_policy":                                  tableNetworkFirewallPolicy(ctx),
 			"oci_nosql_table":                                              tableNoSQLTable(ctx),
 			"oci_nosql_table_metric_read_throttle_count":                   tableOciNoSQLTableMetricReadThrottleCount(ctx),
 			"oci_nosql_table_metric_read_throttle_count_daily":             tableOciNoSQLTableMetricReadThrottleCountDaily(ctx),

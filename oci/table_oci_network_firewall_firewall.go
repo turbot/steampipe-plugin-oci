@@ -39,10 +39,6 @@ func tableNetworkFirewall(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "availability_domain",
 					Require: plugin.Optional,
 				},
@@ -60,13 +56,24 @@ func tableNetworkFirewall(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
+				Name:        "display_name",
+				Description: "A user-friendly name for the Network Firewall.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
 				Name:        "availability_domain",
 				Description: "A filter to return only resources that are present within the specified availability domain.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "display_name",
-				Description: "A user-friendly name for the Network Firewall.",
+				Name:        "time_created",
+				Description: "Time that Network Firewall was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "subnet_id",
+				Description: "The OCID of the subnet associated with the Network Firewall.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -99,17 +106,6 @@ func tableNetworkFirewall(_ context.Context) *plugin.Table {
 				Description: "An array of network security groups OCID associated with the Network Firewall.",
 				Hydrate:     getNetworkFirewall,
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "subnet_id",
-				Description: "The OCID of the subnet associated with the Network Firewall.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that Network Firewall was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// tags
@@ -162,7 +158,7 @@ func listNetworkFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listNetworkFirewalls", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_network_firewall_firewall.listNetworkFirewalls", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 
@@ -174,6 +170,7 @@ func listNetworkFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	// Create Session
 	session, err := networkFirewallService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_network_firewall_firewall.listNetworkFirewalls", "connection_error", err)
 		return nil, err
 	}
 
@@ -196,6 +193,7 @@ func listNetworkFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	for pagesLeft {
 		response, err := session.NetworkFirewallClient.ListNetworkFirewalls(ctx, request)
 		if err != nil {
+			logger.Error("oci_network_firewall_firewall.listNetworkFirewalls", "api_error", err)
 			return nil, err
 		}
 		for _, firewall := range response.Items {
@@ -216,13 +214,13 @@ func listNetworkFirewalls(ctx context.Context, d *plugin.QueryData, _ *plugin.Hy
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
 func getNetworkFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getNetworkFirewall", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_network_firewall_firewall.getNetworkFirewall", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -242,7 +240,7 @@ func getNetworkFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	// Create Session
 	session, err := networkFirewallService(ctx, d, region)
 	if err != nil {
-		logger.Error("getNetworkFirewall", "error_NetworkFirewallService", err)
+		logger.Error("oci_network_firewall_firewall.getNetworkFirewall", "connection_error", err)
 		return nil, err
 	}
 
@@ -255,12 +253,13 @@ func getNetworkFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 
 	response, err := session.NetworkFirewallClient.GetNetworkFirewall(ctx, request)
 	if err != nil {
+		logger.Error("oci_network_firewall_firewall.getNetworkFirewall", "api_error", err)
 		return nil, err
 	}
 	return response.NetworkFirewall, nil
 }
 
-//// TRANSFORM FUNCTION
+//// TRANSFORM FUNCTIONS
 
 func networkFirewallTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
@@ -310,9 +309,6 @@ func buildNetworkFirewallFilters(equalQuals plugin.KeyColumnEqualsQualMap) netwo
 	}
 	if equalQuals["network_firewall_policy_id"] != nil {
 		request.NetworkFirewallPolicyId = types.String(equalQuals["network_firewall_policy_id"].GetStringValue())
-	}
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
 	}
 	if equalQuals["availability_domain"] != nil {
 		request.AvailabilityDomain = types.String(equalQuals["availability_domain"].GetStringValue())

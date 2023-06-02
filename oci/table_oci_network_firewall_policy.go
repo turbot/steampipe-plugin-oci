@@ -35,10 +35,6 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -54,6 +50,28 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 			{
 				Name:        "display_name",
 				Description: "A user-friendly name for the Network Firewall Policy.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "time_created",
+				Description: "Time that Network Firewall Policy was created.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "is_firewall_attached",
+				Description: "To determine if any Network Firewall is associated with this Network Firewall Policy.",
+				Type:        proto.ColumnType_BOOL,
+				Hydrate:     getNetworkFirewallPolicy,
+			},
+			{
+				Name:        "lifecycle_details",
+				Description: "A message describing the current state in more detail.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "lifecycle_state",
+				Description: "The current state of the Network Firewall.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -81,22 +99,6 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Hydrate:     getNetworkFirewallPolicy,
 			},
 			{
-				Name:        "is_firewall_attached",
-				Description: "To determine if any Network Firewall is associated with this Network Firewall Policy.",
-				Type:        proto.ColumnType_BOOL,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "lifecycle_details",
-				Description: "A message describing the current state in more detail.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
-				Name:        "lifecycle_state",
-				Description: "The current state of the Network Firewall.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "mapped_secrets",
 				Description: "A mapping of strings to MappedSecret objects.",
 				Type:        proto.ColumnType_JSON,
@@ -113,12 +115,6 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Description: "A mapping of strings to arrays of UrlPattern objects.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "time_created",
-				Description: "Time that Network Firewall Policy was created.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 
 			// tags
@@ -171,7 +167,7 @@ func listNetworkFirewallPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listNetworkFirewallPolicies", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicies", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 
@@ -183,6 +179,7 @@ func listNetworkFirewallPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create Session
 	session, err := networkFirewallService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicies", "connection_error", err)
 		return nil, err
 	}
 
@@ -205,6 +202,7 @@ func listNetworkFirewallPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.NetworkFirewallClient.ListNetworkFirewallPolicies(ctx, request)
 		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicies", "api_error", err)
 			return nil, err
 		}
 		for _, firewallPolicy := range response.Items {
@@ -225,13 +223,13 @@ func listNetworkFirewallPolicies(ctx context.Context, d *plugin.QueryData, _ *pl
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
 
 func getNetworkFirewallPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getNetworkFirewallPolicy", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_network_firewall_policy.getNetworkFirewallPolicy", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -251,7 +249,7 @@ func getNetworkFirewallPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	// Create Session
 	session, err := networkFirewallService(ctx, d, region)
 	if err != nil {
-		logger.Error("getNetworkFirewallPolicy", "error_NetworkFirewallService", err)
+		logger.Error("oci_network_firewall_policy.getNetworkFirewallPolicy", "connection_error", err)
 		return nil, err
 	}
 
@@ -264,6 +262,7 @@ func getNetworkFirewallPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	response, err := session.NetworkFirewallClient.GetNetworkFirewallPolicy(ctx, request)
 	if err != nil {
+		logger.Error("oci_network_firewall_policy.getNetworkFirewallPolicy", "api_error", err)
 		return nil, err
 	}
 	return response.NetworkFirewallPolicy, nil
@@ -316,9 +315,6 @@ func buildNetworkFirewallPolicyFilters(equalQuals plugin.KeyColumnEqualsQualMap)
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
-	}
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
 	}
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = networkfirewall.ListNetworkFirewallPoliciesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())

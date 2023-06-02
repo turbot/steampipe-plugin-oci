@@ -63,12 +63,14 @@ where
 
 ```sql
 select
-    f.display_name as firewall_name,
-    f.id as firewall_id,
-    p.display_name as policy_display_name,
-    p.id as policy_id,
-    p.lifecycle_details as policy_lifecycle
+  f.display_name as firewall_name,
+  f.id as firewall_id,
+  p.display_name as policy_display_name,
+  p.id as policy_id,
+  p.lifecycle_details as policy_lifecycle 
 from
-  oci_network_firewall_firewall as f
-  left join oci_network_firewall_policy as p on f.network_firewall_policy_id = p.id;
+  oci_network_firewall_firewall as f 
+  left join
+    oci_network_firewall_policy as p 
+    on f.network_firewall_policy_id = p.id;
 ```

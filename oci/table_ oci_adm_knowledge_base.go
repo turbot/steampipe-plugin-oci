@@ -109,21 +109,23 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 	}
 }
 
-//// LIST FUNCTION
+// // LIST FUNCTION
 func listAdmKnowledgeBases(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listAdmKnowledgeBases", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_adm_knowledge_base.listAdmKnowledgeBases", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
+
 	// Create Session
 	session, err := admService(ctx, d, region)
 	if err != nil {
+		logger.Error("oci_adm_knowledge_base.listAdmKnowledgeBases", "connection_error", err)
 		return nil, err
 	}
 
@@ -146,6 +148,7 @@ func listAdmKnowledgeBases(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	for pagesLeft {
 		response, err := session.ApplicationDependencyManagementClient.ListKnowledgeBases(ctx, request)
 		if err != nil {
+			logger.Error("oci_adm_knowledge_base.listAdmKnowledgeBases", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -166,12 +169,13 @@ func listAdmKnowledgeBases(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 	return nil, err
 }
 
-//// HYDRATE FUNCTION
+//// HYDRATE FUNCTIONS
+
 func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getAdmKnowledgeBase", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_adm_knowledge_base.getAdmKnowledgeBase", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -189,10 +193,9 @@ func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	}
 
 	// Create Session
-
 	session, err := admService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAdmKnowledgeBase", "error_AdmService", err)
+		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "connection_erro", err)
 		return nil, err
 	}
 
@@ -205,12 +208,14 @@ func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	response, err := session.ApplicationDependencyManagementClient.GetKnowledgeBase(ctx, request)
 	if err != nil {
+		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "connection_erro", err)
 		return nil, err
 	}
 	return response.KnowledgeBase, nil
 }
 
-// // TRANSFORM FUNCTION
+//// TRANSFORM FUNCTION
+
 func admKnowledgeBaseTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
@@ -258,9 +263,6 @@ func buildAdmKnowledgeBaseFilters(equalQuals plugin.KeyColumnEqualsQualMap) adm.
 	}
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
-	}
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
 	}
 
 	return request

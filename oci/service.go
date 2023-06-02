@@ -35,6 +35,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/logging"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
@@ -70,21 +71,22 @@ type session struct {
 	IdentityClient                 identity.IdentityClient
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
-	LoggingManagementClient        logging.LoggingManagementClient
 	LoadBalancerClient             loadbalancer.LoadBalancerClient
+	LoggingManagementClient        logging.LoggingManagementClient
 	MonitoringClient               monitoring.MonitoringClient
-	MySQLConfigurationClient       mysql.MysqlaasClient
-	MySQLChannelClient             mysql.ChannelsClient
 	MySQLBackupClient              mysql.DbBackupsClient
+	MySQLChannelClient             mysql.ChannelsClient
+	MySQLConfigurationClient       mysql.MysqlaasClient
 	MySQLDBSystemClient            mysql.DbSystemClient
+	NetworkFirewallClient          networkfirewall.NetworkFirewallClient
 	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
 	NoSQLClient                    nosql.NosqlClient
 	NotificationControlPlaneClient ons.NotificationControlPlaneClient
 	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
 	ObjectStorageClient            objectstorage.ObjectStorageClient
 	QueueAdminClient               queue.QueueAdminClient
-	ResourceSearchClient           resourcesearch.ResourceSearchClient
 	ResourceManagerClient          resourcemanager.ResourceManagerClient
+	ResourceSearchClient           resourcesearch.ResourceSearchClient
 	StreamAdminClient              streaming.StreamAdminClient
 	VaultClient                    vault.VaultsClient
 	VirtualNetworkClient           core.VirtualNetworkClient
@@ -521,6 +523,48 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	sess := &session{
 		TenancyID:                 tenantID,
 		FunctionsManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// networkService returns the service client for OCI Network Firewall service
+func networkFirewallService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("networkFirewall-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkFirewallService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get network firewall service client
+	client, err := networkfirewall.NewNetworkFirewallClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		NetworkFirewallClient: client,
 	}
 
 	// save session in cache
@@ -1338,7 +1382,6 @@ func queueService(ctx context.Context, d *plugin.QueryData, region string) (*ses
 	return sess, nil
 }
 
-
 // resourceSearchService returns the service client for OCI Resource Search Service
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1564,8 +1607,8 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 	}
 
 	sess := &session{
-		TenancyID:       tenantId,
-		BastionClient:   client,
+		TenancyID:     tenantId,
+		BastionClient: client,
 	}
 
 	// save session in cache

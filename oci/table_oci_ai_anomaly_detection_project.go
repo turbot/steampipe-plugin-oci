@@ -17,7 +17,7 @@ import (
 func tableAiAnomalyDetectionProject(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_project",
-		Description:      "OCI Anomaly Detection Project",
+		Description:      "OCI AI Anomaly Detection Project",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),

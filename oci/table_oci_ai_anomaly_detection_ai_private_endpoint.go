@@ -17,7 +17,7 @@ import (
 func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_ai_private_endpoint",
-		Description:      "OCI Anomaly Detection Ai Private Endpoint",
+		Description:      "OCI AI Anomaly Detection AI Private Endpoint",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -36,10 +36,6 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 				},
 				{
 					Name:    "display_name",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "id",
 					Require: plugin.Optional,
 				},
 			},
@@ -284,9 +280,5 @@ func buildAiAnomalyDetectionAiPrivateEndpointFilters(equalQuals plugin.KeyColumn
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
 	}
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-	}
-
 	return request
 }

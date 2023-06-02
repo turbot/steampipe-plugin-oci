@@ -17,7 +17,7 @@ import (
 func tableAiAnomalyDetectionDataAsset(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_ai_anomaly_detection_data_asset",
-		Description:      "OCI Anomaly Detection Data Asset",
+		Description:      "OCI AI Anomaly Detection Data Asset",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),

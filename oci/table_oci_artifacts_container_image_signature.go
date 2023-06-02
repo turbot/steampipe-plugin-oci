@@ -16,8 +16,8 @@ import (
 
 func tableArtifactContainerImageSignature(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifact_container_image_signature",
-		Description:      "OCI Container Image Signature",
+		Name:             "oci_artifacts_container_image_signature",
+		Description:      "OCI Artifacts Container Image Signature",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -28,10 +28,6 @@ func tableArtifactContainerImageSignature(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "id",
 					Require: plugin.Optional,
 				},
 				{
@@ -140,7 +136,7 @@ func listArtifactContainerImageSignatures(ctx context.Context, d *plugin.QueryDa
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifact_container_image_signature.listArtifactContainerImageSignatures", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_container_image_signature.listArtifactContainerImageSignatures", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -150,7 +146,7 @@ func listArtifactContainerImageSignatures(ctx context.Context, d *plugin.QueryDa
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_image_signature.listArtifactContainerImageSignatures", "connection_error", err)
+		logger.Error("oci_artifacts_container_image_signature.listArtifactContainerImageSignatures", "connection_error", err)
 		return nil, err
 	}
 
@@ -173,7 +169,7 @@ func listArtifactContainerImageSignatures(ctx context.Context, d *plugin.QueryDa
 	for pagesLeft {
 		response, err := session.ArtifactClient.ListContainerImageSignatures(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifact_container_image_signature.listArtifactContainerImageSignatures", "api_error", err)
+			logger.Error("oci_artifacts_container_image_signature.listArtifactContainerImageSignatures", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -200,7 +196,7 @@ func getArtifactContainerImageSignature(ctx context.Context, d *plugin.QueryData
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactContainerImageSignature", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_container_image_signature.getArtifactContainerImageSignature", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -221,7 +217,7 @@ func getArtifactContainerImageSignature(ctx context.Context, d *plugin.QueryData
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_image_signature.getArtifactContainerImageSignature", "connection_error", err)
+		logger.Error("oci_artifacts_container_image_signature.getArtifactContainerImageSignature", "connection_error", err)
 		return nil, err
 	}
 
@@ -234,7 +230,7 @@ func getArtifactContainerImageSignature(ctx context.Context, d *plugin.QueryData
 
 	response, err := session.ArtifactClient.GetContainerImageSignature(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifact_container_image_signature.getArtifactContainerImageSignature", "api_error", err)
+		logger.Error("oci_artifacts_container_image_signature.getArtifactContainerImageSignature", "api_error", err)
 		return nil, err
 	}
 	return response.ContainerImageSignature, nil
@@ -243,13 +239,6 @@ func getArtifactContainerImageSignature(ctx context.Context, d *plugin.QueryData
 // Build additional filters
 func buildArtifactContainerImageSignatureFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImageSignaturesRequest {
 	request := artifacts.ListContainerImageSignaturesRequest{}
-
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
-	if equalQuals["id"] != nil {
-		request.ImageId = types.String(equalQuals["id"].GetStringValue())
-	}
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())

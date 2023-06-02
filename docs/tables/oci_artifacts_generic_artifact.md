@@ -1,6 +1,6 @@
-# Table: oci_artifact_generic_artifact
+# Table: oci_artifacts_generic_artifact
 
-OCI container artifact information.
+This resource provides the Generic Artifact resource in Oracle Cloud Infrastructure Artifacts service.
 
 ## Examples
 
@@ -17,7 +17,7 @@ select
   size_in_bytes,
   lifecycle_state as state
 from
-  oci_artifact_generic_artifact;
+  oci_artifacts_generic_artifact;
 ```
 
 ### List available generic artifacts
@@ -32,7 +32,7 @@ select
   size_in_bytes,
   lifecycle_state
 from
-  oci_artifact_generic_artifact
+  oci_artifacts_generic_artifact
 where
   lifecycle_state = 'AVAILABLE';
 ```
@@ -44,7 +44,7 @@ select
   artifact_path,
   count(version) as numbers_of_versions
 from
-  oci_artifact_generic_artifact
+  oci_artifacts_generic_artifact
 group by
   artifact_path;
 ```
@@ -60,7 +60,7 @@ select
   artifact_path,
   time_created
 from
-  oci_artifact_generic_artifact
+  oci_artifacts_generic_artifact
 where
   time_created >= now() - interval '30' day;
 ```
@@ -75,7 +75,7 @@ select
   version,
   size_in_bytes
 from
-  oci_artifact_generic_artifact
+  oci_artifacts_generic_artifact
 order by
   size_in_bytes desc limit 1;
 ```
@@ -90,8 +90,8 @@ select
   r.is_immutable as is_repository_immutable,
   r.lifecycle_state as repository_lifecycle_state
 from
-  oci_artifact_generic_artifact as a,
-  oci_artifact_repository as r
+  oci_artifacts_generic_artifact as a,
+  oci_artifacts_repository as r
 where
   a.repository_id = r.id
 and

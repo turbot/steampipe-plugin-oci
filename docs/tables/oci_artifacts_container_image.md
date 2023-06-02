@@ -1,4 +1,4 @@
-# Table: oci_artifact_container_image
+# Table: oci_artifacts_container_image
 
 OCI artifact container image is a standardized format for packaging and distributing software applications, libraries, and dependencies. It is based on the Open Container Initiative (OCI) specifications and provides a consistent way to store and share container images across different container runtimes and platforms. OCI artifact container images typically include the application code, runtime environment, system libraries, and other dependencies needed to run the software. They are used to create and deploy containerized applications in cloud environments and container orchestration platforms.
 
@@ -23,10 +23,10 @@ select
   version,
   lifecycle_state as state
 from
-  oci_artifact_container_image;
+  oci_artifacts_container_image;
 ```
 
-### Get the largest layers of image in size
+### Get the size of the largest image layer (in bytes)
 
 ```sql
 select
@@ -36,12 +36,12 @@ select
   time_created,
   layers_size_in_bytes
 from
-  oci_artifact_container_image
+  oci_artifacts_container_image
 order by
   layers_size_in_bytes desc limit 1;
 ```
 
-### Get version details of each images
+### Get version details of each image
 
 ```sql
 select
@@ -51,7 +51,7 @@ select
   v ->> 'timeCreated' as image_version_created_time,
   v ->> 'version' as version
 from
-  oci_artifact_container_image as i,
+  oci_artifacts_container_image as i,
   jsonb_array_elements(versions) as v;
 ```
 
@@ -65,7 +65,7 @@ select
   l ->> 'sizeInBytes' as layer_size_in_bytes,
   l ->> 'timeCreated' as layer_create_time
 from
-  oci_artifact_container_image,
+  oci_artifacts_container_image,
   jsonb_array_elements(layers) as l;
 ```
 
@@ -81,8 +81,8 @@ select
   r.is_public,
   r.lifecycle_state
 from
-  oci_artifact_container_image as i,
-  oci_artifact_container_repository as r
+  oci_artifacts_container_image as i,
+  oci_artifacts_container_repository as r
 where
   r.id = i.repository_id;
 ```
@@ -97,7 +97,7 @@ select
   version,
   lifecycle_state
 from
-  oci_artifact_container_image
+  oci_artifacts_container_image
 where
   lifecycle_state = 'AVAILABLE';
 ```
@@ -112,12 +112,12 @@ select
   time_created,
   manifest_size_in_bytes
 from
-  oci_artifact_container_image
+  oci_artifacts_container_image
 where
   time_created >= now() - interval '30' day;
 ```
 
-### Retrive the total number of pull count for images
+### Retrive the total number of pull count of each image
 
 ```sql
 select
@@ -126,5 +126,5 @@ select
   digest,
   pull_count
 from
-  oci_artifact_container_image;
+  oci_artifacts_container_image;
 ```

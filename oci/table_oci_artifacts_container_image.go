@@ -16,8 +16,8 @@ import (
 
 func tableArtifactContainerImage(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifact_container_image",
-		Description:      "OCI Container Image",
+		Name:             "oci_artifacts_container_image",
+		Description:      "OCI Artifacts Container Image",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -172,7 +172,7 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifact_container_image.listArtifactContainerImages", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_container_image.listArtifactContainerImages", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -182,7 +182,7 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_image.listArtifactContainerImages", "connection_error", err)
+		logger.Error("oci_artifacts_container_image.listArtifactContainerImages", "connection_error", err)
 		return nil, err
 	}
 
@@ -205,7 +205,7 @@ func listArtifactContainerImages(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.ArtifactClient.ListContainerImages(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifact_container_image.listArtifactContainerImages", "api_error", err)
+			logger.Error("oci_artifacts_container_image.listArtifactContainerImages", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -232,7 +232,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifact_container_image.getArtifactContainerImage", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_container_image.getArtifactContainerImage", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
@@ -253,7 +253,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_image.getArtifactContainerImage", "connection_error", err)
+		logger.Error("oci_artifacts_container_image.getArtifactContainerImage", "connection_error", err)
 		return nil, err
 	}
 
@@ -266,7 +266,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 
 	response, err := session.ArtifactClient.GetContainerImage(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifact_container_image.getArtifactContainerImage", "api_error", err)
+		logger.Error("oci_artifacts_container_image.getArtifactContainerImage", "api_error", err)
 		return nil, err
 	}
 	return response.ContainerImage, nil
@@ -276,22 +276,15 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 func buildArtifactContainerImageFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerImagesRequest {
 	request := artifacts.ListContainerImagesRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
-
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
 	}
-
 	if equalQuals["repository_id"] != nil {
 		request.RepositoryId = types.String(equalQuals["repository_id"].GetStringValue())
 	}
-
 	if equalQuals["repository_name"] != nil {
 		request.RepositoryName = types.String(equalQuals["repository_name"].GetStringValue())
 	}
-
 	if equalQuals["version"] != nil {
 		request.Version = types.String(equalQuals["version"].GetStringValue())
 	}

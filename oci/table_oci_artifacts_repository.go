@@ -14,17 +14,17 @@ import (
 
 //// TABLE DEFINITION
 
-func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
+func tableArtifactRepository(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifact_container_repository",
-		Description:      "OCI Container Repository",
+		Name:             "oci_artifacts_repository",
+		Description:      "OCI Artifacts Repository",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getArtifactContainerRepository,
+			Hydrate:    getArtifactRepository,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listArtifactContainerRepositories,
+			Hydrate: listArtifactRepositories,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -35,7 +35,7 @@ func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "is_public",
+					Name:    "is_immutable",
 					Require: plugin.Optional,
 				},
 				{
@@ -47,78 +47,59 @@ func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "display_name",
-				Description: "The container repository name.",
-				Type:        proto.ColumnType_STRING,
-			},
-			{
 				Name:        "id",
-				Description: "The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the container repository.",
+				Description: "The OCID (https://docs.cloud.oracle.com/iaas/Content/General/Concepts/identifiers.htm) of the repository.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "created_by",
-				Description: "The id of the user or principal that created the resource.",
+				Name:        "display_name",
+				Description: "The repository name.",
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     getArtifactContainerRepository,
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that Container Repository was created.",
+				Description: "An RFC 3339 timestamp indicating when the repository was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "image_count",
-				Description: "Total number of images.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "is_immutable",
-				Description: "Whether the repository is immutable. Images cannot be overwritten in an immutable repository.",
-				Type:        proto.ColumnType_BOOL,
-				Hydrate:     getArtifactContainerRepository,
-			},
-			{
-				Name:        "is_public",
-				Description: "Whether the repository is public. A public repository allows unauthenticated access.",
-				Type:        proto.ColumnType_BOOL,
-			},
-			{
-				Name:        "layer_count",
-				Description: "Total number of layers.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "layers_size_in_bytes",
-				Description: "Total storage in bytes consumed by layers.",
-				Type:        proto.ColumnType_INT,
-			},
-			{
-				Name:        "lifecycle_state",
-				Description: "The current state of the container repository.",
+				Name:        "description",
+				Description: "The repository description.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "billable_size_in_g_bs",
-				Description: "Total storage size in GBs that will be charged.",
-				Type:        proto.ColumnType_INT,
+				Name:        "is_immutable",
+				Description: "Whether the repository is immutable. The artifacts of an immutable repository cannot be overwritten.",
+				Type:        proto.ColumnType_BOOL,
 			},
 			{
-				Name:        "time_last_pushed",
-				Description: "An RFC 3339 timestamp indicating when an image was last pushed to the repository.",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Hydrate:     getArtifactContainerRepository,
-				Transform:   transform.FromField("TimeLastPushed.Time"),
+				Name:        "lifecycle_state",
+				Description: "The current state of the repository.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "freeform_tags",
+				Description: "Free-form tags for this resource. Each tag is a simple key-value pair with no",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "defined_tags",
+				Description: "Defined tags for this resource. Each key is predefined and scoped to a",
+				Type:        proto.ColumnType_JSON,
 			},
 
 			// Standard Steampipe columns
 			{
+				Name:        "tags",
+				Description: ColumnDescriptionTags,
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.From(artifactRepositoryTags),
+			},
+			{
 				Name:        "title",
 				Description: ColumnDescriptionTitle,
 				Type:        proto.ColumnType_STRING,
-
-				Transform: transform.FromField("DisplayName"),
+				Transform:   transform.FromField("DisplayName"),
 			},
 
 			// Standard OCI columns
@@ -139,29 +120,27 @@ func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
 	}
 }
 
-//// LIST FUNCTION
-
-func listArtifactContainerRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+// // LIST FUNCTION
+func listArtifactRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listArtifactContainerRepositories", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_repository.listArtifactRepositories", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
-
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_repository.listArtifactContainerRepositories", "connection_error", err)
+		logger.Error("oci_artifacts_repository.listArtifactRepositories", "connection_error", err)
 		return nil, err
 	}
 
 	//Build request parameters
-	request := buildArtifactContainerRepositoryFilters(equalQuals)
+	request := buildArtifactRepositoryFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(100)
 	request.RequestMetadata = common.RequestMetadata{
@@ -177,9 +156,9 @@ func listArtifactContainerRepositories(ctx context.Context, d *plugin.QueryData,
 
 	pagesLeft := true
 	for pagesLeft {
-		response, err := session.ArtifactClient.ListContainerRepositories(ctx, request)
+		response, err := session.ArtifactClient.ListRepositories(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifact_container_repository.listArtifactContainerRepositories", "api_error", err)
+			logger.Error("oci_artifacts_repository.listArtifactRepositories", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -202,23 +181,19 @@ func listArtifactContainerRepositories(ctx context.Context, d *plugin.QueryData,
 
 //// HYDRATE FUNCTION
 
-func getArtifactContainerRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+func getArtifactRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getArtifactContainerRepository", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("getArtifactRepository", "Compartment", compartment, "OCI_REGION", region)
 
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(artifacts.ContainerRepositorySummary).Id
-	} else {
-		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-			return nil, nil
-		}
+	id := d.EqualsQuals["id"].GetStringValue()
+
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
 	}
 
-	// handle empty ID in get call
+	// handle empty id in get call
 	if id == "" {
 		return nil, nil
 	}
@@ -227,35 +202,84 @@ func getArtifactContainerRepository(ctx context.Context, d *plugin.QueryData, h 
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_container_repository.getArtifactContainerRepository", "connection_error", err)
+		logger.Error("oci_artifacts_repository.getArtifactRepository", "connection_error", err)
 		return nil, err
 	}
 
-	request := artifacts.GetContainerRepositoryRequest{
+	request := artifacts.GetRepositoryRequest{
 		RepositoryId: types.String(id),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}
 
-	response, err := session.ArtifactClient.GetContainerRepository(ctx, request)
+	response, err := session.ArtifactClient.GetRepository(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifact_container_repository.getArtifactContainerRepository", "api_error", err)
+		logger.Error("oci_artifacts_repository.getArtifactRepository", "api_error", err)
 		return nil, err
 	}
-	return response.ContainerRepository, nil
+	return response.Repository, nil
+}
+
+//// TRANSFORM FUNCTION
+
+func artifactRepositoryTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	var freeformTags map[string]string
+	var definedTags map[string]map[string]interface{}
+
+	if d.HydrateItem == nil {
+		return nil, nil
+	}
+
+	switch d.HydrateItem.(type) {
+	case artifacts.RepositorySummary:
+		obj := d.HydrateItem.(artifacts.RepositorySummary)
+		freeformTags = obj.GetFreeformTags()
+		definedTags = obj.GetDefinedTags()
+	default:
+		if obj, ok := d.HydrateItem.(artifacts.Repository); ok {
+			freeformTags = obj.GetFreeformTags()
+			definedTags = obj.GetDefinedTags()
+		}
+	}
+
+	var tags map[string]interface{}
+	if freeformTags != nil {
+		tags = map[string]interface{}{}
+		for k, v := range freeformTags {
+			tags[k] = v
+		}
+	}
+	if definedTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+	return tags, nil
 }
 
 // Build additional filters
-func buildArtifactContainerRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListContainerRepositoriesRequest {
-	request := artifacts.ListContainerRepositoriesRequest{}
+func buildArtifactRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) artifacts.ListRepositoriesRequest {
+	request := artifacts.ListRepositoriesRequest{}
+
+	if equalQuals["compartment_id"] != nil {
+		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
+	}
 
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
 	}
-	if equalQuals["is_public"] != nil {
-		request.IsPublic = types.Bool(equalQuals["is_public"].GetBoolValue())
+
+	if equalQuals["is_immutable"] != nil {
+		request.IsImmutable = types.Bool(equalQuals["is_immutable"].GetBoolValue())
 	}
+
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = types.String(equalQuals["lifecycle_state"].GetStringValue())
 	}

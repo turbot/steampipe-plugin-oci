@@ -16,8 +16,8 @@ import (
 
 func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_artifact_generic_artifact",
-		Description:      "OCI Generic Artifact",
+		Name:             "oci_artifacts_generic_artifact",
+		Description:      "OCI Artifacts Generic Artifact",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -59,10 +59,10 @@ func tableArtifactGenericArtifact(_ context.Context) *plugin.Table {
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
-			// The column 'display_name' has been renamed to 'name' in this table due to its relationship with the table 'oci_artifact_repository'.
-			// The table 'oci_artifact_repository' has an optional qualifier called 'display_name' in its list configuration.
+			// The column 'display_name' has been renamed to 'name' in this table due to its relationship with the table 'oci_artifacts_repository'.
+			// The table 'oci_artifacts_repository' has an optional qualifier called 'display_name' in its list configuration.
 			// Additionally, this table has a property named 'DisplayName' which can also be used as an optional key qualifier.
-			// When running a query like 'select * from oci_artifact_generic_artifact where display_name = 'test/artifact:1'', the value of 'display_name' is passed as a parameter to the 'listArtifactRepositories' API of the 'oci_artifact_repository' table, which is its parent table.
+			// When running a query like 'select * from oci_artifacts_generic_artifact where display_name = 'test/artifact:1'', the value of 'display_name' is passed as a parameter to the 'listArtifactRepositories' API of the 'oci_artifacts_repository' table, which is its parent table.
 			// However, this results in an error when the 'listArtifactRepositories' function is called, with the following details: Error: Error returned by Artifacts Service. Http Status Code: 400. Error Code: BadRequest. Opc request id: c1f7fce0f00b215e711b20e9c28c58c6/2bfb17a9e4750c67c6b384c1. Message: Repository name invalid: 'test/artifact:1'.
 			// The operation name associated with this error is 'ListRepositories'.
 			{
@@ -162,7 +162,7 @@ func listArtifactGenericArtifacts(ctx context.Context, d *plugin.QueryData, h *p
 	repository := h.Item.(artifacts.RepositorySummary)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_generic_artifact.listArtifactGenericArtifacts", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -178,7 +178,7 @@ func listArtifactGenericArtifacts(ctx context.Context, d *plugin.QueryData, h *p
 	// Create Session
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "connection_error", err)
+		logger.Error("oci_artifacts_generic_artifact.listArtifactGenericArtifacts", "connection_error", err)
 		return nil, err
 	}
 
@@ -202,7 +202,7 @@ func listArtifactGenericArtifacts(ctx context.Context, d *plugin.QueryData, h *p
 	for pagesLeft {
 		response, err := session.ArtifactClient.ListGenericArtifacts(ctx, request)
 		if err != nil {
-			logger.Error("oci_artifact_generic_artifact.listArtifactGenericArtifacts", "api_error", err)
+			logger.Error("oci_artifacts_generic_artifact.listArtifactGenericArtifacts", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -229,7 +229,7 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_artifact_generic_artifact.getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_artifacts_generic_artifact.getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
 
 	id := d.EqualsQuals["id"].GetStringValue()
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -245,7 +245,7 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 
 	session, err := artifactService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_artifact_generic_artifact.getArtifactGenericArtifact", "connection_error", err)
+		logger.Error("oci_artifacts_generic_artifact.getArtifactGenericArtifact", "connection_error", err)
 		return nil, err
 	}
 
@@ -258,7 +258,7 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 
 	response, err := session.ArtifactClient.GetGenericArtifact(ctx, request)
 	if err != nil {
-		logger.Error("oci_artifact_generic_artifact.getArtifactGenericArtifact", "api_error", err)
+		logger.Error("oci_artifacts_generic_artifact.getArtifactGenericArtifact", "api_error", err)
 		return nil, err
 	}
 	return response.GenericArtifact, nil
@@ -320,6 +320,7 @@ func buildArtifactGenericArtifactFilters(equalQuals plugin.KeyColumnEqualsQualMa
 	if equalQuals["sha256"] != nil {
 		request.Sha256 = types.String(equalQuals["sha256"].GetStringValue())
 	}
+
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = types.String(equalQuals["lifecycle_state"].GetStringValue())
 	}

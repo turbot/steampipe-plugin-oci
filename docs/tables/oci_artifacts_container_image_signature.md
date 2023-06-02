@@ -1,4 +1,4 @@
-# Table: oci_artifact_container_image_signature
+# Table: oci_artifacts_container_image_signature
 
 OCI (Oracle Cloud Infrastructure) Artifact Container Image Signature is a digital signature that provides a way to verify the authenticity and integrity of container images stored in OCI Artifact Registry. It is used to ensure that the image has not been tampered with and that it can be trusted.
 
@@ -18,7 +18,7 @@ select
   signature,
   signing_algorithm
 from
-  oci_artifact_container_image_signature;
+  oci_artifacts_container_image_signature;
 ```
 
 ### List signatures created in last 30 days
@@ -32,7 +32,7 @@ select
   message,
   signature
 from
-  oci_artifact_container_image_signature
+  oci_artifacts_container_image_signature
 where
   time_created >= now() - interval '30' day;
 ```
@@ -51,13 +51,13 @@ select
   i.manifest_size_in_bytes,
   i.pull_count
 from
-  oci_artifact_container_image_signature as s,
-  oci_artifact_container_image as i
+  oci_artifacts_container_image_signature as s,
+  oci_artifacts_container_image as i
 where
   i.id = s.image_id;
 ```
 
-### Get KMS key details used by image signature
+### Get KMS key details used by each image signature
 
 ```sql
 select
@@ -69,7 +69,7 @@ select
   v.public_key,
   v.origin
 from
-  oci_artifact_container_image_signature as s,
+  oci_artifacts_container_image_signature as s,
   oci_kms_key_version as v
 where
   v.id = s.kms_key_version_id;
@@ -85,7 +85,7 @@ select
   signature,
   signing_algorithm
 from
-  oci_artifact_container_image_signature
+  oci_artifacts_container_image_signature
 where
   signing_algorithm = 'RSA';
 ```

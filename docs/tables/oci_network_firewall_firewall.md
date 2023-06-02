@@ -8,15 +8,15 @@ A network firewall is a security resource that exists in a subnet of your choice
 
 ```sql
 select
-    id,
-    display_name,
-    availability_domain,
-    ipv4_address,
-    ipv6_address,
-    network_firewall_policy_id,
-    network_security_group_ids,
-    subnet_id,
-    lifecycle_state as state
+  id,
+  display_name,
+  availability_domain,
+  ipv4_address,
+  ipv6_address,
+  network_firewall_policy_id,
+  network_security_group_ids,
+  subnet_id,
+  lifecycle_state as state
 from
   oci_network_firewall_firewall;
 ```

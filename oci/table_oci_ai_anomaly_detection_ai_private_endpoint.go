@@ -52,7 +52,7 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "subnet_id",
-				Description: "Subnet Identifier",
+				Description: "Subnet Identifier.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -93,7 +93,7 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that Ai Private Endpoint was created.",
+				Description: "Time that AI Private Endpoint was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},

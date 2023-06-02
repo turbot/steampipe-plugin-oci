@@ -1,3 +1,20 @@
+## v0.25.0 [2023-06-03]
+
+_What's new?_
+
+- New tables added: (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_ai_anomaly_detection_ai_private_endpoint](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_ai_private_endpoint) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508)) 
+  - [oci_ai_anomaly_detection_data_asset](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_data_asset) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_ai_anomaly_detection_model](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_model) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_ai_anomaly_detection_project](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_project) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_artifacts_container_image_signature](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_image_signature) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_container_image](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_image) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_container_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_repository) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_generic_artifact](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_generic_artifact) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_repository) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_network_firewall_firewall](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_network_firewall_firewall) ([#507](https://github.com/turbot/steampipe-plugin-oci/pull/507))
+  - [oci_network_firewall_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_network_firewall_policy) ([#507](https://github.com/turbot/steampipe-plugin-oci/pull/507))
+
 ## v0.24.0 [2023-05-11]
 
 _Dependencies_

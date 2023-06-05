@@ -89,5 +89,5 @@ from
   oci_autoscaling_auto_scaling_policy as p,
   oci_autoscaling_auto_scaling_configuration as c
 where
-  p.auto_scaling_configuration_id = c.id
+  p.auto_scaling_configuration_id = c.id;
 ```

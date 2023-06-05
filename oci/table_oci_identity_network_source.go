@@ -2,7 +2,6 @@ package oci
 
 import (
 	"context"
-	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
@@ -26,10 +25,6 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 			Hydrate: listIdentityNetworkSources,
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -39,7 +34,6 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		GetMatrixItemFunc: BuildCompartmentList,
 		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
@@ -122,12 +116,6 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "compartment_id",
-				Description: ColumnDescriptionCompartment,
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
-			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
@@ -140,13 +128,7 @@ func tableIdentityNetworkSource(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	compartment := d.EqualsQualString(matrixKeyCompartment)
 	equalQuals := d.EqualsQuals
-
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -156,7 +138,7 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListNetworkSourcesRequest{
-		CompartmentId: types.String(compartment),
+		CompartmentId: &session.TenancyID,
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -209,7 +191,7 @@ func listIdentityNetworkSources(ctx context.Context, d *plugin.QueryData, _ *plu
 //// HYDRATE FUNCTIONS
 
 func getIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	compartment := d.EqualsQualString(matrixKeyCompartment)
+	plugin.Logger(ctx).Trace("getIdentityNetworkSource")
 
 	var id string
 	if h.Item != nil {
@@ -218,9 +200,8 @@ func getIdentityNetworkSource(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = d.EqualsQuals["id"].GetStringValue()
 	}
 
-	// Restrict the api call to only root compartment
-	// Handle empty dynamic group id in get call
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || id == "" {
+	// handle empty network source id in get call
+	if id == "" {
 		return nil, nil
 	}
 

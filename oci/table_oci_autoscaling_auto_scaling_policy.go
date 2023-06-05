@@ -191,7 +191,7 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 
 	session, err := autoScalingService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAutoscalingAutoScalingPolicy", "error_AutoscalingService", err)
+		logger.Error("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "connection_error", err)
 		return nil, err
 	}
 

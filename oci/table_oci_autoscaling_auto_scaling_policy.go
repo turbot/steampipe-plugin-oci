@@ -170,7 +170,7 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
-	logger.Debug("getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
+	logger.Debug("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
 
 	var id, configurationId string
 	if h.Item != nil {

@@ -64,7 +64,7 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that Auto Scaling Policy was created.",
+				Description: "Time that autoscaling policy was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},

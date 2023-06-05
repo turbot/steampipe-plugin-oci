@@ -11,7 +11,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
 func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_autoscaling_auto_scaling_policy",
@@ -39,7 +39,7 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -64,7 +64,7 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that Auto Scaling Policy was created.",
+				Description: "Time that autoscaling policy was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -178,7 +178,7 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
-	logger.Debug("getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
+	logger.Debug("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
 
 	var id, configurationId string
 	if h.Item != nil {
@@ -199,7 +199,7 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 
 	session, err := autoScalingService(ctx, d, region)
 	if err != nil {
-		logger.Error("getAutoscalingAutoScalingPolicy", "error_AutoscalingService", err)
+		logger.Error("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "connection_error", err)
 		return nil, err
 	}
 

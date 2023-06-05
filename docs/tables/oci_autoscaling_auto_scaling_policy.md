@@ -8,13 +8,13 @@ Autoscaling policies define the criteria that trigger autoscaling actions and th
 
 ```sql
 select
-    capacity,
-    id,
-    display_name,
-    is_enabled,
-    policy_type
+  capacity,
+  id,
+  display_name,
+  is_enabled,
+  policy_type
 from
-oci_autoscaling_auto_scaling_policy;
+  oci_autoscaling_auto_scaling_policy;
 ```
 
 ### List enabled policies

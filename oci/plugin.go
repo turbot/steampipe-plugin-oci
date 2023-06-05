@@ -31,7 +31,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),
-			"oci_autoscaling_auto_scaling_policy":                          tableAutoscalingAutoScalingPolicy(ctx),
+			"oci_autoscaling_auto_scaling_policy":                          tableAutoScalingPolicy(ctx),
 			"oci_bastion_bastion":                                          tableBastion(ctx),
 			"oci_bastion_session":                                          tableBastionSession(ctx),
 			"oci_budget_alert_rule":                                        tableBudgetAlertRule(ctx),

@@ -12,7 +12,7 @@ import (
 )
 
 // // TABLE DEFINITION
-func tableAutoscalingAutoScalingPolicy(_ context.Context) *plugin.Table {
+func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_autoscaling_auto_scaling_policy",
 		Description:      "OCI Auto Scaling Policy",

@@ -85,6 +85,12 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+			{
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
@@ -105,7 +111,8 @@ type autoscalingpolicyInfo struct {
 	AutoScalingConfigurationId *string
 }
 
-// // LIST FUNCTION
+//// LIST FUNCTION
+
 func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	configuration := h.Item.(autoscaling.AutoScalingConfigurationSummary)
@@ -166,7 +173,8 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 	return nil, err
 }
 
-// // HYDRATE FUNCTION
+//// HYDRATE FUNCTION
+
 func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)

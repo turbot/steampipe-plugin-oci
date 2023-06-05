@@ -39,7 +39,7 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "A user-friendly name. Does not have to be unique, and it's changeable",
+				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{

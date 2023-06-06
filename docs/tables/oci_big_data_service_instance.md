@@ -88,7 +88,7 @@ where
   is_cloud_sql_configured;
 ```
 
-### Get cloud sql details of each cluster
+### List cloud sql details of each cluster
 
 ```sql
 select

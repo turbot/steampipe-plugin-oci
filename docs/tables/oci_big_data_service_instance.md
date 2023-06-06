@@ -144,7 +144,7 @@ from
   jsonb_array_elements(nodes) as n;
 ```
 
-### Get KMS key details of each cluster
+### List KMS key details of each cluster
 
 ```sql
 select

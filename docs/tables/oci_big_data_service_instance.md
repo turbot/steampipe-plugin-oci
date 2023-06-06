@@ -109,7 +109,7 @@ from
 select
   id,
   network_config ->> 'IsNatGatewayRequired' as nat_gateway_required,
-  network_config ->> 'CidrBlock' as CidrBlock,
+  network_config ->> 'CidrBlock' as cidr_block,
 from
   oci_big_data_service_instance;
 ```

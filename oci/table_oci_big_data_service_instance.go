@@ -196,7 +196,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	}
 
 	//Build request parameters
-	request := buildListBdsBdsInstanceFilters(equalQuals)
+	request := buildListBigDataServiceInstanceFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{

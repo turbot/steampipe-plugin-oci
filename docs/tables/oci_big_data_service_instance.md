@@ -103,7 +103,7 @@ from
   oci_big_data_service_instance;
 ```
 
-### Get network config details of clusters
+### List network config details of clusters
 
 ```sql
 select

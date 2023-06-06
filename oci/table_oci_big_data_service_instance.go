@@ -83,7 +83,7 @@ func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "number_of_nodes",
-				Description: "Number of nodes that forming the cluster",
+				Description: "Number of nodes that form the cluster.",
 				Type:        proto.ColumnType_INT,
 			},
 			{

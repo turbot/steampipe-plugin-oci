@@ -2,16 +2,17 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_big_data_service_instance",
@@ -60,6 +61,13 @@ func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 				Description: "Time that the Bds Instance was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "TimeUpdated",
+				Description: "The time the cluster was updated, shown as an RFC 3339 formatted datetime string.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
+				Hydrate:     getBigDataServiceInstance,
 			},
 			{
 				Name:        "lifecycle_state",

@@ -114,7 +114,7 @@ from
   oci_big_data_service_instance;
 ```
 
-### Get node information of each cluster
+### List node information for each cluster
 
 ```sql
 select

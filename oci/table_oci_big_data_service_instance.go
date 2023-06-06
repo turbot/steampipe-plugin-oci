@@ -321,7 +321,7 @@ func bigDataServiceInstanceTags(_ context.Context, d *transform.TransformData) (
 }
 
 // Build additional list filters
-func buildListBdsBdsInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) bds.ListBdsInstancesRequest {
+func buildListBigDataServiceInstanceFilters(equalQuals plugin.KeyColumnEqualsQualMap) bds.ListBdsInstancesRequest {
 	request := bds.ListBdsInstancesRequest{}
 
 	if equalQuals["lifecycle_state"] != nil {

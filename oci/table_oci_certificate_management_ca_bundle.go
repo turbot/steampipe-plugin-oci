@@ -2,13 +2,14 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
 // TABLE DEFINITION
@@ -20,6 +21,9 @@ func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCertificatesManagementCaBundle,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreError: isNotFoundError([]string{"InvalidParameter"}),
+			},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCertificatesManagementCaBundles,
@@ -50,7 +54,7 @@ func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 				Description: "A user-friendly name for the CA bundle.",
 				Type:        proto.ColumnType_STRING,
 			},
-				{
+			{
 				Name:        "time_created",
 				Description: "Time that the Ca Bundle was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -152,7 +156,7 @@ func listCertificatesManagementCaBundles(ctx context.Context, d *plugin.QueryDat
 	for pagesLeft {
 		response, err := session.CertificatesManagementClient.ListCaBundles(ctx, request)
 		if err != nil {
-		logger.Error("oci_certificate_management_ca_bundle.listCertificatesManagementCaBundles", "api_error", err)
+			logger.Error("oci_certificate_management_ca_bundle.listCertificatesManagementCaBundles", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {

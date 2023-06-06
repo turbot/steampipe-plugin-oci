@@ -39,7 +39,7 @@ from
   oci_big_data_service_instance;
 ```
 
-#### Check whether or not the cluster should be set up as secure
+#### List clusters that should be set up as secure
 
 ```sql
 select

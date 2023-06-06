@@ -214,7 +214,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.BdsClient.ListBdsInstances(ctx, request)
 		if err != nil {
-			logger.Error("oci_big_data_service_instance.listBdsBdsInstances", "api_error", err)
+			logger.Error("oci_big_data_service_instance.listBigDataServiceInstances", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {

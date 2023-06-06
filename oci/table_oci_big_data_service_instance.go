@@ -149,7 +149,7 @@ func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(bdsBdsInstanceTags),
+				Transform:   transform.From(bigDataServiceInstanceTags),
 			},
 			{
 				Name:        "title",

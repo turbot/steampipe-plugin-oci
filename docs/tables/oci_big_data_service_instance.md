@@ -131,7 +131,7 @@ select
   n ->> 'AvailabilityDomain' as node_availability_domain,
   n ->> 'FaultDomain' as node_fault_domain,
   n ->> 'TimeCreated' as node_time_created,
-  n -> 'AttachedBlockVolumes' as node_attached_block_volumes,
+  n ->> 'AttachedBlockVolumes' as node_attached_block_volumes,
   n ->> 'Hostname' as node_hostname,
   n ->> 'ImageId' as node_image_id,
   n ->> 'TimeUpdated' as node_time_updated,

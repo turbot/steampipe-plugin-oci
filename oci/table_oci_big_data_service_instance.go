@@ -281,6 +281,10 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 
 //// TRANSFORM FUNCTIONS
 
+// Priority order for tags
+// 1. Free-form tags
+// 2. Defined Tags
+
 func bigDataServiceInstanceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

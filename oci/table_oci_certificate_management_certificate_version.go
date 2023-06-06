@@ -2,6 +2,8 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
@@ -31,7 +33,7 @@ func tableCertificatesManagementCertificateVersion(_ context.Context) *plugin.Ta
 		},
 		List: &plugin.ListConfig{
 			ParentHydrate: listCertificatesManagementCertificates,
-			Hydrate: listCertificatesManagementCertificateVersions,
+			Hydrate:       listCertificatesManagementCertificateVersions,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "certificate_id",
@@ -189,7 +191,13 @@ func listCertificatesManagementCertificateVersions(ctx context.Context, d *plugi
 func getCertificatesManagementCertificateVersion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getCertificatesManagementCertificateVersion", "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	request := buildGetCertificatesManagementCertificateVersionFilters(d.EqualsQuals, h)
 

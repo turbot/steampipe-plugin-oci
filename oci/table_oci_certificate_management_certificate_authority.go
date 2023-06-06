@@ -166,7 +166,8 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 	}
 }
 
-// LIST FUNCTION
+//// LIST FUNCTION
+
 func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -223,7 +224,8 @@ func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *pl
 	return nil, err
 }
 
-// HYDRATE FUNCTION
+//// HYDRATE FUNCTION
+
 func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -252,7 +254,8 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	return response.CertificateAuthority, nil
 }
 
-// TRANSFORM FUNCTION
+//// TRANSFORM FUNCTION
+
 func certificatesManagementCertificateAuthorityTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}

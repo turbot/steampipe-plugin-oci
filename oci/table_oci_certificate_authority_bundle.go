@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/certificates"
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -34,7 +35,7 @@ func tableCertificatesAuthorityBundle(_ context.Context) *plugin.Table {
 			},
 			Hydrate: getCertificateAuthorityBundle,
 		},
-		GetMatrixItemFunc: BuildRegionList,
+		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
 				Name:        "certificate_authority_id",
@@ -119,7 +120,13 @@ func tableCertificatesAuthorityBundle(_ context.Context) *plugin.Table {
 func getCertificateAuthorityBundle(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificate_authority_bundle.getCertificateAuthorityBundle", "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	request := buildGetCertificateAuthorityBundleFilters(d.EqualsQuals)
 

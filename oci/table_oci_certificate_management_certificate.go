@@ -172,7 +172,8 @@ func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 	}
 }
 
-// LIST FUNCTION
+//// LIST FUNCTION
+
 func listCertificatesManagementCertificates(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -240,6 +241,11 @@ func getCertificatesManagementCertificate(ctx context.Context, d *plugin.QueryDa
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificate_management_certificate.getCertificatesManagementCertificate", "Compartment", compartment, "OCI_REGION", region)
 	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+
+	// Restrict the api call to only root compartment/ per region
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
 

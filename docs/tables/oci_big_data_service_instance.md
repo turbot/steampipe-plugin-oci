@@ -108,7 +108,7 @@ from
 ```sql
 select
   id,
-  network_config ->> 'IsNatGatewayRequired' as IsNatGatewayRequired,
+  network_config ->> 'IsNatGatewayRequired' as nat_gateway_required,
   network_config ->> 'CidrBlock' as CidrBlock,
 from
   oci_big_data_service_instance;

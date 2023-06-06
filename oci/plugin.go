@@ -44,6 +44,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_bastion_session":                                          tableBastionSession(ctx),
 			"oci_budget_alert_rule":                                        tableBudgetAlertRule(ctx),
 			"oci_budget_budget":                                            tableBudget(ctx),
+			"oci_certificate_authority_bundle":                 tableCertificatesAuthorityBundle(ctx),
 			"oci_cloud_guard_configuration":                                tableCloudGuardConfiguration(ctx),
 			"oci_cloud_guard_detector_recipe":                              tableCloudGuardDetectorRecipe(ctx),
 			"oci_cloud_guard_managed_list":                                 tableCloudGuardManagedList(ctx),

@@ -96,7 +96,7 @@ select
   display_name
   cloud_sql_details ->> 'Shape' as shape,
   cloud_sql_details ->> 'ShIpAddressape' as ip_address,
-  cloud_sql_details ->> 'BlockVolumeSizeInGBs' as block_volume_size_in_g_bs,
+  cloud_sql_details ->> 'BlockVolumeSizeInGBs' as block_volume_size_in_gbs,
   cloud_sql_details ->> 'IsKerberosMappedToDatabaseUsers' as is_kerberos_mapped_to_database_users,
   cloud_sql_details ->> 'KerberosDetails' as kerberos_details
 from

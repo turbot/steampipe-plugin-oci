@@ -281,7 +281,7 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 
 //// TRANSFORM FUNCTIONS
 
-func bdsBdsInstanceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+func bigDataServiceInstanceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {

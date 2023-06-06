@@ -191,7 +191,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create Session
 	session, err := bdsService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_big_data_service_instance.listBdsBdsInstances", "connection_error", err)
+		logger.Error("oci_big_data_service_instance.listBigDataServiceInstances", "connection_error", err)
 		return nil, err
 	}
 

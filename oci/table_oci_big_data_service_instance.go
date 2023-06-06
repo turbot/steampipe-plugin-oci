@@ -181,7 +181,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_big_data_service_instance.listBdsBdsInstances", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_big_data_service_instance.listBigDataServiceInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match

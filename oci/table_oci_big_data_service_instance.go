@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
 func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_big_data_service_instance",

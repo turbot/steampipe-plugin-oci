@@ -188,7 +188,7 @@ func listCertificatesManagementCertificateAuthorityVersions(ctx context.Context,
 
 func getCertificatesManagementCertificateAuthorityVersion(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("oci_certificate_management_certificate_authority_version.getCertificatesManagementCertificateAuthorityVersion", "OCI_REGION", region)
 
 	request := buildGetCertificatesManagementCertificateAuthorityVersionFilters(d.EqualsQuals, h)

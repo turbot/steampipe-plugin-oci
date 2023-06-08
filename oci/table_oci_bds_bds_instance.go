@@ -15,7 +15,7 @@ import (
 //// TABLE DEFINITION
 func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_big_data_service_instance",
+		Name:             "oci_bds_bds_instance",
 		Description:      "OCI Big Data Service Instance",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
@@ -189,7 +189,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_big_data_service_instance.listBigDataServiceInstances", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_bds_bds_instance.listBigDataServiceInstances", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -199,7 +199,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	// Create Session
 	session, err := bdsService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_big_data_service_instance.listBigDataServiceInstances", "connection_error", err)
+		logger.Error("oci_bds_bds_instance.listBigDataServiceInstances", "connection_error", err)
 		return nil, err
 	}
 
@@ -222,7 +222,7 @@ func listBigDataServiceInstances(ctx context.Context, d *plugin.QueryData, _ *pl
 	for pagesLeft {
 		response, err := session.BdsClient.ListBdsInstances(ctx, request)
 		if err != nil {
-			logger.Error("oci_big_data_service_instance.listBigDataServiceInstances", "api_error", err)
+			logger.Error("oci_bds_bds_instance.listBigDataServiceInstances", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -249,7 +249,7 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_big_data_service_instance.getBigDataServiceInstance", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_bds_bds_instance.getBigDataServiceInstance", "Compartment", compartment, "OCI_REGION", region)
 	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
@@ -272,7 +272,7 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 	// Create Session
 	session, err := bdsService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_big_data_service_instance.getBigDataServiceInstance", "connection_error", err)
+		logger.Error("oci_bds_bds_instance.getBigDataServiceInstance", "connection_error", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
@@ -281,7 +281,7 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 
 	response, err := session.BdsClient.GetBdsInstance(ctx, request)
 	if err != nil {
-		logger.Error("oci_big_data_service_instance.getBigDataServiceInstance", "api_error", err)
+		logger.Error("oci_bds_bds_instance.getBigDataServiceInstance", "api_error", err)
 		return nil, err
 	}
 	return response.BdsInstance, nil

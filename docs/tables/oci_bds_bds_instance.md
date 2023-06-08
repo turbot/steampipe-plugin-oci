@@ -1,4 +1,4 @@
-# Table: oci_big_data_service_instance
+# Table: oci_bds_bds_instance
 
 Oracle Big Data Service is a fully managed, automated cloud service that provides enterprises with a cost-effective Hadoop environment. Customers easily create secure and scalable Hadoop-based data lakes that can quickly process large amounts of data.
 
@@ -25,7 +25,7 @@ select
   cluster_profile,
   lifecycle_state as state
 from
-  oci_big_data_service_instance;
+  oci_bds_bds_instance;
 ```
 
 ### Count the number of nodes per instance
@@ -36,7 +36,7 @@ select
   display_name,
   number_of_nodes
 from
-  oci_big_data_service_instance;
+  oci_bds_bds_instance;
 ```
 
 ### List clusters that should be set up as secure
@@ -50,7 +50,7 @@ select
   cluster_version,
   created_by
 from
-  oci_big_data_service_instance
+  oci_bds_bds_instance
 where
   is_secure;
 ```
@@ -67,7 +67,7 @@ select
   is_high_availability,
   created_by
 from
-  oci_big_data_service_instance
+  oci_bds_bds_instance
 where
   is_high_availability;
 ```
@@ -83,7 +83,7 @@ select
   is_secure,
   is_cloud_sql_configured
 from
-  oci_big_data_service_instance
+  oci_bds_bds_instance
 where
   is_cloud_sql_configured;
 ```
@@ -100,7 +100,7 @@ select
   cloud_sql_details ->> 'IsKerberosMappedToDatabaseUsers' as is_kerberos_mapped_to_database_users,
   cloud_sql_details ->> 'KerberosDetails' as kerberos_details
 from
-  oci_big_data_service_instance;
+  oci_bds_bds_instance;
 ```
 
 ### List network config details of each clusters
@@ -111,7 +111,7 @@ select
   network_config ->> 'IsNatGatewayRequired' as nat_gateway_required,
   network_config ->> 'CidrBlock' as cidr_block,
 from
-  oci_big_data_service_instance;
+  oci_bds_bds_instance;
 ```
 
 ### List node information for each cluster
@@ -140,7 +140,7 @@ select
   n ->> 'Nvmes' as node_nvmes,
   n ->> 'LocalDisksTotalSizeInGBs' as node_local_disks_total_size_in_gbs
 from
-  oci_big_data_service_instance,
+  oci_bds_bds_instance,
   jsonb_array_elements(nodes) as n;
 ```
 
@@ -156,7 +156,7 @@ select
   k.current_key_version,
   k.protection_mode
 from
-  oci_big_data_service_instance as i,
+  oci_bds_bds_instance as i,
   oci_kms_key as k
 where
   i.kms_key_id = k.id;

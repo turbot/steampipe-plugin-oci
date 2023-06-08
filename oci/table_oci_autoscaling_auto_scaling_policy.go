@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
 	"github.com/oracle/oci-go-sdk/v65/common"
@@ -11,11 +12,11 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_autoscaling_auto_scaling_policy",
-		Description:      "OCI Auto Scaling Policy",
+		Description:      "OCI Autoscaling Policy",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.AllColumns([]string{"id", "auto_scaling_configuration_id"}),
@@ -109,6 +110,7 @@ type autoscalingpolicyInfo struct {
 	IsEnabled                  *bool
 	PolicyType                 *string
 	AutoScalingConfigurationId *string
+	CompartmentId              *string
 }
 
 //// LIST FUNCTION
@@ -117,6 +119,7 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 	logger := plugin.Logger(ctx)
 	configuration := h.Item.(autoscaling.AutoScalingConfigurationSummary)
 	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listAutoscalingAutoScalingPolicies", "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
@@ -156,6 +159,7 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 				PolicyType:                 respItem.PolicyType,
 				IsEnabled:                  respItem.IsEnabled,
 				AutoScalingConfigurationId: configuration.Id,
+				CompartmentId:              &compartment,
 			})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
@@ -178,7 +182,13 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
+
+	// Restrict the api call to only root compartment
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
 
 	var id, configurationId string
 	if h.Item != nil {
@@ -215,7 +225,15 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 	if err != nil {
 		return nil, err
 	}
-	return response.AutoScalingPolicy, nil
+	return &autoscalingpolicyInfo{
+		Id:                         response.GetId(),
+		DisplayName:                response.GetDisplayName(),
+		TimeCreated:                response.GetTimeCreated(),
+		Capacity:                   response.GetCapacity(),
+		IsEnabled:                  response.GetIsEnabled(),
+		AutoScalingConfigurationId: &configurationId,
+		CompartmentId:              &compartment,
+	}, nil
 }
 
 // Build additional filters

@@ -45,7 +45,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_budget_alert_rule":                                        tableBudgetAlertRule(ctx),
 			"oci_budget_budget":                                            tableBudget(ctx),
 			"oci_certificate_authority_bundle":                             tableCertificatesAuthorityBundle(ctx),
-			"oci_certificate_certificate_bundle_version":                   tableCertificatesCertificateBundleVersion(ctx),
 			"oci_certificate_management_association":                       tableCertificatesManagementAssociation(ctx),
 			"oci_certificate_management_ca_bundle":                         tableCertificatesManagementCaBundle(ctx),
 			"oci_certificate_management_certificate":                       tableCertificatesManagementCertificate(ctx),

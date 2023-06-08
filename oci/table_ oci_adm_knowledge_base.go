@@ -30,10 +30,6 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -293,9 +289,6 @@ func admKnowledgeBaseTags(_ context.Context, d *transform.TransformData) (interf
 func buildAdmKnowledgeBaseFilters(equalQuals plugin.KeyColumnEqualsQualMap) adm.ListKnowledgeBasesRequest {
 	request := adm.ListKnowledgeBasesRequest{}
 
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-	}
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = adm.KnowledgeBaseLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}

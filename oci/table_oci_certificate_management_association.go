@@ -22,7 +22,7 @@ func tableCertificatesManagementAssociation(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCertificatesManagementAssociation,
 			IgnoreConfig: &plugin.IgnoreConfig{
-				ShouldIgnoreError: isNotFoundError([]string{"InvalidParameter", "404"}),
+				ShouldIgnoreError: isNotFoundErrorCode([]string{"InvalidParameter"}),
 			},
 		},
 		List: &plugin.ListConfig{

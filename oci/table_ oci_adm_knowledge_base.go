@@ -24,6 +24,10 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listAdmKnowledgeBases,
+			// If the resource is not available in a given compartment the API throws NotAuthorizedOrNotFound error code
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundErrorCode([]string{"NotAuthorizedOrNotFound"}),
+			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "id",

@@ -16,7 +16,7 @@ import (
 func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_adm_knowledge_base",
-		Description:      "OCI Knowledge Base",
+		Description:      "OCI Application Dependency Management Knowledge Base",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -62,7 +62,7 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 			{
 				Name:        "lifecycle_state",
 				Description: "The current lifecycle state of the Knowledge Base.",
-				Type:        proto.ColumnType_STRING,
+				Type:        proto.ColumnType_JSON,
 			},
 			{
 				Name:        "freeform_tags",
@@ -75,10 +75,21 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 			{
+				Name:        "system_tags",
+				Description: "System tags for this resource. These predefined keys are scoped to namespaces.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
 				Name:        "time_created",
 				Description: "Time that Knowledge Base was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
+			},
+			{
+				Name:        "time_updated",
+				Description: "Time that Knowledge Base was updated.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 
 			// Standard Steampipe columns
@@ -199,7 +210,7 @@ func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 	// Create Session
 	session, err := admService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "connection_erro", err)
+		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "connection_error", err)
 		return nil, err
 	}
 
@@ -212,7 +223,7 @@ func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 	response, err := session.ApplicationDependencyManagementClient.GetKnowledgeBase(ctx, request)
 	if err != nil {
-		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "connection_erro", err)
+		logger.Error("oci_adm_knowledge_base.getAdmKnowledgeBase", "api_error", err)
 		return nil, err
 	}
 	return response.KnowledgeBase, nil
@@ -220,18 +231,28 @@ func getAdmKnowledgeBase(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 //// TRANSFORM FUNCTION
 
+// Priority order for tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
+
 func admKnowledgeBaseTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
+
 	var freeformTags map[string]string
 	var definedTags map[string]map[string]interface{}
+	var systemTags map[string]map[string]interface{}
+
 	switch d.HydrateItem.(type) {
 	case adm.KnowledgeBase:
 		obj := d.HydrateItem.(adm.KnowledgeBase)
 		freeformTags = obj.FreeformTags
 		definedTags = obj.DefinedTags
+		systemTags = obj.SystemTags
 	case adm.KnowledgeBaseSummary:
 		obj := d.HydrateItem.(adm.KnowledgeBaseSummary)
 		freeformTags = obj.FreeformTags
 		definedTags = obj.DefinedTags
+		systemTags = obj.SystemTags
 	}
 
 	var tags map[string]interface{}
@@ -241,11 +262,24 @@ func admKnowledgeBaseTags(_ context.Context, d *transform.TransformData) (interf
 			tags[k] = v
 		}
 	}
+
 	if definedTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}
 		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+
+		}
+	}
+
+	if systemTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range systemTags {
 			for key, value := range v {
 				tags[key] = value
 			}

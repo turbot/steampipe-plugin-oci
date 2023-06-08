@@ -58,13 +58,13 @@ func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "Time that the Bds Instance was created.",
+				Description: "Time that the Big Data Service Instance was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
-				Name:        "TimeUpdated",
-				Description: "The time the cluster was updated, shown as an RFC 3339 formatted datetime string.",
+				Name:        "time_updated",
+				Description: "Time that the Big Data Service Instance was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 				Hydrate:     getBigDataServiceInstance,

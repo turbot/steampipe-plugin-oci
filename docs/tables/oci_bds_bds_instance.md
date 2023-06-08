@@ -39,7 +39,7 @@ from
   oci_bds_bds_instance;
 ```
 
-### List clusters that should be set up as secure
+### List secure clusters
 
 ```sql
 select
@@ -72,7 +72,7 @@ where
   is_high_availability;
 ```
 
-### List clusters that has cloud sql configured
+### List clusters that have cloud SQL configured
 
 ```sql
 select
@@ -88,7 +88,7 @@ where
   is_cloud_sql_configured;
 ```
 
-### List cloud sql details of each cluster
+### List cloud SQL details of each cluster
 
 ```sql
 select
@@ -103,7 +103,7 @@ from
   oci_bds_bds_instance;
 ```
 
-### List network config details of each clusters
+### List network config details of each cluster
 
 ```sql
 select
@@ -114,7 +114,7 @@ from
   oci_bds_bds_instance;
 ```
 
-### List node information for each cluster
+### List node information of each cluster
 
 ```sql
 select

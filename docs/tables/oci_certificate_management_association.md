@@ -18,7 +18,7 @@ from
   oci_certificate_management_association;
 ```
 
-### Count numbers of associations by type
+### Count the number of certificate associations by type
 
 ```sql
 select
@@ -45,7 +45,7 @@ where
   time_created >= now() - interval '10' day;
 ```
 
-### List associations that are not active
+### List inactive associations
 
 ```sql
 select

@@ -15,7 +15,7 @@ import (
 func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_certificate_management_certificate_authority",
-		Description:      "OCI Certificate Authority",
+		Description:      "OCI Certificate Management Authority",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -172,7 +172,7 @@ func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listCertificatesManagementCertificateAuthorities", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificate_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -204,6 +204,7 @@ func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *pl
 	for pagesLeft {
 		response, err := session.CertificatesManagementClient.ListCertificateAuthorities(ctx, request)
 		if err != nil {
+			logger.Error("oci_certificate_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -230,7 +231,7 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getCertificatesManagementCertificateAuthority", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificate_management_certificate_authority.getCertificatesManagementCertificateAuthority", "Compartment", compartment, "OCI_REGION", region)
 	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
@@ -240,7 +241,7 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("getCertificatesManagementCertificateAuthority", "error_CertificatesManagementService", err)
+		logger.Error("oci_certificate_management_certificate_authority.getCertificatesManagementCertificateAuthority", "error_CertificatesManagementService", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
@@ -294,13 +295,6 @@ func certificatesManagementCertificateAuthorityTags(_ context.Context, d *transf
 // Build additional list filters
 func buildListCertificatesManagementCertificateAuthorityFilters(equalQuals plugin.KeyColumnEqualsQualMap) certificatesmanagement.ListCertificateAuthoritiesRequest {
 	request := certificatesmanagement.ListCertificateAuthoritiesRequest{}
-
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-	}
-	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = certificatesmanagement.ListCertificateAuthoritiesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
-	}
 
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = certificatesmanagement.ListCertificateAuthoritiesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())

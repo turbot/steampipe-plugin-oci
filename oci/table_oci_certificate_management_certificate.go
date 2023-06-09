@@ -16,7 +16,7 @@ import (
 func tableCertificatesManagementCertificate(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_certificate_management_certificate",
-		Description:      "OCI Certificate",
+		Description:      "OCI Management Certificate",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),

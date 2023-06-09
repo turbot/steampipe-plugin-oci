@@ -16,7 +16,7 @@ import (
 func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_certificate_management_ca_bundle",
-		Description:      "OCI Certificate management Ca Bundle",
+		Description:      "OCI Certificate Management CA Bundle",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -253,6 +253,7 @@ func buildListCertificatesManagementCaBundleFilters(equalQuals plugin.KeyColumnE
 	if equalQuals["compartment_id"] != nil {
 		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
 	}
+	
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = certificatesmanagement.ListCaBundlesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}

@@ -1,6 +1,7 @@
 # Table: oci_certificate_management_certificate
 
-The details of the certificate. This object does not contain the certificate contents. For certificate contents see oci_certificates_certificate_bundle.
+This table provides information on Certificate resources in Oracle Cloud Infrastructure Certificates Management service.
+
 
 ## Examples
 
@@ -59,7 +60,7 @@ where
   lifecycle_state = 'FAILED';
 ```
 
-### List certificates created in last 30 days
+### List certificates created in the last 30 days
 
 ```sql
 select

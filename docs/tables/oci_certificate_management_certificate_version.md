@@ -23,6 +23,7 @@ from
 ```
 
 ### Get all certificate versions
+
 ```sql
 select
   cmcv.certificate_id,
@@ -34,11 +35,12 @@ select
   cmcv.subject_alternative_names,
   cmcv.time_of_deletion,
   cmcv.validity,
-  cmcv.revocation_status
+  cmcv.revocation_status 
 from
-  oci_certificate_management_certificate_version cmcv
-inner join oci_certificate_management_certificate cmc
-on cmcv.certificate_id = cmc.id;
+  oci_certificate_management_certificate_version cmcv 
+  inner join
+    oci_certificate_management_certificate cmc 
+    on cmcv.certificate_id = cmc.id;
 ```
 
 ### Count versions by certificate
@@ -53,7 +55,7 @@ group by
   certificate_id;
 ```
 
-### List versions created in last 30 day
+### List certificate versions created in the last 30 days
 
 ```sql
 select

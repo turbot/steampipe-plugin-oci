@@ -26,7 +26,7 @@ from
   oci_certificate_management_certificate_authority;
 ```
 
-### List active certificate authority
+### List inactive certificate authorities
 
 ```sql
 select
@@ -36,7 +36,9 @@ select
   issuer_certificate_authority_id,
   current_version
 from
-  oci_certificate_management_certificate_authority;
+  oci_certificate_management_certificate_authority
+where
+  lifecycle_state <> 'ACTIVE'
 ```
 
 ### List certificates with SHA256_WITH_RSA signed algorithm

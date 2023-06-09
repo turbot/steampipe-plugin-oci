@@ -35,11 +35,12 @@ select
   cmcav.subject_alternative_names,
   cmcav.time_of_deletion,
   cmcav.validity,
-  cmcav.revocation_status
+  cmcav.revocation_status 
 from
-  oci_certificate_management_certificate_authority_version cmcav
-inner join oci_certificate_management_certificate_authority cmca
-on cmca.id = cmcav.certificate_authority_id;
+  oci_certificate_management_certificate_authority_version cmcav 
+  inner join
+    oci_certificate_management_certificate_authority cmca 
+    on cmca.id = cmcav.certificate_authority_id;
 ```
 
 ### Count certificate versions by certificate authority

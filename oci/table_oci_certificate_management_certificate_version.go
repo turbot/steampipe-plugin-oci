@@ -16,7 +16,7 @@ import (
 func tableCertificatesManagementCertificateVersion(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_certificate_management_certificate_version",
-		Description:      "OCI Certificate Version",
+		Description:      "OCI Certificate Management Version",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: []*plugin.KeyColumn{
@@ -192,7 +192,7 @@ func getCertificatesManagementCertificateVersion(ctx context.Context, d *plugin.
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getCertificatesManagementCertificateVersion", "OCI_REGION", region)
+	logger.Debug("oci_certificate_management_certificate_version.getCertificatesManagementCertificateVersion", "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {

@@ -47,7 +47,7 @@ where
   policy_type = 'threshold';
 ```
 
-### List policy older than 30 days
+### List policies older than 30 days
 
 ```sql
 select

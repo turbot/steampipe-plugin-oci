@@ -42,6 +42,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_artifacts_generic_artifact":                               tableArtifactGenericArtifact(ctx),
 			"oci_artifacts_repository":                                     tableArtifactRepository(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),
+			"oci_autoscaling_auto_scaling_policy":                          tableAutoScalingPolicy(ctx),
 			"oci_bastion_bastion":                                          tableBastion(ctx),
 			"oci_bastion_session":                                          tableBastionSession(ctx),
 			"oci_bds_bds_instance":                                         tableBigDataServiceInstance(ctx),

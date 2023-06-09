@@ -120,7 +120,13 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 	configuration := h.Item.(autoscaling.AutoScalingConfigurationSummary)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
+	configurationId := d.EqualsQualString("auto_scaling_configuration_id")
 	logger.Debug("listAutoscalingAutoScalingPolicies", "OCI_REGION", region)
+	
+	// Restrict API call for other configuration id if the configuration id is provided in where clause
+	if configurationId != "" && configurationId != *configuration.Id {
+		return nil, nil
+	}
 
 	equalQuals := d.EqualsQuals
 	// Create Session

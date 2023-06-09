@@ -15,7 +15,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesManagementAssociation(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificate_management_association",
+		Name:             "oci_certificates_management_association",
 		Description:      "OCI Certificate Association",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
@@ -121,7 +121,7 @@ func listCertificatesManagementAssociations(ctx context.Context, d *plugin.Query
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_association.listCertificatesManagementAssociations", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_association.listCertificatesManagementAssociations", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -131,7 +131,7 @@ func listCertificatesManagementAssociations(ctx context.Context, d *plugin.Query
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_management_association.listCertificatesManagementAssociations", "connection_error", err)
+		logger.Error("oci_certificates_management_association.listCertificatesManagementAssociations", "connection_error", err)
 		return nil, err
 	}
 
@@ -154,7 +154,7 @@ func listCertificatesManagementAssociations(ctx context.Context, d *plugin.Query
 	for pagesLeft {
 		response, err := session.CertificatesManagementClient.ListAssociations(ctx, request)
 		if err != nil {
-			logger.Error("oci_certificate_management_association.listCertificatesManagementAssociations", "api_error", err)
+			logger.Error("oci_certificates_management_association.listCertificatesManagementAssociations", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -180,7 +180,7 @@ func getCertificatesManagementAssociation(ctx context.Context, d *plugin.QueryDa
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_association.getCertificatesManagementAssociation", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_association.getCertificatesManagementAssociation", "Compartment", compartment, "OCI_REGION", region)
 
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
@@ -191,7 +191,7 @@ func getCertificatesManagementAssociation(ctx context.Context, d *plugin.QueryDa
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_management_association.getCertificatesManagementAssociation", "connection_error", err)
+		logger.Error("oci_certificates_management_association.getCertificatesManagementAssociation", "connection_error", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
@@ -200,7 +200,7 @@ func getCertificatesManagementAssociation(ctx context.Context, d *plugin.QueryDa
 
 	response, err := session.CertificatesManagementClient.GetAssociation(ctx, request)
 	if err != nil {
-		logger.Error("oci_certificate_management_association.getCertificatesManagementAssociation", "api_error", err)
+		logger.Error("oci_certificates_management_association.getCertificatesManagementAssociation", "api_error", err)
 		return nil, err
 	}
 	return response.Association, nil

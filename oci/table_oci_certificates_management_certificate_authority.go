@@ -14,7 +14,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificate_management_certificate_authority",
+		Name:             "oci_certificates_management_certificate_authority",
 		Description:      "OCI Certificate Management Authority",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
@@ -172,7 +172,7 @@ func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *pl
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -204,7 +204,7 @@ func listCertificatesManagementCertificateAuthorities(ctx context.Context, d *pl
 	for pagesLeft {
 		response, err := session.CertificatesManagementClient.ListCertificateAuthorities(ctx, request)
 		if err != nil {
-			logger.Error("oci_certificate_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "api_error", err)
+			logger.Error("oci_certificates_management_certificate_authority.listCertificatesManagementCertificateAuthorities", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -231,7 +231,7 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_certificate_authority.getCertificatesManagementCertificateAuthority", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_certificate_authority.getCertificatesManagementCertificateAuthority", "Compartment", compartment, "OCI_REGION", region)
 	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
 	}
@@ -241,7 +241,7 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_management_certificate_authority.getCertificatesManagementCertificateAuthority", "error_CertificatesManagementService", err)
+		logger.Error("oci_certificates_management_certificate_authority.getCertificatesManagementCertificateAuthority", "error_CertificatesManagementService", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{

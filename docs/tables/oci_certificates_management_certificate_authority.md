@@ -1,4 +1,4 @@
-# Table: oci_certificate_management_certificate_authority
+# Table: oci_certificates_management_certificate_authority
 
 The metadata details of the certificate authority (CA). This object does not contain the CA contents. For certificate contents see oci_certificates_certificate_authority_bundle.
 
@@ -23,7 +23,7 @@ select
   signing_algorithm,
   lifecycle_state as state
 from
-  oci_certificate_management_certificate_authority;
+  oci_certificates_management_certificate_authority;
 ```
 
 ### List inactive certificate authorities
@@ -36,7 +36,7 @@ select
   issuer_certificate_authority_id,
   current_version
 from
-  oci_certificate_management_certificate_authority
+  oci_certificates_management_certificate_authority
 where
   lifecycle_state <> 'ACTIVE'
 ```
@@ -51,7 +51,7 @@ select
   signing_algorithm,
   certificate_authority_rules
 from
-  oci_certificate_management_certificate_authority
+  oci_certificates_management_certificate_authority
 where
   signing_algorithm = 'SHA256_WITH_RSA';
 ```
@@ -68,7 +68,7 @@ select
   issuer_certificate_authority_id,
   kms_key_id
 from
-  oci_certificate_management_certificate_authority
+  oci_certificates_management_certificate_authority
 where
   time_created >= now() - interval '30' day;
 ```
@@ -84,7 +84,7 @@ select
   k.vault_id,
   k.current_key_version
 from
-  oci_certificate_management_certificate_authority as a,
+  oci_certificates_management_certificate_authority as a,
   oci_kms_key as k
 where
   k.id = a.kms_key_id;
@@ -100,7 +100,7 @@ select
   r ->> 'leafCertificateMaxValidityDuration' as leaf_certificate_max_validity_duration,
   r ->> 'ruleType' as rule_type
 from
-  oci_certificate_management_certificate_authority,
+  oci_certificates_management_certificate_authority,
   jsonb_array_elements(certificate_authority_rules) as r;
 ```
 
@@ -112,7 +112,7 @@ select
   id,
   validity ->> 'timeOfValidityNotAfter' as time_of_validity_not_after
 from
-  oci_certificate_management_certificate_authority
+  oci_certificates_management_certificate_authority
 where
   time_of_validity_not_after <= '2033-06-04T00:00:00Z';
 ```

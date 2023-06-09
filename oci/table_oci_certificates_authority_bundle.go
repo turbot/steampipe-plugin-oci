@@ -15,7 +15,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesAuthorityBundle(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificate_authority_bundle",
+		Name:             "oci_certificates_authority_bundle",
 		Description:      "OCI Certificate Authority Bundle",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
@@ -121,7 +121,7 @@ func getCertificateAuthorityBundle(ctx context.Context, d *plugin.QueryData, h *
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_authority_bundle.getCertificateAuthorityBundle", "OCI_REGION", region)
+	logger.Debug("oci_certificates_authority_bundle.getCertificateAuthorityBundle", "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
@@ -133,7 +133,7 @@ func getCertificateAuthorityBundle(ctx context.Context, d *plugin.QueryData, h *
 	// Create Session
 	session, err := certificatesService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_authority_bundle.getCertificateAuthorityBundle", "connection_error", err)
+		logger.Error("oci_certificates_authority_bundle.getCertificateAuthorityBundle", "connection_error", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
@@ -142,7 +142,7 @@ func getCertificateAuthorityBundle(ctx context.Context, d *plugin.QueryData, h *
 
 	response, err := session.CertificatesClient.GetCertificateAuthorityBundle(ctx, request)
 	if err != nil {
-		logger.Error("oci_certificate_authority_bundle.getCertificateAuthorityBundle", "api_error", err)
+		logger.Error("oci_certificates_authority_bundle.getCertificateAuthorityBundle", "api_error", err)
 		return nil, err
 	}
 	return response.CertificateAuthorityBundle, nil

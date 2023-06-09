@@ -1,7 +1,6 @@
-# Table: oci_certificate_management_certificate
+# Table: oci_certificates_management_certificate
 
 This table provides information on Certificate resources in Oracle Cloud Infrastructure Certificates Management service.
-
 
 ## Examples
 
@@ -25,7 +24,7 @@ select
   certificate_profile_type,
   lifecycle_state as state
 from
-  oci_certificate_management_certificate;
+  oci_certificates_management_certificate;
 ```
 
 ### List imported certificates
@@ -39,7 +38,7 @@ select
   config_type,
   signature_algorithm
 from
-  oci_certificate_management_certificate
+  oci_certificates_management_certificate
 where
   config_type = 'IMPORTED';
 ```
@@ -55,7 +54,7 @@ select
   certificate_revocation_list_details,
   key_algorithm
 from
-  oci_certificate_management_certificate
+  oci_certificates_management_certificate
 where
   lifecycle_state = 'FAILED';
 ```
@@ -71,7 +70,7 @@ select
   time_created,
   time_of_deletion
 from
-  oci_certificate_management_certificate
+  oci_certificates_management_certificate
 where
   time_created >= now() - interval '30' day;
 ```
@@ -88,5 +87,5 @@ select
   current_version ->> 'serialNumber' as serial_number,
   current_version ->> 'stages' as stages
 from
-  oci_certificate_management_certificate;
+  oci_certificates_management_certificate;
 ```

@@ -1,4 +1,4 @@
-# Table: oci_certificate_management_association
+# Table: oci_certificates_management_association
 
 OCI Certificate Management Association is a feature provided by Oracle Cloud Infrastructure (OCI) that allows you to associate a certificate with a specific resource. In OCI, a certificate represents an SSL/TLS certificate used for securing communication between clients and servers.
 
@@ -15,7 +15,7 @@ select
   association_type,
   time_created
 from
-  oci_certificate_management_association;
+  oci_certificates_management_association;
 ```
 
 ### Count the number of certificate associations by type
@@ -25,7 +25,7 @@ select
   association_type,
   count(id) as numbers_of_association
 from
-  oci_certificate_management_association
+  oci_certificates_management_association
 group by
   association_type;
 ```
@@ -40,7 +40,7 @@ select
   time_created,
   associated_resource_id
 from
-  oci_certificate_management_association
+  oci_certificates_management_association
 where
   time_created >= now() - interval '10' day;
 ```
@@ -55,7 +55,7 @@ select
   time_created,
   associated_resource_id
 from
-  oci_certificate_management_association
+  oci_certificates_management_association
 where
   lifecycle_state <> 'ACTIVE';
 ```

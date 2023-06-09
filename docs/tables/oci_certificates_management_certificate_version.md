@@ -1,4 +1,4 @@
-# Table: oci_certificate_management_certificate_version
+# Table: oci_certificates_management_certificate_version
 
 The details of the certificate version
 
@@ -19,7 +19,7 @@ select
   validity,
   revocation_status
 from
-  oci_certificate_management_certificate_version;
+  oci_certificates_management_certificate_version;
 ```
 
 ### Get all certificate versions
@@ -35,11 +35,11 @@ select
   cmcv.subject_alternative_names,
   cmcv.time_of_deletion,
   cmcv.validity,
-  cmcv.revocation_status 
+  cmcv.revocation_status
 from
-  oci_certificate_management_certificate_version cmcv 
+  oci_certificates_management_certificate_version cmcv
   inner join
-    oci_certificate_management_certificate cmc 
+    oci_certificates_management_certificate cmc
     on cmcv.certificate_id = cmc.id;
 ```
 
@@ -50,7 +50,7 @@ select
   certificate_id,
   count(version_number)
 from
-  oci_certificate_management_certificate_version
+  oci_certificates_management_certificate_version
 group by
   certificate_id;
 ```
@@ -65,7 +65,7 @@ select
   time_created,
   serial_number
 from
-  oci_certificate_management_certificate_version
+  oci_certificates_management_certificate_version
 where
   time_created >= now() - interval '30' day;
 ```

@@ -15,7 +15,7 @@ import (
 // TABLE DEFINITION
 func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_certificate_management_ca_bundle",
+		Name:             "oci_certificates_management_ca_bundle",
 		Description:      "OCI Certificate Management CA Bundle",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
@@ -123,7 +123,7 @@ func listCertificatesManagementCaBundles(ctx context.Context, d *plugin.QueryDat
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_ca_bundle.listCertificatesManagementCaBundles", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_ca_bundle.listCertificatesManagementCaBundles", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -133,7 +133,7 @@ func listCertificatesManagementCaBundles(ctx context.Context, d *plugin.QueryDat
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_management_ca_bundle.listCertificatesManagementCaBundles", "connection_error", err)
+		logger.Error("oci_certificates_management_ca_bundle.listCertificatesManagementCaBundles", "connection_error", err)
 		return nil, err
 	}
 
@@ -156,7 +156,7 @@ func listCertificatesManagementCaBundles(ctx context.Context, d *plugin.QueryDat
 	for pagesLeft {
 		response, err := session.CertificatesManagementClient.ListCaBundles(ctx, request)
 		if err != nil {
-			logger.Error("oci_certificate_management_ca_bundle.listCertificatesManagementCaBundles", "api_error", err)
+			logger.Error("oci_certificates_management_ca_bundle.listCertificatesManagementCaBundles", "api_error", err)
 			return nil, err
 		}
 		for _, respItem := range response.Items {
@@ -183,7 +183,7 @@ func getCertificatesManagementCaBundle(ctx context.Context, d *plugin.QueryData,
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_certificate_management_ca_bundle.getCertificatesManagementCaBundle", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_certificates_management_ca_bundle.getCertificatesManagementCaBundle", "Compartment", compartment, "OCI_REGION", region)
 
 	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 		return nil, nil
@@ -194,7 +194,7 @@ func getCertificatesManagementCaBundle(ctx context.Context, d *plugin.QueryData,
 	// Create Session
 	session, err := certificatesManagementService(ctx, d, region)
 	if err != nil {
-		logger.Error("oci_certificate_management_ca_bundle.getCertificatesManagementCaBundle", "connection_error", err)
+		logger.Error("oci_certificates_management_ca_bundle.getCertificatesManagementCaBundle", "connection_error", err)
 		return nil, err
 	}
 	request.RequestMetadata = common.RequestMetadata{
@@ -203,7 +203,7 @@ func getCertificatesManagementCaBundle(ctx context.Context, d *plugin.QueryData,
 
 	response, err := session.CertificatesManagementClient.GetCaBundle(ctx, request)
 	if err != nil {
-		logger.Error("oci_certificate_management_ca_bundle.getCertificatesManagementCaBundle", "api_error", err)
+		logger.Error("oci_certificates_management_ca_bundle.getCertificatesManagementCaBundle", "api_error", err)
 		return nil, err
 	}
 	return response.CaBundle, nil
@@ -253,7 +253,7 @@ func buildListCertificatesManagementCaBundleFilters(equalQuals plugin.KeyColumnE
 	if equalQuals["compartment_id"] != nil {
 		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
 	}
-	
+
 	if equalQuals["lifecycle_state"] != nil {
 		request.LifecycleState = certificatesmanagement.ListCaBundlesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}

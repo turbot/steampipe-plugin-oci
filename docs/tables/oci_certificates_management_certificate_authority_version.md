@@ -1,4 +1,4 @@
-# Table: oci_certificate_management_certificate_authority_version
+# Table: oci_certificates_management_certificate_authority_version
 
 In Oracle Cloud Infrastructure (OCI), the Certificate Management service provides a secure and centralized way to manage SSL/TLS certificates. The certificates managed by OCI Certificate Management do not have versions in the traditional sense. Instead, the service allows you to manage the lifecycle of certificates, including creating, importing, renewing, and revoking certificates.
 
@@ -19,7 +19,7 @@ select
   validity,
   revocation_status
 from
-  oci_certificate_management_certificate_authority_version;
+  oci_certificates_management_certificate_authority_version;
 ```
 
 ### Get all certificate authority versions
@@ -35,11 +35,11 @@ select
   cmcav.subject_alternative_names,
   cmcav.time_of_deletion,
   cmcav.validity,
-  cmcav.revocation_status 
+  cmcav.revocation_status
 from
-  oci_certificate_management_certificate_authority_version cmcav 
+  oci_certificates_management_certificate_authority_version cmcav
   inner join
-    oci_certificate_management_certificate_authority cmca 
+    oci_certificates_management_certificate_authority cmca
     on cmca.id = cmcav.certificate_authority_id;
 ```
 
@@ -50,7 +50,7 @@ select
   certificate_authority_id,
   count(version_number)
 from
-  oci_certificate_management_certificate_authority_version
+  oci_certificates_management_certificate_authority_version
 group by
   certificate_authority_id;
 ```
@@ -65,7 +65,7 @@ select
   issuer_ca_version_number,
   version_name
 from
-  oci_certificate_management_certificate_authority_version
+  oci_certificates_management_certificate_authority_version
 where
   time_created >= now() - interval '30' day;
 ```

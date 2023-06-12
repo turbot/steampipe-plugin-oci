@@ -8,19 +8,19 @@ Application Migration simplifies the migration of applications from Oracle Cloud
 
 ```sql
 select
-    id,
-    display_name,
-    description,
-    source_id,
-    application_name,
-    application_type,
-    pre_created_target_database_type,
-    is_selective_migration,
-    service_config,
-    application_config,
-    lifecycle_details,
-    migration_state,
-    lifecycle_state as state
+  id,
+  display_name,
+  description,
+  source_id,
+  application_name,
+  application_type,
+  pre_created_target_database_type,
+  is_selective_migration,
+  service_config,
+  application_config,
+  lifecycle_details,
+  migration_state,
+  lifecycle_state as state
 from
-oci_application_migration_migration;
+  oci_application_migration_migration;
 ```

@@ -13,12 +13,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/adm"
+	"github.com/oracle/oci-go-sdk/v65/aianomalydetection"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
 	"github.com/oracle/oci-go-sdk/v65/applicationmigration"
+	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/audit"
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
 	"github.com/oracle/oci-go-sdk/v65/bastion"
+	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
@@ -36,6 +40,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/logging"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
@@ -51,45 +56,135 @@ import (
 )
 
 type session struct {
-	TenancyID                      string
-	AnalyticsClient                analytics.AnalyticsClient
-	ApiGatewayClient               apigateway.ApiGatewayClient
-	ApplicationMigrationClient     applicationmigration.ApplicationMigrationClient
-	AuditClient                    audit.AuditClient
-	AutoScalingClient              autoscaling.AutoScalingClient
-	BastionClient                  bastion.BastionClient
-	BlockstorageClient             core.BlockstorageClient
-	BudgetClient                   budget.BudgetClient
-	CloudGuardClient               cloudguard.CloudGuardClient
-	ComputeClient                  core.ComputeClient
-	ComputeManagementClient        core.ComputeManagementClient
-	ContainerEngineClient          containerengine.ContainerEngineClient
-	DatabaseClient                 database.DatabaseClient
-	DnsClient                      dns.DnsClient
-	EventsClient                   events.EventsClient
-	FileStorageClient              filestorage.FileStorageClient
-	FunctionsManagementClient      functions.FunctionsManagementClient
-	IdentityClient                 identity.IdentityClient
-	KmsManagementClient            keymanagement.KmsManagementClient
-	KmsVaultClient                 keymanagement.KmsVaultClient
-	LoggingManagementClient        logging.LoggingManagementClient
-	LoadBalancerClient             loadbalancer.LoadBalancerClient
-	MonitoringClient               monitoring.MonitoringClient
-	MySQLConfigurationClient       mysql.MysqlaasClient
-	MySQLChannelClient             mysql.ChannelsClient
-	MySQLBackupClient              mysql.DbBackupsClient
-	MySQLDBSystemClient            mysql.DbSystemClient
-	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
-	NoSQLClient                    nosql.NosqlClient
-	NotificationControlPlaneClient ons.NotificationControlPlaneClient
-	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
-	ObjectStorageClient            objectstorage.ObjectStorageClient
-	QueueAdminClient               queue.QueueAdminClient
-	ResourceSearchClient           resourcesearch.ResourceSearchClient
-	ResourceManagerClient          resourcemanager.ResourceManagerClient
-	StreamAdminClient              streaming.StreamAdminClient
-	VaultClient                    vault.VaultsClient
-	VirtualNetworkClient           core.VirtualNetworkClient
+	TenancyID                             string
+	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
+	ApplicationMigrationClient            applicationmigration.ApplicationMigrationClient
+	AnomalyDetectionClient                aianomalydetection.AnomalyDetectionClient
+	AnalyticsClient                       analytics.AnalyticsClient
+	ApiGatewayClient                      apigateway.ApiGatewayClient
+	ArtifactClient                        artifacts.ArtifactsClient
+	AuditClient                           audit.AuditClient
+	AutoScalingClient                     autoscaling.AutoScalingClient
+	BastionClient                         bastion.BastionClient
+	BdsClient                             bds.BdsClient
+	BlockstorageClient                    core.BlockstorageClient
+	BudgetClient                          budget.BudgetClient
+	CloudGuardClient                      cloudguard.CloudGuardClient
+	ComputeClient                         core.ComputeClient
+	ComputeManagementClient               core.ComputeManagementClient
+	ContainerEngineClient                 containerengine.ContainerEngineClient
+	DatabaseClient                        database.DatabaseClient
+	DnsClient                             dns.DnsClient
+	EventsClient                          events.EventsClient
+	FileStorageClient                     filestorage.FileStorageClient
+	FunctionsManagementClient             functions.FunctionsManagementClient
+	IdentityClient                        identity.IdentityClient
+	KmsManagementClient                   keymanagement.KmsManagementClient
+	KmsVaultClient                        keymanagement.KmsVaultClient
+	LoadBalancerClient                    loadbalancer.LoadBalancerClient
+	LoggingManagementClient               logging.LoggingManagementClient
+	MonitoringClient                      monitoring.MonitoringClient
+	MySQLBackupClient                     mysql.DbBackupsClient
+	MySQLChannelClient                    mysql.ChannelsClient
+	MySQLConfigurationClient              mysql.MysqlaasClient
+	MySQLDBSystemClient                   mysql.DbSystemClient
+	NetworkFirewallClient                 networkfirewall.NetworkFirewallClient
+	NetworkLoadBalancerClient             networkloadbalancer.NetworkLoadBalancerClient
+	NoSQLClient                           nosql.NosqlClient
+	NotificationControlPlaneClient        ons.NotificationControlPlaneClient
+	NotificationDataPlaneClient           ons.NotificationDataPlaneClient
+	ObjectStorageClient                   objectstorage.ObjectStorageClient
+	QueueAdminClient                      queue.QueueAdminClient
+	ResourceManagerClient                 resourcemanager.ResourceManagerClient
+	ResourceSearchClient                  resourcesearch.ResourceSearchClient
+	StreamAdminClient                     streaming.StreamAdminClient
+	VaultClient                           vault.VaultsClient
+	VirtualNetworkClient                  core.VirtualNetworkClient
+}
+
+// admService returns the service client for OCI ADM service
+func admService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("adm-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("admService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Adm service client
+	client, err := adm.NewApplicationDependencyManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                             tenantId,
+		ApplicationDependencyManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+
+}
+
+// aiAnomalyDetectionService returns the service client for OCI AiAnomalyDetection service
+func aiAnomalyDetectionService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("aianomalydetection-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("aiAnomalyDetectionService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get AiAnomalyDetection service client
+	client, err := aianomalydetection.NewAnomalyDetectionClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:              tenantId,
+		AnomalyDetectionClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // apiGatewayService returns the service client for OCI ApiGateway service
@@ -136,7 +231,6 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 	return sess, nil
 }
 
-// applicationMigrationService returns the service client for OCI ApplicationMigration service
 func applicationMigrationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
@@ -170,6 +264,50 @@ func applicationMigrationService(ctx context.Context, d *plugin.QueryData, regio
 	sess := &session{
 		TenancyID:                  tenantId,
 		ApplicationMigrationClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+
+func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("artifact-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("artifactService", "error_getProvider", err)
+		return nil, err
+	}
+
+	// get artifact service client
+	client, err := artifacts.NewArtifactsClientWithConfigurationProvider(provider)
+	if err != nil {
+		logger.Error("artifactService", "error_NewArtifactsClientWithConfigurationProvider", err)
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		logger.Error("artifactService", "error_TenancyOCID", err)
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:       tenantId,
+		ArtifactClient: client,
 	}
 
 	// save session in cache
@@ -249,6 +387,46 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 	sess := &session{
 		TenancyID:         tenantId,
 		AutoScalingClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// bdsService returns the service client for OCI Big Data Service
+func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("bigdata-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("bdsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := bds.NewBdsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		BdsClient: client,
 	}
 
 	// save session in cache
@@ -565,6 +743,48 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	sess := &session{
 		TenancyID:                 tenantID,
 		FunctionsManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// networkService returns the service client for OCI Network Firewall service
+func networkFirewallService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("networkFirewall-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkFirewallService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get network firewall service client
+	client, err := networkfirewall.NewNetworkFirewallClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		NetworkFirewallClient: client,
 	}
 
 	// save session in cache

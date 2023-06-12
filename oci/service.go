@@ -23,6 +23,8 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/bastion"
 	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
+	"github.com/oracle/oci-go-sdk/v65/certificates"
+	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v65/common/auth"
@@ -56,10 +58,10 @@ import (
 
 type session struct {
 	TenancyID                             string
-	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
 	AnomalyDetectionClient                aianomalydetection.AnomalyDetectionClient
 	AnalyticsClient                       analytics.AnalyticsClient
 	ApiGatewayClient                      apigateway.ApiGatewayClient
+	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
 	ArtifactClient                        artifacts.ArtifactsClient
 	AuditClient                           audit.AuditClient
 	AutoScalingClient                     autoscaling.AutoScalingClient
@@ -67,6 +69,8 @@ type session struct {
 	BdsClient                             bds.BdsClient
 	BlockstorageClient                    core.BlockstorageClient
 	BudgetClient                          budget.BudgetClient
+	CertificatesClient                    certificates.CertificatesClient
+	CertificatesManagementClient          certificatesmanagement.CertificatesManagementClient
 	CloudGuardClient                      cloudguard.CloudGuardClient
 	ComputeClient                         core.ComputeClient
 	ComputeManagementClient               core.ComputeManagementClient
@@ -124,7 +128,6 @@ func admService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 	if err != nil {
 		return nil, err
 	}
-
 	// get tenant ocid from provider
 	tenantId, err := provider.TenancyOCID()
 	if err != nil {
@@ -263,7 +266,7 @@ func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*
 	}
 
 	sess := &session{
-		TenancyID:       tenantId,
+		TenancyID:      tenantId,
 		ArtifactClient: client,
 	}
 
@@ -1247,6 +1250,90 @@ func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	sess := &session{
 		TenancyID:    tenantID,
 		BudgetClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// certificatesManagementService returns the service client for OCI CertificatesManagement service
+func certificatesManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificatesmanagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get CertificatesManagement service client
+	client, err := certificatesmanagement.NewCertificatesManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                    tenantId,
+		CertificatesManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// certificatesService returns the service client for OCI Certificates service
+func certificatesService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificates-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Certificates service client
+	client, err := certificates.NewCertificatesClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		CertificatesClient: client,
 	}
 
 	// save session in cache

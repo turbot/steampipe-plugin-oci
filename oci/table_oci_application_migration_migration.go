@@ -12,11 +12,11 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
 func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_application_migration_migration",
-		Description:      "OCI Migration",
+		Description:      "OCI Application Migration",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -169,7 +169,7 @@ func listApplicationMigrationMigrations(ctx context.Context, d *plugin.QueryData
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listApplicationMigrationMigrations", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_application_migration_migration.listApplicationMigrationMigrations", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
@@ -229,7 +229,7 @@ func getApplicationMigrationMigration(ctx context.Context, d *plugin.QueryData, 
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getApplicationMigrationMigration", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_application_migration_migration.getApplicationMigrationMigration", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {

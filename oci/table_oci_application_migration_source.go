@@ -12,11 +12,11 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-// // TABLE DEFINITION
+//// TABLE DEFINITION
 func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_application_migration_source",
-		Description:      "OCI Source",
+		Description:      "OCI Application Migration Source",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -87,6 +87,17 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
+			{
+				Name:        "source_details",
+				Description: "Details of the source.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getApplicationMigrationSource,
+			},
+			{
+				Name:        "type",
+				Description: "Type of the source.",
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// Standard Steampipe columns
 			{
@@ -126,14 +137,14 @@ func listApplicationMigrationSources(ctx context.Context, d *plugin.QueryData, _
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("listApplicationMigrationSources", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_application_migration_source.listApplicationMigrationSources", "Compartment", compartment, "OCI_REGION", region)
 
 	equalQuals := d.EqualsQuals
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
 		return nil, nil
 	}
-	
+
 	// Create Session
 	session, err := applicationMigrationService(ctx, d, region)
 	if err != nil {
@@ -187,7 +198,7 @@ func getApplicationMigrationSource(ctx context.Context, d *plugin.QueryData, h *
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("getApplicationMigrationSource", "Compartment", compartment, "OCI_REGION", region)
+	logger.Debug("oci_application_migration_source.getApplicationMigrationSource", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {

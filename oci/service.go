@@ -234,6 +234,7 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 	return sess, nil
 }
 
+// applicationMigrationService returns the service client for OCI Application Migration service
 func applicationMigrationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 

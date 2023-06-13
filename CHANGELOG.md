@@ -19,8 +19,7 @@ _What's new?_
 
 _Bug fixes_
 
-- Fixed `oci_identity_policy` table to return data for all compartments instead of only `root` compartment. ([#505](https://github.com/turbot/steampipe-plugin-oci/pull/505))
-- Fixed `oci_identity_availability_domain` table to return data for all compartments instead of only `root` compartment. ([#512](https://github.com/turbot/steampipe-plugin-oci/pull/512))
+- Fixed `oci_identity_policy` and `oci_identity_availability_domain` tables to return data for all compartments instead of only `root` compartment. ([#505](https://github.com/turbot/steampipe-plugin-oci/pull/505)) ([#512](https://github.com/turbot/steampipe-plugin-oci/pull/512))
 
 ## v0.25.0 [2023-06-03]
 

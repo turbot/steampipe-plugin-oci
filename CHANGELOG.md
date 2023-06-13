@@ -1,9 +1,33 @@
+## v0.26.0 [2023-06-13]
+
+_What's new?_
+
+- New tables added: (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_adm_knowledge_base](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_adm_knowledge_base) ([#509](https://github.com/turbot/steampipe-plugin-oci/pull/509))
+  - [oci_adm_vulnerability_audit](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_adm_vulnerability_audit) ([#509](https://github.com/turbot/steampipe-plugin-oci/pull/509))
+  - [oci_application_migration_migration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_application_migration_migration) ([#510](https://github.com/turbot/steampipe-plugin-oci/pull/510))
+  - [oci_application_migration_source](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_application_migration_source) ([#510](https://github.com/turbot/steampipe-plugin-oci/pull/510))
+  - [oci_autoscaling_auto_scaling_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_autoscaling_auto_scaling_policy) ([#513](https://github.com/turbot/steampipe-plugin-oci/pull/513))
+  - [oci_bds_bds_instance](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bds_bds_instance) ([#514](https://github.com/turbot/steampipe-plugin-oci/pull/514))
+  - [oci_certificate_authority_bundle](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_authority_bundle) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_association](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_association) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_ca_bundle](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_ca_bundle) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_authority](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_authority) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_authority_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_authority_version) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_version) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+
+_Bug fixes_
+
+- Fixed `oci_identity_policy` table to return data for all compartments instead of only `root` compartment. ([#505](https://github.com/turbot/steampipe-plugin-oci/pull/505))
+- Fixed `oci_identity_availability_domain` table to return data for all compartments instead of only `root` compartment. ([#512](https://github.com/turbot/steampipe-plugin-oci/pull/512))
+
 ## v0.25.0 [2023-06-03]
 
 _What's new?_
 
 - New tables added: (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
-  - [oci_ai_anomaly_detection_ai_private_endpoint](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_ai_private_endpoint) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508)) 
+  - [oci_ai_anomaly_detection_ai_private_endpoint](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_ai_private_endpoint) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
   - [oci_ai_anomaly_detection_data_asset](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_data_asset) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
   - [oci_ai_anomaly_detection_model](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_model) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
   - [oci_ai_anomaly_detection_project](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_project) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))

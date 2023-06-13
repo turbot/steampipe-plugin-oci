@@ -16,7 +16,7 @@ import (
 func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_application_migration_migration",
-		Description:      "OCI Application Migration",
+		Description:      "OCI Application Migration Migration",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
@@ -27,10 +27,6 @@ func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
-					Require: plugin.Optional,
-				},
-				{
-					Name:    "id",
 					Require: plugin.Optional,
 				},
 				{
@@ -77,7 +73,7 @@ func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "pre_created_target_database_type",
-				Description: "The pre-existing database type to be used in this migration. Currently, Application migration only supports Oracle Cloud",
+				Description: "The pre-existing database type to be used in this migration. Currently, Application migration only supports Oracle Cloud.",
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     getApplicationMigrationMigration,
 			},
@@ -89,13 +85,13 @@ func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "service_config",
-				Description: "Configuration required to migrate the application. In addition to the key and value, additional fields are provided",
+				Description: "Configuration required to migrate the application. In addition to the key and value, additional fields are provided.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getApplicationMigrationMigration,
 			},
 			{
 				Name:        "application_config",
-				Description: "Configuration required to migrate the application. In addition to the key and value, additional fields are provided",
+				Description: "Configuration required to migrate the application. In addition to the key and value, additional fields are provided.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getApplicationMigrationMigration,
 			},
@@ -310,14 +306,6 @@ func applicationMigrationMigrationTags(_ context.Context, d *transform.Transform
 func buildApplicationMigrationMigrationFilters(equalQuals plugin.KeyColumnEqualsQualMap) applicationmigration.ListMigrationsRequest {
 	request := applicationmigration.ListMigrationsRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-
-	}
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-
-	}
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
 

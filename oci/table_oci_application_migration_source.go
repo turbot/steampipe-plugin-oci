@@ -31,10 +31,6 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "display_name",
 					Require: plugin.Optional,
 				},
@@ -279,14 +275,6 @@ func applicationMigrationSourceTags(_ context.Context, d *transform.TransformDat
 func buildApplicationMigrationSourceFilters(equalQuals plugin.KeyColumnEqualsQualMap) applicationmigration.ListSourcesRequest {
 	request := applicationmigration.ListSourcesRequest{}
 
-	if equalQuals["compartment_id"] != nil {
-		request.CompartmentId = types.String(equalQuals["compartment_id"].GetStringValue())
-
-	}
-	if equalQuals["id"] != nil {
-		request.Id = types.String(equalQuals["id"].GetStringValue())
-
-	}
 	if equalQuals["display_name"] != nil {
 		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
 

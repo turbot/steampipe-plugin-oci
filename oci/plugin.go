@@ -28,6 +28,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
+			"oci_logging_search":                                           tableLoggingSearch(ctx),
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),

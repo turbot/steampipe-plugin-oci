@@ -32,6 +32,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
 	"github.com/oracle/oci-go-sdk/v65/loadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/logging"
+	"github.com/oracle/oci-go-sdk/v65/loggingsearch"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
@@ -68,6 +69,7 @@ type session struct {
 	KmsManagementClient            keymanagement.KmsManagementClient
 	KmsVaultClient                 keymanagement.KmsVaultClient
 	LoggingManagementClient        logging.LoggingManagementClient
+	LoggingSearchClient            loggingsearch.LogSearchClient
 	LoadBalancerClient             loadbalancer.LoadBalancerClient
 	MonitoringClient               monitoring.MonitoringClient
 	MySQLConfigurationClient       mysql.MysqlaasClient
@@ -320,6 +322,46 @@ func loggingManagementService(ctx context.Context, d *plugin.QueryData, region s
 	sess := &session{
 		TenancyID:               tenantId,
 		LoggingManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// loggingSearchService returns the service client for OCI Logging Search Service
+func loggingSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("loggingsearch-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("loggingSearchService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := loggingsearch.NewLogSearchClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:           tenantId,
+		LoggingSearchClient: client,
 	}
 
 	// save session in cache
@@ -831,7 +873,7 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 	}
 
 	sess := &session{
-		TenancyID:     tenantId,
+		TenancyID:               tenantId,
 		ComputeManagementClient: client,
 	}
 

@@ -7,7 +7,6 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/devops"
 
-	"github.com/hashicorp/go-hclog"
 	"github.com/turbot/go-kit/types"
 
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
@@ -27,7 +26,9 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 			Hydrate:    getRepository,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listRepositories,
+			Hydrate:           listRepositories,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			// Since we were encountering errors when retrieving results by passing the project_id as an input parameter, we have decided to remove it from the optional key qualifiers.
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -38,7 +39,7 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "id",
+					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
 			},
@@ -96,12 +97,6 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "mirror_repository_config",
-				Description: "Mirror repository configuration.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getRepository,
-			},
-			{
 				Name:        "time_created",
 				Description: "The time the repository was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -142,6 +137,12 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 				Hydrate:     getRepository,
 			},
 			{
+				Name:        "mirror_repository_config",
+				Description: "Mirror repository configuration.",
+				Type:        proto.ColumnType_JSON,
+				Hydrate:     getRepository,
+			},
+			{
 				Name:        "trigger_build_events",
 				Description: "Trigger build events supported for this repository.",
 				Type:        proto.ColumnType_JSON,
@@ -172,6 +173,12 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.From(repositoryTags),
 			},
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Name"),
+			},
 
 			// Standard OCI columns
 			{
@@ -201,8 +208,8 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 
 func listRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	region := d.EqualsQualString(matrixKeyRegion)
 
 	logger.Debug("listRepositories", "Compartment", compartment, "OCI_REGION", region)
 
@@ -220,10 +227,7 @@ func listRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 	}
 
 	// Build request parameters
-	request, isValid := buildRepositoryFilters(equalQuals, logger)
-	if !isValid {
-		return nil, nil
-	}
+	request := buildRepositoryFilters(equalQuals)
 	request.CompartmentId = types.String(compartment)
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = oci_common.RequestMetadata{
@@ -267,8 +271,8 @@ func listRepositories(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydrat
 
 func getRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("getRepository", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
@@ -310,19 +314,23 @@ func getRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 }
 
 // Build additional filters
-func buildRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.Logger) (devops.ListRepositoriesRequest, bool) {
+func buildRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) devops.ListRepositoriesRequest {
 	request := devops.ListRepositoriesRequest{}
-	isValid := true
 
 	if equalQuals["name"] != nil && strings.Trim(equalQuals["name"].GetStringValue(), " ") != "" {
 		request.Name = types.String(equalQuals["name"].GetStringValue())
 	}
-	return request, isValid
+	if equalQuals["lifecycle_state"] != nil && strings.Trim(equalQuals["lifecycle_state"].GetStringValue(), " ") != "" {
+		request.LifecycleState = devops.RepositoryLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
+	}
+
+	return request
 }
 
 // Priority order for tags
 // 1. Defined Tags
-// 2. Free-form tags
+// 2. Free-form Tags
+// 3. System Tags
 func repositoryTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}

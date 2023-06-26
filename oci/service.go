@@ -32,6 +32,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
+	"github.com/oracle/oci-go-sdk/v65/devops"
 	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/events"
 	"github.com/oracle/oci-go-sdk/v65/filestorage"
@@ -79,6 +80,7 @@ type session struct {
 	ContainerEngineClient                 containerengine.ContainerEngineClient
 	DatabaseClient                        database.DatabaseClient
 	DnsClient                             dns.DnsClient
+	DevopsClient                          devops.DevopsClient
 	EventsClient                          events.EventsClient
 	FileStorageClient                     filestorage.FileStorageClient
 	FunctionsManagementClient             functions.FunctionsManagementClient
@@ -275,7 +277,6 @@ func applicationMigrationService(ctx context.Context, d *plugin.QueryData, regio
 
 	return sess, nil
 }
-
 
 func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -670,6 +671,46 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	sess := &session{
 		TenancyID:    tenantId,
 		EventsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// devopsService returns the service client for OCI Devops Service
+func devopsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("devops-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("devopsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := devops.NewDevopsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantId,
+		DevopsClient: client,
 	}
 
 	// save session in cache

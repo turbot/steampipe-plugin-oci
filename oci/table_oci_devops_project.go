@@ -101,6 +101,11 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionFreefromTags,
 				Type:        proto.ColumnType_JSON,
 			},
+			{
+				Name:        "system_tags",
+				Description: ColumnDescriptionSystemTags,
+				Type:        proto.ColumnType_JSON,
+			},
 
 			// Standard Steampipe columns
 			{
@@ -254,9 +259,6 @@ func buildProjectFilters(equalQuals plugin.KeyColumnEqualsQualMap, logger hclog.
 
 	if equalQuals["name"] != nil && strings.Trim(equalQuals["name"].GetStringValue(), " ") != "" {
 		request.Name = types.String(equalQuals["name"].GetStringValue())
-	}
-	if equalQuals["lifecycle_state"] != nil && strings.Trim(equalQuals["lifecycle_state"].GetStringValue(), " ") != "" {
-		request.LifecycleState = devops.ProjectLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
 	}
 	return request, isValid
 }

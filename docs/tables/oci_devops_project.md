@@ -8,7 +8,7 @@ A DevOps project is created to successfully build and deploy applications by usi
 
 ```sql
 select
-  display_name,
+  name,
   id,
   description,
   namespace,

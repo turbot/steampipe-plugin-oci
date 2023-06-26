@@ -310,6 +310,16 @@ func devopsProjectTags(ctx context.Context, d *transform.TransformData) (interfa
 
 		}
 	}
+if systemTags != nil {
+		if tags == nil {
+			tags = map[string]interface{}{}
+		}
+		for _, v := range systemTags {
+			for key, value := range v {
+				tags[key] = value
+			}
 
+		}
+	}
 	return tags, nil
 }

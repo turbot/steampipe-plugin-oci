@@ -12,7 +12,7 @@ select
   id,
   description,
   namespace,
-  state,
+  lifecycle_state,
   time_created,
   time_updated
 from

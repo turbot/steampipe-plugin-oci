@@ -51,3 +51,32 @@ from
   oci_devops_project project
   left join oci_ons_notification_topic topic on project.notification_topic_id = topic.topic_id;
 ```
+
+### List projects that are not active
+
+```sql
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created,
+  namespace
+from
+  oci_devops_project
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+### List projects that are created in last 30 days
+
+```sql
+select
+  name,
+  id,
+  time_created,
+  namespace
+from
+  oci_devops_project
+where
+  time_created >= now() - interval '30' day;
+```

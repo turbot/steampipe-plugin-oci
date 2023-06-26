@@ -279,6 +279,7 @@ func transformNotificationTopic(ctx context.Context, d *transform.TransformData)
 func devopsProjectTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}
+	var systemTags map[string]map[string]interface{}
 	switch d.HydrateItem.(type) {
 	case devops.ProjectSummary:
 		freeFormTags = d.HydrateItem.(devops.ProjectSummary).FreeformTags

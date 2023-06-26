@@ -49,7 +49,5 @@ select
   project.description
 from
   oci_devops_project project
-  left join
-  oci_ons_notification_topic topic
-  on project.notification_topic_id = topic.topic_id
+  left join oci_ons_notification_topic topic on project.notification_topic_id = topic.topic_id;
 ```

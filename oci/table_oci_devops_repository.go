@@ -140,7 +140,6 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 				Name:        "mirror_repository_config",
 				Description: "Mirror repository configuration.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getRepository,
 			},
 			{
 				Name:        "trigger_build_events",

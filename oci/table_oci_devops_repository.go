@@ -327,9 +327,9 @@ func buildRepositoryFilters(equalQuals plugin.KeyColumnEqualsQualMap) devops.Lis
 }
 
 // Priority order for tags
-// 1. Defined Tags
-// 2. Free-form Tags
-// 3. System Tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
 func repositoryTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}

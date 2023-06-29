@@ -1,3 +1,11 @@
+## v0.28.0 [2023-06-29]
+
+_What's new?_
+
+- New tables added
+  - [oci_devops_project](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_devops_project) ([#523](https://github.com/turbot/steampipe-plugin-oci/pull/523)) (Thanks [lucasjellema](https://github.com/lucasjellema) for the contribution!)
+  - [oci_devops_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_devops_repository) ([#522](https://github.com/turbot/steampipe-plugin-oci/pull/522))
+
 ## v0.27.0 [2023-06-20]
 
 _Dependencies_

@@ -305,7 +305,7 @@ func getRepository(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	}
 	response, err := session.DevopsClient.GetRepository(ctx, request)
 	if err != nil {
-		logger.Error("oci_devops_repository.getQueue", "api_error", err)
+		logger.Error("oci_devops_repository.getRepository", "api_error", err)
 		return nil, err
 	}
 

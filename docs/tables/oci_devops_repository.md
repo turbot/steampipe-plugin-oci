@@ -37,7 +37,7 @@ select
 from
   oci_devops_repository
 where
-    lifecycle_state <> 'ACTIVE';
+  lifecycle_state <> 'ACTIVE';
 ```
 
 ### List hosted repositories

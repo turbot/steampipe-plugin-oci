@@ -73,7 +73,6 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Description: "A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.",
 				Type:        proto.ColumnType_STRING,
 			},
-
 			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the project.",
@@ -106,7 +105,6 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Description: ColumnDescriptionSystemTags,
 				Type:        proto.ColumnType_JSON,
 			},
-
 			// Standard Steampipe columns
 			{
 				Name:        "tags",
@@ -120,7 +118,6 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("Name"),
 			},
-
 			// Standard OCI columns
 			{
 				Name:        "region",
@@ -286,9 +283,11 @@ func devopsProjectTags(ctx context.Context, d *transform.TransformData) (interfa
 	case devops.ProjectSummary:
 		freeFormTags = d.HydrateItem.(devops.ProjectSummary).FreeformTags
 		definedTags = d.HydrateItem.(devops.ProjectSummary).DefinedTags
+		systemTags = d.HydrateItem.(devops.ProjectSummary).SystemTags
 	case devops.Project:
 		freeFormTags = d.HydrateItem.(devops.Project).FreeformTags
 		definedTags = d.HydrateItem.(devops.Project).DefinedTags
+		systemTags = d.HydrateItem.(devops.Project).SystemTags
 	default:
 		return nil, nil
 	}

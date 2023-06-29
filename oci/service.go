@@ -81,7 +81,6 @@ type session struct {
 	DatabaseClient                        database.DatabaseClient
 	DevopsClient                          devops.DevopsClient
 	DnsClient                             dns.DnsClient
-	DevopsClient                          devops.DevopsClient
 	EventsClient                          events.EventsClient
 	FileStorageClient                     filestorage.FileStorageClient
 	FunctionsManagementClient             functions.FunctionsManagementClient

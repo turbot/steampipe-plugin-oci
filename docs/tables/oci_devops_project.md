@@ -19,24 +19,6 @@ from
   oci_devops_project;
 ```
 
-### Query with all columns for DevOps Projects
-
-```sql
-select
-  name,
-  id,
-  lifecycle_state,
-  notification_topic_id,
-  namespace,
-  lifecycle_details,
-  description,
-  time_created,
-  time_updated,
-  tags
-from
-  oci_devops_project;
-```
-
 ### Join DevOps Projects with Notification Topics
 
 ```sql
@@ -67,7 +49,7 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
-### List projects that are created in last 30 days
+### List projects that are created in the last 30 days
 
 ```sql
 select

@@ -79,6 +79,7 @@ type session struct {
 	ComputeManagementClient               core.ComputeManagementClient
 	ContainerEngineClient                 containerengine.ContainerEngineClient
 	DatabaseClient                        database.DatabaseClient
+	DevopsClient                          devops.DevopsClient
 	DnsClient                             dns.DnsClient
 	DevopsClient                          devops.DevopsClient
 	EventsClient                          events.EventsClient
@@ -471,6 +472,46 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	sess := &session{
 		TenancyID:      tenantId,
 		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// devOpsService returns the service client for OCI DevOps Service
+func devOpsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("devops-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("devOpsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := devops.NewDevopsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantId,
+		DevopsClient: client,
 	}
 
 	// save session in cache

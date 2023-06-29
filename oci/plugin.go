@@ -117,6 +117,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_pluggable_database":                              tableOciPluggableDatabase(ctx),
 			"oci_database_software_image":                                  tableOciDatabaseSoftwareImage(ctx),
 			"oci_devops_project":                                           tableDevopsProject(ctx),
+			"oci_devops_repository":                                        tableDevopsRepository(ctx),
 			"oci_dns_rrset":                                                tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                             tableDnsTsigKey(ctx),
 			"oci_dns_zone":                                                 tableDnsZone(ctx),

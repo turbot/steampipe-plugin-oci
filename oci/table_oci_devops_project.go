@@ -28,6 +28,7 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listDevopsProjects,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

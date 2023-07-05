@@ -62,6 +62,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_cloud_guard_managed_list":                                 tableCloudGuardManagedList(ctx),
 			"oci_cloud_guard_responder_recipe":                             tableCloudGuardResponderRecipe(ctx),
 			"oci_cloud_guard_target":                                       tableCloudGuardTarget(ctx),
+			"oci_container_instances_container_instance":                   tableContainerInstancesContainerInstance(ctx),
 			"oci_containerengine_cluster":                                  tableOciContainerEngineCluster(ctx),
 			"oci_core_block_volume_replica":                                tableCoreBlockVolumeReplica(ctx),
 			"oci_core_boot_volume":                                         tableCoreBootVolume(ctx),
@@ -182,7 +183,6 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_resourcemanager_stack":                                    tableOciResourceManagerStack(ctx),
 			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
-			"oci_container_instances_container_instance":                   tableContainerInstancesContainerInstance(ctx),
 		},
 	}
 	return p

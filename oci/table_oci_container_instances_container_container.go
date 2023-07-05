@@ -19,14 +19,15 @@ import (
 func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_container_instances_container",
-		Description:      "OCI Container Instance",
+		Description:      "Retrieve information about your Containers Running inside Container Instances.",
 		DefaultTransform: transform.FromCamel(),
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getContainer,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listContainers,
+			Hydrate:           listContainers,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -61,6 +62,7 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the container.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "availability_domain",
@@ -75,7 +77,8 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 			{
 				Name:        "container_instance_id",
 				Description: "The identifier of the Container Instance on which this container is running.",
-				Type:        proto.ColumnType_INT,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "time_created",

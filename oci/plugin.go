@@ -183,6 +183,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
 			"oci_container_instances_container_instance":                   tableContainerInstancesContainerInstance(ctx),
+			"oci_container_instances_container":                            tableContainerInstancesContainer(ctx),
 		},
 	}
 	return p

@@ -8,47 +8,87 @@ Container Instances is a serverless compute service that enables you to quickly 
 
 ```sql
 select
-   display_name,
-   id,
-   time_created,
-   containers
+  display_name,
+  id,
+  availability_domain,
+  lifecycle_state,
+  time_created,
+  container_count
 from
   oci_container_instances_container_instance;
 ```
 
-### List active container instances
+### List failed container instances
 
 ```sql
 select
   display_name,
   id,
+  availability_domain,
   lifecycle_state,
   time_created,
-  time_updated,
-  shape
+  container_count
 from
   oci_container_instances_container_instance
 where
-  lifecycle_state = 'ACTIVE';
+  lifecycle_state = 'FAILED';
 ```
-### List all available details for container_instances
+
+### Get shape config details for container instances
+
+```sql
+select
+  display_name,
+  lifecycle_state,
+  shape_config ->> 'ocpus' as ocpus,
+  shape_config ->> 'memoryInGBs' as memory_in_gbs,
+  shape_config ->> 'processorDescription' as processor_description,
+  shape_config ->> 'networkingBandwidthInGbps' as networking_bandwidth_in_gbps
+from
+  oci_container_instances_container_instance;
+```
+
+### List container instances with no restart policy
 
 ```sql
 select
   display_name,
   id,
+  availability_domain,
   lifecycle_state,
   time_created,
-  time_updated,
-  time_updated,
-  shape,
-  containers,
-  volume_count,
-  graceful_shutdown_timeout_in_seconds,
-  fault_domain,
-  container_restart_policy,
-  availability_domain
-  tags
+  container_count
 from
   oci_container_instances_container_instance
+where
+  container_restart_policy = 'NEVER';
+```
+
+### Get dns config details for container instances
+
+```sql
+select
+  display_name,
+  lifecycle_state,
+  dns_config -> 'nameservers' as nameservers,
+  dns_config -> 'searches' as searches,
+  dns_config -> 'options' as options
+from
+  oci_container_instances_container_instance;
+```
+
+### List container instances that are not attached to any volume
+
+```sql
+select
+  display_name,
+  id,
+  availability_domain,
+  lifecycle_state,
+  time_created,
+  container_count
+from
+  oci_container_instances_container_instance
+where
+  volume_count is null;
 ```

@@ -18,15 +18,15 @@ import (
 
 func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_container_instances_container_instance",
-		Description:      "OCI Container Instance",
-		DefaultTransform: transform.FromCamel(),
+		Name:        "oci_container_instances_container_instance",
+		Description: "Retrieve information about your Container Instances.",
 		Get: &plugin.GetConfig{
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getContainerInstance,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listContainerInstances,
+			Hydrate:           listContainerInstances,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -57,6 +57,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the container instance.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "availability_domain",
@@ -91,7 +92,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "containers",
-				Description: "Details on all containers in the instance - such as image, restart attempts, working directory.",
+				Description: "The Containers on this Instance.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getContainerInstance,
 			},
@@ -168,7 +169,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 			},
 
-			// // Standard Steampipe columns
+			// Standard Steampipe columns
 			{
 				Name:        "tags",
 				Description: ColumnDescriptionTags,

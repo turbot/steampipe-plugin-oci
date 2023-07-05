@@ -76,3 +76,19 @@ select
 from
   oci_container_instances_container_instance;
 ```
+
+### List container instances that are not attached to any volume
+
+```sql
+select
+  display_name,
+  id,
+  availability_domain,
+  lifecycle_state,
+  time_created,
+  container_count
+from
+  oci_container_instances_container_instance
+where
+  volume_count is null;
+```

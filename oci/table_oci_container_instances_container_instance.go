@@ -57,6 +57,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 				Name:        "id",
 				Description: "The OCID of the container instance.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "availability_domain",

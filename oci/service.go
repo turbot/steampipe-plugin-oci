@@ -30,6 +30,7 @@ import (
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v65/common/auth"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
+	"github.com/oracle/oci-go-sdk/v65/containerinstances"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/devops"
@@ -78,6 +79,7 @@ type session struct {
 	ComputeClient                         core.ComputeClient
 	ComputeManagementClient               core.ComputeManagementClient
 	ContainerEngineClient                 containerengine.ContainerEngineClient
+	ContainerInstancesClient              containerinstances.ContainerInstanceClient
 	DatabaseClient                        database.DatabaseClient
 	DevopsClient                          devops.DevopsClient
 	DnsClient                             dns.DnsClient
@@ -1998,6 +2000,46 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 	sess := &session{
 		TenancyID:     tenantId,
 		BastionClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// containerInstancesService returns the service client for OCI Container Instances Service
+func containerInstancesService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("containerinstances-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("containerInstancesService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := containerinstances.NewContainerInstanceClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                tenantId,
+		ContainerInstancesClient: client,
 	}
 
 	// save session in cache

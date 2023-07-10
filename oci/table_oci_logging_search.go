@@ -18,27 +18,24 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 		Name:        "oci_logging_search",
 		Description: "OCI Logging Search",
 		List: &plugin.ListConfig{
-			Hydrate: listLoggingSearch,
+			Hydrate:           listLoggingSearch,
+			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "start_time",
-					Require: plugin.Required,
+					Require: plugin.Optional,
 				},
 				{
 					Name:    "end_time",
-					Require: plugin.Required,
+					Require: plugin.Optional,
 				},
 				{
-					Name:    "log_group_id",
-					Require: plugin.Required,
+					Name:    "log_group_name",
+					Require: plugin.Optional,
 				},
 				{
-					Name:    "log_id",
-					Require: plugin.Required,
-				},
-				{
-					Name:    "level",
-					Require: plugin.Required,
+					Name:    "log_name",
+					Require: plugin.Optional,
 				},
 			},
 		},
@@ -57,46 +54,28 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 				Transform:   transform.FromQual("end_time"),
 			},
 			{
-				Name:        "log_group_id",
+				Name:        "log_group_name",
 				Description: "",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("log_group_id"),
+				Transform:   transform.FromQual("log_group_name"),
 			},
 			{
-				Name:        "log_id",
+				Name:        "log_name",
 				Description: "",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("log_id"),
+				Transform:   transform.FromQual("log_name"),
 			},
 			{
-				Name:        "level",
+				Name:        "datetime",
 				Description: "",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromQual("level"),
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("Data.datetime").Transform(transform.UnixMsToTimestamp),
 			},
 			{
-				Name:        "summary",
+				Name:        "log_content",
 				Description: "",
 				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "results",
-				Description: "",
-				Type:        proto.ColumnType_JSON,
-			},
-			{
-				Name:        "fields",
-				Description: "",
-				Type:        proto.ColumnType_JSON,
-			},
-
-			// Standard Steampipe columns
-
-			{
-				Name:        "title",
-				Description: ColumnDescriptionTitle,
-				Type:        proto.ColumnType_STRING,
-				//Transform:   transform.FromField("DisplayName"),
+				Transform:   transform.FromField("Data.logContent"),
 			},
 
 			// Standard OCI columns
@@ -104,6 +83,12 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 				Name:        "region",
 				Description: ColumnDescriptionRegion,
 				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "tenant_id",
@@ -114,6 +99,12 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 			},
 		},
 	}
+}
+
+type LoggingSearch struct {
+	Data          interface{}
+	CompartmentId string
+	Region        string
 }
 
 //// LIST FUNCTION
@@ -130,19 +121,27 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		return nil, err
 	}
 	request := loggingsearch.SearchLogsRequest{}
-	request.SearchLogsDetails.IsReturnFieldInfo = types.Bool(true)
 	request.SearchLogsDetails.TimeStart = &common.SDKTime{Time: d.KeyColumnQuals["start_time"].GetTimestampValue().AsTime()}
 	request.SearchLogsDetails.TimeEnd = &common.SDKTime{Time: d.KeyColumnQuals["end_time"].GetTimestampValue().AsTime()}
-	log_group_id := d.KeyColumnQualString("log_group_id")
-	log_id := d.KeyColumnQualString("log_id")
-	level := d.KeyColumnQualString("level")
-	searchQuery := "search " + compartment + "/" + log_group_id + "/" + log_id + "| where level = " + level + ";"
+	log_group_name := d.KeyColumnQualString("log_group_name")
+	log_name := d.KeyColumnQualString("log_name")
+
+	// prepare the query
+	query := compartment
+	if log_group_name != "" {
+		query = query + "/" + log_group_name
+	}
+	if log_name != "" {
+		query = query + "/" + log_name
+	}
+	searchQuery := "search \"" + query + "\""
+	request.SearchLogsDetails.SearchQuery = types.String(searchQuery)
 
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
-	request.SearchLogsDetails.SearchQuery = types.String(searchQuery)
+
 	limit := d.QueryContext.Limit
 	if d.QueryContext.Limit != nil {
 		if *limit < int64(*request.Limit) {
@@ -156,8 +155,14 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		if err != nil {
 			return nil, err
 		}
+		for _, result := range response.SearchResponse.Results {
+			d.StreamListItem(ctx, LoggingSearch{*result.Data, compartment, region})
 
-		d.StreamListItem(ctx, response.SearchResponse)
+			// Context can be cancelled due to manual cancellation or the limit has been hit
+			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				return nil, nil
+			}
+		}
 
 		if response.OpcNextPage != nil {
 			request.Page = response.OpcNextPage

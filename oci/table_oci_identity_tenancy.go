@@ -6,9 +6,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/audit"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -26,7 +26,7 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 				ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the tenancy.",
@@ -96,12 +96,12 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 

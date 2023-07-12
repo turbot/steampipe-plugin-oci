@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/oracle/oci-go-sdk/v65/core"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -20,7 +20,7 @@ func tableOciCoreInstanceMetricCpuUtilizationHourly(_ context.Context) *plugin.T
 			Hydrate:       listCoreInstanceMetricCpuUtilizationHourly,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: MonitoringMetricColumns(
+		Columns: commonColumnsForAllResource(MonitoringMetricColumns(
 			[]*plugin.Column{
 				{
 					Name:        "id",
@@ -28,7 +28,7 @@ func tableOciCoreInstanceMetricCpuUtilizationHourly(_ context.Context) *plugin.T
 					Type:        proto.ColumnType_STRING,
 					Transform:   transform.FromField("DimensionValue"),
 				},
-			}),
+			})),
 	}
 }
 

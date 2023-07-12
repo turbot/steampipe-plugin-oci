@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -44,7 +44,7 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "A user-friendly name. Does not have to be unique, and it's changeable.",
@@ -125,12 +125,12 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -138,11 +138,11 @@ func tableCoreSecurityList(_ context.Context) *plugin.Table {
 
 func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listCoreSecurityLists", "Compartment", compartment, "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -181,7 +181,7 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 			d.StreamListItem(ctx, securityList)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -200,8 +200,8 @@ func listCoreSecurityLists(ctx context.Context, d *plugin.QueryData, _ *plugin.H
 func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getCoreSecurityList")
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci.getCoreSecurityList", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
@@ -209,7 +209,7 @@ func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 		return nil, nil
 	}
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
 
 	if id == "" {
 		return nil, nil

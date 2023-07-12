@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -56,7 +56,7 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			Hydrate:    getMySQLDBSystem,
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "The user-friendly name for the DB System. It does not have to be unique.",
@@ -170,6 +170,20 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 				Hydrate:     getMySQLDBSystem,
 			},
 			{
+				Name:        "cpu_core_count",
+				Description: "The number of CPU Cores the Instance provides. These are OCPU's.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getMySQLDBSystemShape,
+				Transform:   transform.FromField("CpuCoreCount"),
+			},
+			{
+				Name:        "memory_size_in_gbs",
+				Description: "The amount of RAM the Instance provides. This is an IEC base-2 number.",
+				Type:        proto.ColumnType_INT,
+				Hydrate:     getMySQLDBSystemShape,
+				Transform:   transform.FromField("MemorySizeInGBs"),
+			},
+			{
 				Name:        "time_updated",
 				Description: "The time the DB System was last updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -253,12 +267,12 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -266,11 +280,11 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 
 func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listMySQLDBSystems", "Compartment", compartment, "OCI_REGION", region)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -309,7 +323,7 @@ func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 			d.StreamListItem(ctx, dbSystem)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -327,15 +341,15 @@ func listMySQLDBSystems(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 
 func getMySQLDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getMySQLDBSystem", "Compartment", compartment, "OCI_REGION", region)
 
 	var id string
 	if h.Item != nil {
 		id = *h.Item.(mysql.DbSystemSummary).Id
 	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
+		id = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil
@@ -366,6 +380,43 @@ func getMySQLDBSystem(ctx context.Context, d *plugin.QueryData, h *plugin.Hydrat
 	}
 
 	return response.DbSystem, nil
+}
+
+func getMySQLDBSystemShape(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("getMySQLDBSystemShape", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	switch h.Item.(type) {
+	case mysql.DbSystemSummary:
+		id = *h.Item.(mysql.DbSystemSummary).ShapeName
+	case mysql.DbSystem:
+		id = *h.Item.(mysql.DbSystem).ShapeName
+	}
+
+	// Create Session
+	session, err := mySQLConfigurationService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "connection_error", err)
+		return nil, err
+	}
+
+	request := mysql.ListShapesRequest{
+		Name:          types.String(id),
+		CompartmentId: types.String(compartment),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	response, err := session.MySQLConfigurationClient.ListShapes(ctx, request)
+	if err != nil {
+		logger.Error("oci_mysql_db_system.getMySQLDBSystemShape", "api_error", err)
+		return nil, err
+	}
+	return response.Items[0], nil
 }
 
 //// TRANSFORM FUNCTION

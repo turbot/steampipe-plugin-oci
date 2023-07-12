@@ -5,9 +5,10 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,8 +20,15 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			ParentHydrate: listRegions,
 			Hydrate:       lisAvailabilityDomains,
+			KeyColumns: []*plugin.KeyColumn{
+				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+			},
 		},
-		Columns: []*plugin.Column{
+		GetMatrixItemFunc: BuildCompartmentList,
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name of the Availability Domain.",
@@ -48,12 +56,18 @@ func tableIdentityAvailabilityDomain(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_STRING,
 			},
 			{
-				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenantId,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+		}),
 	}
 }
 
@@ -65,7 +79,13 @@ type availabilityDomainInfo struct {
 //// LIST FUNCTION
 
 func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Debug("lisAvailabilityDomains")
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	equalQuals := d.EqualsQuals
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	region := *h.Item.(ociRegion).Name
 	status := h.Item.(ociRegion).Status
@@ -83,7 +103,7 @@ func lisAvailabilityDomains(ctx context.Context, d *plugin.QueryData, h *plugin.
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListAvailabilityDomainsRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},

@@ -6,9 +6,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -34,7 +34,7 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "name",
 				Description: "The name you assign to the group during creation.",
@@ -103,18 +103,18 @@ func tableIdentityDynamicGroup(_ context.Context) *plugin.Table {
 			// Standard OCI columns
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 
 //// LIST FUNCTION
 
 func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -160,7 +160,7 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 			d.StreamListItem(ctx, dynamicGroup)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -179,7 +179,7 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 func getIdentityDynamicGroup(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getIdentityDynamicGroup")
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	id := d.EqualsQuals["id"].GetStringValue()
 
 	// handle empty dynamic group id in get call
 	if id == "" {

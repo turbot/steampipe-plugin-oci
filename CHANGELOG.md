@@ -1,3 +1,122 @@
+## v0.28.0 [2023-06-29]
+
+_What's new?_
+
+- New tables added
+  - [oci_devops_project](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_devops_project) ([#523](https://github.com/turbot/steampipe-plugin-oci/pull/523)) (Thanks [lucasjellema](https://github.com/lucasjellema) for the contribution!)
+  - [oci_devops_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_devops_repository) ([#522](https://github.com/turbot/steampipe-plugin-oci/pull/522))
+
+## v0.27.0 [2023-06-20]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.5.0](https://github.com/turbot/steampipe-plugin-sdk/blob/v5.5.0/CHANGELOG.md#v550-2023-06-16) which significantly reduces API calls and boosts query performance, resulting in faster data retrieval. ([#520](https://github.com/turbot/steampipe-plugin-oci/pull/520))
+
+## v0.26.0 [2023-06-13]
+
+_What's new?_
+
+- New tables added: (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_adm_knowledge_base](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_adm_knowledge_base) ([#509](https://github.com/turbot/steampipe-plugin-oci/pull/509))
+  - [oci_adm_vulnerability_audit](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_adm_vulnerability_audit) ([#509](https://github.com/turbot/steampipe-plugin-oci/pull/509))
+  - [oci_application_migration_migration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_application_migration_migration) ([#510](https://github.com/turbot/steampipe-plugin-oci/pull/510))
+  - [oci_application_migration_source](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_application_migration_source) ([#510](https://github.com/turbot/steampipe-plugin-oci/pull/510))
+  - [oci_autoscaling_auto_scaling_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_autoscaling_auto_scaling_policy) ([#513](https://github.com/turbot/steampipe-plugin-oci/pull/513))
+  - [oci_bds_bds_instance](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bds_bds_instance) ([#514](https://github.com/turbot/steampipe-plugin-oci/pull/514))
+  - [oci_certificate_authority_bundle](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_authority_bundle) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_association](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_association) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_ca_bundle](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_ca_bundle) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_authority](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_authority) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_authority_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_authority_version) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+  - [oci_certificate_management_certificate_version](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_certificate_management_certificate_version) ([#516](https://github.com/turbot/steampipe-plugin-oci/pull/516))
+
+_Bug fixes_
+
+- Fixed `oci_identity_policy` and `oci_identity_availability_domain` tables to return data for all compartments instead of only `root` compartment. ([#505](https://github.com/turbot/steampipe-plugin-oci/pull/505)) ([#512](https://github.com/turbot/steampipe-plugin-oci/pull/512))
+
+## v0.25.0 [2023-06-03]
+
+_What's new?_
+
+- New tables added: (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_ai_anomaly_detection_ai_private_endpoint](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_ai_private_endpoint) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_ai_anomaly_detection_data_asset](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_data_asset) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_ai_anomaly_detection_model](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_model) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_ai_anomaly_detection_project](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_ai_anomaly_detection_project) ([#508](https://github.com/turbot/steampipe-plugin-oci/pull/508))
+  - [oci_artifacts_container_image_signature](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_image_signature) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_container_image](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_image) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_container_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_container_repository) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_generic_artifact](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_generic_artifact) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_artifacts_repository](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_artifacts_repository) ([#511](https://github.com/turbot/steampipe-plugin-oci/pull/511))
+  - [oci_network_firewall_firewall](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_network_firewall_firewall) ([#507](https://github.com/turbot/steampipe-plugin-oci/pull/507))
+  - [oci_network_firewall_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_network_firewall_policy) ([#507](https://github.com/turbot/steampipe-plugin-oci/pull/507))
+
+## v0.24.0 [2023-05-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.4.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v541-2023-05-05) which fixes increased plugin initialization time due to multiple connections causing the schema to be loaded repeatedly. ([#503](https://github.com/turbot/steampipe-plugin-oci/pull/503))
+
+## v0.23.0 [2023-04-14]
+
+_Enhancements_
+
+- Added column `tenant_name` across all the tables. ([#495](https://github.com/turbot/steampipe-plugin-oci/pull/495))
+
+## v0.22.0 [2023-04-11]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.3.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v530-2023-03-16) which adds go-getter support to dynamic tables. ([#496](https://github.com/turbot/steampipe-plugin-oci/pull/496))
+
+## v0.21.0 [2023-03-15]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.2.0](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v520-2023-03-02) which includes fixes for query cache pending item mechanism and aggregator connections not working for dynamic tables. ([#492](https://github.com/turbot/steampipe-plugin-oci/pull/492))
+
+## v0.20.0 [2023-03-03]
+
+_What's new?_
+
+- New tables added
+  - [oci_bastion_bastion](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_bastion) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_bastion_session](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_bastion_session) ([#476](https://github.com/turbot/steampipe-plugin-oci/pull/476)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+  - [oci_queue_queue](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_queue_queue) ([#481](https://github.com/turbot/steampipe-plugin-oci/pull/481)) (Thanks [@lucasjellema](https://github.com/lucasjellema) for the contribution!)
+
+_Enhancements_
+
+- Added columns `cpu_core_count` and `memory_size_in_gbs` to `oci_mysql_db_system` table. ([#483](https://github.com/turbot/steampipe-plugin-oci/pull/483)) (Thanks [@scotti-fletcher](https://github.com/scotti-fletcher) for the contribution!)
+
+## v0.19.1 [2023-02-10]
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.12](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v4112-2023-02-09) which fixes the query caching functionality. ([#477](https://github.com/turbot/steampipe-plugin-oci/pull/477))
+
+## v0.19.0 [2023-01-30]
+
+_What's new?_
+
+- New tables added
+  - [oci_core_cluster_network](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_cluster_network) ([#452](https://github.com/turbot/steampipe-plugin-oci/pull/452))
+  - [oci_core_instance_configuration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_instance_configuration) ([#464](https://github.com/turbot/steampipe-plugin-oci/pull/464))
+  - [oci_core_volume_default_backup_policy](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_default_backup_policy) ([#463](https://github.com/turbot/steampipe-plugin-oci/pull/463))
+  - [oci_core_volume_group](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_core_volume_group) ([#467](https://github.com/turbot/steampipe-plugin-oci/pull/467))
+
+_Enhancements_
+
+- Added columns `kms_key_id`, `kms_key_version_id` and `vault_id` to `oci_database_autonomous_database` table. ([#469](https://github.com/turbot/steampipe-plugin-oci/pull/469))
+
+_Bug fixes_
+
+- Fixed the `exports` column in `oci_file_storage_file_system` to correctly return data instead of `null` when an `id` is passed in the `where` clause. ([#466](https://github.com/turbot/steampipe-plugin-oci/pull/466))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v4.1.11](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v4111-2023-01-24) which fixes the issue of non-caching of all the columns of the queried table. ([#474](https://github.com/turbot/steampipe-plugin-oci/pull/474))
+
 ## v0.18.0 [2023-01-06]
 
 _Enhancements_

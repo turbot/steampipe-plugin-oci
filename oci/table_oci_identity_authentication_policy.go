@@ -5,9 +5,9 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -19,7 +19,7 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 		List: &plugin.ListConfig{
 			Hydrate: listAuthenticationPolicy,
 		},
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			// Password Policy
 			{
 				Name:        "is_lowercase_characters_required",
@@ -69,11 +69,11 @@ func tableIdentityAuthenticationPolicy(_ context.Context) *plugin.Table {
 			// Standard OCI columns
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+		}),
 	}
 }
 

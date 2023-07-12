@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/resourcesearch"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -23,7 +23,7 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 			Hydrate:    listResourceSearch,
 		},
 		GetMatrixItemFunc: BuildRegionList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "identifier",
 				Description: "The unique identifier for this particular resource, usually an OCID.",
@@ -123,12 +123,12 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -143,11 +143,11 @@ type searchInfo struct {
 
 func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
 	logger.Debug("listResourceSearch", "OCI_REGION", region)
 
-	query := d.KeyColumnQuals["query"].GetStringValue()
-	text := d.KeyColumnQuals["text"].GetStringValue()
+	query := d.EqualsQuals["query"].GetStringValue()
+	text := d.EqualsQuals["text"].GetStringValue()
 
 	// handle empty query and text in list call
 	if query == "" && text == "" {
@@ -194,7 +194,7 @@ func listResourceSearch(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 				d.StreamListItem(ctx, searchInfo{resource, query, region, ""})
 
 				// Context can be cancelled due to manual cancellation or the limit has been hit
-				if d.QueryStatus.RowsRemaining(ctx) == 0 {
+				if d.RowsRemaining(ctx) == 0 {
 					return nil, nil
 				}
 			}

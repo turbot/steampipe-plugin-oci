@@ -7,9 +7,9 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -48,7 +48,7 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 			},
 		},
 		GetMatrixItemFunc: BuildCompartmentList,
-		Columns: []*plugin.Column{
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			{
 				Name:        "display_name",
 				Description: "The display name of the Configuration.",
@@ -144,12 +144,12 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 				Transform:   transform.FromValue(),
 			},
-		},
+		}),
 	}
 }
 
@@ -157,10 +157,10 @@ func tableMySQLConfiguration(_ context.Context) *plugin.Table {
 
 func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listMySQLConfigurations", "Compartment", compartment)
 
-	equalQuals := d.KeyColumnQuals
+	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
 	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
@@ -217,7 +217,7 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin
 
 func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("getMySQLConfiguration", "Compartment", compartment)
 
 	var id string
@@ -225,7 +225,7 @@ func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 		configuration := h.Item.(mysql.ConfigurationSummary)
 		id = *configuration.Id
 	} else {
-		id = d.KeyColumnQuals["id"].GetStringValue()
+		id = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment
 		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
 			return nil, nil

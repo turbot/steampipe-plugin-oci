@@ -13,17 +13,26 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/oracle/oci-go-sdk/v65/adm"
+	"github.com/oracle/oci-go-sdk/v65/aianomalydetection"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
+	"github.com/oracle/oci-go-sdk/v65/applicationmigration"
+	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/audit"
 	"github.com/oracle/oci-go-sdk/v65/autoscaling"
+	"github.com/oracle/oci-go-sdk/v65/bastion"
+	"github.com/oracle/oci-go-sdk/v65/bds"
 	"github.com/oracle/oci-go-sdk/v65/budget"
+	"github.com/oracle/oci-go-sdk/v65/certificates"
+	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v65/common/auth"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/oracle/oci-go-sdk/v65/database"
+	"github.com/oracle/oci-go-sdk/v65/devops"
 	"github.com/oracle/oci-go-sdk/v65/dns"
 	"github.com/oracle/oci-go-sdk/v65/events"
 	"github.com/oracle/oci-go-sdk/v65/filestorage"
@@ -35,57 +44,154 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/loggingsearch"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
 	"github.com/oracle/oci-go-sdk/v65/mysql"
+	"github.com/oracle/oci-go-sdk/v65/networkfirewall"
 	"github.com/oracle/oci-go-sdk/v65/networkloadbalancer"
 	"github.com/oracle/oci-go-sdk/v65/nosql"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/oracle/oci-go-sdk/v65/ons"
+	"github.com/oracle/oci-go-sdk/v65/queue"
 	"github.com/oracle/oci-go-sdk/v65/resourcemanager"
 	"github.com/oracle/oci-go-sdk/v65/resourcesearch"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/vault"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/connection"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/connection"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
 type session struct {
-	TenancyID                      string
-	AnalyticsClient                analytics.AnalyticsClient
-	ApiGatewayClient               apigateway.ApiGatewayClient
-	AuditClient                    audit.AuditClient
-	AutoScalingClient              autoscaling.AutoScalingClient
-	BlockstorageClient             core.BlockstorageClient
-	BudgetClient                   budget.BudgetClient
-	CloudGuardClient               cloudguard.CloudGuardClient
-	ComputeClient                  core.ComputeClient
-	ComputeManagementClient        core.ComputeManagementClient
-	ContainerEngineClient          containerengine.ContainerEngineClient
-	DatabaseClient                 database.DatabaseClient
-	DnsClient                      dns.DnsClient
-	EventsClient                   events.EventsClient
-	FileStorageClient              filestorage.FileStorageClient
-	FunctionsManagementClient      functions.FunctionsManagementClient
-	IdentityClient                 identity.IdentityClient
-	KmsManagementClient            keymanagement.KmsManagementClient
-	KmsVaultClient                 keymanagement.KmsVaultClient
-	LoggingManagementClient        logging.LoggingManagementClient
-	LoggingSearchClient            loggingsearch.LogSearchClient
-	LoadBalancerClient             loadbalancer.LoadBalancerClient
-	MonitoringClient               monitoring.MonitoringClient
-	MySQLConfigurationClient       mysql.MysqlaasClient
-	MySQLChannelClient             mysql.ChannelsClient
-	MySQLBackupClient              mysql.DbBackupsClient
-	MySQLDBSystemClient            mysql.DbSystemClient
-	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
-	NoSQLClient                    nosql.NosqlClient
-	NotificationControlPlaneClient ons.NotificationControlPlaneClient
-	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
-	ObjectStorageClient            objectstorage.ObjectStorageClient
-	ResourceSearchClient           resourcesearch.ResourceSearchClient
-	ResourceManagerClient          resourcemanager.ResourceManagerClient
-	StreamAdminClient              streaming.StreamAdminClient
-	VaultClient                    vault.VaultsClient
-	VirtualNetworkClient           core.VirtualNetworkClient
+	TenancyID                             string
+	AnomalyDetectionClient                aianomalydetection.AnomalyDetectionClient
+	AnalyticsClient                       analytics.AnalyticsClient
+	ApiGatewayClient                      apigateway.ApiGatewayClient
+	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
+	ApplicationMigrationClient            applicationmigration.ApplicationMigrationClient
+	ArtifactClient                        artifacts.ArtifactsClient
+	AuditClient                           audit.AuditClient
+	AutoScalingClient                     autoscaling.AutoScalingClient
+	BastionClient                         bastion.BastionClient
+	BdsClient                             bds.BdsClient
+	BlockstorageClient                    core.BlockstorageClient
+	BudgetClient                          budget.BudgetClient
+	CertificatesClient                    certificates.CertificatesClient
+	CertificatesManagementClient          certificatesmanagement.CertificatesManagementClient
+	CloudGuardClient                      cloudguard.CloudGuardClient
+	ComputeClient                         core.ComputeClient
+	ComputeManagementClient               core.ComputeManagementClient
+	ContainerEngineClient                 containerengine.ContainerEngineClient
+	DatabaseClient                        database.DatabaseClient
+	DevopsClient                          devops.DevopsClient
+	DnsClient                             dns.DnsClient
+	EventsClient                          events.EventsClient
+	FileStorageClient                     filestorage.FileStorageClient
+	FunctionsManagementClient             functions.FunctionsManagementClient
+	IdentityClient                        identity.IdentityClient
+	KmsManagementClient                   keymanagement.KmsManagementClient
+	KmsVaultClient                        keymanagement.KmsVaultClient
+	LoadBalancerClient                    loadbalancer.LoadBalancerClient
+	LoggingManagementClient               logging.LoggingManagementClient
+	LoggingSearchClient                   loggingsearch.LogSearchClient
+	MonitoringClient                      monitoring.MonitoringClient
+	MySQLBackupClient                     mysql.DbBackupsClient
+	MySQLChannelClient                    mysql.ChannelsClient
+	MySQLConfigurationClient              mysql.MysqlaasClient
+	MySQLDBSystemClient                   mysql.DbSystemClient
+	NetworkFirewallClient                 networkfirewall.NetworkFirewallClient
+	NetworkLoadBalancerClient             networkloadbalancer.NetworkLoadBalancerClient
+	NoSQLClient                           nosql.NosqlClient
+	NotificationControlPlaneClient        ons.NotificationControlPlaneClient
+	NotificationDataPlaneClient           ons.NotificationDataPlaneClient
+	ObjectStorageClient                   objectstorage.ObjectStorageClient
+	QueueAdminClient                      queue.QueueAdminClient
+	ResourceManagerClient                 resourcemanager.ResourceManagerClient
+	ResourceSearchClient                  resourcesearch.ResourceSearchClient
+	StreamAdminClient                     streaming.StreamAdminClient
+	VaultClient                           vault.VaultsClient
+	VirtualNetworkClient                  core.VirtualNetworkClient
+}
+
+// admService returns the service client for OCI ADM service
+func admService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("adm-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("admService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Adm service client
+	client, err := adm.NewApplicationDependencyManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                             tenantId,
+		ApplicationDependencyManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+
+}
+
+// aiAnomalyDetectionService returns the service client for OCI AiAnomalyDetection service
+func aiAnomalyDetectionService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("aianomalydetection-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("aiAnomalyDetectionService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get AiAnomalyDetection service client
+	client, err := aianomalydetection.NewAnomalyDetectionClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:              tenantId,
+		AnomalyDetectionClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
 }
 
 // apiGatewayService returns the service client for OCI ApiGateway service
@@ -124,6 +230,91 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 	sess := &session{
 		TenancyID:        tenantId,
 		ApiGatewayClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// applicationMigrationService returns the service client for OCI Application Migration service
+func applicationMigrationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("applicationmigration-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("applicationMigrationService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get ApplicationMigration service client
+	client, err := applicationmigration.NewApplicationMigrationClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                  tenantId,
+		ApplicationMigrationClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("artifact-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("artifactService", "error_getProvider", err)
+		return nil, err
+	}
+
+	// get artifact service client
+	client, err := artifacts.NewArtifactsClientWithConfigurationProvider(provider)
+	if err != nil {
+		logger.Error("artifactService", "error_NewArtifactsClientWithConfigurationProvider", err)
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		logger.Error("artifactService", "error_TenancyOCID", err)
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:      tenantId,
+		ArtifactClient: client,
 	}
 
 	// save session in cache
@@ -211,6 +402,46 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
+// bdsService returns the service client for OCI Big Data Service
+func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("bigdata-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("bdsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := bds.NewBdsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		BdsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // identityService returns the service client for OCI Identity service
 func identityService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 
@@ -242,6 +473,46 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	sess := &session{
 		TenancyID:      tenantId,
 		IdentityClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// devOpsService returns the service client for OCI DevOps Service
+func devOpsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("devops-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("devOpsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := devops.NewDevopsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantId,
+		DevopsClient: client,
 	}
 
 	// save session in cache
@@ -490,6 +761,46 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	return sess, nil
 }
 
+// devopsService returns the service client for OCI Devops Service
+func devopsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("devops-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("devopsService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := devops.NewDevopsClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:    tenantId,
+		DevopsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // fileStorageService returns the service client for OCI File Storage Service
 func fileStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -559,6 +870,48 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	sess := &session{
 		TenancyID:                 tenantID,
 		FunctionsManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// networkService returns the service client for OCI Network Firewall service
+func networkFirewallService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("networkFirewall-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("networkFirewallService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get network firewall service client
+	client, err := networkfirewall.NewNetworkFirewallClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		NetworkFirewallClient: client,
 	}
 
 	// save session in cache
@@ -841,7 +1194,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	return sess, nil
 }
 
-// coreComputeManagementService returns the service client for OCI Core Compute service
+// coreComputeManagementService returns the service client for OCI Core Compute Management service
 func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 
@@ -860,7 +1213,7 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 		return nil, err
 	}
 
-	// get compute service client
+	// get compute management service client
 	client, err := core.NewComputeManagementClientWithConfigurationProvider(provider)
 	if err != nil {
 		return nil, err
@@ -1064,6 +1417,90 @@ func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	sess := &session{
 		TenancyID:    tenantID,
 		BudgetClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// certificatesManagementService returns the service client for OCI CertificatesManagement service
+func certificatesManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificatesmanagement-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesManagementService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get CertificatesManagement service client
+	client, err := certificatesmanagement.NewCertificatesManagementClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:                    tenantId,
+		CertificatesManagementClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// certificatesService returns the service client for OCI Certificates service
+func certificatesService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("certificates-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("certificatesService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get Certificates service client
+	client, err := certificates.NewCertificatesClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:          tenantId,
+		CertificatesClient: client,
 	}
 
 	// save session in cache
@@ -1338,6 +1775,44 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 	return sess, nil
 }
 
+// queueService returns the service client for OCI Queue Service
+func queueService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+	serviceCacheKey := fmt.Sprintf("queue-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("queueService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := queue.NewQueueAdminClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:        tenantId,
+		QueueAdminClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
 // resourceSearchService returns the service client for OCI Resource Search Service
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
@@ -1523,6 +1998,48 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 	sess := &session{
 		TenancyID:       tenantId,
 		AnalyticsClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// bastionService returns the service client for OCI Bastion service
+func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("bastion-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("bastionService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	// get bastion service client
+	client, err := bastion.NewBastionClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:     tenantId,
+		BastionClient: client,
 	}
 
 	// save session in cache

@@ -7,9 +7,9 @@ import (
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 // append the common metric columns onto the column list
@@ -78,7 +78,7 @@ func commonMonitoringMetricColumns() []*plugin.Column {
 		},
 		{
 			Name:        "tenant_id",
-			Description: ColumnDescriptionTenant,
+			Description: ColumnDescriptionTenantId,
 			Type:        proto.ColumnType_STRING,
 			Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
 			Transform:   transform.FromValue(),

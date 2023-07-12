@@ -2,13 +2,14 @@ package oci
 
 import (
 	"context"
+	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -25,6 +26,10 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 			Hydrate: listPolicy,
 			KeyColumns: []*plugin.KeyColumn{
 				{
+					Name:    "compartment_id",
+					Require: plugin.Optional,
+				},
+				{
 					Name:    "lifecycle_state",
 					Require: plugin.Optional,
 				},
@@ -34,7 +39,8 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 				},
 			},
 		},
-		Columns: []*plugin.Column{
+		GetMatrixItemFunc: BuildCompartmentList,
+		Columns: commonColumnsForAllResource([]*plugin.Column{
 			// top columns
 			{
 				Name:        "name",
@@ -110,19 +116,33 @@ func tableIdentityPolicy(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Name:        "compartment_id",
+				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),
 			},
-		},
+			{
+				Name:        "tenant_id",
+				Description: ColumnDescriptionTenantId,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CompartmentId"),
+			},
+		}),
 	}
 }
 
 //// LIST FUNCTION
 
 func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	equalQuals := d.KeyColumnQuals
+	logger := plugin.Logger(ctx)
+	equalQuals := d.EqualsQuals
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Trace("oci.listPolicy", "Compartment", compartment)
+
+	// Return nil, if given compartment_id doesn't match
+	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+		return nil, nil
+	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
@@ -132,7 +152,7 @@ func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 
 	// The OCID of the tenancy containing the compartment.
 	request := identity.ListPoliciesRequest{
-		CompartmentId: &session.TenancyID,
+		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 		RequestMetadata: common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
@@ -168,7 +188,7 @@ func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 			d.StreamListItem(ctx, user)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}
@@ -185,9 +205,15 @@ func listPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData)
 //// HYDRATE FUNCTIONS
 
 func getPolicy(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	plugin.Logger(ctx).Trace("getPolicy")
+	logger := plugin.Logger(ctx)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci.getPolicy", "Compartment", compartment)
 
-	id := d.KeyColumnQuals["id"].GetStringValue()
+	// Restrict the api call to only root compartment
+	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		return nil, nil
+	}
+	id := d.EqualsQuals["id"].GetStringValue()
 
 	// Create Session
 	session, err := identityService(ctx, d)

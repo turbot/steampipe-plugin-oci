@@ -9,8 +9,8 @@ package oci
 import (
 	"context"
 
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 const pluginName = "steampipe-plugin-oci"
@@ -28,12 +28,35 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			Schema:      ConfigSchema,
 		},
 		TableMap: map[string]*plugin.Table{
-			"oci_logging_search":                                           tableLoggingSearch(ctx),
+			"oci_adm_knowledge_base":                                       tableAdmKnowledgeBase(ctx),
+			"oci_adm_vulnerability_audit":                                  tableAdmVulnerabilityAudit(ctx),
+			"oci_ai_anomaly_detection_ai_private_endpoint":                 tableAiAnomalyDetectionAiPrivateEndpoint(ctx),
+			"oci_ai_anomaly_detection_data_asset":                          tableAiAnomalyDetectionDataAsset(ctx),
+			"oci_ai_anomaly_detection_model":                               tableAiAnomalyDetectionModel(ctx),
+			"oci_ai_anomaly_detection_project":                             tableAiAnomalyDetectionProject(ctx),
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
+			"oci_application_migration_migration":                          tableApplicationMigrationMigration(ctx),
+			"oci_application_migration_source":                             tableApplicationMigrationSource(ctx),
+			"oci_artifacts_container_image":                                tableArtifactContainerImage(ctx),
+			"oci_artifacts_container_image_signature":                      tableArtifactContainerImageSignature(ctx),
+			"oci_artifacts_container_repository":                           tableArtifactContainerRepository(ctx),
+			"oci_artifacts_generic_artifact":                               tableArtifactGenericArtifact(ctx),
+			"oci_artifacts_repository":                                     tableArtifactRepository(ctx),
 			"oci_autoscaling_auto_scaling_configuration":                   tableAutoScalingConfiguration(ctx),
+			"oci_autoscaling_auto_scaling_policy":                          tableAutoScalingPolicy(ctx),
+			"oci_bastion_bastion":                                          tableBastion(ctx),
+			"oci_bastion_session":                                          tableBastionSession(ctx),
+			"oci_bds_bds_instance":                                         tableBigDataServiceInstance(ctx),
 			"oci_budget_alert_rule":                                        tableBudgetAlertRule(ctx),
 			"oci_budget_budget":                                            tableBudget(ctx),
+			"oci_certificates_authority_bundle":                            tableCertificatesAuthorityBundle(ctx),
+			"oci_certificates_management_association":                      tableCertificatesManagementAssociation(ctx),
+			"oci_certificates_management_ca_bundle":                        tableCertificatesManagementCaBundle(ctx),
+			"oci_certificates_management_certificate":                      tableCertificatesManagementCertificate(ctx),
+			"oci_certificates_management_certificate_authority":            tableCertificatesManagementCertificateAuthority(ctx),
+			"oci_certificates_management_certificate_authority_version":    tableCertificatesManagementCertificateAuthorityVersion(ctx),
+			"oci_certificates_management_certificate_version":              tableCertificatesManagementCertificateVersion(ctx),
 			"oci_cloud_guard_configuration":                                tableCloudGuardConfiguration(ctx),
 			"oci_cloud_guard_detector_recipe":                              tableCloudGuardDetectorRecipe(ctx),
 			"oci_cloud_guard_managed_list":                                 tableCloudGuardManagedList(ctx),
@@ -57,6 +80,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_image":                                               tableCoreImage(ctx),
 			"oci_core_image_custom":                                        tableCoreImageCustom(ctx),
 			"oci_core_instance":                                            tableCoreInstance(ctx),
+			"oci_core_instance_configuration":                              tableCoreInstanceConfiguration(ctx),
 			"oci_core_instance_metric_cpu_utilization":                     tableOciCoreInstanceMetricCpuUtilization(ctx),
 			"oci_core_instance_metric_cpu_utilization_daily":               tableOciCoreInstanceMetricCpuUtilizationDaily(ctx),
 			"oci_core_instance_metric_cpu_utilization_hourly":              tableOciCoreInstanceMetricCpuUtilizationHourly(ctx),
@@ -79,6 +103,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_core_volume_backup":                                       tableCoreVolumeBackup(ctx),
 			"oci_core_volume_backup_policy":                                tableCoreVolumeBackupPolicy(ctx),
 			"oci_core_volume_default_backup_policy":                        tableCoreVolumeDefaultBackupPolicy(ctx),
+			"oci_core_volume_group":                                        tableCoreVolumeGroup(ctx),
 			"oci_database_autonomous_database":                             tableOciDatabaseAutonomousDatabase(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization":            tableOciDatabaseAutonomousDatabaseMetricCpuUtilization(ctx),
 			"oci_database_autonomous_db_metric_cpu_utilization_daily":      tableOciDatabaseAutonomousDatabaseMetricCpuUtilizationDaily(ctx),
@@ -91,6 +116,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_db_system":                                       tableOciDatabaseDBSystem(ctx),
 			"oci_database_pluggable_database":                              tableOciPluggableDatabase(ctx),
 			"oci_database_software_image":                                  tableOciDatabaseSoftwareImage(ctx),
+			"oci_devops_project":                                           tableDevopsProject(ctx),
+			"oci_devops_repository":                                        tableDevopsRepository(ctx),
 			"oci_dns_rrset":                                                tableDnsRecordSet(ctx),
 			"oci_dns_tsig_key":                                             tableDnsTsigKey(ctx),
 			"oci_dns_zone":                                                 tableDnsZone(ctx),
@@ -119,6 +146,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_kms_vault":                                                tableKmsVault(ctx),
 			"oci_logging_log":                                              tableLoggingLog(ctx),
 			"oci_logging_log_group":                                        tableLoggingLogGroup(ctx),
+			"oci_logging_search":                                           tableLoggingSearch(ctx),
 			"oci_mysql_backup":                                             tableMySQLBackup(ctx),
 			"oci_mysql_channel":                                            tableMySQLChannel(ctx),
 			"oci_mysql_configuration":                                      tableMySQLConfiguration(ctx),
@@ -133,6 +161,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_mysql_db_system_metric_memory_utilization":                tableOciMySQLDBSystemMetricMemoryUtilization(ctx),
 			"oci_mysql_db_system_metric_memory_utilization_daily":          tableOciMySQLDBSystemMetricMemoryUtilizationDaily(ctx),
 			"oci_mysql_heat_wave_cluster":                                  tableOciMySQLHeatWaveCluster(ctx),
+			"oci_network_firewall_firewall":                                tableNetworkFirewall(ctx),
+			"oci_network_firewall_policy":                                  tableNetworkFirewallPolicy(ctx),
 			"oci_nosql_table":                                              tableNoSQLTable(ctx),
 			"oci_nosql_table_metric_read_throttle_count":                   tableOciNoSQLTableMetricReadThrottleCount(ctx),
 			"oci_nosql_table_metric_read_throttle_count_daily":             tableOciNoSQLTableMetricReadThrottleCountDaily(ctx),
@@ -147,6 +177,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_objectstorage_object":                                     tableObjectStorageObject(ctx),
 			"oci_ons_notification_topic":                                   tableOnsNotificationTopic(ctx),
 			"oci_ons_subscription":                                         tableOnsSubscription(ctx),
+			"oci_queue_queue":                                              tableQueueQueue(ctx),
 			"oci_region":                                                   tableIdentityRegion(ctx),
 			"oci_resource_search":                                          tableResourceSearch(ctx),
 			"oci_resourcemanager_stack":                                    tableOciResourceManagerStack(ctx),

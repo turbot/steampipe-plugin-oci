@@ -2,13 +2,14 @@ package oci
 
 import (
 	"context"
+	"time"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/loggingsearch"
 	"github.com/turbot/go-kit/types"
-	"github.com/turbot/steampipe-plugin-sdk/v4/grpc/proto"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin"
-	"github.com/turbot/steampipe-plugin-sdk/v4/plugin/transform"
+	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
 //// TABLE DEFINITION
@@ -22,60 +23,85 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
-					Name:    "start_time",
-					Require: plugin.Optional,
+					Name:       "timestamp",
+					Operators:  []string{">", ">=", "=", "<", "<="},
+					Require:    plugin.Optional,
+					CacheMatch: "exact",
 				},
 				{
-					Name:    "end_time",
-					Require: plugin.Optional,
+					Name:       "log_group_name",
+					Require:    plugin.Optional,
+					CacheMatch: "exact",
 				},
 				{
-					Name:    "log_group_name",
-					Require: plugin.Optional,
+					Name:       "log_name",
+					Require:    plugin.Optional,
+					CacheMatch: "exact",
 				},
 				{
-					Name:    "log_name",
-					Require: plugin.Optional,
+					Name:       "search_query",
+					Require:    plugin.Optional,
+					CacheMatch: "exact",
 				},
 			},
 		},
 		GetMatrixItemFunc: BuildCompartementRegionList,
 		Columns: []*plugin.Column{
 			{
-				Name:        "start_time",
-				Description: "",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromQual("start_time"),
+				Name:        "log_content_id",
+				Description: "The log content id.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Data.logContent.id"),
 			},
 			{
-				Name:        "end_time",
-				Description: "",
+				Name:        "log_content_source",
+				Description: "The log content source.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Data.logContent.source"),
+			},
+			{
+				Name:        "log_content_type",
+				Description: "The log content type.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Data.logContent.type"),
+			},
+			{
+				Name:        "timestamp",
+				Description: "Represents the timestamp of a log entry.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromQual("end_time"),
+				Transform:   transform.FromField("Data.datetime").Transform(transform.UnixMsToTimestamp),
 			},
 			{
 				Name:        "log_group_name",
-				Description: "",
+				Description: "Specifies the name of the log group to which the log entry belongs.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromQual("log_group_name"),
 			},
 			{
 				Name:        "log_name",
-				Description: "",
+				Description: "Indicates the name of the log within the log group. It helps to identify the specific log within a log group.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromQual("log_name"),
 			},
 			{
-				Name:        "datetime",
-				Description: "",
-				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("Data.datetime").Transform(transform.UnixMsToTimestamp),
+				Name:        "search_query",
+				Description: "Stores the search query associated with the log entry. It represents the criteria used to filter and retrieve specific logs from the log group.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("search_query"),
 			},
 			{
 				Name:        "log_content",
-				Description: "",
+				Description: "Stores the actual content of the log entry in JSON format. It contains the detailed information about the log event, such as log message, metadata, and any additional structured data.",
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Data.logContent"),
+			},
+
+			// Standard Steampipe columns
+			{
+				Name:        "title",
+				Description: ColumnDescriptionTitle,
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Data.logContent.id"),
 			},
 
 			// Standard OCI columns
@@ -88,31 +114,29 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromCamel(),
+				Transform:   transform.FromField("Data.logContent.oracle.compartmentid"),
 			},
 			{
 				Name:        "tenant_id",
-				Description: ColumnDescriptionTenant,
+				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
-				Transform:   transform.FromValue(),
+				Transform:   transform.FromField("Data.logContent.oracle.tenantid"),
 			},
 		},
 	}
 }
 
 type LoggingSearch struct {
-	Data          interface{}
-	CompartmentId string
-	Region        string
+	Data   interface{}
+	Region string
 }
 
 //// LIST FUNCTION
 
 func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
-	region := plugin.GetMatrixItem(ctx)[matrixKeyRegion].(string)
-	compartment := plugin.GetMatrixItem(ctx)[matrixKeyCompartment].(string)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("listLoggingSearch", "Compartment", compartment, "OCI_REGION", region)
 
 	// Create Session
@@ -120,21 +144,50 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	if err != nil {
 		return nil, err
 	}
-	request := loggingsearch.SearchLogsRequest{}
-	request.SearchLogsDetails.TimeStart = &common.SDKTime{Time: d.KeyColumnQuals["start_time"].GetTimestampValue().AsTime()}
-	request.SearchLogsDetails.TimeEnd = &common.SDKTime{Time: d.KeyColumnQuals["end_time"].GetTimestampValue().AsTime()}
-	log_group_name := d.KeyColumnQualString("log_group_name")
-	log_name := d.KeyColumnQualString("log_name")
 
-	// prepare the query
-	query := compartment
-	if log_group_name != "" {
-		query = query + "/" + log_group_name
+	request := loggingsearch.SearchLogsRequest{}
+
+	//set the start and end time based on the provided timestamp
+	var timeStart, timeEnd *common.SDKTime
+	if d.Quals["timestamp"] != nil {
+		for _, q := range d.Quals["timestamp"].Quals {
+			timestamp := q.Value.GetTimestampValue().AsTime()
+			switch q.Operator {
+			case "=":
+				timeStart = &common.SDKTime{Time: timestamp}
+				timeEnd = &common.SDKTime{Time: timestamp}
+			case ">=", ">":
+				timeStart = &common.SDKTime{Time: timestamp}
+			case "<", "<=":
+				timeEnd = &common.SDKTime{Time: timestamp}
+			}
+		}
 	}
-	if log_name != "" {
-		query = query + "/" + log_name
+	if timeStart == nil {
+		timeStart = &common.SDKTime{Time: (time.Now().AddDate(0, 0, -1))}
 	}
-	searchQuery := "search \"" + query + "\""
+	if timeEnd == nil {
+		timeEnd = &common.SDKTime{Time: (time.Now())}
+	}
+	request.SearchLogsDetails.TimeStart = timeStart
+	request.SearchLogsDetails.TimeEnd = timeEnd
+	var searchQuery string
+	if d.EqualsQualString("search_query") == "" {
+		log_group_name := d.EqualsQualString("log_group_name")
+		log_name := d.EqualsQualString("log_name")
+
+		// prepare the query
+		query := compartment
+		if log_group_name != "" {
+			query = query + "/" + log_group_name
+		}
+		if log_name != "" {
+			query = query + "/" + log_name
+		}
+		searchQuery = "search \"" + query + "\""
+	} else {
+		searchQuery = d.EqualsQualString("search_query")
+	}
 	request.SearchLogsDetails.SearchQuery = types.String(searchQuery)
 
 	request.Limit = types.Int(1000)
@@ -156,10 +209,10 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 			return nil, err
 		}
 		for _, result := range response.SearchResponse.Results {
-			d.StreamListItem(ctx, LoggingSearch{*result.Data, compartment, region})
+			d.StreamListItem(ctx, LoggingSearch{*result.Data, region})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.QueryStatus.RowsRemaining(ctx) == 0 {
+			if d.RowsRemaining(ctx) == 0 {
 				return nil, nil
 			}
 		}

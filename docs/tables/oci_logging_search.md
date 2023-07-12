@@ -8,6 +8,7 @@ The service offers powerful search capabilities, enabling you to search for spec
 
   - timestamp >= ‘2023-03-11T00:00:00Z’ and timestamp <= ‘2023-03-15T00:00:00Z’
   - timestamp between ‘2023-03-11T00:00:00Z’ and ‘2023-03-15T00:00:00Z’
+  - timestamp >= now() - interval '7 days' (The data will be fetched for last 7 days)
   - timestamp > ‘2023-03-15T00:00:00Z’ (The data will be fetched from the provided time to the current time)
   - timestamp < ‘2023-03-15T00:00:00Z’ (The data will be fetched from one day before the provided time to the provided time)
 
@@ -35,7 +36,7 @@ from
   oci_logging_search;
 ```
 
-### Show log entries of last 12 hrs
+### Show log entries of last 3 days
 
 ```sql
 select
@@ -50,7 +51,7 @@ select
 from
   oci_logging_search
 where
-  timestamp >= now() - interval '12 hrs';
+  timestamp >= now() - interval '3 days';
 ```
 
 ### Show log entries which are related to DatabaseService

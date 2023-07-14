@@ -4,11 +4,11 @@ The service offers powerful search capabilities, enabling you to search for spec
 
 **Important notes:**
 
-- By default, this table will provide data for the last 24hrs. You can give the `timestamp` value in the below ways to fetch data in a range. The examples below can guide you.
+- By default, this table will provide data for the last 24hrs. You can pass the `timestamp` value in the following ways to fetch data in a range.
 
   - timestamp >= ‘2023-03-11T00:00:00Z’ and timestamp <= ‘2023-03-15T00:00:00Z’
   - timestamp between ‘2023-03-11T00:00:00Z’ and ‘2023-03-15T00:00:00Z’
-  - timestamp >= now() - interval '7 days' (The data will be fetched for last 7 days)
+  - timestamp >= now() - interval '7 days' (The data will be fetched for the last 7 days)
   - timestamp > ‘2023-03-15T00:00:00Z’ (The data will be fetched from the provided time to the current time)
   - timestamp < ‘2023-03-15T00:00:00Z’ (The data will be fetched from one day before the provided time to the provided time)
 
@@ -20,7 +20,7 @@ The service offers powerful search capabilities, enabling you to search for spec
 
 ## Examples
 
-### Show log entries of last 24 hrs
+### Show log entries of the last 24 hrs
 
 ```sql
 select
@@ -36,7 +36,7 @@ from
   oci_logging_search;
 ```
 
-### Show log entries of last 3 days
+### Show log entries of the last 3 days
 
 ```sql
 select
@@ -54,7 +54,7 @@ where
   timestamp >= now() - interval '3 days';
 ```
 
-### Show log entries which are related to DatabaseService
+### Show log entries that are related to DatabaseService
 
 ```sql
 select

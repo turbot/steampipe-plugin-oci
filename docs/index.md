@@ -118,7 +118,7 @@ connection "oci_prod" {
   plugin              = "oci"
   config_file_profile = "oci_prod"
   config_path         = "~/.oci/config"
-  regions             = ["ap-*"]
+  regions             = ["ap-mumbai-1", "us-ashburn-1"]
 }
 ```
 

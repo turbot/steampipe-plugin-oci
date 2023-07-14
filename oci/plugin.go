@@ -148,6 +148,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_kms_vault":                                                tableKmsVault(ctx),
 			"oci_logging_log":                                              tableLoggingLog(ctx),
 			"oci_logging_log_group":                                        tableLoggingLogGroup(ctx),
+			"oci_logging_search":                                           tableLoggingSearch(ctx),
 			"oci_mysql_backup":                                             tableMySQLBackup(ctx),
 			"oci_mysql_channel":                                            tableMySQLChannel(ctx),
 			"oci_mysql_configuration":                                      tableMySQLConfiguration(ctx),

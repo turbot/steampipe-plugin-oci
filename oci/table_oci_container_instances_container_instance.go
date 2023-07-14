@@ -50,18 +50,18 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "The name of the container instance.",
+				Description: "Display name for the Container Instance.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the container instance.",
+				Description: "Unique identifier that is immutable on creation.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
 			{
 				Name:        "availability_domain",
-				Description: "Availability Domain where the ContainerInstance is running.",
+				Description: "Availability Domain where the Container Instance is running.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
@@ -76,7 +76,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the Container Instance was created.",
+				Description: "The time the the Container Instance was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -110,7 +110,7 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "dns_config",
-				Description: "DnsConfig of the container instance.",
+				Description: "DNS Config of the container instance.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getContainerInstance,
 			},
@@ -137,13 +137,13 @@ func tableContainerInstancesContainerInstance(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_updated",
-				Description: "The date and time the Container Instance was last modified.",
+				Description: "The time the ContainerInstance was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
 			{
 				Name:        "graceful_shutdown_timeout_in_seconds",
-				Description: "The retention period of the messages in the queue, in seconds.",
+				Description: "Duration in seconds processes within a Container have to gracefully terminate. This applies whenever a Container must be halted, such as when the Container Instance is deleted.",
 				Type:        proto.ColumnType_INT,
 			},
 			{
@@ -278,6 +278,8 @@ func listContainerInstances(ctx context.Context, d *plugin.QueryData, _ *plugin.
 	return nil, err
 }
 
+/// HYDRATE FUNCTIONS
+
 func getContainerInstance(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -323,9 +325,9 @@ func getContainerInstance(ctx context.Context, d *plugin.QueryData, h *plugin.Hy
 }
 
 // Priority order for tags
-// 1. Defined Tags
-// 2. Free-form tags
-// 3. System tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
 func containerInstanceTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}

@@ -18,6 +18,22 @@ from
   oci_container_instances_container_instance;
 ```
 
+### List container instances created in the last 7 days
+
+```sql
+select
+  display_name,
+  id,
+  availability_domain,
+  lifecycle_state,
+  time_created,
+  container_count
+from
+  oci_container_instances_container_instance
+where
+  time_created >= now() - interval '7' day;
+```
+
 ### List failed container instances
 
 ```sql
@@ -64,7 +80,7 @@ where
   container_restart_policy = 'NEVER';
 ```
 
-### Get dns config details for container instances
+### Get DNS config details for container instances
 
 ```sql
 select
@@ -91,4 +107,20 @@ from
   oci_container_instances_container_instance
 where
   volume_count is null;
+```
+
+### List container instances having more than one containers associated to it
+
+```sql
+select
+  display_name,
+  id,
+  availability_domain,
+  lifecycle_state,
+  time_created,
+  container_count
+from
+  oci_container_instances_container_instance
+where
+  container_count > 1;
 ```

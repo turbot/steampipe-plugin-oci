@@ -96,10 +96,67 @@ connection "oci_tenant_y" {
 - `min_error_retry_delay` (Optional) The minimum retry delay in milliseconds after which retries will be performed. This delay is also used as a base value when calculating the exponential backoff retry times. Defaults to 25ms and must be greater than or equal to 1ms.
 - `regions` (Optional) List of OCI regions Steampipe will connect to
 
-## Get involved
+## Multi-Account Connections
 
-- Open source: https://github.com/turbot/steampipe-plugin-oci
-- Community: [Slack Channel](https://steampipe.io/community/join)
+You may create multiple oci connections:
+```hcl
+connection "oci_dev" {
+  plugin              = "oci"
+  config_file_profile = "oci_dev"
+  config_path         = "~/.oci/config"
+  regions             = ["ap-mumbai-1", "us-ashburn-1"]
+}
+
+connection "oci_qa" {
+  plugin              = "oci"
+  config_file_profile = "oci_qa"
+  config_path         = "~/.oci/config"
+  regions             = ["sa-vinhedo-1", "ap-hyderabad-1"]
+}
+
+connection "oci_prod" {
+  plugin              = "oci"
+  config_file_profile = "oci_prod"
+  config_path         = "~/.oci/config"
+  regions             = ["ap-*"]
+}
+```
+
+Each connection is implemented as a distinct [Postgres schema](https://www.postgresql.org/docs/current/ddl-schemas.html). As such, you can use qualified table names to query a specific connection:
+
+```sql
+select * from oci_qa.oci_identity_user
+```
+
+You can multi-account connections by using an [**aggregator** connection](https://steampipe.io/docs/using-steampipe/managing-connections#using-aggregators). Aggregators allow you to query data from multiple connections for a plugin as if they are a single connection. 
+
+```hcl
+connection "oci_all" {
+  plugin      = "oci"
+  type        = "aggregator"
+  connections = ["oci_dev", "oci_qa", "oci_prod"]
+}
+```
+
+Querying tables from this connection will return results from the `oci_dev`, `oci_qa`, and `oci_prod` connections:
+```sql
+select * from oci_all.oci_identity_user
+```
+
+Alternatively, can use an unqualified name and it will be resolved according to the [Search Path](https://steampipe.io/docs/guides/search-path). It's a good idea to name your aggregator first alphbetically, so that it is the first connection in the search path (i.e. `oci_all` comes before `oci_dev`):
+```sql
+select * from oci_identity_user
+```
+
+Steampipe supports the `*` wildcard in the connection names. For example, to aggregate all the OCI plugin connections whose names begin with `oci_`:
+
+```hcl
+connection "oci_all" {
+  type        = "aggregator"
+  plugin      = "oci"
+  connections = ["oci_*"]
+}
+```
 
 ## Advanced configuration options
 
@@ -163,3 +220,8 @@ connection "oci" {
   auth   = "InstancePrincipal"   # Type of authentication
 }
 ```
+
+## Get involved
+
+- Open source: https://github.com/turbot/steampipe-plugin-oci
+- Community: [Slack Channel](https://steampipe.io/community/join)

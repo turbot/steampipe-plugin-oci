@@ -106,3 +106,20 @@ from
 where
   environment_variables is null;
 ```
+
+### List details of the instance to which the container is connected
+
+```sql
+select
+  c.display_name as container_name,
+  i.id as instance_id,
+  i.display_name as instance_name,
+  i.availability_domain as instance_availability_domain,
+  i.lifecycle_state as instance_lifecycle_state,
+  i.time_created instance_create_time
+from
+  oci_container_instances_container as c,
+  oci_container_instances_container_instance as i
+where
+  c.container_instance_id = i.id;
+```

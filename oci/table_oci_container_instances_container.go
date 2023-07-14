@@ -55,12 +55,12 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 		Columns: []*plugin.Column{
 			{
 				Name:        "display_name",
-				Description: "The name of the container.",
+				Description: "isplay name for the Container. Can be renamed.",
 				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "id",
-				Description: "The OCID of the container.",
+				Description: "Unique identifier that is immutable on creation.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},
@@ -82,7 +82,7 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_created",
-				Description: "The date and time the Container was created.",
+				Description: "The time the the Container was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
@@ -167,7 +167,7 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "time_updated",
-				Description: "The date and time the Container Instance was last modified.",
+				Description: "The time the Container was updated.",
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeUpdated.Time"),
 			},
@@ -220,7 +220,6 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 				Name:        "compartment_id",
 				Description: ColumnDescriptionCompartment,
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
 			},
 			{
 				Name:        "tenant_id",
@@ -307,6 +306,8 @@ func listContainers(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 	return nil, err
 }
 
+/// HYDRATE FUNCTIONS
+
 func getContainer(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)
@@ -352,9 +353,9 @@ func getContainer(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDat
 }
 
 // Priority order for tags
-// 1. Defined Tags
-// 2. Free-form tags
-// 3. System tags
+// 1. System Tags
+// 2. Defined Tags
+// 3. Free-form tags
 func containerTags(ctx context.Context, d *transform.TransformData) (interface{}, error) {
 	var freeFormTags map[string]string
 	var definedTags map[string]map[string]interface{}

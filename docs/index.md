@@ -96,7 +96,7 @@ connection "oci_tenant_y" {
 - `min_error_retry_delay` (Optional) The minimum retry delay in milliseconds after which retries will be performed. This delay is also used as a base value when calculating the exponential backoff retry times. Defaults to 25ms and must be greater than or equal to 1ms.
 - `regions` (Optional) List of OCI regions Steampipe will connect to.
 
-## Multi-Account Connections
+## Multi-Tenant Connections
 
 You may create multiple oci connections:
 ```hcl

@@ -1,3 +1,16 @@
+## v0.29.0 [2023-07-14]
+
+_What's new?_
+
+- New tables added
+  - [oci_container_instances_container_instance](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_container_instances_container_instance) ([#525](https://github.com/turbot/steampipe-plugin-oci/pull/525))
+  - [oci_container_instances_container](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_container_instances_container) ([#526](https://github.com/turbot/steampipe-plugin-oci/pull/526))
+  - [oci_logging_search](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_logging_search) ([#527](https://github.com/turbot/steampipe-plugin-oci/pull/527))
+
+_Enhancements_
+
+- Updated the `docs/index.md`` file to include multi-tenant configuration examples. ([#531](https://github.com/turbot/steampipe-plugin-oci/pull/531))
+
 ## v0.28.0 [2023-06-29]
 
 _What's new?_

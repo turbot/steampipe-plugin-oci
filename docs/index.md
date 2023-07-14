@@ -94,7 +94,7 @@ connection "oci_tenant_y" {
 - `config_path` (Optional) Path of the config file where subjected profile is available.
 - `max_error_retry_attempts` (Optional) The maximum number of attempts (including the initial call) Steampipe will make for failing API calls. Defaults to 9 and must be greater than or equal to 1.
 - `min_error_retry_delay` (Optional) The minimum retry delay in milliseconds after which retries will be performed. This delay is also used as a base value when calculating the exponential backoff retry times. Defaults to 25ms and must be greater than or equal to 1ms.
-- `regions` (Optional) List of OCI regions Steampipe will connect to
+- `regions` (Optional) List of OCI regions Steampipe will connect to.
 
 ## Multi-Account Connections
 
@@ -103,21 +103,18 @@ You may create multiple oci connections:
 connection "oci_dev" {
   plugin              = "oci"
   config_file_profile = "oci_dev"
-  config_path         = "~/.oci/config"
   regions             = ["ap-mumbai-1", "us-ashburn-1"]
 }
 
 connection "oci_qa" {
   plugin              = "oci"
   config_file_profile = "oci_qa"
-  config_path         = "~/.oci/config"
   regions             = ["sa-vinhedo-1", "ap-hyderabad-1"]
 }
 
 connection "oci_prod" {
   plugin              = "oci"
   config_file_profile = "oci_prod"
-  config_path         = "~/.oci/config"
   regions             = ["ap-mumbai-1", "us-ashburn-1"]
 }
 ```

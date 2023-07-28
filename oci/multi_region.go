@@ -391,7 +391,7 @@ func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string
 	for _, region := range regions.Items {
 		regionNames = append(regionNames, *region.Name)
 	}
-	plugin.Logger(ctx).Error("regions", regionNames)
+
 	d.ConnectionManager.Cache.Set(cacheKey, regionNames)
 
 	return regionNames, nil

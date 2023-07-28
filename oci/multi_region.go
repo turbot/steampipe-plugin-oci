@@ -17,24 +17,22 @@ const matrixKeyRegion = "region"
 const matrixKeyCompartment = "compartment"
 const matrixKeyZone = "zone"
 
-// var pluginQueryData *plugin.QueryData
-
-// func init() {
-// 	pluginQueryData = &plugin.QueryData{
-// 		ConnectionManager: connection.NewManager(),
-// 	}
-// }
-
 // BuildRegionList :: return a list of matrix items, one per region specified in the connection config
-func BuildRegionList(_ context.Context, d *plugin.QueryData) []map[string]interface{} {
+func BuildRegionList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 	// retrieve regions from connection config
 	ociConfig := GetConfig(d.Connection)
 
 	if ociConfig.Regions != nil {
 		regions := GetConfig(d.Connection).Regions
 
-		if len(getInvalidRegions(regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ","))
+		// fetch OCI regions
+		validRegions, err := listOciAvailableRegions(ctx, d)
+		if err != nil {
+			panic(err)
+		}
+		invalidRegions := getInvalidRegions(regions, validRegions)
+		if len(invalidRegions) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(invalidRegions, ","))
 		}
 
 		// validate regions list
@@ -104,8 +102,14 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 	if ociConfig.Regions != nil {
 		regions := GetConfig(d.Connection).Regions
 
-		if len(getInvalidRegions(regions)) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(getInvalidRegions(regions), ",") + ". Edit your connection configuration file and then restart Steampipe")
+		// fetch OCI regions
+		validRegions, err := listOciAvailableRegions(ctx, d)
+		if err != nil {
+			panic(err)
+		}
+		invalidRegions := getInvalidRegions(regions, validRegions)
+		if len(invalidRegions) > 0 {
+			panic("\n\nConnection config have invalid regions: " + strings.Join(invalidRegions, ","))
 		}
 
 		// validate regions list
@@ -140,41 +144,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 	return defaultMatrix
 }
 
-func getInvalidRegions(regions []string) []string {
-	ociRegions := []string{
-		"ap-chiyoda-1",
-		"ap-chuncheon-1",
-		"ap-hyderabad-1",
-		"ap-melbourne-1",
-		"ap-mumbai-1",
-		"ap-osaka-1",
-		"ap-seoul-1",
-		"ap-sydney-1",
-		"ap-tokyo-1",
-		"ca-montreal-1",
-		"ca-toronto-1",
-		"eu-amsterdam-1",
-		"eu-frankfurt-1",
-		"eu-zurich-1",
-		"me-dubai-1",
-		"me-jeddah-1",
-		"sa-santiago-1",
-		"sa-saopaulo-1",
-		"sa-vinhedo-1",
-		"uk-cardiff-1",
-		"uk-gov-cardiff-1",
-		"uk-gov-london-1",
-		"uk-london-1",
-		"us-ashburn-1",
-		"us-gov-ashburn-1",
-		"us-gov-chicago-1",
-		"us-gov-phoenix-1",
-		"us-langley-1",
-		"us-luke-1",
-		"us-phoenix-1",
-		"us-sanjose-1",
-	}
-
+func getInvalidRegions(regions []string, ociRegions []string) []string {
 	invalidRegions := []string{}
 	for _, region := range regions {
 		if !helpers.StringSliceContains(ociRegions, region) {
@@ -212,10 +182,15 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 		},
 	}
 
+	endpointRegion := GetConfig(d.Connection).Regions[0]
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.IdentityClient.ListCompartments(ctx, request)
 		if err != nil {
+			if strings.Contains(err.Error(), "no such host") {
+				panic("\n\nConnection config has invalid region: " + endpointRegion + ". Edit your connection configuration file and then restart Steampipe")
+			}
+			plugin.Logger(ctx).Error("listAllCompartments", "ListCompartments", err)
 			return nil, err
 		}
 
@@ -383,4 +358,41 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	d.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
 
 	return response.Configuration, nil
+}
+
+// List out the regions supported by Oracle Cloud
+func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string, error) {
+	logger := plugin.Logger(ctx)
+
+	cacheKey := "OciRegionList"
+	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+		return cachedData.([]string), nil
+	}
+
+	endpointRegion := GetConfig(d.Connection).Regions[0]
+
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	var regionNames []string
+
+	regions, err := session.IdentityClient.ListRegions(ctx)
+	if err != nil {
+		if strings.Contains(err.Error(), "no such host") {
+			panic("\n\nConnection config has invalid region: " + endpointRegion + ". Edit your connection configuration file and then restart Steampipe")
+		}
+		logger.Error("listOciAvailableRegions", "ListRegions", err)
+		return nil, err
+	}
+
+	for _, region := range regions.Items {
+		regionNames = append(regionNames, *region.Name)
+	}
+	plugin.Logger(ctx).Error("regions", regionNames)
+	d.ConnectionManager.Cache.Set(cacheKey, regionNames)
+
+	return regionNames, nil
 }

@@ -48,13 +48,11 @@ where
 
 ```sql
 select
- t2.name as parent,
- count(t1.*) as child_count
+  t2.name as parent,
+  count(t1.*) as child_count
 from
- oci_nosql_table t1
-  join oci_nosql_table t2
-  on t1.title like t2.title || '.%'
-  and t1.title <> t2.title
+  oci_nosql_table t1
+  join oci_nosql_table t2 on t1.title like t2.title || '.%' and t1.title <> t2.title
 group by
   parent;
 ```
@@ -63,13 +61,12 @@ group by
 
 ```sql
 select
- t2.name as parent,
- -- To exclude the parent table from being counted as a child, we subtract 1 from the count.
- count(t1.*) - 1 as child_count
+  t2.name as parent,
+  -- To exclude the parent table from being counted as a child, we subtract 1 from the count.
+  count(t1.*) - 1 as child_count
 from
- oci_nosql_table t1
-  join oci_nosql_table t2
-  on t1.title like t2.title || '%'
+  oci_nosql_table t1
+  join oci_nosql_table t2 on t1.title like t2.title || '%'
 group by
   parent;
 ```

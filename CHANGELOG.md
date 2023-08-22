@@ -1,3 +1,13 @@
+## v0.30.0 [2023-08-22]
+
+_Enhancements_
+
+- Added example queries in the `oci_nosql_table` table doc for counting the number of child tables of a parent table. ([#535](https://github.com/turbot/steampipe-plugin-oci/pull/535))
+
+_Bug fixes_
+
+- Fixed the validation of the `regions` argument in the configuration file to generate an error in case an unsupported or an invalid region is provided. ([#534](https://github.com/turbot/steampipe-plugin-oci/pull/534)) 
+
 ## v0.29.0 [2023-07-14]
 
 _What's new?_

@@ -32,7 +32,7 @@ func BuildRegionList(ctx context.Context, d *plugin.QueryData) []map[string]inte
 		}
 		invalidRegions := getInvalidRegions(regions, validRegions)
 		if len(invalidRegions) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(invalidRegions, ","))
+			panic("\n\nConnection config has invalid regions: " + strings.Join(invalidRegions, ",") + ". Edit your connection configuration file and then restart Steampipe")
 		}
 
 		// validate regions list
@@ -109,7 +109,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 		}
 		invalidRegions := getInvalidRegions(regions, validRegions)
 		if len(invalidRegions) > 0 {
-			panic("\n\nConnection config have invalid regions: " + strings.Join(invalidRegions, ","))
+			panic("\n\nConnection config has invalid regions: " + strings.Join(invalidRegions, ",") + ". Edit your connection configuration file and then restart Steampipe")
 		}
 
 		// validate regions list

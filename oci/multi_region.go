@@ -79,7 +79,6 @@ func BuildCompartmentList(ctx context.Context, d *plugin.QueryData) []map[string
 
 // BuildCompartmentRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
-	plugin.Logger(ctx).Error("come ******", getRegionFromEnvVar())
 	// cache compartment region matrix
 	cacheKey := "CompartmentRegionList"
 
@@ -95,7 +94,6 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 		}
 		panic(err)
 	}
-	plugin.Logger(ctx).Error("come -------")
 	// retrieve regions from connection config
 	ociConfig := GetConfig(d.Connection)
 
@@ -128,7 +126,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 		d.ConnectionManager.Cache.Set(cacheKey, matrix)
 		return matrix
 	}
-	plugin.Logger(ctx).Error("getRegionFromEnvVar() -------", getRegionFromEnvVar())
+
 	defaultMatrix := make([]map[string]interface{}, len(compartments))
 	for j, compartment := range compartments {
 		defaultMatrix[j] = map[string]interface{}{

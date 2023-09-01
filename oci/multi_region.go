@@ -79,7 +79,6 @@ func BuildCompartmentList(ctx context.Context, d *plugin.QueryData) []map[string
 
 // BuildCompartmentRegionList :: return a list of matrix items, one per region-compartment specified in the connection config
 func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
-
 	// cache compartment region matrix
 	cacheKey := "CompartmentRegionList"
 
@@ -95,7 +94,6 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 		}
 		panic(err)
 	}
-
 	// retrieve regions from connection config
 	ociConfig := GetConfig(d.Connection)
 
@@ -182,12 +180,17 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 		},
 	}
 
-	endpointRegion := GetConfig(d.Connection).Regions[0]
+	// fetch the first region provided in the config file if available
+	var endpointRegion string
+	if GetConfig(d.Connection).Regions != nil {
+		endpointRegion = GetConfig(d.Connection).Regions[0]
+	}
+
 	pagesLeft := true
 	for pagesLeft {
 		response, err := session.IdentityClient.ListCompartments(ctx, request)
 		if err != nil {
-			if strings.Contains(err.Error(), "no such host") {
+			if strings.Contains(err.Error(), "no such host") && endpointRegion != "" {
 				panic("\n\nConnection config has invalid region: " + endpointRegion + ". Edit your connection configuration file and then restart Steampipe")
 			}
 			plugin.Logger(ctx).Error("listAllCompartments", "ListCompartments", err)

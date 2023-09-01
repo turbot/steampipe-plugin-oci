@@ -1,3 +1,9 @@
+## v0.30.1 [2023-09-01]
+
+_Bug fixes_
+
+- Fixed the `index out of range` error while querying `oci_database_autonomous_database`, `oci_events_rule` and `oci_identity_tag_default` tables, when the `regions` config arg is not set in the `oci.spc` file. ([#537](https://github.com/turbot/steampipe-plugin-oci/pull/537))
+
 ## v0.30.0 [2023-08-22]
 
 _Enhancements_

@@ -180,7 +180,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 		},
 	}
 
-	// fetch the first region provided in config if available
+	// fetch the first region provided in the config file if available
 	var endpointRegion string
 	if GetConfig(d.Connection).Regions != nil {
 		endpointRegion = GetConfig(d.Connection).Regions[0]

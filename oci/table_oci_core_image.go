@@ -181,11 +181,6 @@ func listCoreImages(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateD
 		return nil, nil
 	}
 
-	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-		return nil, nil
-	}
-
 	// Create Session
 	session, err := coreComputeService(ctx, d, region)
 	if err != nil {

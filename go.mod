@@ -3,7 +3,7 @@ module github.com/turbot/steampipe-plugin-oci
 go 1.19
 
 require (
-	github.com/hashicorp/go-hclog v1.4.0
+	github.com/hashicorp/go-hclog v1.5.0
 	github.com/oracle/oci-go-sdk/v65 v65.28.0
 	github.com/turbot/go-kit v0.6.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.5.1

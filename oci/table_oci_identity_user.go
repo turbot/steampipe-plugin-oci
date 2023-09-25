@@ -68,6 +68,12 @@ func tableIdentityUser(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
+				Name:        "last_successful_login_time",
+				Description: "Date and time the user was last successfully logged in.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("LastSuccessfulLoginTime.Time"),
+			},
+			{
 				Name:        "description",
 				Description: "The description assigned to the user.",
 				Type:        proto.ColumnType_STRING,

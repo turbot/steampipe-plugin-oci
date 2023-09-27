@@ -1,3 +1,13 @@
+## v0.31.0 [2023-09-27]
+
+_Enhancements_
+
+- Added the `last_successful_login_time` column to `oci_identity_user` table. ([#547](https://github.com/turbot/steampipe-plugin-oci/pull/547))
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v5.5.1](https://github.com/turbot/steampipe-plugin-sdk/blob/main/CHANGELOG.md#v551-2023-07-26). ([#542](https://github.com/turbot/steampipe-plugin-oci/pull/542))
+
 ## v0.30.1 [2023-09-01]
 
 _Bug fixes_
@@ -12,7 +22,7 @@ _Enhancements_
 
 _Bug fixes_
 
-- Fixed the validation of the `regions` argument in the configuration file to generate an error in case an unsupported or an invalid region is provided. ([#534](https://github.com/turbot/steampipe-plugin-oci/pull/534)) 
+- Fixed the validation of the `regions` argument in the configuration file to generate an error in case an unsupported or an invalid region is provided. ([#534](https://github.com/turbot/steampipe-plugin-oci/pull/534))
 
 ## v0.29.0 [2023-07-14]
 

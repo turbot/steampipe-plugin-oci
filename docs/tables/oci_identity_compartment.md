@@ -1,10 +1,20 @@
-# Table: oci_identity_compartment
+---
+title: "Steampipe Table: oci_identity_compartment - Query OCI Identity Compartments using SQL"
+description: "Allows users to query OCI Identity Compartments."
+---
 
-Compartments are the primary building blocks you use to organize your cloud resources. You use compartments to organize and isolate your resources to make it easier to manage and secure access to them. For more information about compartments policy, go to [Understanding Compartments](https://docs.oracle.com/en-us/iaas/Content/GSG/Concepts/settinguptenancy.htm#Understa)
+# Table: oci_identity_compartment - Query OCI Identity Compartments using SQL
+
+Oracle Cloud Infrastructure Identity and Access Management (IAM) service lets you control who has access to your cloud resources. You can control what type of access a group of users have and to which specific resources. This is achieved through the use of compartments, which are a fundamental component of Oracle Cloud Infrastructure for organizing and isolating your cloud resources.
+
+## Table Usage Guide
+
+The `oci_identity_compartment` table provides insights into compartments within Oracle Cloud Infrastructure Identity and Access Management (IAM). As a cloud architect or administrator, you can explore compartment-specific details through this table, including compartment names, descriptions, and states. Utilize it to manage and understand your OCI resource organization, such as identifying compartments with specific resources, understanding your compartment hierarchy, and ensuring appropriate resource isolation.
 
 ## Examples
 
 ### Basic info
+Discover the segments that are in different lifecycle states within your OCI Identity Compartments. This could be useful in assessing the elements within your compartments and understanding their statuses for better resource management.
 
 ```sql
 select
@@ -17,6 +27,7 @@ from
 ```
 
 ### Details joined with parent compartment
+Analyze the settings to understand the relationship between different compartments within an OCI identity compartment hierarchy. This is useful for understanding the structure and dependencies within your OCI environment.
 
 ```sql
 select
@@ -32,6 +43,7 @@ order by
 ```
 
 ### Full path of the compartments
+This query is useful in tracking the full path of active compartments within a system. It aids in system organization and management by allowing users to understand the hierarchical structure of compartments, thereby facilitating easier navigation and data retrieval.
 
 ```sql
 with recursive compartments as

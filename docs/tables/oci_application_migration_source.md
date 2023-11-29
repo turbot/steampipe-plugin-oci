@@ -1,10 +1,20 @@
-# Table: oci_application_migration_source
+---
+title: "Steampipe Table: oci_application_migration_source - Query OCI Application Migration Sources using SQL"
+description: "Allows users to query data from Oracle Cloud Infrastructure's Application Migration Sources."
+---
 
-The properties that define a source. Source refers to the source environment from which you migrate an application to Oracle Cloud Infrastructure.
+# Table: oci_application_migration_source - Query OCI Application Migration Sources using SQL
+
+Oracle Cloud Infrastructure's Application Migration service helps you migrate applications from any environment to Oracle Cloud Infrastructure. It simplifies the migration process, reduces downtime, and ensures that your applications are migrated with minimal disruption. This service is beneficial for those who want to take advantage of Oracle Cloud Infrastructure's benefits without the hassle of manually migrating their applications.
+
+## Table Usage Guide
+
+The `oci_application_migration_source` table provides insights into the sources within Oracle Cloud Infrastructure's Application Migration service. As a Cloud engineer, explore source-specific details through this table, including the source type, lifecycle state, and associated metadata. Utilize it to uncover information about sources, such as those in different lifecycle states, the type of sources, and the verification of source details.
 
 ## Examples
 
 ### Basic info
+Explore the basic information of your migration sources in Oracle Cloud Infrastructure (OCI) to understand their current lifecycle state and source details. This can be useful for tracking the status and origin of your migration sources, aiding in effective resource management and migration planning.
 
 ```sql
 select
@@ -21,6 +31,7 @@ from
 ```
 
 ### List all inactive sources
+Discover the segments that are not currently active in your application migration process. This can be useful for identifying potential issues or bottlenecks, allowing you to optimize the migration process.
 
 ```sql
 select
@@ -39,6 +50,7 @@ where
 ```
 
 ### List all sources created in the last 30 days
+Explore which sources have been created in the last 30 days to better manage and understand the status of your application migration. This allows for efficient tracking of newly added sources, essential for maintaining an updated and secure application environment.
 
 ```sql
 select
@@ -57,6 +69,7 @@ where
 ```
 
 ### List all migrations under a particular source
+Explore which migrations are associated with a specific source in order to manage and track application migration processes. This is particularly useful for identifying the state and details of migrations, aiding in the organization and monitoring of migration tasks.
 
 ```sql
 select

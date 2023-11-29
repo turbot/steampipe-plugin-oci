@@ -1,10 +1,20 @@
-# Table: oci_core_network_load_balancer
+---
+title: "Steampipe Table: oci_core_network_load_balancer - Query OCI Core Network Load Balancers using SQL"
+description: "Allows users to query OCI Core Network Load Balancers."
+---
 
-Network Load Balancers can provide automated traffic distribution from one entry point to multiple servers in a backend set. It ensure that your services remain available by directing traffic only to healthy servers. Network Load Balancer provides the benefits of flow high availability, source and destination IP addresses, and port preservation. It is designed to handle volatile traffic patterns and millions of flows, offering high throughput while maintaining ultra low latency. It is the ideal load balancing solution for latency sensitive workloads. It is also optimized for long-running connections in the order of days or months.
+# Table: oci_core_network_load_balancer - Query OCI Core Network Load Balancers using SQL
+
+A Network Load Balancer in Oracle Cloud Infrastructure (OCI) is a regional, non-internet-facing, load balancer that distributes traffic within a virtual cloud network (VCN). It uses a load balancing algorithm and health check policy to distribute traffic among backend servers. The Network Load Balancer is designed to handle volatile traffic patterns and millions of flows, with the ability to scale in real time, without pre-warming.
+
+## Table Usage Guide
+
+The `oci_core_network_load_balancer` table provides insights into Network Load Balancers within Oracle Cloud Infrastructure (OCI) Core services. As a Network Administrator, you can explore load balancer-specific details through this table, including configurations, backend sets, and associated metadata. Utilize it to uncover information about load balancers, such as their health check policies, backend sets, and the distribution of traffic among backend servers.
 
 ## Examples
 
 ### Basic info
+Explore which network load balancers are currently active in your OCI core network. This can help you assess their health status and identify any that may have been recently created or modified.
 
 ```sql
 select
@@ -19,6 +29,7 @@ from
 ```
 
 ### List NLBs assigns with public IP address
+Discover the segments that are assigned with public IP addresses within your network load balancer, allowing you to identify those that are not private. This can be beneficial for understanding your network's exposure and managing security risks.
 
 ```sql
 select
@@ -32,6 +43,7 @@ where
 ```
 
 ### List critical NLBs
+Analyze the health status of your network load balancers to identify those in a critical state. This information could be vital in troubleshooting network issues, ensuring data flow efficiency, and maintaining overall system performance.
 
 ```sql
 select

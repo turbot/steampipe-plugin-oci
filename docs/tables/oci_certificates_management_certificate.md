@@ -1,10 +1,20 @@
-# Table: oci_certificates_management_certificate
+---
+title: "Steampipe Table: oci_certificates_management_certificate - Query OCI Certificates Management Certificates using SQL"
+description: "Allows users to query Certificates Management Certificates in Oracle Cloud Infrastructure."
+---
 
-This table provides information on Certificate resources in Oracle Cloud Infrastructure Certificates Management service.
+# Table: oci_certificates_management_certificate - Query OCI Certificates Management Certificates using SQL
+
+Oracle Cloud Infrastructure (OCI) Certificates Management is a service that helps in managing and controlling SSL/TLS certificates. It allows users to create, import, and manage SSL/TLS certificates for their cloud-based applications and resources. This service ensures that the certificates are valid, trusted, and can be used for secure connections.
+
+## Table Usage Guide
+
+The `oci_certificates_management_certificate` table provides insights into the SSL/TLS certificates managed by OCI Certificates Management. As a security analyst, you can delve into certificate-specific details through this table, including certificate type, validity, and associated metadata. Utilize it to uncover information about certificates, such as their expiration dates, the resources they're associated with, and their overall status within your OCI environment.
 
 ## Examples
 
 ### Basic info
+Discover the details of your certificates, including their lifecycle state and associated metadata. This is useful to understand the status and configuration of your certificates for better management and security compliance.
 
 ```sql
 select
@@ -28,6 +38,7 @@ from
 ```
 
 ### List imported certificates
+Explore imported certificates to understand their lifecycle state, rules, and signature algorithm. This can be helpful in managing and understanding the security and validity of certificates in your environment.
 
 ```sql
 select
@@ -44,6 +55,7 @@ where
 ```
 
 ### List failed certificates
+Discover the segments that have failed certificates to gain insights into potential security risks or issues in your system. This is useful for quickly identifying and addressing problematic areas, enhancing the overall security of your system.
 
 ```sql
 select
@@ -60,6 +72,7 @@ where
 ```
 
 ### List certificates created in the last 30 days
+Discover the segments that have been certified within the last month. This is useful for tracking recent changes and ensuring system security.
 
 ```sql
 select
@@ -76,6 +89,7 @@ where
 ```
 
 ### Get the current version details of each certificate
+Explore which certificates are currently in use and their respective details. This is useful for tracking certificate versions and their revocation status, which aids in maintaining secure connections.
 
 ```sql
 select

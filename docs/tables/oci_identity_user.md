@@ -1,8 +1,20 @@
-# Table: oci_identity_user
+---
+title: "Steampipe Table: oci_identity_user - Query OCI Identity Users using SQL"
+description: "Allows users to query information about users in OCI Identity."
+---
+
+# Table: oci_identity_user - Query OCI Identity Users using SQL
+
+Oracle Cloud Infrastructure's Identity and Access Management (IAM) service lets you control who has access to your cloud resources. You can control what type of access a group of users have and to which specific resources. This is done through the use of policies, compartments, and other security features that the IAM service offers.
+
+## Table Usage Guide
+
+The `oci_identity_user` table provides insights into users within OCI Identity and Access Management (IAM). As a security administrator, explore user-specific details through this table, including user ID, name, description, and associated metadata. Utilize it to uncover information about users, such as their state, time of creation, and compartment ID.
 
 ## Examples
 
 ### Basic info
+Discover the segments that highlight user details and their access privileges. This allows for better management and oversight of user permissions and security settings.
 
 ```sql
 select
@@ -23,6 +35,7 @@ from
 ```
 
 ### List Oracle Identity Cloud Service(IDCS) users
+Explore which users in the Oracle Identity Cloud Service have multi-factor authentication activated. This is beneficial to ensure security protocols are being followed within your organization.
 
 ```sql
 select
@@ -39,6 +52,7 @@ where
 ```
 
 ### List users who can log in to console
+Explore which users have the ability to log in to the console. This can be useful to identify potential security risks and enforce appropriate user permissions.
 
 ```sql
 select
@@ -51,6 +65,7 @@ where
 ```
 
 ### Details of identity groups attached to users
+Explore which user profiles are linked to specific identity groups. This can help in managing user permissions and understanding the distribution of user roles within your organization.
 
 ```sql
 select

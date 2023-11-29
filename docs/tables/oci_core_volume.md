@@ -1,10 +1,20 @@
-# Table: oci_core_volume
+---
+title: "Steampipe Table: oci_core_volume - Query OCI Core Volumes using SQL"
+description: "Allows users to query OCI Core Volumes."
+---
 
-The Oracle Cloud Infrastructure Block Volume service lets you dynamically provision and manage block storage volume.
+# Table: oci_core_volume - Query OCI Core Volumes using SQL
+
+OCI Core Volumes are block storage devices that you can attach to instances in the same availability domain. They are durable, high performance storage volumes that can persist beyond the life of a single Oracle Cloud Infrastructure Compute instance. Core Volumes are designed for mission-critical applications that require granular, consistent, and reliable data access.
+
+## Table Usage Guide
+
+The `oci_core_volume` table provides insights into Core Volumes within Oracle Cloud Infrastructure (OCI). As a database administrator, explore volume-specific details through this table, including size, state, and associated metadata. Utilize it to uncover information about volumes, such as those with high performance, the availability of volumes, and the verification of volume backups.
 
 ## Examples
 
 ### Basic info
+Explore which volumes in your Oracle Cloud Infrastructure are currently active, when they were created, and their display names for easy identification and management.
 
 ```sql
 select
@@ -18,6 +28,7 @@ from
 
 
 ### List volumes with a faulty state
+Explore which storage volumes are in a faulty state. This is useful for identifying potential issues in your storage infrastructure that may require troubleshooting or maintenance.
 
 ```sql
 select
@@ -33,6 +44,7 @@ where
 
 
 ### List volumes with size greater than 1024 GB
+Identify instances where storage volumes exceed 1024 GB to effectively manage resources and ensure optimal utilization.
 
 ```sql
 select
@@ -48,6 +60,7 @@ where
 
 
 ### List volumes with Oracle managed encryption (volumes are encrypted by default with Oracled managed encryption keys)
+Determine the volumes that are encrypted using Oracle's default management keys. This can be useful to identify volumes that may not have been individually configured with custom encryption settings, potentially highlighting areas for enhanced security measures.
 
 ```sql
 select
@@ -63,6 +76,7 @@ where
 
 
 ### List volumes with customer managed encryption
+Identify instances where customer-managed encryption is used for volumes. This can help assess security measures and compliance with data protection standards.
 
 ```sql
 select
@@ -78,6 +92,7 @@ where
 
 
 ### List volumes created in the root compartment
+Discover the segments that are utilizing storage space within the root compartment. This can help in efficient management of resources and planning for future storage needs.
 
 ```sql
 select

@@ -1,10 +1,20 @@
-# Table: oci_application_migration_migration
+---
+title: "Steampipe Table: oci_application_migration_migration - Query OCI Application Migration Service Migrations using SQL"
+description: "Allows users to query data related to migrations in Oracle Cloud Infrastructure's Application Migration Service."
+---
 
-Application Migration simplifies the migration of applications from Oracle Cloud Infrastructure Classic to Oracle Cloud Infrastructure. You can use Application Migration API to migrate applications, such as Oracle Java Cloud Service, SOA Cloud Service, and Integration Classic instances, to Oracle Cloud Infrastructure.
+# Table: oci_application_migration_migration - Query OCI Application Migration Service Migrations using SQL
+
+Oracle Cloud Infrastructure's Application Migration Service simplifies the migration of applications from on-premise data centers or other clouds to Oracle Cloud Infrastructure. It supports a wide range of source applications, including Java EE, Oracle WebLogic Server, Oracle SOA Suite, and more. The service provides a comprehensive solution for migrating applications, databases, and associated configurations.
+
+## Table Usage Guide
+
+The `oci_application_migration_migration` table provides insights into the migrations performed using Oracle Cloud Infrastructure's Application Migration Service. As a cloud engineer or database administrator, you can explore migration-specific details through this table, including migration status, type of source application, and associated metadata. Utilize it to monitor the progress of migrations, identify any issues, and ensure successful migration of applications to Oracle Cloud Infrastructure.
 
 ## Examples
 
 ### Basic info
+Explore the status and details of your application migrations to understand their progress and configuration. This can help in managing and tracking the migration process effectively.
 
 ```sql
 select
@@ -26,6 +36,7 @@ from
 ```
 
 ### List all inactive migrations
+Discover the segments that consist of inactive migrations in your application to better manage resources and prioritize tasks. This can be particularly useful in maintaining efficiency and ensuring smooth operations within your system.
 
 ```sql
 select
@@ -49,6 +60,7 @@ where
 ```
 
 ### List all migrations created in the last 30 days
+Identify recent application migrations within the past month. This can provide insights into the migration trends and help in assessing the migration workload.
 
 ```sql
 select
@@ -72,6 +84,7 @@ where
 ```
 
 ### List source details of a particular migration
+This query helps in assessing the details of a specific migration source in an application migration scenario. It's useful when you need to understand the lifecycle, account details, and regional information of the source associated with a particular migration.
 
 ```sql
 select
@@ -93,6 +106,7 @@ where
 ```
 
 ### List successfully migrated applications
+Discover the segments that have successfully migrated applications in your OCI environment. This can help you track your migration progress and ensure that all applications have been transferred correctly.
 
 ```sql
 select
@@ -108,6 +122,7 @@ where
 ```
 
 ### List application migrations that have selective-migration enabled
+Determine the areas in which applications have selective migration enabled. This query is useful for understanding which applications are set to migrate only specific parts, allowing for targeted and efficient migration processes.
 
 ```sql
 select

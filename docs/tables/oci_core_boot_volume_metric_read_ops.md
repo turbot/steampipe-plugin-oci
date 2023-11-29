@@ -1,10 +1,20 @@
-# Table: oci_core_boot_volume_metric_read_ops
+---
+title: "Steampipe Table: oci_core_boot_volume_metric_read_ops - Query OCI Core Boot Volume Metrics using SQL"
+description: "Allows users to query OCI Core Boot Volume Read Operations Metrics."
+---
 
-OCI Monitoring metrics explorer provide data about the performance of your systems. The `oci_core_boot_volume_metric_read_ops` table provides metric statistics at 5 minute intervals for the most recent 5 days.
+# Table: oci_core_boot_volume_metric_read_ops - Query OCI Core Boot Volume Metrics using SQL
+
+Oracle Cloud Infrastructure's Core Boot Volume is a block storage volume that contains the image used to boot a Compute instance. These Boot Volumes are reliable, high-performance storage volumes that can persistently store data and can be used as boot volumes for instances. They offer consistent, low-latency performance, and a variety of management features, such as backup and restore operations, cloning, and volume expansion.
+
+## Table Usage Guide
+
+The `oci_core_boot_volume_metric_read_ops` table provides insights into the read operations metrics of Boot Volumes within Oracle Cloud Infrastructure's Core service. As a system administrator or DevOps engineer, explore metric-specific details through this table, including the volume ID, namespace, metric timestamp, and read operation statistics. Utilize it to monitor and analyze the performance of your Boot Volumes, identify any unusual read operation patterns, and ensure optimal performance of your instances.
 
 ## Examples
 
 ### Basic info
+Explore the performance metrics of boot volumes in your Oracle Cloud Infrastructure environment. This query helps in identifying any unusual activity or performance degradation by analyzing metrics such as minimum, maximum, average, and total read operations over time.
 
 ```sql
 select
@@ -23,6 +33,7 @@ order by
 ```
 
 ### Intervals where volumes exceed 1000 average read ops
+Analyze the settings to understand periods where the average read operations surpass a threshold of 1000. This could be useful in identifying potential system overloads or performance bottlenecks.
 
 ```sql
 select
@@ -43,6 +54,7 @@ order by
 ```
 
 ### Intervals where volumes exceed 8000 max read ops
+Explore instances where the read operations on boot volumes exceed a certain threshold to monitor system performance and identify potential bottlenecks. This can be useful in optimizing your system configuration for improved efficiency.
 
 ```sql
 select
@@ -63,6 +75,7 @@ order by
 ```
 
 ### Read, Write, and Total IOPS
+Explore the performance of your system by analyzing input/output operations. This query helps to understand the average, maximum, and minimum read/write operations over time, assisting in identifying potential issues or areas for improvement.
 
 ```sql
 select 

@@ -1,10 +1,20 @@
-# Table: oci_certificates_management_certificate_authority_version
+---
+title: "Steampipe Table: oci_certificates_management_certificate_authority_version - Query OCI Certificates Management Certificate Authority Versions using SQL"
+description: "Allows users to query Certificate Authority Versions in the OCI Certificates Management service."
+---
 
-In Oracle Cloud Infrastructure (OCI), the Certificate Management service provides a secure and centralized way to manage SSL/TLS certificates. The certificates managed by OCI Certificate Management do not have versions in the traditional sense. Instead, the service allows you to manage the lifecycle of certificates, including creating, importing, renewing, and revoking certificates.
+# Table: oci_certificates_management_certificate_authority_version - Query OCI Certificates Management Certificate Authority Versions using SQL
+
+A Certificate Authority Version in OCI Certificates Management is a specific version of a certificate authority (CA). It contains the information about the CA, such as its public key and the associated private key. This CA version can be used to sign certificates or certificate revocation lists (CRLs).
+
+## Table Usage Guide
+
+The `oci_certificates_management_certificate_authority_version` table provides insights into the versions of certificate authorities within OCI Certificates Management. As a security administrator, you can explore CA version-specific details through this table, including the public key, private key, and other associated metadata. Utilize it to uncover information about CA versions, such as their signing status, the associated CAs, and the validity of each version.
 
 ## Examples
 
 ### Basic info
+Explore the versions of certificate authorities to understand their revocation status, validity, and deletion times. This can be useful for maintaining security compliance and tracking changes in your certificate authorities.
 
 ```sql
 select
@@ -23,6 +33,7 @@ from
 ```
 
 ### Get all certificate authority versions
+Determine the versions of all certificate authorities to assess their validity, revocation status, and other key details. This is useful for maintaining the security of your network by ensuring all certificates are up-to-date and valid.
 
 ```sql
 select
@@ -44,6 +55,7 @@ from
 ```
 
 ### Count certificate versions by certificate authority
+Analyze the distribution of certificate versions across different certificate authorities. This can be useful in identifying authorities that have a high number of versions, potentially indicating frequent changes or updates.
 
 ```sql
 select
@@ -56,6 +68,7 @@ group by
 ```
 
 ### List certificate versions created in the last 30 days
+Identify recent certificate versions made within the past month. This can be useful for tracking the creation and management of certificate authorities over time.
 
 ```sql
 select

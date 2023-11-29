@@ -1,10 +1,20 @@
-# Table: oci_bds_bds_instance
+---
+title: "Steampipe Table: oci_bds_bds_instance - Query OCI Big Data Service Instances using SQL"
+description: "Allows users to query Big Data Service Instances in Oracle Cloud Infrastructure."
+---
 
-Oracle Big Data Service is a fully managed, automated cloud service that provides enterprises with a cost-effective Hadoop environment. Customers easily create secure and scalable Hadoop-based data lakes that can quickly process large amounts of data.
+# Table: oci_bds_bds_instance - Query OCI Big Data Service Instances using SQL
+
+Oracle Cloud Infrastructure Big Data Service is a fully managed service that allows you to process large amounts of data at the speed of business. It provides a high-performance, secure, and easy-to-use environment for running big data workloads, including machine learning and artificial intelligence, real-time analytics, and data exploration. The service is fully integrated with Oracle Cloud Infrastructure, providing seamless access to its data and services.
+
+## Table Usage Guide
+
+The `oci_bds_bds_instance` table provides insights into Big Data Service Instances within Oracle Cloud Infrastructure. As a data engineer or data scientist, explore instance-specific details through this table, including the state of the instance, the time it was created, and the shape of nodes. Utilize it to uncover information about instances, such as their network configuration, whether they are in high availability mode, and the type of workload they are designed for.
 
 ## Examples
 
 ### Basic info
+Explore the configuration details of your Big Data Service instances in Oracle Cloud Infrastructure. This query helps in understanding the current state, security settings, and other crucial details of each instance for better management and decision-making.
 
 ```sql
 select
@@ -29,6 +39,7 @@ from
 ```
 
 ### Count the number of nodes per instance
+Assess the distribution of nodes across various instances to manage resources more efficiently. This can be particularly useful in optimizing workload distribution and identifying potential bottlenecks.
 
 ```sql
 select
@@ -40,6 +51,7 @@ from
 ```
 
 ### List secure clusters
+Analyze the settings to understand which clusters are secure in your Oracle Cloud Infrastructure Big Data Service. This can be particularly useful for ensuring compliance with security policies and identifying potential vulnerabilities.
 
 ```sql
 select
@@ -56,6 +68,7 @@ where
 ```
 
 ### List highly available clusters
+Discover the segments that consist of highly available clusters to ensure your data is always accessible and resilient to failures. This is especially useful in maintaining business continuity and minimizing downtime.
 
 ```sql
 select
@@ -73,6 +86,7 @@ where
 ```
 
 ### List clusters that have cloud SQL configured
+Determine the areas in which clusters have been configured with Cloud SQL to gain insights into the high availability, security, and lifecycle state of these instances. This can help in assessing the elements within your Oracle Cloud Infrastructure Big Data Service for optimal resource management.
 
 ```sql
 select
@@ -89,6 +103,7 @@ where
 ```
 
 ### List cloud SQL details of each cluster
+Determine the configuration and settings of each cloud SQL cluster, including details such as shape, IP address, block volume size, and Kerberos mapping. This enables efficient management and monitoring of your cloud SQL clusters.
 
 ```sql
 select
@@ -104,6 +119,7 @@ from
 ```
 
 ### List network config details of each cluster
+Analyze the network configuration of each cluster to understand whether a NAT gateway is required and to pinpoint the specific CIDR block being used. This can be beneficial for assessing network requirements and planning infrastructure changes.
 
 ```sql
 select
@@ -115,6 +131,7 @@ from
 ```
 
 ### List node information of each cluster
+Determine the characteristics of each node within your clusters to better understand their configuration and performance. This can be useful for troubleshooting or optimizing your cluster's performance and resource allocation.
 
 ```sql
 select
@@ -145,6 +162,7 @@ from
 ```
 
 ### List KMS key details of each cluster
+Explore which clusters are associated with specific KMS keys to understand their protection mode and management details. This is useful for assessing the security configuration of each cluster.
 
 ```sql
 select

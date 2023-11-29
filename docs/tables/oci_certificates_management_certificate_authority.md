@@ -1,10 +1,20 @@
-# Table: oci_certificates_management_certificate_authority
+---
+title: "Steampipe Table: oci_certificates_management_certificate_authority - Query OCI Certificate Management Certificate Authorities using SQL"
+description: "Allows users to query Certificate Authorities within the OCI Certificate Management service."
+---
 
-The metadata details of the certificate authority (CA). This object does not contain the CA contents. For certificate contents see oci_certificates_certificate_authority_bundle.
+# Table: oci_certificates_management_certificate_authority - Query OCI Certificate Management Certificate Authorities using SQL
+
+The Oracle Cloud Infrastructure (OCI) Certificate Management service is a scalable and secure solution for managing digital certificates. It offers a centralized way to create, deploy, and renew certificates, helping to ensure the security of web services and applications. A Certificate Authority (CA) in OCI Certificate Management is a trusted entity that issues digital certificates, which are data files used to cryptographically link an entity with a public key.
+
+## Table Usage Guide
+
+The `oci_certificates_management_certificate_authority` table provides insights into Certificate Authorities within the OCI Certificate Management service. As a security engineer, you can use this table to explore details about each Certificate Authority, including its status, type, and associated endpoints. This can be particularly useful for maintaining an up-to-date inventory of Certificate Authorities, ensuring they are valid and appropriately configured, and identifying any potential security risks.
 
 ## Examples
 
 ### Basic info
+Explore the details of your organization's digital certificates to understand their current status and configuration. This can be useful for maintaining security standards and ensuring proper certificate management.
 
 ```sql
 select
@@ -27,6 +37,7 @@ from
 ```
 
 ### List inactive certificate authorities
+Explore which Certificate Authorities are currently inactive. This is useful to identify potential areas of your system that may lack the necessary security due to inactive authorities.
 
 ```sql
 select
@@ -42,6 +53,7 @@ where
 ```
 
 ### List certificates with SHA256_WITH_RSA signed algorithm
+Explore which certificates are using the SHA256_WITH_RSA signing algorithm. This is particularly useful for determining the security level of your certificates and identifying any potential risks.
 
 ```sql
 select
@@ -57,6 +69,7 @@ where
 ```
 
 ### List certificates created in the last 30 days
+Explore which certificates have been created in the past month. This can be useful in managing and tracking newly issued certificates to ensure they are properly configured and authorized.
 
 ```sql
 select
@@ -74,6 +87,7 @@ where
 ```
 
 ### Get KMS key details of each certificate
+Analyze the settings to understand the relationship between each certificate and its corresponding key in Oracle Cloud Infrastructure's Key Management service. This can help in identifying the certificates that are linked to a particular key, thereby aiding in key management and security compliance.
 
 ```sql
 select
@@ -91,6 +105,7 @@ where
 ```
 
 ### Get certificate authority rule details
+Explore the rules of your certificate authority to understand the maximum validity duration for both the certificate authority itself and the leaf certificates. This helps in managing the lifecycle of your certificates, ensuring they remain valid and secure.
 
 ```sql
 select
@@ -105,6 +120,7 @@ from
 ```
 
 ### List certificates that are valid upto a certain date
+Identify certificates that will remain valid until a specific date. This is useful for planning renewals and managing certificate lifecycles.
 
 ```sql
 select

@@ -1,10 +1,20 @@
-# Table: oci_certificates_management_certificate_version
+---
+title: "Steampipe Table: oci_certificates_management_certificate_version - Query OCI Certificates Management Certificate Versions using SQL"
+description: "Allows users to query OCI Certificates Management Certificate Versions."
+---
 
-The details of the certificate version
+# Table: oci_certificates_management_certificate_version - Query OCI Certificates Management Certificate Versions using SQL
+
+The Oracle Cloud Infrastructure (OCI) Certificates Management service helps you manage SSL/TLS certificates for your services. It provides a centralized way to upload and manage certificates, including the ability to monitor certificates for expiration. The Certificates Management service supports both Oracle-managed certificates and customer-managed certificates.
+
+## Table Usage Guide
+
+The `oci_certificates_management_certificate_version` table provides insights into each version of a certificate in OCI Certificates Management. As a security administrator, you can explore certificate-specific details through this table, including certificate data, creation time, and associated metadata. Use it to uncover information about certificates, such as their validity period, the entities they are issued to, and the entities they are issued by.
 
 ## Examples
 
 ### Basic info
+Explore the details of each certificate version in your Oracle Cloud Infrastructure, including its stages, validity, and revocation status. This can be useful in managing your certificates and ensuring they are up to date and secure.
 
 ```sql
 select
@@ -23,6 +33,7 @@ from
 ```
 
 ### Get all certificate versions
+Discover the different versions of your certificates, including details such as stages, validity, and revocation status. This query is useful for maintaining an overview of your certificate statuses and identifying any potential issues or changes that might impact your system's security.
 
 ```sql
 select
@@ -44,6 +55,7 @@ from
 ```
 
 ### Count versions by certificate
+Explore the number of versions associated with each certificate to effectively manage and track certificate updates. This can be particularly useful in maintaining security standards and ensuring optimal system performance.
 
 ```sql
 select
@@ -56,6 +68,7 @@ group by
 ```
 
 ### List certificate versions created in the last 30 days
+Explore which certificate versions were created in the last month. This can be helpful in tracking recent changes and additions to your certificates, ensuring you're up-to-date on your security configurations.
 
 ```sql
 select

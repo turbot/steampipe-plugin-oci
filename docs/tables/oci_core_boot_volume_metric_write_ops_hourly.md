@@ -1,10 +1,20 @@
-# Table: oci_core_boot_volume_metric_write_ops_hourly
+---
+title: "Steampipe Table: oci_core_boot_volume_metric_write_ops_hourly - Query OCI Core Boot Volume Metrics using SQL"
+description: "Allows users to query hourly write operations metrics for OCI Core Boot Volumes."
+---
 
-OCI Monitoring metrics explorer provide data about the performance of your systems. The `oci_core_boot_volume_metric_write_ops_hourly` table provides metric statistics at 60 minute intervals for the most recent 60 days.
+# Table: oci_core_boot_volume_metric_write_ops_hourly - Query OCI Core Boot Volume Metrics using SQL
+
+Oracle Cloud Infrastructure's Core Boot Volume is a block storage volume that contains the image used to boot a Compute instance. These boot volumes are reliable and durable, with built-in redundancy to protect your data against failure. They also offer high performance and a large storage capacity.
+
+## Table Usage Guide
+
+The `oci_core_boot_volume_metric_write_ops_hourly` table provides insights into the hourly write operations metrics of OCI Core Boot Volumes. As a data analyst or a cloud operations engineer, you can use this table to monitor and analyze the write operations performance of your boot volumes on an hourly basis. This can be particularly useful for identifying potential issues, optimizing performance, and ensuring the efficient use of resources.
 
 ## Examples
 
 ### Basic info
+Explore the hourly write operations on boot volumes in Oracle Cloud Infrastructure. This can help assess the volume's performance over time and identify any potential issues or trends.
 
 ```sql
 select
@@ -23,6 +33,7 @@ order by
 ```
 
 ### Intervals where volumes exceed 1000 average write ops
+Explore instances where the average write operations exceed 1000 on an hourly basis. This can be useful for identifying potential periods of high activity or system stress.
 
 ```sql
 select
@@ -43,6 +54,7 @@ order by
 ```
 
 ### Intervals where volumes exceed 8000 max write ops
+Determine the instances where the maximum write operations on boot volumes exceed a set threshold. This can help in identifying potential performance issues and planning for capacity upgrades.
 
 ```sql
 select
@@ -63,6 +75,7 @@ order by
 ```
 
 ### Read, Write, and Total IOPS
+Analyze the performance of your boot volume by observing the average, maximum, and minimum input/output operations per second (IOPS). This can help you understand how your system is performing and where potential bottlenecks might be occurring.
 
 ```sql
 select 

@@ -1,10 +1,20 @@
-# Table: oci_identity_tag_namespace
+---
+title: "Steampipe Table: oci_identity_tag_namespace - Query OCI Identity Tag Namespaces using SQL"
+description: "Allows users to query OCI Identity Tag Namespaces."
+---
 
-OCI Tag namespace is a container for your tag keys. It consists of a name and zero or more tag key definitions. Tag namespaces are not case sensitive and must be unique across the tenancy. The namespace is also a natural grouping to which administrators can apply policy. One policy on the tag namespace applies to all the tag definitions contained within that namespace.
+# Table: oci_identity_tag_namespace - Query OCI Identity Tag Namespaces using SQL
+
+Oracle Cloud Infrastructure (OCI) Identity Tag Namespaces is a resource within OCI that assists in categorizing resources in various ways. It allows users to define their own specific set of tags to be used across all resources, helping in better organization and management. This provides a structured way of sorting and filtering resources, thereby improving the efficiency of resource utilization and management.
+
+## Table Usage Guide
+
+The `oci_identity_tag_namespace` table provides insights into the Tag Namespaces within OCI Identity. As a cloud engineer, explore namespace-specific details through this table, including the name, description, and associated metadata. Utilize it to uncover information about namespaces, such as those that are inactive, the compartment they belong to, and the time they were created.
 
 ## Examples
 
 ### Basic info
+Explore which elements within your Oracle Cloud Infrastructure are retired or active. This query provides insights into the lifecycle states of various components, helping you manage your resources effectively.
 
 ```sql
 select
@@ -17,6 +27,7 @@ from
 ```
 
 ### List active tag namespaces
+Determine the areas in which active tag namespaces are present. This is useful for managing and organizing resources within a cloud infrastructure, especially when dealing with a large number of resources.
 
 ```sql
 select
@@ -31,6 +42,7 @@ where
 ```
 
 ### List retired tag namespaces
+Explore which tag namespaces are retired in your Oracle Cloud Infrastructure identity service. This can help maintain an organized and efficient tagging system by identifying and managing outdated tags.
 
 ```sql
 select

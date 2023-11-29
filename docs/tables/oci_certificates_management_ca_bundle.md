@@ -1,10 +1,20 @@
-# Table: oci_certificates_management_ca_bundle
+---
+title: "Steampipe Table: oci_certificates_management_ca_bundle - Query OCI Certificate Management CA Bundles using SQL"
+description: "Allows users to query Certificate Management CA Bundles in Oracle Cloud Infrastructure (OCI)."
+---
 
-OCI Certificate Management is a service provided by Oracle Cloud Infrastructure (OCI) that enables you to manage and secure your SSL/TLS certificates. The OCI Certificate Management CA bundle, also known as the Root CA Bundle, is a collection of trusted root certificates provided by OCI. These certificates are used to validate the trustworthiness of SSL/TLS certificates issued by certificate authorities supported by OCI Certificate Management.
+# Table: oci_certificates_management_ca_bundle - Query OCI Certificate Management CA Bundles using SQL
+
+Oracle Cloud Infrastructure (OCI) Certificate Management is a feature that allows you to manage and deploy SSL/TLS certificates. It provides a centralized way to manage certificates, ensuring secure and encrypted communication between the client and the server. OCI Certificate Management helps in maintaining the trust and integrity of your applications and infrastructure.
+
+## Table Usage Guide
+
+The `oci_certificates_management_ca_bundle` table provides insights into Certificate Management CA Bundles within OCI. As a Security Engineer, explore bundle-specific details through this table, including certificate data, validity, and associated metadata. Utilize it to uncover information about certificate bundles, such as those with expired certificates, the trust relationships between certificates, and the verification of trust policies.
 
 ## Examples
 
 ### Basic info
+Explore which certificates are active or inactive by analyzing their lifecycle state and details. This can help you understand the status and creation time of certificates for better management and timely renewal.
 
 ```sql
 select
@@ -19,6 +29,7 @@ from
 ```
 
 ### List bundles created between a specific time
+Discover the segments that were created within a specific time frame. This query is useful in tracking the lifecycle of your resources, allowing you to manage and optimize their utilization effectively.
 
 ```sql
 select
@@ -33,6 +44,7 @@ where
 ```
 
 ### List failed bundles
+Determine the areas in which certificate management bundles have failed, allowing you to identify and address issues in your OCI environment.
 
 ```sql
 select

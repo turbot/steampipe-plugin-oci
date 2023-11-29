@@ -1,10 +1,20 @@
-# Table: oci_autoscaling_auto_scaling_configuration
+---
+title: "Steampipe Table: oci_autoscaling_auto_scaling_configuration - Query OCI Autoscaling Auto Scaling Configurations using SQL"
+description: "Allows users to query OCI Auto Scaling Configurations."
+---
 
-The Oracle Cloud Infrastructure autoscaling configuration allows you to dynamically scale the resources in a Compute instance pool.
+# Table: oci_autoscaling_auto_scaling_configuration - Query OCI Autoscaling Auto Scaling Configurations using SQL
+
+Auto Scaling in OCI is a cloud service that helps you maintain application availability and allows you to dynamically adjust capacity in response to changing demand patterns. This service ensures that your applications always have the right amount of compute, memory, and other resources they need to stay responsive, even when demand is unpredictable. Auto Scaling automatically adjusts the number of instances in response to changes in load.
+
+## Table Usage Guide
+
+The `oci_autoscaling_auto_scaling_configuration` table provides insights into the Auto Scaling Configurations within OCI Autoscaling. As a DevOps engineer, you can explore configuration-specific details through this table, including policies, resources, and associated metadata. Use it to uncover information about configurations, such as those with specific policies, the resources associated with each configuration, and the current state of each configuration.
 
 ## Examples
 
 ### Basic info
+Determine the areas in which OCI auto-scaling configurations are enabled to gain insights into resource count and creation time. This can be useful for assessing the efficiency and capacity of your auto-scaling setup.
 
 ```sql
 select
@@ -20,6 +30,7 @@ from
 
 
 ### List enabled autoscaling configurations
+Explore the configurations that have autoscaling enabled. This is useful to understand the resources that are set to automatically adjust capacity to maintain steady, predictable performance at the lowest possible cost.
 
 ```sql
 select
@@ -34,6 +45,7 @@ where
 
 
 ### Get policy details for each autoscaling configuration
+This example allows you to analyze all the policies associated with your autoscaling configurations, giving you insights into their status, types, rules, and capacities. This can be beneficial in managing and optimizing your autoscaling configurations for better resource utilization and cost efficiency.
 
 ```sql
 select
@@ -52,6 +64,7 @@ from
 
 
 ### Get resource details for each autoscaling configuration
+Explore the details of each autoscaling configuration to understand the associated resources. This can help in managing and optimizing your cloud resources effectively.
 
 ```sql
 select

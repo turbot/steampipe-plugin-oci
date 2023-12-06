@@ -11,6 +11,9 @@ Oracle Cloud Infrastructure (OCI) Resource Search is a service that enables you 
 
 The `oci_resource_search` table provides insights into the resources within Oracle Cloud Infrastructure. As a cloud administrator, explore resource-specific details through this table, including resource types, compartments, and associated metadata. Utilize it to uncover information about resources, such as their configurations, relationships, and the compartment in which they reside.
 
+**Important Notes**
+- You must specify either the `text` or `query` in the `where` clause to query this table.
+
 ## Examples
 
 ### List resources/services/documentations with freetext as test

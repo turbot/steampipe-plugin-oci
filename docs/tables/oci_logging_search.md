@@ -11,6 +11,19 @@ Oracle Cloud Infrastructure's Logging Search is a fully managed, scalable, and h
 
 The `oci_logging_search` table provides insights into the Logging Search within Oracle Cloud Infrastructure (OCI). As a DevOps engineer, explore search-specific details through this table, including log groups, log content, and associated metadata. Utilize it to uncover information about logs, such as those related to specific resources, the content of the logs, and the verification of log groups.
 
+**Important Notes**
+- By default, this table will provide data for the last 24hrs. You can pass the `timestamp` value in the following ways to fetch data in a range.
+  - timestamp >= ‘2023-03-11T00:00:00Z’ and timestamp <= ‘2023-03-15T00:00:00Z’
+  - timestamp between ‘2023-03-11T00:00:00Z’ and ‘2023-03-15T00:00:00Z’
+  - timestamp >= now() - interval '7 days' (The data will be fetched for the last 7 days)
+  - timestamp > ‘2023-03-15T00:00:00Z’ (The data will be fetched from the provided time to the current time)
+  - timestamp < ‘2023-03-15T00:00:00Z’ (The data will be fetched from one day before the provided time to the provided time)
+- We recommend specifying optional quals in the query to optimize the table output. Optional quals are supported for the following columns:
+  - `log_group_name`
+  - `log_name`
+  - `search_query`
+  - `timestamp`
+
 ## Examples
 
 ### Show log entries of the last 24 hrs

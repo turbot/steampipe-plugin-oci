@@ -11,6 +11,9 @@ The Oracle Cloud Infrastructure Key Management service is a cloud solution that 
 
 The `oci_kms_key_version` table provides insights into Key Versions within the Oracle Cloud Infrastructure Key Management Service. As a security engineer, explore key version-specific details through this table, including their lifecycle states, creation times, and associated master keys. Utilize it to uncover information about key versions, such as those with specific cryptographic endpoints, the association between key versions and master keys, and the status of each key version.
 
+**Important Notes**
+- You must specify the `key_id`, `management_endpoint`, and `region` in the `where` clause to query this table.
+
 ## Examples
 
 ### Basic info
@@ -44,7 +47,7 @@ with oci_kms as (
     k.compartment_id
   from
     oci_kms_key k, oci_kms_key_version v
-  where 
+  where
     v.key_id = k.id
     and v.management_endpoint = k.management_endpoint
     and v.region = k.region
@@ -52,7 +55,7 @@ with oci_kms as (
   group by
     k.name,k.lifecycle_state, k.region,k.compartment_id
 )
-select 
+select
   k.name,
   k.lifecycle_state,
   latest_key_version_created,

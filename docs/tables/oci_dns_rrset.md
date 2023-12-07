@@ -16,7 +16,18 @@ The `oci_dns_rrset` table provides insights into DNS Resource Record Sets (RRSet
 ### Basic info
 Explore which domains within your DNS records are protected, along with their type, data, and time-to-live values. This can help you assess the security and configuration of your DNS records.
 
-```sql
+```sql+postgres
+select
+  domain,
+  rtype,
+  r_data,
+  ttl,
+  is_protected
+from
+  oci_dns_rrset;
+```
+
+```sql+sqlite
 select
   domain,
   rtype,
@@ -30,7 +41,18 @@ from
 ### List DNS records which are not protected
 Explore which DNS records are not protected to bolster your system's security by identifying potential vulnerabilities. This can aid in prioritizing and implementing necessary protective measures.
 
-```sql
+```sql+postgres
+select
+  domain,
+  rtype,
+  is_protected
+from
+  oci_dns_rrset
+where
+  not is_protected;
+```
+
+```sql+sqlite
 select
   domain,
   rtype,
@@ -44,7 +66,17 @@ where
 ### List name server DNS records
 Discover the segments that use 'NS' (Name Server) DNS records within your domain. This allows you to gain insights into your DNS configuration and understand how your domain's DNS records are managed.
 
-```sql
+```sql+postgres
+select
+  domain,
+  rtype
+from
+  oci_dns_rrset
+where
+  rtype = 'NS';
+```
+
+```sql+sqlite
 select
   domain,
   rtype

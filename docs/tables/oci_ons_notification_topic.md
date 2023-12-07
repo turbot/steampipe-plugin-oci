@@ -16,7 +16,19 @@ The `oci_ons_notification_topic` table provides insights into topics within OCI 
 ### Basic info
 Explore the various notification topics within your Oracle Cloud Infrastructure to understand their lifecycle states and associated API endpoints. This could be useful for assessing the overall configuration and status of your notification system.
 
-```sql
+```sql+postgres
+select
+  name,
+  topic_id,
+  api_endpoint,
+  short_topic_id,
+  lifecycle_state,
+  description
+from
+  oci_ons_notification_topic;
+```
+
+```sql+sqlite
 select
   name,
   topic_id,
@@ -31,7 +43,17 @@ from
 ### List inactive topics
 Explore which notification topics are currently inactive within your Oracle Cloud Infrastructure. This can help you identify areas that may need attention or cleanup to optimize your resources.
 
-```sql
+```sql+postgres
+select
+  name,
+  lifecycle_state
+from
+  oci_ons_notification_topic
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   lifecycle_state

@@ -16,7 +16,26 @@ The `oci_bastion_bastion` table provides insights into Bastions within the OCI B
 ### Basic info
 Explore the configuration of your bastion host in Oracle Cloud Infrastructure, including its type, status, and associated network details. This can help you manage your cloud security by understanding the maximum sessions allowed, session lifespan, and the state of each bastion host.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  bastion_type,
+  dns_proxy_status,
+  client_cidr_block_allow_list,
+  max_session_ttl_in_seconds,
+  max_sessions_allowed,
+  private_endpoint_ip_address,
+  static_jump_host_ip_address,
+  phone_book_entry,
+  target_vcn_id,
+  target_subnet_id,
+  lifecycle_state as state
+from
+  oci_bastion_bastion;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -38,7 +57,7 @@ from
 ### Show Bastions that allow access from the Internet (0.0.0.0/0)
 Identify Bastions that permit internet access, providing insights into potential security vulnerabilities within your network infrastructure.
 
-```sql
+```sql+postgres
 select
   id,
   name,
@@ -54,10 +73,26 @@ where
   ::jsonb ? '0.0.0.0/0';
 ```
 
+```sql+sqlite
+Error: SQLite does not support CIDR operations.
+```
+
 ### List bastions which are not active
 Explore which bastions are not currently active. This can be useful in identifying potential security risks or in optimizing resource usage by decommissioning inactive bastions.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_bastion_bastion
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

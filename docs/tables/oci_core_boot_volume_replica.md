@@ -16,7 +16,18 @@ The `oci_core_boot_volume_replica` table provides insights into Boot Volume Repl
 ### Basic info
 Explore the basic information of your boot volume replicas to gain insights into their creation time and current state. This can help in assessing their lifecycle management and operational status.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  boot_volume_id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_core_boot_volume_replica;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -30,7 +41,20 @@ from
 ### List volume replicas which are not available
 Discover the segments that consist of volume replicas which are not readily accessible. This can be useful in identifying potential issues or bottlenecks in your storage system.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  boot_volume_id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_core_boot_volume_replica
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

@@ -16,7 +16,7 @@ The `oci_application_migration_source` table provides insights into the sources 
 ### Basic info
 Explore the basic information of your migration sources in Oracle Cloud Infrastructure (OCI) to understand their current lifecycle state and source details. This can be useful for tracking the status and origin of your migration sources, aiding in effective resource management and migration planning.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -30,10 +30,24 @@ from
   oci_application_migration_source;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  description,
+  lifecycle_details,
+  lifecycle_state as state,
+  json_extract(source_details, '$.computeAccount') as source_account_name,
+  json_extract(source_details, '$.region') as source_account_region,
+  json_extract(source_details, '$.type') as source_account_type
+from
+  oci_application_migration_source;
+```
+
 ### List all inactive sources
 Discover the segments that are not currently active in your application migration process. This can be useful for identifying potential issues or bottlenecks, allowing you to optimize the migration process.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -49,10 +63,26 @@ where
   lifecycle_state <> 'ACTIVE';
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  description,
+  lifecycle_details,
+  lifecycle_state as state,
+  json_extract(source_details, '$.computeAccount') as source_account_name,
+  json_extract(source_details, '$.region') as source_account_region,
+  json_extract(source_details, '$.type') as source_account_type
+from
+  oci_application_migration_source
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
 ### List all sources created in the last 30 days
 Explore which sources have been created in the last 30 days to better manage and understand the status of your application migration. This allows for efficient tracking of newly added sources, essential for maintaining an updated and secure application environment.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -68,10 +98,42 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  description,
+  lifecycle_details,
+  lifecycle_state as state,
+  json_extract(source_details, '$.computeAccount') as source_account_name,
+  json_extract(source_details, '$.region') as source_account_region,
+  json_extract(source_details, '$.type') as source_account_type
+from
+  oci_application_migration_source
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### List all migrations under a particular source
 Explore which migrations are associated with a specific source in order to manage and track application migration processes. This is particularly useful for identifying the state and details of migrations, aiding in the organization and monitoring of migration tasks.
 
-```sql
+```sql+postgres
+select
+  s.id as source_id,
+  s.display_name as source_name,
+  m.id as migration_id,
+  m.display_name as migration_name,
+  m.lifecycle_details,
+  m.lifecycle_state as state
+from
+  oci_application_migration_source as s,
+  oci_application_migration_migration as m
+where
+  s.id = m.source_id
+  and s.display_name = 'source-1';
+```
+
+```sql+sqlite
 select
   s.id as source_id,
   s.display_name as source_name,

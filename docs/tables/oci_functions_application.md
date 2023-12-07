@@ -16,7 +16,18 @@ The `oci_functions_application` table provides insights into Applications within
 ### Basic info
 Discover the status and identifiers of your Oracle Cloud Infrastructure's functions applications. This allows for a quick overview and understanding of your application's lifecycle state and associated subnet IDs.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  lifecycle_state,
+  subnet_ids
+from
+  oci_functions_application;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +42,18 @@ from
 ### List applications not in the active state
 Determine the areas in which applications are not currently active. This can help in identifying applications that may need attention or troubleshooting, thereby ensuring smooth operations.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_functions_application
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -46,7 +68,16 @@ where
 ### Get configuration details for each application
 Analyze the settings to understand each application's configuration within Oracle Cloud Infrastructure's Functions service. This allows for a comprehensive review of application settings, aiding in optimization and troubleshooting efforts.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  config
+from
+  oci_functions_application;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

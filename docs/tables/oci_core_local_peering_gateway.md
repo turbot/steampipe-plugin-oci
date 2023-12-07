@@ -16,7 +16,17 @@ The `oci_core_local_peering_gateway` table provides insights into Local Peering 
 ### Basic info
 Explore the status of local peering gateways within your Oracle Cloud Infrastructure network to manage and optimize connections between virtual cloud networks. This is vital for ensuring smooth data transfer and maintaining network performance.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  vcn_id,
+  lifecycle_state
+from
+  oci_core_local_peering_gateway;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List available LPGs
 Discover the segments that have local peering gateways in an available state, enabling you to manage and optimize network connectivity within your virtual cloud network.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  vcn_id,
+  lifecycle_state
+from
+  oci_core_local_peering_gateway
+where
+  lifecycle_state = 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -44,7 +66,19 @@ where
 ### List LPGs which are not connected to any peer
 Explore which Local Peering Gateways (LPGs) are not connected to any peer. This can help in identifying isolated network segments, which could be a potential security risk or a misconfiguration.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  vcn_id,
+  lifecycle_state
+from
+  oci_core_local_peering_gateway
+where
+  peering_status = 'NEW';
+```
+
+```sql+sqlite
 select
   name,
   id,

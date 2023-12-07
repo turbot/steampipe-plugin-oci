@@ -16,7 +16,19 @@ The `oci_core_image_custom` table provides insights into custom images within th
 ### Basic info
 Explore the basic details of your custom images in Oracle Cloud Infrastructure, such as display name, size, tags, lifecycle state, and operating system. This can help you manage your resources effectively and keep track of your custom images.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  size_in_mbs,
+  tags,
+  lifecycle_state,
+  operating_system
+from
+  oci_core_image_custom;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +43,7 @@ from
 ### List images with encryption in transit disabled
 Explore which custom images have disabled encryption during data transit, to identify potential security risks. This can help in enhancing the data security measures by ensuring encryption is enabled during data transit.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -40,4 +52,15 @@ from
   oci_core_image_custom
 where
   launch_options ->> 'isPvEncryptionInTransitEnabled' = 'false';
+```
+
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_extract(launch_options, '$.isPvEncryptionInTransitEnabled') as is_encryption_in_transit_enabled
+from
+  oci_core_image_custom
+where
+  json_extract(launch_options, '$.isPvEncryptionInTransitEnabled') = 'false';
 ```

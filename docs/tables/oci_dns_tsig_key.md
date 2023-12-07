@@ -16,7 +16,17 @@ The `oci_dns_tsig_key` table offers insights into DNS Transaction Signature (TSI
 ### Basic info
 Assess the elements within your Oracle Cloud Infrastructure by pinpointing specific locations where certain security keys were created and their current lifecycle state. This aids in understanding the status and age of your security measures.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state,
+  time_created
+from
+  oci_dns_tsig_key;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -29,7 +39,18 @@ from
 ### List TSIG keys which are not active
 Explore TSIG keys that are not currently active. This can be useful in identifying keys that may be expired or unused, aiding in the maintenance and security of your DNS system.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_dns_tsig_key
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

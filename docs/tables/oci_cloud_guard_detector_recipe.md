@@ -16,7 +16,17 @@ The `oci_cloud_guard_detector_recipe` table provides insights into the Detector 
 ### Basic info
 Explore which cloud guard detector recipes have been created, their respective IDs, when they were created, and their current lifecycle states. This information can help in managing and tracking the status of your cloud guard detector recipes.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_detector_recipe;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List detector recipes which are not active
 Explore which detector recipes in your Cloud Guard are inactive. This is useful for identifying potential security blind spots in your system.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_detector_recipe
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -44,7 +66,7 @@ where
 ### List detector recipes with password related rules
 Discover the segments that have password-related rules within the detector recipes. This query is useful for assessing security measures in place and ensuring rules regarding password age and complexity are being enforced.
 
-```sql
+```sql+postgres
 select
   name,
   e ->> 'detectorRuleId' as Rule_name,
@@ -55,4 +77,17 @@ from
 where
   e ->> 'detectorRuleId' = 'PASSWORD_TOO_OLD'
   or e ->> 'detectorRuleId' = 'PASSWORD_POLICY_NOT_COMPLEX';
+```
+
+```sql+sqlite
+select
+  name,
+  json_extract(e.value, '$.detectorRuleId') as Rule_name,
+  json_extract(json_extract(e.value, '$.details'), '$.isEnabled') as status
+from
+  oci_cloud_guard_detector_recipe,
+  json_each(effective_detector_rules) as e
+where
+  json_extract(e.value, '$.detectorRuleId') = 'PASSWORD_TOO_OLD'
+  or json_extract(e.value, '$.detectorRuleId') = 'PASSWORD_POLICY_NOT_COMPLEX';
 ```

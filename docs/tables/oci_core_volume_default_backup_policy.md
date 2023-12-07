@@ -16,7 +16,16 @@ The `oci_core_volume_default_backup_policy` table provides insights into the def
 ### Basic info
 Explore which default backup policies have been created and when, to gain insights into the history and management of your data backups. This can help in assessing the regularity and effectiveness of your backup strategies.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  time_created
+from
+  oci_core_volume_default_backup_policy;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -28,7 +37,7 @@ from
 ### Get schedule info for each volume backup policy
 This query is useful for gaining insights into the scheduling of volume backup policies. It helps in understanding the timing, frequency, and retention period of backups, which can assist in optimizing storage management and disaster recovery plans.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -42,4 +51,20 @@ select
 from
   oci_core_volume_default_backup_policy,
   jsonb_array_elements(schedules) as s;
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(s.value, '$.backupType') as backup_type,
+  json_extract(s.value, '$.dayOfMonth') as day_of_month,
+  json_extract(s.value, '$.hourOfDay') as hour_of_day,
+  json_extract(s.value, '$.offsetSeconds') as offset_seconds,
+  json_extract(s.value, '$.period') as period,
+  json_extract(s.value, '$.retentionSeconds') as retention_seconds,
+  json_extract(s.value, '$.timeZone') as time_zone
+from
+  oci_core_volume_default_backup_policy,
+  json_each(schedules) as s;
 ```

@@ -16,7 +16,20 @@ The `oci_events_rule` table provides insights into the rules within OCI Events s
 ### Basic info
 Explore the status and conditions of events rules in Oracle Cloud Infrastructure (OCI) to understand their functionality and lifecycle. This can help in monitoring rule performance, identifying enabled rules, and assessing the actions taken when rules are triggered.
 
-```sql
+```sql+postgres
+select
+  id as rule_id,
+  display_name,
+  lifecycle_state as state,
+  condition,
+  is_enabled,
+  time_created,
+  actions
+from
+  oci_events_rule;
+```
+
+```sql+sqlite
 select
   id as rule_id,
   display_name,
@@ -32,7 +45,20 @@ from
 ### List enabled rules
 Explore which rules are currently active in your system. This can help you understand which conditions are being monitored, assisting in system maintenance and troubleshooting.
 
-```sql
+```sql+postgres
+select
+  id as rule_id,
+  display_name,
+  lifecycle_state,
+  condition,
+  is_enabled
+from
+  oci_events_rule
+where
+  is_enabled;
+```
+
+```sql+sqlite
 select
   id as rule_id,
   display_name,
@@ -48,7 +74,20 @@ where
 ### List failed rules
 Discover the segments that have rules in a 'FAILED' state in your Oracle Cloud Infrastructure's Events service. This can help pinpoint specific areas needing attention, promoting efficient troubleshooting and system optimization.
 
-```sql
+```sql+postgres
+select
+  id as rule_id,
+  display_name,
+  lifecycle_state,
+  condition,
+  is_enabled
+from
+  oci_events_rule
+where
+  lifecycle_state = 'FAILED';
+```
+
+```sql+sqlite
 select
   id as rule_id,
   display_name,
@@ -64,7 +103,7 @@ where
 ### Get action details for rules that have the Oracle Notification Service action type
 Determine the specifics of rules that utilize the Oracle Notification Service. This query is useful for identifying and managing these particular rules, offering insights into their status, associated topics, and overall configuration.
 
-```sql
+```sql+postgres
 select
   id as rule_id,
   display_name,
@@ -81,10 +120,27 @@ where
   a ->> 'actionType'  = 'ONS'
 ```
 
+```sql+sqlite
+select
+  rule.id as rule_id,
+  display_name,
+  is_enabled,
+  json_extract(a.value, '$.actionType') as action_type,
+  json_extract(a.value, '$.id') as action_id,
+  json_extract(a.value, '$.isEnabled') as action_is_enabled,
+  json_extract(a.value, '$.lifecycleState') as action_state,
+  json_extract(a.value, '$.topicId') as topic_id
+from
+  oci_events_rule rule,
+  json_each(actions) as a
+where
+  json_extract(a.value, '$.actionType')  = 'ONS'
+```
+
 ### Get action details for rules that have the Oracle Streaming Service action type
 Explore the details of specific rules in Oracle Streaming Service, focusing on their current state and whether they are enabled. This can be useful for managing and monitoring the status of various rules within your streaming service.
 
-```sql
+```sql+postgres
 select
   id as rule_id,
   display_name,
@@ -101,14 +157,40 @@ where
   a ->> 'actionType'  = 'OSS'
 ```
 
+```sql+sqlite
+select
+  rule_id,
+  display_name,
+  is_enabled,
+  json_extract(a.value, '$.actionType') as action_type,
+  json_extract(a.value, '$.id') as action_id,
+  json_extract(a.value, '$.isEnabled') as action_is_enabled,
+  json_extract(a.value, '$.lifecycleState') as action_state,
+  json_extract(a.value, '$.streamId') as stream_id
+from
+  oci_events_rule,
+  json_each(actions) as a
+where
+  json_extract(a.value, '$.actionType')  = 'OSS'
+```
+
 ### Get event type details for each rule
 Explore which rules are associated with specific event types in your Oracle Cloud Infrastructure events setup. This can help in managing and understanding the functioning of different rules in your system.
 
-```sql
+```sql+postgres
 select
   id as rule_id,
   display_name,
   condition ->> 'eventType' as event_type
+from
+  oci_events_rule;
+```
+
+```sql+sqlite
+select
+  id as rule_id,
+  display_name,
+  json_extract(condition, '$.eventType') as event_type
 from
   oci_events_rule;
 ```

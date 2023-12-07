@@ -16,7 +16,22 @@ The `oci_mysql_db_system_metric_connections` table provides insights into connec
 ### Basic info
 Explore the performance metrics of your MySQL database system over time. This query helps you assess the minimum, maximum, and average number of connections, along with the total sample count, allowing you to better understand your system's utilization and manage its capacity effectively.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_mysql_db_system_metric_connections
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,7 +49,7 @@ order by
 ### Active connection statistics
 Analyze the statistics of active connections to gain insights into the performance and usage patterns of your MySQL database system. This can help you understand peak usage times, manage resources more effectively, and troubleshoot potential issues.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
@@ -50,16 +65,48 @@ order by
   timestamp;
 ```
 
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_conn,
+  round(maximum,2) as max_conn,
+  round(average,2) as avg_conn,
+  sample_count
+from
+  oci_mysql_db_system_metric_connections
+where metric_name = 'ActiveConnections'
+order by
+  id,
+  timestamp;
+```
+
 ### Current connection statistics
 Analyze the current connection statistics from your MySQL database system in Oracle Cloud Infrastructure (OCI) to understand the minimum, maximum, and average connections over a specified period. This can help you manage your database connections more effectively, ensuring optimal performance and resource utilization.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_conn,
   round(maximum::numeric,2) as max_conn,
   round(average::numeric,2) as avg_conn,
+  sample_count
+from
+  oci_mysql_db_system_metric_connections
+where metric_name = 'CurrentConnections'
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_conn,
+  round(maximum,2) as max_conn,
+  round(average,2) as avg_conn,
   sample_count
 from
   oci_mysql_db_system_metric_connections

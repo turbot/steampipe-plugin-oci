@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_read_throttle_count_hourly` table provides insights 
 ### Basic info
 Gain insights into the hourly metrics of NoSQL table read throttle counts, including the minimum, maximum, average, and total counts, to understand the performance and usage patterns. This can be used to optimize resource allocation and improve application performance.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_read_throttle_count_hourly
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where read throttle count exceeded 100 average
 Explore instances where the count of read throttles exceeded an average of 100 within a given hour. This can help in identifying potential bottlenecks in data retrieval and read operations, allowing for better performance optimization.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_read_throttle_count_hourly
+where
+  average > 100
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

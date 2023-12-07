@@ -16,7 +16,22 @@ The `oci_database_autonomous_db_metric_storage_utilization_daily` table provides
 ### Basic info
 Explore the patterns of storage utilization in your Oracle Cloud Infrastructure's autonomous databases. This query helps you assess the minimum, maximum, and average storage used daily, aiding in efficient resource management.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_database_autonomous_db_metric_storage_utilization_daily
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### Storage Utilization Over 80% average
 Determine the areas in which storage utilization exceeds an average of 80%. This query is useful for identifying potential issues with storage management and can aid in optimizing resource allocation.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_storage,
   round(maximum::numeric,2) as max_storage,
   round(average::numeric,2) as avg_storage,
+  sample_count
+from
+  oci_database_autonomous_db_metric_storage_utilization_daily
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_storage,
+  round(maximum,2) as max_storage,
+  round(average,2) as avg_storage,
   sample_count
 from
   oci_database_autonomous_db_metric_storage_utilization_daily

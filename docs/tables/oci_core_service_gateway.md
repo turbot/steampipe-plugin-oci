@@ -16,7 +16,19 @@ The `oci_core_service_gateway` table provides insights into the Service Gateways
 ### Basic info
 Explore which service gateways in your Oracle Cloud Infrastructure are active and when they were created. This can help you manage your resources and understand your usage patterns across different regions.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  time_created,
+  vcn_id,
+  lifecycle_state,
+  region
+from
+  oci_core_service_gateway;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +43,18 @@ from
 ### List service gateways that use route tables
 Explore which service gateways are utilizing route tables. This can be beneficial in identifying potential areas of network configuration that may require optimization or troubleshooting.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  route_table_id
+from
+  oci_core_service_gateway
+where
+  route_table_id is not null;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -45,7 +68,7 @@ where
 ### Get enabled services for each service gateway
 Explore which services are currently enabled for each service gateway. This can be useful in managing and optimizing network traffic by identifying active services.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -56,10 +79,21 @@ from
   jsonb_array_elements(services) as s;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_extract(s.value, '$.serviceId') as service_id,
+  json_extract(s.value, '$.serviceName') as service_name
+from
+  oci_core_service_gateway,
+  json_each(services) as s;
+```
+
 ### List service gateways that block traffic
 Discover the segments that are obstructing traffic flow within the service gateways. This is useful in identifying potential bottlenecks or areas of concern within your network infrastructure.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -68,4 +102,15 @@ from
   oci_core_service_gateway
 where
   block_traffic;
+```
+
+```sql+sqlite
+select
+  display_name,
+  id,
+  block_traffic
+from
+  oci_core_service_gateway
+where
+  block_traffic = 1;
 ```

@@ -16,7 +16,19 @@ The `oci_core_public_ip` table provides insights into Public IP resources within
 ### Basic info
 Analyze the settings to understand the lifecycle state and creation time of your public IP addresses in Oracle Cloud Infrastructure. This can help you manage and track your resources more effectively.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  ip_address,
+  scope,
+  time_created
+from
+  oci_core_public_ip;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +43,18 @@ from
 ### List unused public IPs
 Discover the segments that consist of unused public IPs to optimize resource allocation and reduce unnecessary costs. This is particularly useful in managing network resources effectively by identifying IPs that are available for use.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  lifecycle_state as state,
+  scope
+from
+  oci_core_public_ip
+where
+  lifecycle_state = 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   display_name,
   lifecycle_state as state,

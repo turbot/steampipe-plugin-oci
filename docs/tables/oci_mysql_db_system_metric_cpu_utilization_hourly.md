@@ -16,7 +16,22 @@ The `oci_mysql_db_system_metric_cpu_utilization_hourly` table provides insights 
 ### Basic info
 Analyze the CPU utilization of your MySQL database system over the past hour. This allows you to identify periods of high demand and optimize system performance accordingly.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_mysql_db_system_metric_cpu_utilization_hourly
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### CPU Over 80% average
 Analyze the settings to understand instances where CPU utilization is consistently high, exceeding 80% on average. This is useful for identifying potential performance bottlenecks and planning for capacity upgrades.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
   round(average::numeric,2) as avg_cpu,
+  sample_count
+from
+  oci_mysql_db_system_metric_cpu_utilization_hourly
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_cpu,
+  round(maximum,2) as max_cpu,
+  round(average,2) as avg_cpu,
   sample_count
 from
   oci_mysql_db_system_metric_cpu_utilization_hourly

@@ -16,7 +16,23 @@ The `oci_certificates_management_certificate_version` table provides insights in
 ### Basic info
 Explore the details of each certificate version in your Oracle Cloud Infrastructure, including its stages, validity, and revocation status. This can be useful in managing your certificates and ensuring they are up to date and secure.
 
-```sql
+```sql+postgres
+select
+  certificate_id,
+  version_number,
+  stages,
+  serial_number,
+  issuer_ca_version_number,
+  version_name,
+  subject_alternative_names,
+  time_of_deletion,
+  validity,
+  revocation_status
+from
+  oci_certificates_management_certificate_version;
+```
+
+```sql+sqlite
 select
   certificate_id,
   version_number,
@@ -35,7 +51,26 @@ from
 ### Get all certificate versions
 Discover the different versions of your certificates, including details such as stages, validity, and revocation status. This query is useful for maintaining an overview of your certificate statuses and identifying any potential issues or changes that might impact your system's security.
 
-```sql
+```sql+postgres
+select
+  cmcv.certificate_id,
+  cmcv.version_number,
+  cmcv.stages,
+  cmcv.serial_number,
+  cmcv.issuer_ca_version_number,
+  cmcv.version_name,
+  cmcv.subject_alternative_names,
+  cmcv.time_of_deletion,
+  cmcv.validity,
+  cmcv.revocation_status
+from
+  oci_certificates_management_certificate_version cmcv
+  inner join
+    oci_certificates_management_certificate cmc
+    on cmcv.certificate_id = cmc.id;
+```
+
+```sql+sqlite
 select
   cmcv.certificate_id,
   cmcv.version_number,
@@ -57,7 +92,17 @@ from
 ### Count versions by certificate
 Explore the number of versions associated with each certificate to effectively manage and track certificate updates. This can be particularly useful in maintaining security standards and ensuring optimal system performance.
 
-```sql
+```sql+postgres
+select
+  certificate_id,
+  count(version_number)
+from
+  oci_certificates_management_certificate_version
+group by
+  certificate_id;
+```
+
+```sql+sqlite
 select
   certificate_id,
   count(version_number)
@@ -70,7 +115,7 @@ group by
 ### List certificate versions created in the last 30 days
 Explore which certificate versions were created in the last month. This can be helpful in tracking recent changes and additions to your certificates, ensuring you're up-to-date on your security configurations.
 
-```sql
+```sql+postgres
 select
   certificate_id,
   version_number,
@@ -81,4 +126,17 @@ from
   oci_certificates_management_certificate_version
 where
   time_created >= now() - interval '30' day;
+```
+
+```sql+sqlite
+select
+  certificate_id,
+  version_number,
+  time_of_deletion,
+  time_created,
+  serial_number
+from
+  oci_certificates_management_certificate_version
+where
+  time_created >= datetime('now', '-30 day');
 ```

@@ -16,7 +16,21 @@ The `oci_objectstorage_object` table provides insights into the objects within O
 ### Basic info
 Explore which objects within your Oracle Cloud Infrastructure (OCI) Object Storage have been modified recently. This can help in tracking changes, managing storage space, and maintaining data security.
 
-```sql
+```sql+postgres
+select
+  name,
+  bucket_name,
+  namespace,
+  region,
+  size,
+  md5,
+  time_created,
+  time_modified
+from
+  oci_objectstorage_object;
+```
+
+```sql+sqlite
 select
   name,
   bucket_name,
@@ -34,7 +48,20 @@ from
 ### List archived objects
 Explore which objects in your cloud storage have been archived. This is useful for understanding your data retention and could aid in cost management by identifying potentially unnecessary storage.
 
-```sql
+```sql+postgres
+select
+  name,
+  bucket_name,
+  namespace,
+  region,
+  archival_state
+from
+  oci_objectstorage_object
+where
+  archival_state = 'Archived';
+```
+
+```sql+sqlite
 select
   name,
   bucket_name,

@@ -16,7 +16,18 @@ The `oci_file_storage_mount_target` table provides insights into Mount Targets w
 ### Basic info
 Explore the status of your file storage mount targets to identify any that are not currently active. This can be useful in troubleshooting, ensuring optimal system performance, and managing resources effectively.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  availability_domain,
+  time_created
+from
+  oci_file_storage_mount_target;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -29,7 +40,18 @@ from
 
 ## List mount targets which are not active
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_file_storage_mount_target
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

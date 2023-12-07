@@ -16,7 +16,16 @@ The `oci_cloud_guard_configuration` table provides insights into Cloud Guard Con
 ### Basic info
 Analyze the settings to understand the status and management of resources across different reporting regions in your OCI Cloud Guard configuration. This can help determine areas where resources are self-managed and where intervention may be needed.
 
-```sql
+```sql+postgres
+select
+  reporting_region,
+  status,
+  self_manage_resources
+from
+  oci_cloud_guard_configuration;
+```
+
+```sql+sqlite
 select
   reporting_region,
   status,

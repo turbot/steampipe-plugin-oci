@@ -16,7 +16,24 @@ The `oci_network_firewall_policy` table provides insights into Firewall Policies
 ### Basic info
 Explore the configuration and status of your network firewall policy. This information can help you assess the security rules and applications associated with your firewall, identify any mapped secrets, and determine whether the firewall is currently attached.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  application_lists,
+  decryption_profiles,
+  decryption_rules,
+  ip_address_lists,
+  is_firewall_attached,
+  mapped_secrets,
+  security_rules,
+  url_lists,
+  lifecycle_state as state
+from
+  oci_network_firewall_policy;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -36,7 +53,7 @@ from
 ### List network firewall policies created in the last 30 days
 Explore the recently created network firewall policies to understand their configuration and status. This is helpful to monitor the recent changes and ensure the security rules, decryption profiles, and other settings are properly configured.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -55,10 +72,48 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  application_lists,
+  decryption_profiles,
+  decryption_rules,
+  ip_address_lists,
+  is_firewall_attached,
+  mapped_secrets,
+  security_rules,
+  url_lists,
+  lifecycle_state as state
+from
+  oci_network_firewall_policy
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### List network firewall policies with firewall attached
 Determine the network firewall policies that have a firewall attached. This can help in identifying and managing the policies that are actively being implemented, thereby enhancing network security.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  application_lists,
+  decryption_profiles,
+  decryption_rules,
+  ip_address_lists,
+  is_firewall_attached,
+  mapped_secrets,
+  security_rules,
+  url_lists,
+  lifecycle_state as state
+from
+  oci_network_firewall_policy
+where
+  is_firewall_attached;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -80,7 +135,26 @@ where
 ### List network firewall policies without mapped secrets
 Identify instances where network firewall policies are potentially vulnerable due to the absence of mapped secrets. This is crucial for enhancing security measures and avoiding unauthorized access.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  application_lists,
+  decryption_profiles,
+  decryption_rules,
+  ip_address_lists,
+  is_firewall_attached,
+  mapped_secrets,
+  security_rules,
+  url_lists,
+  lifecycle_state as state
+from
+  oci_network_firewall_policy
+where
+  mapped_secrets is null;
+```
+
+```sql+sqlite
 select
   id,
   display_name,

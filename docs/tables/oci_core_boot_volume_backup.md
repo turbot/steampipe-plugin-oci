@@ -16,7 +16,20 @@ The `oci_core_boot_volume_backup` table provides insights into Boot Volume Backu
 ### Basic info
 Explore the basic details of your boot volume backups in Oracle Cloud Infrastructure. This query can be useful to understand the state and type of each backup, when it was created, and its source, providing a comprehensive overview for effective management and oversight.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  boot_volume_id,
+  source_type,
+  time_created,
+  type,
+  lifecycle_state as state
+from
+  oci_core_boot_volume_backup;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -32,7 +45,21 @@ from
 ### List manual boot volume backups
 Uncover the details of manual boot volume backups. This query helps you in identifying those backups that were manually created, providing insights into the time and state of their creation.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  source_type,
+  time_created,
+  type,
+  lifecycle_state as state
+from
+  oci_core_boot_volume_backup
+where
+  source_type = 'MANUAL';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

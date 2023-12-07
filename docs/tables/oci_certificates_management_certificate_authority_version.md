@@ -16,7 +16,23 @@ The `oci_certificates_management_certificate_authority_version` table provides i
 ### Basic info
 Explore the versions of certificate authorities to understand their revocation status, validity, and deletion times. This can be useful for maintaining security compliance and tracking changes in your certificate authorities.
 
-```sql
+```sql+postgres
+select
+  certificate_authority_id,
+  version_number,
+  stages,
+  serial_number,
+  issuer_ca_version_number,
+  version_name,
+  subject_alternative_names,
+  time_of_deletion,
+  validity,
+  revocation_status
+from
+  oci_certificates_management_certificate_authority_version;
+```
+
+```sql+sqlite
 select
   certificate_authority_id,
   version_number,
@@ -35,7 +51,26 @@ from
 ### Get all certificate authority versions
 Determine the versions of all certificate authorities to assess their validity, revocation status, and other key details. This is useful for maintaining the security of your network by ensuring all certificates are up-to-date and valid.
 
-```sql
+```sql+postgres
+select
+  cmcav.certificate_authority_id,
+  cmcav.version_number,
+  cmcav.stages,
+  cmcav.serial_number,
+  cmcav.issuer_ca_version_number,
+  cmcav.version_name,
+  cmcav.subject_alternative_names,
+  cmcav.time_of_deletion,
+  cmcav.validity,
+  cmcav.revocation_status
+from
+  oci_certificates_management_certificate_authority_version cmcav
+  inner join
+    oci_certificates_management_certificate_authority cmca
+    on cmca.id = cmcav.certificate_authority_id;
+```
+
+```sql+sqlite
 select
   cmcav.certificate_authority_id,
   cmcav.version_number,
@@ -57,7 +92,17 @@ from
 ### Count certificate versions by certificate authority
 Analyze the distribution of certificate versions across different certificate authorities. This can be useful in identifying authorities that have a high number of versions, potentially indicating frequent changes or updates.
 
-```sql
+```sql+postgres
+select
+  certificate_authority_id,
+  count(version_number)
+from
+  oci_certificates_management_certificate_authority_version
+group by
+  certificate_authority_id;
+```
+
+```sql+sqlite
 select
   certificate_authority_id,
   count(version_number)
@@ -70,7 +115,7 @@ group by
 ### List certificate versions created in the last 30 days
 Identify recent certificate versions made within the past month. This can be useful for tracking the creation and management of certificate authorities over time.
 
-```sql
+```sql+postgres
 select
   certificate_authority_id,
   version_number,
@@ -81,4 +126,17 @@ from
   oci_certificates_management_certificate_authority_version
 where
   time_created >= now() - interval '30' day;
+```
+
+```sql+sqlite
+select
+  certificate_authority_id,
+  version_number,
+  serial_number,
+  issuer_ca_version_number,
+  version_name
+from
+  oci_certificates_management_certificate_authority_version
+where
+  time_created >= datetime('now', '-30 day');
 ```

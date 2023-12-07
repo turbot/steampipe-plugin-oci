@@ -16,7 +16,18 @@ The `oci_core_public_ip_pool` table provides insights into Public IP Pools withi
 ### Basic info
 Explore the lifecycle status, creation time, and region of your Oracle Cloud Infrastructure's public IP pools. This can be useful to understand the distribution and availability of your public IP resources.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  time_created,
+  region
+from
+  oci_core_public_ip_pool;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,18 @@ from
 ### List public IP pool which are not active
 Discover the segments that consist of public IP pools that are not currently active. This can be useful to identify and manage unused resources within your network infrastructure.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_core_public_ip_pool
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

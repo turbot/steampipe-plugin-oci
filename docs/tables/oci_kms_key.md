@@ -16,7 +16,18 @@ The `oci_kms_key` table provides insights into the keys within OCI Key Managemen
 ### Basic info
 Explore the lifecycle state and creation time of your keys in Oracle Cloud Infrastructure's Key Management service. This can help you manage your keys effectively by identifying any keys that are outdated or in an undesirable state.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state,
+  time_created,
+  vault_name
+from
+  oci_kms_key;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -30,7 +41,19 @@ from
 ### List keys that are not enabled
 Discover the segments that consist of keys not currently enabled. This is useful to identify potential security risks or areas for system optimization.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state,
+  vault_name
+from
+  oci_kms_key
+where
+  lifecycle_state <> 'ENABLED';
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -45,7 +68,7 @@ where
 ### List keys older than 365 days
 Determine the areas in which encryption keys have been in use for over a year. This could be useful for identifying outdated security measures and ensuring a regular update cycle for enhanced data protection.
 
-```sql
+```sql+postgres
 select
   id,
   name,
@@ -55,6 +78,20 @@ from
   oci_kms_key
 where
   time_created <= (current_date - interval '365' day)
+order by
+  time_created;
+```
+
+```sql+sqlite
+select
+  id,
+  name,
+  lifecycle_state,
+  vault_name
+from
+  oci_kms_key
+where
+  time_created <= date('now','-365 day')
 order by
   time_created;
 ```

@@ -16,7 +16,18 @@ The `oci_mysql_configuration` table provides insights into MySQL configurations 
 ### Basic info
 Explore the basic details of your MySQL configurations to understand their current lifecycle state and creation time, which can be useful for managing and tracking your database resources.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  time_created
+from
+  oci_mysql_configuration;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

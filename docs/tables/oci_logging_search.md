@@ -29,7 +29,7 @@ The `oci_logging_search` table provides insights into the Logging Search within 
 ### Show log entries of the last 24 hrs
 Gain insights into the recent activities within your system by viewing log entries from the past 24 hours. This can help you monitor system performance, identify potential issues, and maintain system health.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -43,10 +43,24 @@ from
   oci_logging_search;
 ```
 
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
+from
+  oci_logging_search;
+```
+
 ### Show log entries of the last 3 days
 Explore the recent activities in your system by analyzing the log entries from the past three days. This can be particularly useful for monitoring system health, detecting anomalies, and troubleshooting issues.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -62,10 +76,26 @@ where
   timestamp >= now() - interval '3 days';
 ```
 
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
+from
+  oci_logging_search
+where
+  timestamp >= datetime('now','-3 days');
+```
+
 ### Show log entries that are related to DatabaseService
 Explore log entries associated with a specific service to gain insights into system activity and performance. This can help identify potential issues or anomalies related to the service, enhancing overall system monitoring and management.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -81,10 +111,26 @@ where
   log_content_type like '%DatabaseService%';
 ```
 
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
+from
+  oci_logging_search
+where
+  log_content_type like '%DatabaseService%';
+```
+
 ### Show log entries from us-ashburn-1 region
 Explore the log entries originating from a specific region to gain insights into system performance and potential issues. This can be useful for troubleshooting or optimizing operations within that region.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -100,10 +146,26 @@ where
   region = 'us-ashburn-1';
 ```
 
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
+from
+  oci_logging_search
+where
+  region = 'us-ashburn-1';
+```
+
 ### Show log entries from a specific log group
 Analyze the entries from a particular log group to gain insights into specific events or issues. This is beneficial in troubleshooting and understanding the operational behavior of your system.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -119,10 +181,26 @@ where
   log_group_name = 'test-bucket';
 ```
 
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
+from
+  oci_logging_search
+where
+  log_group_name = 'test-bucket';
+```
+
 ### Show log entries from a specific search query
 Explore log entries associated with a particular search query. This can help in analyzing patterns, identifying issues, and gaining insights into specific activities within a given timeframe or region.
 
-```sql
+```sql+postgres
 select
   log_content_id,
   log_content_source,
@@ -132,6 +210,22 @@ select
   compartment_id,
   tenant_id,
   jsonb_pretty(log_content) as log_content
+from
+  oci_logging_search
+where
+  search_query = 'search "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecx3hoz4p4h2q37cyljaq/test" | sort by datetime desc';
+```
+
+```sql+sqlite
+select
+  log_content_id,
+  log_content_source,
+  log_content_type,
+  timestamp,
+  region,
+  compartment_id,
+  tenant_id,
+  log_content
 from
   oci_logging_search
 where

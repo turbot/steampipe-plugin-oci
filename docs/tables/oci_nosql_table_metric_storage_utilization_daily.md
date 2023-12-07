@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_storage_utilization_daily` table provides insights i
 ### Basic info
 Analyze the daily storage utilization of NoSQL tables to understand trends such as minimum, maximum, and average usage over time. This can help in optimizing storage allocation, thereby improving cost efficiency and system performance.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_storage_utilization_daily
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where storage utilization exceeded 20GB average
 Uncover the details of specific periods where the storage utilization exceeded an average of 20GB. This assists in managing storage resources effectively by identifying potential overuse situations.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_storage_utilization_daily
+where
+  average > 20 
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

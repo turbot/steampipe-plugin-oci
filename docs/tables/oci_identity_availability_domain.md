@@ -16,7 +16,15 @@ The `oci_identity_availability_domain` table provides insights into Availability
 ### Basic info
 Explore the names and IDs of available domains within the Oracle Cloud Infrastructure (OCI) to manage and organize resources more efficiently. This can be particularly useful for system administrators seeking to streamline their resource allocation and tracking processes.
 
-```sql
+```sql+postgres
+select
+  name,
+  id
+from
+  oci_identity_availability_domain;
+```
+
+```sql+sqlite
 select
   name,
   id

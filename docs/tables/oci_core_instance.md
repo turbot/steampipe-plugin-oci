@@ -16,7 +16,19 @@ The `oci_core_instance` table provides insights into the Core Instances within O
 ### Basic info
 Discover the segments that are crucial in understanding the status and location of instances in Oracle Cloud Infrastructure. This can be useful in managing resources and optimizing performance across different regions.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  time_created,
+  lifecycle_state as state,
+  shape,
+  region
+from
+  oci_core_instance;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +43,7 @@ from
 ### List instances along with the compartment details
 Determine the areas in which specific instances are located and their associated compartment details, helping to better manage and organize your resources.
 
-```sql
+```sql+postgres
 select
   inst.display_name,
   inst.id,
@@ -49,10 +61,38 @@ order by
   inst.shape;
 ```
 
+```sql+sqlite
+select
+  inst.display_name,
+  inst.id,
+  inst.shape,
+  inst.region,
+  comp.name as compartment_name
+from
+  oci_core_instance as inst
+  inner join
+    oci_identity_compartment as comp
+    on inst.compartment_id = comp.id
+order by
+  comp.name,
+  inst.region,
+  inst.shape;
+```
+
 ### Count the number of instances by shape
 Analyze the distribution of instances based on their shape to understand the usage pattern and optimize resource allocation. This can help in making informed decisions about infrastructure scaling and cost management.
 
-```sql
+```sql+postgres
+select
+  shape,
+  count(shape) as count
+from
+  oci_core_instance
+group by
+  shape;
+```
+
+```sql+sqlite
 select
   shape,
   count(shape) as count
@@ -65,7 +105,22 @@ group by
 ### List instances with shape configuration details
 Explore instances to understand their configuration details such as maximum VNIC attachments, memory, networking bandwidth, OCPUs, GPU, and local disk size. This can help in assessing the resources consumed by these instances and planning for future resource allocation.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  shape_config_max_vnic_attachments,
+  shape_config_memory_in_gbs,
+  shape_config_networking_bandwidth_in_gbps,
+  shape_config_ocpus,
+  shape_config_baseline_ocpu_utilization,
+  shape_config_gpus,
+  shape_config_local_disks,
+  shape_config_local_disks_total_size_in_gbs
+from
+  oci_core_instance;
+```
+
+```sql+sqlite
 select
   display_name,
   shape_config_max_vnic_attachments,

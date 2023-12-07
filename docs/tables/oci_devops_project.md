@@ -16,7 +16,20 @@ The `oci_devops_project` table provides insights into DevOps Projects within Ora
 ### Basic info
 Explore the status and timing of your DevOps projects. This query allows you to monitor project progress and updates, providing insight into the lifecycle and timelines of your projects.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  description,
+  namespace,
+  lifecycle_state,
+  time_created,
+  time_updated
+from
+  oci_devops_project;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -32,7 +45,7 @@ from
 ### Join DevOps Projects with Notification Topics
 Explore the connection between DevOps projects and their corresponding notification topics. This can be crucial in managing project notifications and understanding the overall project configuration.
 
-```sql
+```sql+postgres
 select
   project.name,
   project.id,
@@ -45,10 +58,36 @@ from
   left join oci_ons_notification_topic topic on project.notification_topic_id = topic.topic_id;
 ```
 
+```sql+sqlite
+select
+  project.name,
+  project.id,
+  project.notification_topic_id,
+  topic.name as notification_topic_name,
+  project.namespace,
+  project.description
+from
+  oci_devops_project as project
+  left join oci_ons_notification_topic as topic on project.notification_topic_id = topic.topic_id;
+```
+
 ### List projects that are not active
 Discover the segments that consist of inactive projects within your organisation. This can be useful to identify and manage projects that are no longer in use, thereby optimizing resources and improving operational efficiency.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created,
+  namespace
+from
+  oci_devops_project
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -64,7 +103,7 @@ where
 ### List projects that are created in the last 30 days
 Explore which projects have been initiated in the recent 30 days. This is useful for tracking recent development activities and ensuring necessary follow-ups.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -74,4 +113,16 @@ from
   oci_devops_project
 where
   time_created >= now() - interval '30' day;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  time_created,
+  namespace
+from
+  oci_devops_project
+where
+  time_created >= datetime('now', '-30 day');
 ```

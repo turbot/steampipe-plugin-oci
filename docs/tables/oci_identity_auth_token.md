@@ -16,7 +16,17 @@ The `oci_identity_auth_token` table provides insights into Auth Tokens within Or
 ### Basic info
 Explore which authentication tokens have been created within your Oracle Cloud Infrastructure, along with their associated user details and creation timestamps. This can aid in understanding user activity and tracking token usage.
 
-```sql
+```sql+postgres
+select
+  id,
+  user_id,
+  user_name,
+  time_created
+from
+  oci_identity_auth_token;
+```
+
+```sql+sqlite
 select
   id,
   user_id,
@@ -30,7 +40,20 @@ from
 ### List inactive auth tokens
 Explore which authentication tokens are inactive. This can help in identifying potential security risks, as inactive tokens can be a sign of unauthorized access or outdated user credentials.
 
-```sql
+```sql+postgres
+select
+  id,
+  user_id,
+  user_name,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_auth_token
+where
+  lifecycle_state = 'INACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   user_id,
@@ -47,7 +70,19 @@ where
 ### Count the number of auth tokens by user
 Analyze the settings to understand the distribution of authentication tokens across different users. This is useful to monitor user activity and ensure that no user is generating an excessive number of tokens, which could be a potential security risk.
 
-```sql
+```sql+postgres
+select
+  user_id,
+  user_name,
+  count (id) as auth_token_count
+from
+  oci_identity_auth_token
+group by
+  user_name,
+  user_id;
+```
+
+```sql+sqlite
 select
   user_id,
   user_name,
@@ -63,7 +98,7 @@ group by
 ### List auth tokens older than 90 days
 Explore which authentication tokens have been active for more than 90 days. This can be useful for identifying potential security risks and maintaining system integrity.
 
-```sql
+```sql+postgres
 select
   id,
   user_id,
@@ -74,6 +109,21 @@ from
   oci_identity_auth_token
 where
   time_created <= (current_date - interval '90' day)
+order by
+  time_created;
+```
+
+```sql+sqlite
+select
+  id,
+  user_id,
+  user_name,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_auth_token
+where
+  time_created <= date('now','-90 day')
 order by
   time_created;
 ```

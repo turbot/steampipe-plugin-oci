@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_storage_utilization` table provides insights into st
 ### Basic info
 Analyze the storage utilization of your NoSQL tables to understand usage patterns over time. This can help you optimize resource allocation and manage costs more effectively.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_storage_utilization
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where storage utilization exceeded 20GB average
 Determine the periods where your storage usage exceeded an average of 20GB. This is useful to identify potential resource overutilization and optimize your storage management.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_storage_utilization
+where
+  average > 20 
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

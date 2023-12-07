@@ -16,7 +16,18 @@ The `oci_budget_budget` table provides insights into budget details within Oracl
 ### Basic info
 Gain insights into your budgeting by analyzing the state, amount, and actual spending of your Oracle Cloud Infrastructure resources. This helps in understanding the financial aspects of your resources and planning future expenses accordingly.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  amount,
+  actual_spend,
+  lifecycle_state as state
+from
+  oci_budget_budget;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,20 @@ from
 ### List budgets that are not active
 Discover the segments that are not currently active in your budget. This can be useful to identify areas where resources are being allocated but are not currently in use, helping to optimize your budget distribution.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  amount,
+  actual_spend,
+  lifecycle_state as state
+from
+  oci_budget_budget
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -46,7 +70,20 @@ where
 ### List budgets with actual spend more than 100 percent
 Discover segments where the actual expenditure has exceeded the allocated budget. This is particularly useful for identifying and analyzing areas of overspending to facilitate more effective budget management.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  amount,
+  actual_spend,
+  lifecycle_state as state
+from
+  oci_budget_budget
+where
+  actual_spend > amount;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

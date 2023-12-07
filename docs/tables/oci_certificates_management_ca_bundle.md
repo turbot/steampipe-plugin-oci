@@ -16,7 +16,19 @@ The `oci_certificates_management_ca_bundle` table provides insights into Certifi
 ### Basic info
 Explore which certificates are active or inactive by analyzing their lifecycle state and details. This can help you understand the status and creation time of certificates for better management and timely renewal.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state,
+  lifecycle_details,
+  description,
+  time_created
+from
+  oci_certificates_management_ca_bundle;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -31,7 +43,19 @@ from
 ### List bundles created between a specific time
 Discover the segments that were created within a specific time frame. This query is useful in tracking the lifecycle of your resources, allowing you to manage and optimize their utilization effectively.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_certificates_management_ca_bundle
+where
+  time_created between '2023-05-01' and '2023-07-01';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -46,7 +70,19 @@ where
 ### List failed bundles
 Determine the areas in which certificate management bundles have failed, allowing you to identify and address issues in your OCI environment.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  lifecycle_details
+from
+  oci_certificates_management_ca_bundle
+where
+  lifecycle_state = 'FAILED';
+```
+
+```sql+sqlite
 select
   name,
   id,

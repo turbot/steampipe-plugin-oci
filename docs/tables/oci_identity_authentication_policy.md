@@ -16,7 +16,20 @@ The `oci_identity_authentication_policy` table provides insights into the authen
 ### Basic info
 Uncover the details of your authentication policy to ensure it meets your security standards. This query helps in assessing the password requirements and restrictions, such as length and character type, as well as identifying any network sources that are allowed.
 
-```sql
+```sql+postgres
+select
+  minimum_password_length,
+  is_lowercase_characters_required,
+  is_numeric_characters_required,
+  is_special_characters_required,
+  is_uppercase_characters_required,
+  is_username_containment_allowed,
+  network_source_ids
+from
+  oci_identity_authentication_policy
+```
+
+```sql+sqlite
 select
   minimum_password_length,
   is_lowercase_characters_required,

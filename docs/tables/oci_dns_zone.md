@@ -16,7 +16,17 @@ The `oci_dns_zone` table provides insights into DNS zones within Oracle Cloud In
 ### Basic info
 Discover the segments of your OCI DNS zones that are currently active or inactive. This can help you understand when each zone was created, allowing you to manage and optimize your resources effectively.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state,
+  time_created
+from
+  oci_dns_zone;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -29,7 +39,18 @@ from
 ### List DNS zones which are not active
 Explore DNS zones that are not currently active, to identify potential issues or areas for clean-up. This can help in maintaining an efficient and clean DNS system.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_dns_zone
+where
+  lifecycle_state in ('CREATING','DELETED','DELETING','FAILED');
+```
+
+```sql+sqlite
 select
   name,
   id,

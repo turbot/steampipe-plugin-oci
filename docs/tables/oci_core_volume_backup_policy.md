@@ -16,7 +16,18 @@ The `oci_core_volume_backup_policy` table provides insights into the backup poli
 ### Basic info
 Explore which volume backup policies have been created in specific regions, along with their creation times and any applied tags. This can be useful for managing and tracking backup policies across different geographies.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  time_created,
+  region,
+  tags
+from
+  oci_core_volume_backup_policy;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -31,7 +42,16 @@ from
 ### Get the destination region for each volume backup policy
 Determine the destination region for each volume backup policy to help manage and optimize data storage across different regions.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  destination_region
+from
+  oci_core_volume_backup_policy;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -44,7 +64,7 @@ from
 ### Get schedule info for each volume backup policy
 Explore the scheduling details for each volume backup policy. This can help in identifying when and how frequently backups are taken, thus enabling efficient resource planning and data recovery strategies.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -63,11 +83,30 @@ from
   jsonb_array_elements(schedules) as s;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(s.value, '$.backupType') as backup_type,
+  json_extract(s.value, '$.dayOfMonth') as day_of_month,
+  json_extract(s.value, '$.dayOfWeek') as day_of_week,
+  json_extract(s.value, '$.hourOfDay') as hour_of_day,
+  json_extract(s.value, '$.month') as month,
+  json_extract(s.value, '$.offsetSeconds') as offset_econds,
+  json_extract(s.value, '$.offsetType') as offset_type,
+  json_extract(s.value, '$.period') as offset_econds,
+  json_extract(s.value, '$.retentionSeconds') as retention_seconds,
+  json_extract(s.value, '$.timeZone') as time_zone
+from
+  oci_core_volume_backup_policy,
+  json_each(schedules) as s;
+```
+
 
 ### List volume back policies that create full backups
 Explore which volume backup policies are set to create full backups. This can be beneficial to ensure important data is completely backed up and to identify any areas that may require a change in backup strategy.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -77,4 +116,16 @@ from
   jsonb_array_elements(schedules) as s
 where
   s ->> 'backupType' = 'FULL';
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(s.value, '$.backupType') as backup_type
+from
+  oci_core_volume_backup_policy,
+  json_each(schedules) as s
+where
+  json_extract(s.value, '$.backupType') = 'FULL';
 ```

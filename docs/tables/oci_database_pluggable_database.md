@@ -16,7 +16,17 @@ The `oci_database_pluggable_database` table provides insights into Pluggable Dat
 ### Basic info
 Explore which databases are in different stages of their lifecycle and when they were created. This allows you to assess the overall health and status of your databases.
 
-```sql
+```sql+postgres
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_pluggable_database;
+```
+
+```sql+sqlite
 select
   pdb_name,
   id,
@@ -29,7 +39,19 @@ from
 ### List failed pluggable databases
 This query can be used to identify any pluggable databases in the Oracle Cloud Infrastructure that have failed to initialize. By doing so, it allows users to quickly pinpoint and address any issues that may be disrupting their database operations.
 
-```sql
+```sql+postgres
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_pluggable_database
+where
+  lifecycle_state = 'FAILED';
+```
+
+```sql+sqlite
 select
   pdb_name,
   id,
@@ -44,7 +66,7 @@ where
 ### List pluggable databases older than 90 days
 Discover the segments that consist of pluggable databases older than 90 days. This is useful for identifying potential areas for system optimization or data archiving.
 
-```sql
+```sql+postgres
 select
   pdb_name,
   id,
@@ -58,10 +80,24 @@ order by
   time_created;
 ```
 
+```sql+sqlite
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_pluggable_database
+where
+  time_created <= date('now','-90 day')
+order by
+  time_created;
+```
+
 ### List unrestricted pluggable databases
 Explore which pluggable databases are unrestricted in your Oracle Cloud Infrastructure. This can be useful to identify potential security vulnerabilities or for general database management purposes.
 
-```sql
+```sql+postgres
 select
   pdb_name,
   id,
@@ -71,4 +107,16 @@ from
   oci_database_pluggable_database
 where
   not is_restricted;
+```
+
+```sql+sqlite
+select
+  pdb_name,
+  id,
+  lifecycle_state,
+  is_restricted
+from
+  oci_database_pluggable_database
+where
+  is_restricted = 0;
 ```

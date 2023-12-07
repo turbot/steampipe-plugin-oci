@@ -19,7 +19,22 @@ The `oci_kms_key_version` table provides insights into Key Versions within the O
 ### Basic info
 Explore the lifecycle status and creation time of specific keys in your Oracle Cloud Infrastructure Key Management service. This can be useful in managing and tracking your encryption keys, ensuring they are in the desired state and were created at the expected time.
 
-```sql
+```sql+postgres
+select
+  v.id as key_version_id,
+  k.name as key_name,
+  v.lifecycle_state,
+  v.time_created as time_created
+from
+  oci_kms_key k,
+  oci_kms_key_version v
+where
+  v.key_id = k.id
+  and v.management_endpoint = k.management_endpoint
+  and v.region = k.region;
+```
+
+```sql+sqlite
 select
   v.id as key_version_id,
   k.name as key_name,
@@ -37,7 +52,35 @@ where
 ### Get latest key version for all active keys
 Identify the most recent versions of all active keys in your system. This could be useful for auditing purposes or to ensure that you're always using the most up-to-date keys for security purposes.
 
-```sql
+```sql+postgres
+with oci_kms as (
+  select
+    k.name,
+    k.lifecycle_state,
+    max(v.time_created) as latest_key_version_created,
+    k.region,
+    k.compartment_id
+  from
+    oci_kms_key k, oci_kms_key_version v
+  where
+    v.key_id = k.id
+    and v.management_endpoint = k.management_endpoint
+    and v.region = k.region
+    and k.lifecycle_state = 'ENABLED'
+  group by
+    k.name,k.lifecycle_state, k.region,k.compartment_id
+)
+select
+  k.name,
+  k.lifecycle_state,
+  latest_key_version_created,
+  k.region,
+  coalesce(c.name, 'root') as compartment
+from
+  oci_kms k left join oci_identity_compartment c on c.id = k.compartment_id;
+```
+
+```sql+sqlite
 with oci_kms as (
   select
     k.name,

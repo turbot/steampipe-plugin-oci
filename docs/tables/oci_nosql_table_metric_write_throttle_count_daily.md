@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_write_throttle_count_daily` table provides insights 
 ### Basic info
 Analyze the daily write throttle count metrics to understand trends or identify potential issues in your Oracle NoSQL database. This query helps to monitor the overall performance and health of your database by tracking the minimum, maximum, average, and total write throttle counts over time.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count_daily
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where write throttle count exceeded 100 average
 Determine the instances when the daily write throttle count surpasses an average of 100. This can be useful to identify potential bottlenecks in data writing processes and facilitate optimization efforts.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count_daily
+where
+  average > 100
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

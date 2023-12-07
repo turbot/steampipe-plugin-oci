@@ -16,7 +16,17 @@ The `oci_core_boot_volume_attachment` table provides insights into boot volume a
 ### Basic info
 Discover the segments that are in various stages of their lifecycle and when they were created. This query helps to manage and track resources effectively by providing insights into their current state and creation time.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_boot_volume_attachment;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -29,7 +39,19 @@ from
 ### List volume attachments witch are not attached
 Analyze the settings to understand the status of volume attachments that are not currently connected. This could be beneficial for managing storage resources and ensuring efficient utilization.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_boot_volume_attachment
+where
+  lifecycle_state <> 'ATTACHED';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

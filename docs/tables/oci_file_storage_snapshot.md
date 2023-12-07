@@ -18,7 +18,19 @@ The `oci_file_storage_snapshot` table provides insights into snapshots within OC
 2. "Determine the number of snapshots created per file system to understand the distribution and usage of your storage resources."
 3. "Identify the snapshots that have been used as clone sources, helping you track the propagation of your data across your storage environment.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state as state,
+  time_created,
+  provenance_id,
+  region
+from
+  oci_file_storage_snapshot;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -33,7 +45,17 @@ from
 
 ## Count of snapshots created per file system
 
-```sql
+```sql+postgres
+select
+  file_system_id,
+  count(*) as snapshots_count
+from
+  oci_file_storage_snapshot
+group by
+  file_system_id;
+```
+
+```sql+sqlite
 select
   file_system_id,
   count(*) as snapshots_count
@@ -46,7 +68,7 @@ group by
 
 ## List cloned snapshots
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -55,4 +77,15 @@ from
   oci_file_storage_snapshot
 where
   is_clone_source;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  is_clone_source
+from
+  oci_file_storage_snapshot
+where
+  is_clone_source = 1;
 ```

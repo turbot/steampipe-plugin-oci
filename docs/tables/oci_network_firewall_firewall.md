@@ -16,7 +16,22 @@ The `oci_network_firewall_firewall` table provides insights into the firewalls w
 ### Basic info
 Explore the basic details of your Oracle Cloud Infrastructure network firewalls to gain insights into their availability domains, IP addresses, associated security groups, and current lifecycle state. This allows for efficient management and monitoring of your network security.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  availability_domain,
+  ipv4_address,
+  ipv6_address,
+  network_firewall_policy_id,
+  network_security_group_ids,
+  subnet_id,
+  lifecycle_state as state
+from
+  oci_network_firewall_firewall;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -34,7 +49,7 @@ from
 ### List network firewalls created in the last 30 days
 Explore which network firewalls have been created in the past 30 days. This insight can help in assessing recent changes in your network security landscape, enabling you to better manage and monitor your infrastructure's security.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -51,10 +66,44 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  availability_domain,
+  ipv4_address,
+  ipv6_address,
+  network_firewall_policy_id,
+  network_security_group_ids,
+  subnet_id,
+  lifecycle_state as state
+from
+  oci_network_firewall_firewall
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### List network firewalls having IPv6 address
 Identify network firewalls that have been assigned an IPv6 address. This can be useful for managing network security and ensuring all devices are properly configured for IPv6 connectivity.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  availability_domain,
+  ipv4_address,
+  ipv6_address,
+  network_firewall_policy_id,
+  network_security_group_ids,
+  subnet_id,
+  lifecycle_state as state
+from
+  oci_network_firewall_firewall
+where
+  ipv6_address is not null;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -74,7 +123,21 @@ where
 ### Describe the network firewall policy associated to the network firewall
 Explore the association between network firewalls and their corresponding policies. This can be useful for understanding the lifecycle details of the policy and determining the firewall's adherence to it.
 
-```sql
+```sql+postgres
+select
+  f.display_name as firewall_name,
+  f.id as firewall_id,
+  p.display_name as policy_display_name,
+  p.id as policy_id,
+  p.lifecycle_details as policy_lifecycle 
+from
+  oci_network_firewall_firewall as f 
+  left join
+    oci_network_firewall_policy as p 
+    on f.network_firewall_policy_id = p.id;
+```
+
+```sql+sqlite
 select
   f.display_name as firewall_name,
   f.id as firewall_id,

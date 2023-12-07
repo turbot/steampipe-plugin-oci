@@ -16,7 +16,17 @@ The `oci_logging_log_group` table provides insights into Log Groups within Oracl
 ### Basic info
 Explore the lifecycle state and creation time of different log groups in Oracle Cloud Infrastructure's logging service. This can help you manage and monitor your resources effectively.
 
-```sql
+```sql+postgres
+select
+  id as log_group_id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_logging_log_group;
+```
+
+```sql+sqlite
 select
   id as log_group_id,
   display_name,
@@ -30,7 +40,19 @@ from
 ### List inactive log groups
 Explore which log groups are inactive in your OCI logging service. This can be useful for identifying and managing unused resources.
 
-```sql
+```sql+postgres
+select
+  id as log_group_id,
+  display_name,
+  lifecycle_state as state,
+  time_created
+from
+  oci_logging_log_group
+where
+  lifecycle_state = 'INACTIVE';
+```
+
+```sql+sqlite
 select
   id as log_group_id,
   display_name,

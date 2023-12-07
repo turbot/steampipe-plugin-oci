@@ -16,7 +16,22 @@ The `oci_database_autonomous_db_metric_cpu_utilization_daily` table provides ins
 ### Basic info
 Analyze the daily CPU utilization metrics of your autonomous databases to understand their performance trends and resource consumption. This can assist in optimizing resource allocation, identifying peak usage times, and planning capacity for better database management.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_database_autonomous_db_metric_cpu_utilization_daily
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### CPU Over 80% average
 Identify instances where the average CPU utilization exceeds 80% in a day to monitor system performance and prevent potential overloads or slowdowns. This allows for proactive resource management and can help maintain optimal system operation.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
   round(average::numeric,2) as avg_cpu,
+  sample_count
+from
+  oci_database_autonomous_db_metric_cpu_utilization_daily
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_cpu,
+  round(maximum,2) as max_cpu,
+  round(average,2) as avg_cpu,
   sample_count
 from
   oci_database_autonomous_db_metric_cpu_utilization_daily

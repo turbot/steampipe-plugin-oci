@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_write_throttle_count_hourly` table provides insights
 ### Basic info
 Explore the performance metrics of NoSQL databases in Oracle Cloud Infrastructure. This query provides insights into the write throttle count on an hourly basis, which can help in identifying any potential bottlenecks or performance issues.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count_hourly
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where write throttle count exceeded 100 average
 Analyze the settings to understand intervals where the average write throttle count surpassed 100. This could be beneficial in identifying potential performance issues in your NoSQL databases.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count_hourly
+where
+  average > 100
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

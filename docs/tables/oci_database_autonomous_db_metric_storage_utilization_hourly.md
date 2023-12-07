@@ -16,7 +16,22 @@ The `oci_database_autonomous_db_metric_storage_utilization_hourly` table provide
 ### Basic info
 Explore the utilization of storage in your autonomous databases over time. This can help you monitor usage trends, identify periods of high demand, and plan for future capacity needs.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_database_autonomous_db_metric_storage_utilization_hourly
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### Storage Utilization Over 80% average
 Discover the segments that are utilizing more than 80% of their storage capacity on average. This information can help identify potential areas for optimization or expansion to ensure smooth operations.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_storage,
   round(maximum::numeric,2) as max_storage,
   round(average::numeric,2) as avg_storage,
+  sample_count
+from
+  oci_database_autonomous_db_metric_storage_utilization_hourly
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_storage,
+  round(maximum,2) as max_storage,
+  round(average,2) as avg_storage,
   sample_count
 from
   oci_database_autonomous_db_metric_storage_utilization_hourly

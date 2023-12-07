@@ -16,7 +16,18 @@ The `oci_database_software_image` table provides insights into Database Software
 ### Basic info
 Explore which database software images are currently active and when they were created, to gain insights into the life cycle and type of database images in your Oracle Cloud Infrastructure. This can help in managing your resources effectively and keeping track of your database images.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  image_type,
+  lifecycle_state,
+  time_created
+from
+  oci_database_software_image;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,20 @@ from
 ### List deleted database software images
 Explore which database software images have been deleted to manage your resources effectively. This helps in maintaining a clean and efficient database by keeping track of unused or obsolete software images.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  image_type,
+  lifecycle_state,
+  time_created
+from
+  oci_database_software_image
+where
+  lifecycle_state = 'DELETED';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -46,7 +70,7 @@ where
 ### List database software images older than 90 days
 Explore the database software images that have been created more than 90 days ago. This can help in identifying outdated images, potentially facilitating their update or removal.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -57,6 +81,21 @@ from
   oci_database_software_image
 where
   time_created <= (current_date - interval '90' day)
+order by
+  time_created;
+```
+
+```sql+sqlite
+select
+  display_name,
+  id,
+  image_type,
+  lifecycle_state,
+  time_created
+from
+  oci_database_software_image
+where
+  time_created <= date('now','-90 day')
 order by
   time_created;
 ```

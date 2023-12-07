@@ -16,7 +16,17 @@ The `oci_queue_queue` table provides insights into the queues within the OCI Que
 ### Basic info
 Explore which queues are active and their associated details to better manage and monitor your Oracle Cloud Infrastructure (OCI) resources. This can help you maintain an efficient and organized OCI environment.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  lifecycle_state
+from
+  oci_queue_queue;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -29,7 +39,18 @@ from
 ### List queues not in the active state
 Determine the areas in which queues are not actively functioning. This can be useful for identifying potential bottlenecks or interruptions in data flow.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_queue_queue
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -43,7 +64,20 @@ where
 ### List queues that are not encrypted
 Discover the segments that are not encrypted in your system. This query is useful for identifying potential security risks and ensuring that all queues in your system are properly protected.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  compartment_id,
+  region
+from
+  oci_queue_queue
+where 
+  custom_encryption_key_id is null;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -59,7 +93,21 @@ where
 ### Get details of each queue
 Explore the characteristics of each queue, such as retention and visibility duration, to manage and optimize your queue configurations effectively. This allows you to understand queue behaviors, identify potential bottlenecks, and implement necessary adjustments for improved performance.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  retention_in_seconds,
+  visibility_in_seconds,
+  timeout_in_seconds,
+  messages_endpoint,
+  dead_letter_queue_delivery_count,
+  defined_tags,
+  id
+from
+  oci_queue_queue;
+```
+
+```sql+sqlite
 select
   display_name,
   retention_in_seconds,

@@ -16,7 +16,17 @@ The `oci_database_db_home` table provides insights into DB Homes within Oracle C
 ### Basic info
 Explore the lifecycle state and creation time of your Oracle Cloud Infrastructure databases to understand their current status and longevity. This can help in managing and planning resources effectively.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_database_db_home;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -29,7 +39,19 @@ from
 ### List db homes that are not available
 Discover the database homes that are not currently available. This can be useful in identifying potential issues or disruptions in your database services.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_database_db_home
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

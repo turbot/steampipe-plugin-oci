@@ -16,7 +16,16 @@ The `oci_identity_tag_default` table provides insights into the default tags wit
 ### Basic info
 Analyze the settings to understand the necessity and lifecycle status of various elements within your OCI Identity Tag Default. This can help in assessing the importance and current stage of each element, aiding in efficient resource management.
 
-```sql
+```sql+postgres
+select
+  id,
+  is_required,
+  lifecycle_state
+from
+  oci_identity_tag_default;
+```
+
+```sql+sqlite
 select
   id,
   is_required,
@@ -28,7 +37,18 @@ from
 ### List active tag defaults
 Explore which tag defaults are currently active within your OCI identity configuration. This can help manage and organize your resources effectively.
 
-```sql
+```sql+postgres
+select
+  id,
+  is_required,
+  lifecycle_state
+from
+  oci_identity_tag_default
+where
+  lifecycle_state = 'ACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   is_required,
@@ -42,7 +62,7 @@ where
 ### List required tag defaults
 Determine the required tag defaults within your OCI identity to ensure compliance and manage resources effectively. This query is particularly useful in identifying and understanding the lifecycle state of these mandatory tag defaults.
 
-```sql
+```sql+postgres
 select
   id,
   is_required,
@@ -51,4 +71,15 @@ from
   oci_identity_tag_default
 where
   is_required;
+```
+
+```sql+sqlite
+select
+  id,
+  is_required,
+  lifecycle_state
+from
+  oci_identity_tag_default
+where
+  is_required = 1;
 ```

@@ -16,7 +16,17 @@ The `oci_cloud_guard_responder_recipe` table provides insights into the Responde
 ### Basic info
 Explore which cloud guard responder recipes have been created and their current lifecycle states. This is useful for understanding the security posture and state of your Oracle Cloud Infrastructure.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_responder_recipe;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List responder recipes which are not active
 Discover the segments that consist of responder recipes which are not currently active. This can be useful in identifying potential security risks or areas in need of maintenance within your cloud infrastructure.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_responder_recipe
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

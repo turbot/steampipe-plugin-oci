@@ -16,7 +16,18 @@ The `oci_mysql_channel` table provides insights into channels within Oracle Clou
 ### Basic info
 Explore the lifecycle state and creation time of your MySQL channels to understand their current status and longevity. This can be beneficial for assessing the health and stability of your database channels.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  time_created
+from
+  oci_mysql_channel;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,22 @@ from
 ### List disabled channels
 Explore which MySQL channels are currently inactive. This query is useful for maintaining security and performance by identifying channels that are not enabled, allowing for necessary management actions.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  time_created,
+  time_updated,
+  is_enabled
+from
+  oci_mysql_channel
+where
+  not is_enabled;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -48,7 +74,7 @@ where
 ### Get target details for each channel
 Identify the specific details for each channel, such as the applier's username, channel name, system ID, and target type, to gain insights into your MySQL Channel configuration and understand its operational aspects.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -56,6 +82,18 @@ select
   target ->> 'channelName' as channel_name,
   target ->> 'dbSystemId' as db_system_id,
   target ->> 'targetType' as target_type
+from
+  oci_mysql_channel;
+```
+
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_extract(target, '$.applierUsername') as applier_username,
+  json_extract(target, '$.channelName') as channel_name,
+  json_extract(target, '$.dbSystemId') as db_system_id,
+  json_extract(target, '$.targetType') as target_type
 from
   oci_mysql_channel;
 ```

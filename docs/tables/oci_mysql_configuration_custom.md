@@ -16,7 +16,18 @@ The `oci_mysql_configuration_custom` table provides insights into custom configu
 ### Basic info
 Uncover the details of custom MySQL configurations in your Oracle Cloud Infrastructure, including their display names, IDs, descriptions, lifecycle states, and creation times. This can help you manage and monitor your custom configurations more effectively.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  time_created
+from
+  oci_mysql_configuration_custom;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,20 @@ from
 ### List deleted configurations
 Explore which custom MySQL configurations have been deleted in your Oracle Cloud Infrastructure. This is useful for tracking changes and maintaining the security and efficiency of your database systems.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  time_created
+from
+  oci_mysql_configuration_custom 
+where
+  lifecycle_state = 'DELETED';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

@@ -17,7 +17,18 @@ The `oci_artifacts_repository` table provides insights into repositories within 
 ### Basic info
 Explore the basic information of your OCI artifact repositories to understand their immutability, lifecycle state, and other key details. This can be useful in managing your repositories and ensuring proper configuration and state.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  is_immutable,
+  description,
+  lifecycle_state as state
+from
+  oci_artifacts_repository;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +42,7 @@ from
 ### List immutable repositories
 Explore which repositories have been marked as immutable in your Oracle Cloud Infrastructure. This can be useful for understanding your data's security and compliance status, as immutable repositories cannot be changed or deleted, ensuring the integrity of stored data.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -45,10 +56,24 @@ where
   is_immutable;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  time_created,
+  is_immutable,
+  description,
+  lifecycle_state
+from
+  oci_artifacts_repository
+where
+  is_immutable = 1;
+```
+
 ### List repositories created in last 30 days
 Discover the latest repositories that have been created in the last 30 days to understand their lifecycle state and immutability status. This can be useful for auditing purposes, ensuring that all recent additions comply with your organization's policies and standards.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -62,10 +87,36 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  time_created,
+  is_immutable,
+  description,
+  lifecycle_state
+from
+  oci_artifacts_repository
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### List available repositories
 Explore which artifact repositories are currently available. This is useful for assessing the resources you have at your disposal for storing and managing your software artifacts.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  time_created,
+  lifecycle_state
+from
+  oci_artifacts_repository
+where
+  lifecycle_state = 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

@@ -16,7 +16,17 @@ The `oci_core_drg` table gives insights into Dynamic Routing Gateways within Ora
 ### Basic info
 Gain insights into your Oracle Cloud Infrastructure by examining the lifecycle state and creation time of each resource. This can be useful for tracking resource usage and understanding the overall health and status of your infrastructure.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_core_drg;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +40,18 @@ from
 ### List unavailable dynamic routing gateways
 Determine the areas in which dynamic routing gateways are not currently available. This is beneficial to quickly identify and address any network connectivity issues.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state
+from
+  oci_core_drg
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -45,7 +66,17 @@ where
 ### Count of dynamic routing gateways per region
 Explore the distribution of dynamic routing gateways across different regions. This can help in managing network traffic and ensuring efficient data routing.
 
-```sql
+```sql+postgres
+select
+  region,
+  count(*) drg_count
+from
+  oci_core_drg
+group by
+  region;
+```
+
+```sql+sqlite
 select
   region,
   count(*) drg_count

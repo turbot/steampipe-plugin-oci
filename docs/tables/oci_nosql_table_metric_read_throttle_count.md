@@ -16,7 +16,7 @@ The `oci_nosql_table_metric_read_throttle_count` table provides insights into th
 ### Basic info
 Explore which NoSQL tables in your OCI environment have experienced read throttling. This can help you identify potential performance issues and optimize your database operations for better efficiency.
 
-```sql
+```sql+postgres
 select
   name,
   timestamp,
@@ -32,10 +32,45 @@ order by
   timestamp;
 ```
 
+```sql+sqlite
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_read_throttle_count
+order by
+  name,
+  timestamp;
+```
+```
+
 ### Intervals where read throttle count exceeded 100 average
 Explore instances where the read throttle count exceeded an average of 100, allowing you to identify potential performance issues and optimize accordingly. This can be particularly useful in managing and improving the efficiency of your NoSQL database operations.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_read_throttle_count
+where
+  average > 100
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,

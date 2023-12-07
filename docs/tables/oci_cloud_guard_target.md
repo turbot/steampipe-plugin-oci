@@ -16,7 +16,17 @@ The `oci_cloud_guard_target` table provides insights into Cloud Guard Targets wi
 ### Basic info
 Explore the creation times and lifecycle states of your cloud guard targets to better understand their current status and longevity. This can be useful in managing resources and identifying any targets that may require attention or updates.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_target;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List targets which are not active
 Explore which Cloud Guard targets are not currently active. This is useful for identifying potential security risks or areas that may need maintenance or updates.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_target
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

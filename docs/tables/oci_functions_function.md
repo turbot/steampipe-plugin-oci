@@ -16,7 +16,19 @@ The `oci_functions_function` table provides insights into functions within Oracl
 ### Basic info
 Explore the basic information of your Oracle Cloud Infrastructure functions to gain insights into details such as their lifecycle state and associated application ID. This can help in understanding the current state and configuration of your serverless applications.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  application_id,
+  lifecycle_state,
+  image,
+  image_digest
+from
+  oci_functions_function;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -32,7 +44,7 @@ from
 ### List functions where trace configuration is disabled
 Identify functions where trace configuration is not enabled to understand potential areas of risk or lack of visibility in your application performance monitoring.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -44,11 +56,35 @@ where
   not (trace_config -> 'isEnabled') :: bool;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  application_id,
+  json_extract(trace_config, '$.isEnabled') as trace_config_is_enabled
+from
+  oci_functions_function
+where
+  not json_extract(trace_config, '$.isEnabled');
+```
+
 
 ### List functions where memory is greater than 100 MB
 Discover the functions that are using more than 100 MB of memory. This can be useful to identify high-memory usage functions that may need optimization or resource allocation adjustments.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  application_id,
+  memory_in_mbs
+from
+  oci_functions_function
+where
+  memory_in_mbs > 100;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

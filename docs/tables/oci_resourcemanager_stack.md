@@ -16,7 +16,17 @@ The `oci_resourcemanager_stack` table provides insights into the stacks within O
 ### Basic info
 Explore the status and creation times of your resource manager stacks to understand their lifecycle and manage resources effectively. This can help in assessing the elements within your infrastructure for better planning and resource allocation.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  time_created,
+  lifecycle_state as state
+from
+  oci_resourcemanager_stack;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -29,7 +39,19 @@ from
 ### List resource manager stacks that are not active
 Determine the areas in which resource manager stacks are not currently active. This can help in identifying unused resources, potentially optimizing resource usage and reducing costs.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  time_created,
+  lifecycle_state as state
+from
+  oci_resourcemanager_stack
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -44,7 +66,7 @@ where
 ### List resource manager stacks older than 90 days
 Identify instances where resource manager stacks have been in existence for more than 90 days. This can be useful for cleaning up old resources and optimizing resource management.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -54,6 +76,20 @@ from
   oci_resourcemanager_stack
 where
   time_created <= (current_date - interval '90' day)
+order by
+  time_created;
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  time_created,
+  lifecycle_state as state
+from
+  oci_resourcemanager_stack
+where
+  time_created <= date('now','-90 day')
 order by
   time_created;
 ```

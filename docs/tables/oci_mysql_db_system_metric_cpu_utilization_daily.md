@@ -16,7 +16,22 @@ The `oci_mysql_db_system_metric_cpu_utilization_daily` table provides insights i
 ### Basic info
 Explore the variations in CPU utilization of your MySQL database system over time. This analysis can help you understand system performance and plan for capacity needs.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_mysql_db_system_metric_cpu_utilization_daily
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### CPU Over 80% average
 Determine the instances where the average CPU utilization exceeds 80% to proactively manage system performance and avoid potential bottlenecks.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
   round(average::numeric,2) as avg_cpu,
+  sample_count
+from
+  oci_mysql_db_system_metric_cpu_utilization_daily
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_cpu,
+  round(maximum,2) as max_cpu,
+  round(average,2) as avg_cpu,
   sample_count
 from
   oci_mysql_db_system_metric_cpu_utilization_daily

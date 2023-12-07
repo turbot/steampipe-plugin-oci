@@ -16,7 +16,19 @@ The `oci_mysql_backup` table provides insights into MySQL backups within Oracle 
 ### Basic info
 Analyze your MySQL backups in Oracle Cloud Infrastructure to understand their current lifecycle state, backup type, and MySQL version. This can help manage backups more efficiently and ensure they're configured correctly for your needs.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  description,
+  lifecycle_state as state,
+  backup_type,
+  mysql_version
+from
+  oci_mysql_backup;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +43,18 @@ from
 ### List manual backups
 Explore which MySQL backups have been manually created. This is useful for understanding how many backups have been created by user intervention, which can help in managing resources and planning future automated backups.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  creation_type
+from
+  oci_mysql_backup
+where
+  creation_type = 'MANUAL';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -45,7 +68,18 @@ where
 ### List backups with retention days less than 90 days
 Determine areas in which backups have a retention period of less than 90 days. This can be useful for identifying potential vulnerabilities or non-compliance with data retention policies.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  retention_in_days
+from
+  oci_mysql_backup
+where
+  retention_in_days < 90;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -59,7 +93,17 @@ where
 ### Count of backups per DB system
 Explore the frequency of backups for each database system to understand how often data protection measures are being implemented. This can help in assessing the robustness of your data recovery strategy.
 
-```sql
+```sql+postgres
+select
+  db_system_id,
+  count(*) as backup_count
+from
+  oci_mysql_backup
+group by
+  db_system_id;
+```
+
+```sql+sqlite
 select
   db_system_id,
   count(*) as backup_count

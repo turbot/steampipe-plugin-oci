@@ -16,7 +16,23 @@ The `oci_core_boot_volume_metric_read_ops` table provides insights into the read
 ### Basic info
 Explore the performance metrics of boot volumes in your Oracle Cloud Infrastructure environment. This query helps in identifying any unusual activity or performance degradation by analyzing metrics such as minimum, maximum, average, and total read operations over time.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_core_boot_volume_metric_read_ops
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -35,7 +51,25 @@ order by
 ### Intervals where volumes exceed 1000 average read ops
 Analyze the settings to understand periods where the average read operations surpass a threshold of 1000. This could be useful in identifying potential system overloads or performance bottlenecks.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_core_boot_volume_metric_read_ops
+where
+  average > 1000
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -56,7 +90,25 @@ order by
 ### Intervals where volumes exceed 8000 max read ops
 Explore instances where the read operations on boot volumes exceed a certain threshold to monitor system performance and identify potential bottlenecks. This can be useful in optimizing your system configuration for improved efficiency.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_core_boot_volume_metric_read_ops
+where
+  maximum > 8000
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -77,7 +129,31 @@ order by
 ### Read, Write, and Total IOPS
 Explore the performance of your system by analyzing input/output operations. This query helps to understand the average, maximum, and minimum read/write operations over time, assisting in identifying potential issues or areas for improvement.
 
-```sql
+```sql+postgres
+select 
+  r.id,
+  r.timestamp,
+  round(r.average) + round(w.average) as iops_avg,
+  round(r.average) as read_ops_avg,
+  round(w.average) as write_ops_avg,
+  round(r.maximum) + round(w.maximum) as iops_max,
+  round(r.maximum) as read_ops_max,
+  round(w.maximum) as write_ops_max,
+  round(r.minimum) + round(w.minimum) as iops_min,
+  round(r.minimum) as read_ops_min,
+  round(w.minimum) as write_ops_min
+from 
+  oci_core_boot_volume_metric_read_ops as r,
+  oci_core_boot_volume_metric_write_ops as w
+where 
+  r.id = w.id
+  and r.timestamp = w.timestamp
+order by
+  r.id,
+  r.timestamp;
+```
+
+```sql+sqlite
 select 
   r.id,
   r.timestamp,

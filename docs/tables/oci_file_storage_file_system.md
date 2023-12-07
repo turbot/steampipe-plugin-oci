@@ -19,7 +19,19 @@ The `oci_file_storage_file_system` table provides insights into file systems wit
 3. "Discover the file systems that have been cloned, providing a quick overview of your duplicated resources."
 4. "Review the file systems that use Oracle managed encryption, to ensure data security and compliance with your organization's encryption policies.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  availability_domain,
+  metered_bytes,
+  time_created
+from
+  oci_file_storage_file_system;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -34,7 +46,18 @@ from
 
 ## List file systems that are not active
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_file_storage_file_system
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -48,7 +71,7 @@ where
 
 ## List cloned file systems
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -59,10 +82,33 @@ where
   is_clone_parent;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_file_storage_file_system
+where
+  is_clone_parent = 1;
+```
+
 
 ## List file systems with Oracle managed encryption (default encryption uses Oracle managed encryption keys)
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  time_created
+from
+  oci_file_storage_file_system
+where
+  length(kms_key_id) = 0;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -78,7 +124,20 @@ where
 ### List file systems with customer managed encryption keys
 Explore file systems that utilize customer-managed encryption keys to enhance data security and privacy. This allows for a better understanding of your system's security measures and helps identify potential areas for improvement.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state,
+  kms_key_id,
+  time_created
+from
+  oci_file_storage_file_system
+where
+  length(kms_key_id) <> 0;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

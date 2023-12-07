@@ -16,7 +16,17 @@ The `oci_core_volume_attachment` table provides insights into volume attachments
 ### Basic info
 Explore which volume attachments in your Oracle Cloud Infrastructure are active or inactive by checking their lifecycle states and when they were created. This can help you manage your resources more effectively by identifying unused or outdated attachments.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_volume_attachment;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -29,7 +39,19 @@ from
 ### List idle volume attachments
 Determine the areas in which volume attachments are not actively being used. This can help manage resources more effectively by identifying unused elements.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_volume_attachment
+where
+  lifecycle_state <> 'ATTACHED';
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -44,7 +66,7 @@ where
 ### List read only volume attachments
 Explore which volume attachments are set to read-only status. This can be useful to ensure data integrity by preventing unauthorized modifications.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -54,4 +76,16 @@ from
   oci_core_volume_attachment
 where
   is_read_only;
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  lifecycle_state,
+  time_created
+from
+  oci_core_volume_attachment
+where
+  is_read_only = 1;
 ```

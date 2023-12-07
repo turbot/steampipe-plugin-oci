@@ -16,7 +16,17 @@ The `oci_cloud_guard_managed_list` table provides insights into managed lists wi
 ### Basic info
 Explore which cloud guard managed lists have been created, when they were established, and their current lifecycle state. This can help you understand the status and timeline of your cloud guard managed lists for better resource management.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_managed_list;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List managed lists which are not active
 Discover the segments that consist of managed lists in a non-active state. This can be useful to identify and assess potential areas that require attention or action in your cloud guard management.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_cloud_guard_managed_list
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

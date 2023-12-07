@@ -16,7 +16,17 @@ The `oci_streaming_stream` table provides insights into streams within Oracle Cl
 ### Basic info
 Explore which streams in your Oracle Cloud Infrastructure are active and when they were created. This can help you manage and track your resources effectively.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_streaming_stream;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List streams that are not active
 Uncover the details of inactive streams within your environment. This can be useful for identifying potential resource waste or areas for optimization.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_streaming_stream
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -44,7 +66,20 @@ where
 ### List streams with retention period greater than 24 hrs
 Discover the segments that have a retention period longer than a day. This is useful for identifying and managing streams that require a longer data storage period.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state,
+  time_created,
+  retention_in_hours
+from
+  oci_streaming_stream
+where
+  retention_in_hours > 24;
+```
+
+```sql+sqlite
 select
   name,
   id,

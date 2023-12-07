@@ -16,7 +16,22 @@ The `oci_mysql_db_system_metric_memory_utilization` table provides insights into
 ### Basic info
 Explore the performance of your MySQL database system by examining the memory utilization metrics. This allows you to identify periods of high or low usage, aiding in resource planning and optimization.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_mysql_db_system_metric_memory_utilization
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### Memory Utilization Over 80% average
 Explore instances where the average memory utilization exceeds 80% in your MySQL database system. This can help you identify potential performance issues and optimize resource allocation for better system performance.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_memory,
   round(maximum::numeric,2) as max_memory,
   round(average::numeric,2) as avg_memory,
+  sample_count
+from
+  oci_mysql_db_system_metric_memory_utilization
+where average > 80
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_memory,
+  round(maximum,2) as max_memory,
+  round(average,2) as avg_memory,
   sample_count
 from
   oci_mysql_db_system_metric_memory_utilization

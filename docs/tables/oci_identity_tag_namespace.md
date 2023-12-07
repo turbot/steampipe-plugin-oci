@@ -16,7 +16,17 @@ The `oci_identity_tag_namespace` table provides insights into the Tag Namespaces
 ### Basic info
 Explore which elements within your Oracle Cloud Infrastructure are retired or active. This query provides insights into the lifecycle states of various components, helping you manage your resources effectively.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  is_retired,
+  lifecycle_state
+from
+  oci_identity_tag_namespace;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List active tag namespaces
 Determine the areas in which active tag namespaces are present. This is useful for managing and organizing resources within a cloud infrastructure, especially when dealing with a large number of resources.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  is_retired,
+  lifecycle_state
+from
+  oci_identity_tag_namespace
+where
+  lifecycle_state = 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -44,7 +66,19 @@ where
 ### List retired tag namespaces
 Explore which tag namespaces are retired in your Oracle Cloud Infrastructure identity service. This can help maintain an organized and efficient tagging system by identifying and managing outdated tags.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  is_retired,
+  lifecycle_state
+from
+  oci_identity_tag_namespace
+where
+  is_retired;
+```
+
+```sql+sqlite
 select
   name,
   id,

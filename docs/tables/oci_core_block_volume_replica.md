@@ -16,7 +16,18 @@ The `oci_core_block_volume_replica` table provides insights into block volume re
 ### Basic info
 Explore which block volume replicas are currently active and when they were created. This can help in monitoring and managing the lifecycle of your storage resources.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  block_volume_id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_core_block_volume_replica;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -30,7 +41,20 @@ from
 ### List volume replicas which are not available
 Explore the block volume replicas in your OCI Core that are not currently available. This can help in identifying potential issues or disruptions in your data storage and backup systems.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  block_volume_id,
+  time_created,
+  lifecycle_state as state
+from
+  oci_core_block_volume_replica
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

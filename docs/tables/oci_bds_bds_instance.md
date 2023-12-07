@@ -16,7 +16,29 @@ The `oci_bds_bds_instance` table provides insights into Big Data Service Instanc
 ### Basic info
 Explore the configuration details of your Big Data Service instances in Oracle Cloud Infrastructure. This query helps in understanding the current state, security settings, and other crucial details of each instance for better management and decision-making.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  is_high_availability,
+  is_secure,
+  is_cloud_sql_configured,
+  nodes,
+  number_of_nodes,
+  cluster_version,
+  network_config,
+  cluster_details,
+  cloud_sql_details,
+  created_by,
+  bootstrap_script_url,
+  kms_key_id,
+  cluster_profile,
+  lifecycle_state as state
+from
+  oci_bds_bds_instance;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -41,7 +63,16 @@ from
 ### Count the number of nodes per instance
 Assess the distribution of nodes across various instances to manage resources more efficiently. This can be particularly useful in optimizing workload distribution and identifying potential bottlenecks.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  number_of_nodes
+from
+  oci_bds_bds_instance;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -53,7 +84,7 @@ from
 ### List secure clusters
 Analyze the settings to understand which clusters are secure in your Oracle Cloud Infrastructure Big Data Service. This can be particularly useful for ensuring compliance with security policies and identifying potential vulnerabilities.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -67,10 +98,39 @@ where
   is_secure;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  lifecycle_state,
+  is_secure,
+  cluster_version,
+  created_by
+from
+  oci_bds_bds_instance
+where
+  is_secure = 1;
+```
+
 ### List highly available clusters
 Discover the segments that consist of highly available clusters to ensure your data is always accessible and resilient to failures. This is especially useful in maintaining business continuity and minimizing downtime.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  cluster_profile,
+  time_created,
+  lifecycle_state,
+  is_high_availability,
+  created_by
+from
+  oci_bds_bds_instance
+where
+  is_high_availability;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -88,7 +148,7 @@ where
 ### List clusters that have cloud SQL configured
 Determine the areas in which clusters have been configured with Cloud SQL to gain insights into the high availability, security, and lifecycle state of these instances. This can help in assessing the elements within your Oracle Cloud Infrastructure Big Data Service for optimal resource management.
 
-```sql
+```sql+postgres
 select
   id,
   cluster_profile,
@@ -102,10 +162,24 @@ where
   is_cloud_sql_configured;
 ```
 
+```sql+sqlite
+select
+  id,
+  cluster_profile,
+  lifecycle_state,
+  is_high_availability,
+  is_secure,
+  is_cloud_sql_configured
+from
+  oci_bds_bds_instance
+where
+  is_cloud_sql_configured = 1;
+```
+
 ### List cloud SQL details of each cluster
 Determine the configuration and settings of each cloud SQL cluster, including details such as shape, IP address, block volume size, and Kerberos mapping. This enables efficient management and monitoring of your cloud SQL clusters.
 
-```sql
+```sql+postgres
 select
   id,
   display_name
@@ -118,10 +192,23 @@ from
   oci_bds_bds_instance;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(cloud_sql_details, '$.Shape') as shape,
+  json_extract(cloud_sql_details, '$.ShIpAddressape') as ip_address,
+  json_extract(cloud_sql_details, '$.BlockVolumeSizeInGBs') as block_volume_size_in_gbs,
+  json_extract(cloud_sql_details, '$.IsKerberosMappedToDatabaseUsers') as is_kerberos_mapped_to_database_users,
+  json_extract(cloud_sql_details, '$.KerberosDetails') as kerberos_details
+from
+  oci_bds_bds_instance;
+```
+
 ### List network config details of each cluster
 Analyze the network configuration of each cluster to understand whether a NAT gateway is required and to pinpoint the specific CIDR block being used. This can be beneficial for assessing network requirements and planning infrastructure changes.
 
-```sql
+```sql+postgres
 select
   id,
   network_config ->> 'IsNatGatewayRequired' as nat_gateway_required,
@@ -130,10 +217,19 @@ from
   oci_bds_bds_instance;
 ```
 
+```sql+sqlite
+select
+  id,
+  json_extract(network_config, '$.IsNatGatewayRequired') as nat_gateway_required,
+  json_extract(network_config, '$.CidrBlock') as cidr_block
+from
+  oci_bds_bds_instance;
+```
+
 ### List node information of each cluster
 Determine the characteristics of each node within your clusters to better understand their configuration and performance. This can be useful for troubleshooting or optimizing your cluster's performance and resource allocation.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -161,10 +257,38 @@ from
   jsonb_array_elements(nodes) as n;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(n.value, '$.InstanceId') as node_instance_id,
+  json_extract(n.value, '$.DisplayName') as node_display_name,
+  json_extract(n.value, '$.LifecycleState') as node_lifecycle_state,
+  json_extract(n.value, '$.NodeType') as node_type,
+  json_extract(n.value, '$.Shape') as node_shape,
+  json_extract(n.value, '$.SubnetId') as node_subnet_id,
+  json_extract(n.value, '$.IpAddress') as node_ip_address,
+  json_extract(n.value, '$.SshFingerprint') as node_ssh_fingerprint,
+  json_extract(n.value, '$.AvailabilityDomain') as node_availability_domain,
+  json_extract(n.value, '$.FaultDomain') as node_fault_domain,
+  json_extract(n.value, '$.TimeCreated') as node_time_created,
+  json_extract(n.value, '$.AttachedBlockVolumes') as node_attached_block_volumes,
+  json_extract(n.value, '$.Hostname') as node_hostname,
+  json_extract(n.value, '$.ImageId') as node_image_id,
+  json_extract(n.value, '$.TimeUpdated') as node_time_updated,
+  json_extract(n.value, '$.Ocpus') as node_ocpus,
+  json_extract(n.value, '$.MemoryInGBs') as node_memory_in_gbs,
+  json_extract(n.value, '$.Nvmes') as node_nvmes,
+  json_extract(n.value, '$.LocalDisksTotalSizeInGBs') as node_local_disks_total_size_in_gbs
+from
+  oci_bds_bds_instance,
+  json_each(nodes) as n;
+```
+
 ### List KMS key details of each cluster
 Explore which clusters are associated with specific KMS keys to understand their protection mode and management details. This is useful for assessing the security configuration of each cluster.
 
-```sql
+```sql+postgres
 select
   i.display_name,
   i.kms_key_id,
@@ -177,5 +301,22 @@ from
   oci_bds_bds_instance as i,
   oci_kms_key as k
 where
+  i.kms_key_id = k.id;
+```
+
+```sql+sqlite
+select
+  i.display_name,
+  i.kms_key_id,
+  k.vault_id,
+  k.management_endpoint,
+  k.algorithm,
+  k.current_key_version,
+  k.protection_mode
+from
+  oci_bds_bds_instance as i
+join
+  oci_kms_key as k
+on
   i.kms_key_id = k.id;
 ```

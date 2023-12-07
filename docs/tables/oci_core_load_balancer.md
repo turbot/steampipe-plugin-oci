@@ -16,7 +16,18 @@ The `oci_core_load_balancer` table provides insights into the load balancers wit
 ### Basic info
 Explore which load balancers have been created in your Oracle Cloud Infrastructure, when they were established, and their current operational state. This helps in tracking the lifecycle of your resources and understanding their configurations.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  time_created,
+  lifecycle_state as state,
+  shape_name
+from
+  oci_core_load_balancer;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,18 @@ from
 ### List load balancers assigns with public IP address
 Explore which load balancers are assigned with a public IP address. This is useful for assessing potential security risks and managing network access.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  is_private
+from
+  oci_core_load_balancer
+where
+  not is_private;
+```
+
+```sql+sqlite
 select
   display_name,
   id,

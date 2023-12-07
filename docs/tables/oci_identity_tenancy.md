@@ -16,7 +16,17 @@ The `oci_identity_tenancy` table provides insights into the tenancies within Ora
 ### Basic info
 Explore the basic information about your Oracle Cloud Infrastructure (OCI) tenancy, such as its name and ID, as well as understanding its retention period and description. This is useful for getting a quick overview of your tenancy's configuration and settings.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  retention_period_days,
+  description
+from
+  oci_identity_tenancy;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -29,7 +39,19 @@ from
 ### List tenancies with a retention period less than 365 days
 Explore tenancies that have a retention period of less than a year to assess compliance with data retention policies and identify any potential areas of risk.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  retention_period_days,
+  home_region_key
+from
+  oci_identity_tenancy
+where
+  retention_period_days < 365;
+```
+
+```sql+sqlite
 select
   name,
   id,

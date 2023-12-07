@@ -16,7 +16,16 @@ The `oci_containerengine_cluster` table provides insights into Container Engine 
 ### Basic info
 Analyze the lifecycle state of your OCI Container Engine clusters to understand their current operational status. This can help in identifying any clusters that may need attention or maintenance.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_containerengine_cluster;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -28,7 +37,18 @@ from
 ### List failed container engine clusters
 Explore which container engine clusters have failed to understand potential issues or disruptions in your system. This could assist in troubleshooting, maintenance, and system optimization.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_containerengine_cluster
+where
+  lifecycle_state = 'FAILED';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -41,7 +61,7 @@ where
 ### List container engine clusters for which image policy is disabled
 Explore which container engine clusters have their image policy disabled. This can help identify potential security risks, as disabling image policy may allow unauthorized images to be deployed.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -51,4 +71,16 @@ from
   oci_containerengine_cluster
 where
   image_policy_config_enabled = false;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  lifecycle_state,
+  image_policy_config_enabled
+from
+  oci_containerengine_cluster
+where
+  image_policy_config_enabled = 0;
 ```

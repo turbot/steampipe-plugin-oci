@@ -16,7 +16,22 @@ The `oci_core_instance_metric_cpu_utilization_daily` table provides insights int
 ### Basic info
 Analyze the daily CPU utilization metrics of your OCI Core instances to understand usage patterns and performance trends. This can assist in optimizing resource allocation and identifying potential bottlenecks or underutilized instances.
 
-```sql
+```sql+postgres
+select
+  id,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sample_count
+from
+  oci_core_instance_metric_cpu_utilization_daily
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
 select
   id,
   timestamp,
@@ -34,13 +49,29 @@ order by
 ### CPU Over 80% average
 Analyze the settings to understand instances where CPU utilization exceeds 80% on average. This is useful to identify potential performance issues and manage resource allocation effectively.
 
-```sql
+```sql+postgres
 select
   id,
   timestamp,
   round(minimum::numeric,2) as min_cpu,
   round(maximum::numeric,2) as max_cpu,
   round(average::numeric,2) as avg_cpu,
+  sample_count
+from
+  oci_core_instance_metric_cpu_utilization_daily
+where average > 8
+order by
+  id,
+  timestamp;
+```
+
+```sql+sqlite
+select
+  id,
+  timestamp,
+  round(minimum,2) as min_cpu,
+  round(maximum,2) as max_cpu,
+  round(average,2) as avg_cpu,
   sample_count
 from
   oci_core_instance_metric_cpu_utilization_daily

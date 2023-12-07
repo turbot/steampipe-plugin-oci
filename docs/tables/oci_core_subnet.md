@@ -16,7 +16,18 @@ The `oci_core_subnet` table provides insights into subnets within Oracle Cloud I
 ### Basic info
 Explore which subnets are currently active in your Oracle Cloud Infrastructure, along with their creation times and any associated tags. This can help manage resources and track their usage over time.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state,
+  time_created,
+  tags
+from
+  oci_core_subnet;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +42,7 @@ from
 ### Get the OCIDs of the security list for each subnet
 Determine the unique identifiers of security lists associated with each network subnet. This can be useful to assess the security configuration and understand how it is applied across different network segments.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -40,11 +51,31 @@ from
   oci_core_subnet;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_each.value as security_list_id
+from
+  oci_core_subnet,
+  json_each(security_list_ids);
+```
+
 
 ### Count of subnets by VCN ID
 Analyze the settings to understand the distribution of subnets across different Virtual Cloud Networks (VCNs). This is useful for managing resources and load balancing across multiple VCNs.
 
-```sql
+```sql+postgres
+select
+  vcn_id,
+  count(id) as subnet_count
+from
+  oci_core_subnet
+group by
+  vcn_id;
+```
+
+```sql+sqlite
 select
   vcn_id,
   count(id) as subnet_count
@@ -58,11 +89,15 @@ group by
 ### Get the number of available IP address in each subnet
 Explore which subnets have the most available IP addresses to optimize network resource allocation and ensure efficient use of your network space. This is particularly useful in planning network expansion or monitoring network usage.
 
-```sql
+```sql+postgres
 select
   id,
   cidr_block,
   power(2, 32 - masklen(cidr_block :: cidr)) -1 as raw_size
 from
   oci_core_subnet;
+```
+
+```sql+sqlite
+Error: SQLite does not support CIDR operations.
 ```

@@ -16,7 +16,18 @@ The `oci_adm_knowledge_base` table provides insights into the Knowledge Bases wi
 ### Basic info
 Explore which knowledge base entries are active or inactive within your Oracle Cloud Infrastructure. This can help you manage and organize your resources effectively.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  compartment_id,
+  tenant_id,
+  lifecycle_state as state
+from
+  oci_adm_knowledge_base;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -30,7 +41,20 @@ from
 ### List knowledge bases which are not active
 Discover the segments that consist of inactive knowledge bases. This can be particularly useful when carrying out maintenance or auditing tasks, as it helps identify areas that may require attention or updates.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  compartment_id,
+  tenant_id,
+  lifecycle_state as state
+from
+  oci_adm_knowledge_base
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -46,7 +70,7 @@ where
 ### List knowledge bases created in last 30 days
 Discover the knowledge bases that have been created within the past 30 days to maintain an up-to-date understanding of your data resources and ensure you're tracking recent developments.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -59,10 +83,23 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  compartment_id,
+  tenant_id,
+  lifecycle_state as state
+from
+  oci_adm_knowledge_base
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### List knowledge bases that have not been updated for more than 90 days
 Discover the segments that have not been frequently updated, specifically knowledge bases that have been dormant for more than 90 days. This can be useful for identifying potentially outdated or unused resources that may require attention or cleanup.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -73,4 +110,17 @@ from
   oci_adm_knowledge_base
 where
   time_updated < now() - interval '90' day;
+```
+
+```sql+sqlite
+select
+  id,
+  display_name,
+  compartment_id,
+  tenant_id,
+  lifecycle_state as state
+from
+  oci_adm_knowledge_base
+where
+  time_updated < datetime('now', '-90 day');
 ```

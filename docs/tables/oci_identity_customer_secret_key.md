@@ -16,7 +16,18 @@ The `oci_identity_customer_secret_key` table offers insights into the customer s
 ### Basic info
 Explore which customer secret keys have been created in your Oracle Cloud Infrastructure account and when they were created. This can help you manage access to your resources and track account activity over time.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  user_id,
+  user_name,
+  time_created
+from
+  oci_identity_customer_secret_key;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -31,7 +42,21 @@ from
 ### List inactive customer secret keys
 Discover the segments that contain inactive customer secret keys to manage access control and enhance security measures. This helps in identifying potential security risks and taking appropriate action.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  user_id,
+  user_name,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_customer_secret_key
+where
+  lifecycle_state = 'INACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -49,7 +74,17 @@ where
 ### Count customer secret keys by user
 Gain insights into how many secret keys each user has. This query is useful for security audits, ensuring users don't have an excessive number of keys which could increase potential security risks.
 
-```sql
+```sql+postgres
+select
+  user_id,
+  count (id) as customer_secret_key_count
+from
+  oci_identity_customer_secret_key
+group by
+  user_id;
+```
+
+```sql+sqlite
 select
   user_id,
   count (id) as customer_secret_key_count

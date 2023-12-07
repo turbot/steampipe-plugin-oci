@@ -16,7 +16,20 @@ The `oci_core_volume_backup` table provides insights into volume backups within 
 ### Basic info
 Explore which backups of your core volumes in Oracle Cloud Infrastructure have been created, along with their source type and current lifecycle state. This can help you manage and track your backups, ensuring data safety and availability.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  volume_id,
+  source_type,
+  time_created,
+  type,
+  lifecycle_state as state
+from
+  oci_core_volume_backup;
+```
+
+```sql+sqlite
 select
   id,
   display_name,
@@ -33,7 +46,21 @@ from
 ### List manual volume backup
 Explore which volume backups have been manually created. This can be useful for auditing purposes, ensuring that backups are being created as intended and identifying any potential issues with backup procedures.
 
-```sql
+```sql+postgres
+select
+  id,
+  display_name,
+  source_type,
+  time_created,
+  type,
+  lifecycle_state as state
+from
+  oci_core_volume_backup
+where
+  source_type = 'MANUAL';
+```
+
+```sql+sqlite
 select
   id,
   display_name,

@@ -16,7 +16,18 @@ The `oci_core_dhcp_options` table provides insights into DHCP Options within Ora
 ### Basic info
 Explore the state and creation time of your Oracle Cloud Infrastructure's DHCP options to understand their lifecycle and location. This can help you assess their configuration and manage your resources more efficiently.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  time_created,
+  lifecycle_state as state,
+  region
+from
+  oci_core_dhcp_options;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +42,7 @@ from
 ### Get configuration info for each DHCP option
 Explore the configuration details of each DHCP option to understand the server type and custom DNS servers. This can be particularly useful for network administrators who want to manage and optimize their network configurations.
 
-```sql
+```sql+postgres
 select
   id,
   display_name,
@@ -44,11 +55,34 @@ from
   jsonb_array_elements(options) as o;
 ```
 
+```sql+sqlite
+select
+  id,
+  display_name,
+  json_extract(o.value, '$.searchDomainNames') as search_domain_names,
+  json_extract(o.value, '$.customDnsServers') as custom_dns_servers,
+  json_extract(o.value, '$.serverType') as server_type,
+  json_extract(o.value, '$.type') as type
+from
+  oci_core_dhcp_options,
+  json_each(options) as o;
+```
+
 
 ### Count the number of DHCP options by VCN
 Identify the quantity of DHCP options for each Virtual Cloud Network (VCN) to understand the network configuration and manage resources effectively. This can aid in optimizing network performance and troubleshooting network issues.
 
-```sql
+```sql+postgres
+select
+  vcn_id,
+  count(*) dhcp_option_count
+from
+  oci_core_dhcp_options
+group by
+  vcn_id;
+```
+
+```sql+sqlite
 select
   vcn_id,
   count(*) dhcp_option_count

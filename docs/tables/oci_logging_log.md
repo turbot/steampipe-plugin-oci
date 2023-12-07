@@ -16,7 +16,18 @@ The `oci_logging_log` table provides insights into logs within Oracle Cloud Infr
 ### Basic info
 Explore which logs have been created within your Oracle Cloud Infrastructure (OCI) environment, and assess their lifecycle state to understand if they are active or deleted. This can be useful for managing and tracking your OCI resources.
 
-```sql
+```sql+postgres
+select
+  id,
+  log_group_id,
+  name,
+  lifecycle_state,
+  time_created
+from
+  oci_logging_log;
+```
+
+```sql+sqlite
 select
   id,
   log_group_id,
@@ -30,7 +41,19 @@ from
 ### List inactive logs
 Identify logs that are currently inactive. This can be useful in managing system resources or troubleshooting system issues by focusing on logs that are not actively recording data.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  lifecycle_state as state,
+  time_created
+from
+  oci_logging_log
+where
+  lifecycle_state = 'INACTIVE';
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -45,7 +68,7 @@ where
 ### List VCN subnets with flow logging enabled
 Assess the elements within your network by identifying active subnets that have flow logging enabled. This can help enhance network security and troubleshooting by providing visibility into traffic patterns and potential anomalies.
 
-```sql
+```sql+postgres
 select
   configuration -> 'source' ->> 'resource' as subnet_id,
   configuration -> 'source' ->> 'service' as service,
@@ -54,5 +77,17 @@ from
   oci_logging_log
 where
   configuration -> 'source' ->> 'service' = 'flowlogs'
+  and lifecycle_state = 'ACTIVE';
+```
+
+```sql+sqlite
+select
+  json_extract(configuration, '$.source.resource') as subnet_id,
+  json_extract(configuration, '$.source.service') as service,
+  lifecycle_state
+from
+  oci_logging_log
+where
+  json_extract(configuration, '$.source.service') = 'flowlogs'
   and lifecycle_state = 'ACTIVE';
 ```

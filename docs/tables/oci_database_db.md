@@ -16,7 +16,17 @@ The `oci_database_db` table provides insights into databases within Oracle Cloud
 ### Basic info
 Explore which databases are active or inactive by assessing their lifecycle state and when they were created. This information can be useful in managing and maintaining your database resources effectively.
 
-```sql
+```sql+postgres
+select
+  db_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_db;
+```
+
+```sql+sqlite
 select
   db_name,
   id,
@@ -29,7 +39,19 @@ from
 ### List databases that are not available
 Discover the databases that are not currently available. This is useful in identifying potential issues or maintenance requirements within your database system.
 
-```sql
+```sql+postgres
+select
+  db_name,
+  id,
+  lifecycle_state,
+  time_created
+from
+  oci_database_db
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   db_name,
   id,

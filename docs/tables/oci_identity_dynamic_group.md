@@ -16,7 +16,18 @@ The `oci_identity_dynamic_group` table provides insights into dynamic groups wit
 ### Basic info
 Explore the basic information of dynamic groups in your Oracle Cloud Infrastructure. This can help in understanding their current lifecycle state and when they were created, which is useful for management and auditing purposes.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  description,
+  lifecycle_state,
+  time_created
+from
+  oci_identity_dynamic_group;
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -31,7 +42,18 @@ from
 ### List inactive dynamic groups
 Analyze the settings to understand which dynamic groups in your OCI identity are not currently active. This can help manage resources and identify potential security risks.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  lifecycle_state
+from
+  oci_identity_dynamic_group
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   name,
   id,

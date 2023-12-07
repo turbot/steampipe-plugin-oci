@@ -16,7 +16,18 @@ The `oci_core_vcn` table provides insights into Virtual Cloud Networks within Or
 ### Basic info
 Explore which Virtual Cloud Networks (VCNs) are active and the associated metadata for each. This can be useful in gaining insights into your network's configuration and identifying any potential issues or areas for optimization.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state,
+  cidr_block,
+  freeform_tags
+from
+  oci_core_vcn;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,18 @@ from
 ### List unavailable virtual cloud networks
 Explore which virtual cloud networks are currently unavailable. This can be useful in identifying potential issues with network connectivity or resource allocation.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state
+from
+  oci_core_vcn
+where
+  lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

@@ -16,7 +16,23 @@ The `oci_nosql_table_metric_write_throttle_count` table provides insights into t
 ### Basic info
 Explore the metrics related to write throttle counts in NoSQL tables to understand usage patterns and identify potential bottlenecks. This can aid in optimizing table configurations for improved performance.
 
-```sql
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
 select
   name,
   timestamp,
@@ -35,6 +51,29 @@ order by
 ### Intervals where write throttle count exceeded 100 average
 Determine the intervals where the write throttle count exceeded an average of 100. This can help identify periods of high demand or potential performance issues.
 
+```sql+postgres
+select
+  name,
+  timestamp,
+  minimum,
+  maximum,
+  average,
+  sum,
+  sample_count
+from
+  oci_nosql_table_metric_write_throttle_count
+where
+  average > 100
+order by
+  name,
+  timestamp;
+```
+
+```sql+sqlite
+The given PostgreSQL query does not use any PostgreSQL-specific functions or data types, and does not involve any JSON functions or join operations. Therefore, it can be used in SQLite without any changes.
+
+Here is the SQLite query:
+
 ```sql
 select
   name,
@@ -51,4 +90,5 @@ where
 order by
   name,
   timestamp;
+```
 ```

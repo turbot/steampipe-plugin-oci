@@ -16,7 +16,18 @@ The `oci_core_network_security_group` table provides insights into the Network S
 ### Basic info
 Explore which network security groups are active within your system and when they were created. This can help maintain security standards and identify any potentially unauthorized or outdated groups.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  vcn_id,
+  lifecycle_state as state,
+  time_created
+from
+  oci_core_network_security_group;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -31,7 +42,18 @@ from
 ### List NSGs that are not available
 Discover the segments that are not currently available in your network security groups. This is useful to assess the elements within your network that might be causing issues due to their unavailability.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state as state
+from
+  oci_core_network_security_group
+where
+ lifecycle_state <> 'AVAILABLE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -48,7 +70,7 @@ where
 2. "Identify Network Security Groups (NSGs) in your environment that have unrestricted inbound access from the internet."
 3. "Uncover Network Security Groups (NSGs) in your environment that have unrestricted SSH and RDP access from the internet.
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -57,10 +79,19 @@ from
   oci_core_network_security_group;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_array_length(rules) as rules_count
+from
+  oci_core_network_security_group;
+```
+
 
 ## List NSGs whose inbound access is open to the internet
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -76,10 +107,26 @@ where
   and r ->> 'source' = '0.0.0.0/0'
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_extract(r.value, '$.direction') as direction,
+  json_extract(r.value, '$.sourceType') as source_type,
+  json_extract(r.value, '$.source') as source
+from
+  oci_core_network_security_group,
+  json_each(rules) as r
+where
+  json_extract(r.value, '$.direction') = 'INGRESS'
+  and json_extract(r.value, '$.sourceType') = 'CIDR_BLOCK'
+  and json_extract(r.value, '$.source') = '0.0.0.0/0'
+```
+
 
 ## List NSG whose SSH and RDP access is not restricted from the internet
 
-```sql
+```sql+postgres
 select
   display_name,
   id,
@@ -111,11 +158,53 @@ where
   );
 ```
 
+```sql+sqlite
+select
+  display_name,
+  id,
+  json_extract(r.value, '$.direction') as direction,
+  json_extract(r.value, '$.sourceType') as source_type,
+  json_extract(r.value, '$.source') as source,
+  json_extract(r.value, '$.protocol') as protocol,
+  json_extract(r.value, '$.tcpOptions.destinationPortRange.max') as min_port_range,
+  json_extract(r.value, '$.tcpOptions.destinationPortRange.min') as max_port_range
+from
+  oci_core_network_security_group,
+  json_each(rules) as r
+where
+  json_extract(r.value, '$.direction') = 'INGRESS'
+  and json_extract(r.value, '$.sourceType') = 'CIDR_BLOCK'
+  and json_extract(r.value, '$.source') = '0.0.0.0/0'
+  and (
+    (
+      json_extract(r.value, '$.protocol') = 'all'
+    )
+    or (
+      cast(json_extract(r.value, '$.tcpOptions.destinationPortRange.min') as integer) <= 22
+      and cast(json_extract(r.value, '$.tcpOptions.destinationPortRange.max') as integer) >= 22
+    )
+    or (
+      cast(json_extract(r.value, '$.tcpOptions.destinationPortRange.min') as integer) <= 3389
+      and cast(json_extract(r.value, '$.tcpOptions.destinationPortRange.max') as integer) >= 3389
+    )
+  );
+```
+
 
 ### Count the number of NSGs per VCN
 Explore which Virtual Cloud Networks (VCNs) have the most Network Security Groups (NSGs) to understand your cloud network's security distribution. This can help in assessing the security coverage and identifying areas that might need additional security measures.
 
-```sql
+```sql+postgres
+select
+  vcn_id,
+  count(id) as no_of_nsg
+from
+  oci_core_network_security_group
+group by
+  vcn_id;
+```
+
+```sql+sqlite
 select
   vcn_id,
   count(id) as no_of_nsg

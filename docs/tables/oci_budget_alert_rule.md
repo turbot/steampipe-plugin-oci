@@ -16,7 +16,18 @@ The `oci_budget_alert_rule` table provides insights into alert rules within OCI 
 ### Basic info
 Explore the financial boundaries of your project by identifying the alert rules in your budget. This query can help you assess the financial health and lifecycle state of your project.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  budget_id,
+  threshold,
+  lifecycle_state as state
+from
+  oci_budget_alert_rule;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -30,7 +41,20 @@ from
 ### List alert rules that are not active
 Explore which budget alert rules within your OCI environment are not currently active. This is useful for identifying potential savings or areas where budget tracking may not be effectively implemented.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  budget_id,
+  threshold,
+  lifecycle_state as state
+from
+  oci_budget_alert_rule
+where
+  lifecycle_state <> 'ACTIVE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -46,7 +70,21 @@ where
 ### List alert rules with a threshold more than 100 percentage
 Determine the areas in which budget alert rules have been set with a threshold exceeding 100 percent. This can be useful to identify potential errors or overly conservative settings in your financial monitoring.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  budget_id,
+  threshold,
+  lifecycle_state as state
+from
+  oci_budget_alert_rule
+where
+  threshold > 100
+  and threshold_type = 'PERCENTAGE';
+```
+
+```sql+sqlite
 select
   display_name,
   id,

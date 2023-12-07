@@ -16,7 +16,28 @@ The `oci_certificates_management_certificate` table provides insights into the S
 ### Basic info
 Discover the details of your certificates, including their lifecycle state and associated metadata. This is useful to understand the status and configuration of your certificates for better management and security compliance.
 
-```sql
+```sql+postgres
+select
+  id,
+  name,
+  config_type,
+  issuer_certificate_authority_id,
+  description,
+  certificate_rules,
+  time_of_deletion,
+  lifecycle_details,
+  current_version,
+  subject,
+  certificate_revocation_list_details,
+  key_algorithm,
+  signature_algorithm,
+  certificate_profile_type,
+  lifecycle_state as state
+from
+  oci_certificates_management_certificate;
+```
+
+```sql+sqlite
 select
   id,
   name,
@@ -40,7 +61,21 @@ from
 ### List imported certificates
 Explore imported certificates to understand their lifecycle state, rules, and signature algorithm. This can be helpful in managing and understanding the security and validity of certificates in your environment.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  certificate_rules,
+  lifecycle_state,
+  config_type,
+  signature_algorithm
+from
+  oci_certificates_management_certificate
+where
+  config_type = 'IMPORTED';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -57,7 +92,21 @@ where
 ### List failed certificates
 Discover the segments that have failed certificates to gain insights into potential security risks or issues in your system. This is useful for quickly identifying and addressing problematic areas, enhancing the overall security of your system.
 
-```sql
+```sql+postgres
+select
+  name,
+  id,
+  current_version,
+  subject,
+  certificate_revocation_list_details,
+  key_algorithm
+from
+  oci_certificates_management_certificate
+where
+  lifecycle_state = 'FAILED';
+```
+
+```sql+sqlite
 select
   name,
   id,
@@ -74,7 +123,7 @@ where
 ### List certificates created in the last 30 days
 Discover the segments that have been certified within the last month. This is useful for tracking recent changes and ensuring system security.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -88,10 +137,24 @@ where
   time_created >= now() - interval '30' day;
 ```
 
+```sql+sqlite
+select
+  name,
+  id,
+  current_version,
+  key_algorithm,
+  time_created,
+  time_of_deletion
+from
+  oci_certificates_management_certificate
+where
+  time_created >= datetime('now', '-30 day');
+```
+
 ### Get the current version details of each certificate
 Explore which certificates are currently in use and their respective details. This is useful for tracking certificate versions and their revocation status, which aids in maintaining secure connections.
 
-```sql
+```sql+postgres
 select
   name,
   id,
@@ -100,6 +163,19 @@ select
   current_version ->> 'revocationStatus' as revocation_status,
   current_version ->> 'serialNumber' as serial_number,
   current_version ->> 'stages' as stages
+from
+  oci_certificates_management_certificate;
+```
+
+```sql+sqlite
+select
+  name,
+  id,
+  json_extract(current_version, '$.certificateId') as certificate_id,
+  json_extract(current_version, '$.issuerCaVersionNumber') as issuer_ca_version_number,
+  json_extract(current_version, '$.revocationStatus') as revocation_status,
+  json_extract(current_version, '$.serialNumber') as serial_number,
+  json_extract(current_version, '$.stages') as stages
 from
   oci_certificates_management_certificate;
 ```

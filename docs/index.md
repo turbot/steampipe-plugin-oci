@@ -8,6 +8,7 @@ short_name: "oci"
 description: "Steampipe plugin for Oracle Cloud Infrastructure services and resource types."
 og_description: "Query Oracle Cloud with SQL! Open source CLI. No DB required."
 og_image: "/images/plugins/turbot/oci-social-graphic.png"
+engines: ["steampipe", "sqlite", "postgres", "export"]
 ---
 
 # Oracle Cloud + Steampipe

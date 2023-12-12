@@ -12,7 +12,7 @@ type ociConfig struct {
 	PrivateKeyPassword    *string  `hcl:"private_key_password"`
 	PrivateKeyPath        *string  `hcl:"private_key_path"`
 	Profile               *string  `hcl:"config_file_profile"`
-	Regions               []string `hcl:"regions"`
+	Regions               []string `hcl:"regions,optional"`
 	TenancyOCID           *string  `hcl:"tenancy_ocid"`
 	UserOCID              *string  `hcl:"user_ocid"`
 	MaxErrorRetryAttempts *int     `hcl:"max_error_retry_attempts"`

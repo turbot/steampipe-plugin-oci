@@ -1,12 +1,33 @@
-# Table: oci_core_security_list
+---
+title: "Steampipe Table: oci_core_security_list - Query OCI Core Services Security Lists using SQL"
+description: "Allows users to query Security Lists within OCI Core Services."
+---
 
-Security lists act as virtual firewalls for your Compute instances and other kinds of resources. A security list consists of a set of ingress and egress security rules that apply to all the VNICs in any subnet that the security list is associated with.
+# Table: oci_core_security_list - Query OCI Core Services Security Lists using SQL
+
+A Security List in OCI Core Services is a virtual firewall for an instance, with ingress and egress rules that specify the types of traffic allowed in and out. Each rule can have a type, destination, protocol, and source. Security Lists are stateful, meaning their rules apply to both incoming and outgoing traffic.
+
+## Table Usage Guide
+
+The `oci_core_security_list` table provides insights into Security Lists within OCI Core Services. As a network administrator, you can examine the details of these lists, including the types of traffic they allow and their rules. This table is a valuable tool for understanding and managing the flow of traffic in and out of your instances.
 
 ## Examples
 
 ### Basic info
+Assess the elements within your network by identifying the lifecycle state and creation time of security lists in Oracle Cloud Infrastructure. This helps pinpoint specific locations where security measures are active, aiding in overall network management and security.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id,
+  lifecycle_state,
+  time_created,
+  vcn_id
+from
+  oci_core_security_list;
+```
+
+```sql+sqlite
 select
   display_name,
   id,
@@ -19,8 +40,9 @@ from
 
 
 ### Get egress security rules for each security list
+Uncover the details of egress security rules for each security list to understand their settings and configurations. This can be used to assess the elements within each list, providing insights into the security protocols and options in place.
 
-```sql
+```sql+postgres
 select
   display_name,
   p ->> 'destination' as destination,
@@ -35,9 +57,25 @@ from
   jsonb_array_elements(egress_security_rules) as p;
 ```
 
-### Get ingress security rules for each security list
+```sql+sqlite
+select
+  display_name,
+  json_extract(p.value, '$.destination') as destination,
+  json_extract(p.value, '$.destinationType') as destination_type,
+  json_extract(p.value, '$.icmpOptions') as icmp_options,
+  json_extract(p.value, '$.isStateless') as is_stateless,
+  json_extract(p.value, '$.protocol') as protocol,
+  json_extract(p.value, '$.tcpOptions') as tcp_options,
+  json_extract(p.value, '$.udpOptions') as udp_options
+from
+  oci_core_security_list,
+  json_each(egress_security_rules) as p;
+```
 
-```sql
+### Get ingress security rules for each security list
+Determine the areas in which your system's security could be improved by analyzing the ingress security rules for each security list. This allows you to identify potential vulnerabilities and take necessary action to enhance your system's security.
+
+```sql+postgres
 select
   display_name,
   p ->> 'description' as description,
@@ -53,10 +91,27 @@ from
   jsonb_array_elements(ingress_security_rules) as p;
 ```
 
+```sql+sqlite
+select
+  display_name,
+  json_extract(p.value, '$.description') as description,
+  json_extract(p.value, '$.icmpOptions') as icmp_options,
+  json_extract(p.value, '$.isStateless') as is_stateless,
+  json_extract(p.value, '$.protocol') as protocol,
+  json_extract(p.value, '$.source') as source,
+  json_extract(p.value, '$.sourceType') as source_type,
+  json_extract(p.value, '$.tcpOptions') as tcp_options,
+  json_extract(p.value, '$.udpOptions') as udp_options
+from
+  oci_core_security_list,
+  json_each(ingress_security_rules) as p;
+```
+
 
 ### List security lists that do not restrict SSH and RDP access from the internet
+Identify instances where the security lists are not restricting SSH and RDP access from the internet, which could potentially expose your network to security risks.
 
-```sql
+```sql+postgres
  select
   display_name,
   p ->> 'description' as description,
@@ -89,10 +144,54 @@ where
   );
 ```
 
+```sql+sqlite
+select
+  display_name,
+  json_extract(p.value, '$.description') as description,
+  json_extract(p.value, '$.icmpOptions') as icmp_options,
+  json_extract(p.value, '$.isStateless') as is_stateless,
+  json_extract(p.value, '$.protocol') as protocol,
+  json_extract(p.value, '$.source') as source,
+  json_extract(p.value, '$.sourceType') as source_type,
+  json_extract(p.value, '$.tcpOptions.destinationPortRange.max') as min_port_range,
+  json_extract(p.value, '$.tcpOptions.destinationPortRange.min') as max_port_range,
+  json_extract(p.value, '$.udpOptions') as udp_options
+from
+  oci_core_security_list,
+  json_each(ingress_security_rules) as p
+where
+  json_extract(p.value, '$.source') = '0.0.0.0/0'
+  and (
+    (
+      json_extract(p.value, '$.protocol') = 'all'
+      and json_extract(p.value, '$.tcpOptions.destinationPortRange.min') is null
+    )
+    or (
+      json_extract(p.value, '$.tcpOptions.destinationPortRange.min') <= 22
+      and json_extract(p.value, '$.tcpOptions.destinationPortRange.max') >= 22
+    )
+    or (
+      json_extract(p.value, '$.tcpOptions.destinationPortRange.min') <= 3389
+      and json_extract(p.value, '$.tcpOptions.destinationPortRange.max') >= 3389
+    )
+  );
+```
+
 
 ### List default security lists
+Explore the default security lists within your system to understand their unique identifiers and names. This is useful in assessing the existing security configurations and identifying any potential areas of concern.
 
-```sql
+```sql+postgres
+select
+  display_name,
+  id
+from
+  oci_core_security_list
+where
+  display_name like '%Default Security%';
+```
+
+```sql+sqlite
 select
   display_name,
   id

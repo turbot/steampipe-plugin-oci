@@ -48,76 +48,91 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "cluster_name",
 				Description: "The cluster name for cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ClusterName"),
 			},
 			{
 				Name:        "display_name",
 				Description: "The user-friendly name for the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DisplayName"),
 			},
 			{
 				Name:        "lifecycle_state",
 				Description: "The current state of the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LifecycleState"),
 			},
 			{
 				Name:        "id",
 				Description: "The OCID of the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Id"),
 			},
 			{
 				Name:        "availability_domain",
 				Description: "The name of the availability domain that the cloud Exadata infrastructure resource is located in.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("AvailabilityDomain"),
 			},
 			{
 				Name:        "subnet_id",
 				Description: "The OCID of the subnet associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SubnetId"),
 			},
 			{
 				Name:        "shape",
 				Description: "The model name of the Exadata hardware running the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Shape"),
 			},
 			{
 				Name:        "hostname",
 				Description: "The hostname for the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Hostname"),
 			},
 			{
 				Name:        "domain",
 				Description: "The domain name for the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Domain"),
 			},
 			{
 				Name:        "cpu_core_count",
 				Description: "The number of CPU cores enabled on the cloud VM cluster.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("CpuCoreCount"),
 			},
 			{
 				Name:        "cloud_exadata_infrastructure_id",
 				Description: "The OCID of the cloud Exadata infrastructure.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("CloudExadataInfrastructureId"),
 			},
 			{
 				Name:        "backup_subnet_id",
 				Description: "The OCID of the backup network subnet associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("BackupSubnetId"),
 			},
 			{
 				Name:        "last_update_history_entry_id",
 				Description: "The OCID of the last maintenance update history entry.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LastUpdateHistoryEntryId"),
 			},
 			{
 				Name:        "listener_port",
 				Description: "The port number configured for the listener on the cloud VM cluster.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ListenerPort"),
 			},
 			{
 				Name:        "node_count",
 				Description: "The number of nodes in the cloud VM cluster.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("NodeCount"),
 			},
 			{
 				Name:        "storage_size_in_gbs",
@@ -135,16 +150,19 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_details",
 				Description: "Additional information about the current lifecycle state.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LifecycleDetails"),
 			},
 			{
 				Name:        "time_zone",
 				Description: "The time zone of the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("TimeZone"),
 			},
 			{
 				Name:        "ocpu_count",
 				Description: "The number of OCPU cores to enable on the cloud VM cluster.",
 				Type:        proto.ColumnType_DOUBLE,
+				Transform:   transform.FromField("OcpuCount"),
 			},
 			{
 				Name:        "memory_size_in_gbs",
@@ -168,61 +186,73 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "data_storage_percentage",
 				Description: "The percentage assigned to DATA storage.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("DataStoragePercentage"),
 			},
 			{
 				Name:        "is_local_backup_enabled",
 				Description: "If true, database backup on local Exadata storage is configured for the cloud VM cluster.",
 				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("IsLocalBackupEnabled"),
 			},
 			{
 				Name:        "is_sparse_diskgroup_enabled",
 				Description: "If true, sparse disk group is configured for the cloud VM cluster.",
 				Type:        proto.ColumnType_BOOL,
+				Transform:   transform.FromField("IsSparseDiskgroupEnabled"),
 			},
 			{
 				Name:        "gi_version",
 				Description: "A valid Oracle Grid Infrastructure (GI) software version.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("GiVersion"),
 			},
 			{
 				Name:        "system_version",
 				Description: "Operating system version of the image.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("SystemVersion"),
 			},
 			{
 				Name:        "license_model",
 				Description: "The Oracle license model that applies to the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LicenseModel"),
 			},
 			{
 				Name:        "disk_redundancy",
 				Description: "The type of redundancy configured for the cloud Vm cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("DiskRedundancy"),
 			},
 			{
 				Name:        "scan_dns_record_id",
 				Description: "The OCID of the DNS record for the SCAN IP addresses associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ScanDnsRecordId"),
 			},
 			{
 				Name:        "scan_dns_name",
 				Description: "The FQDN of the DNS record for the SCAN IP addresses associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ScanDnsName"),
 			},
 			{
 				Name:        "zone_id",
 				Description: "The OCID of the zone the cloud VM cluster is associated with.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("ZoneId"),
 			},
 			{
 				Name:        "scan_listener_port_tcp",
 				Description: "The TCP Single Client Access Name (SCAN) port.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ScanListenerPortTcp"),
 			},
 			{
 				Name:        "scan_listener_port_tcp_ssl",
 				Description: "The TCPS Single Client Access Name (SCAN) port. The default port is 2484.",
 				Type:        proto.ColumnType_INT,
+				Transform:   transform.FromField("ScanListenerPortTcpSsl"),
 			},
 
 			// JSON fields
@@ -230,41 +260,49 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "ssh_public_keys",
 				Description: "The public key portion of one or more key pairs used for SSH access to the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Clou"),
 			},
 			{
 				Name:        "nsg_ids",
 				Description: "The list of OCIDs for the network security groups (NSGs) to which this resource belongs.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("NsgIds"),
 			},
 			{
 				Name:        "backup_network_nsg_ids",
 				Description: "A list of the OCIDs of the network security groups (NSGs) that the backup network of this DB system belongs to.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("BackupNetworkNsgIds"),
 			},
 			{
 				Name:        "db_servers",
 				Description: "The list of Db servers.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("DbServers"),
 			},
 			{
 				Name:        "scan_ip_ids",
 				Description: "The OCID of the Single Client Access Name (SCAN) IP addresses associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("ScanIpIds"),
 			},
 			{
 				Name:        "vip_ids",
 				Description: "The OCID of the virtual IP (VIP) addresses associated with the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("VipIds"),
 			},
 			{
-				Name:        "DataCollectionOptions",
+				Name:        "datacollectionoptions",
 				Description: "The data collection options of the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Datacollectionoptions"),
 			},
 			{
-				Name:        "IormConfigCache",
+				Name:        "iorm_config_cache",
 				Description: "The config cache details of the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("Iormconfigcache"),
 			},
 
 			// Steampipe standard columns
@@ -369,8 +407,8 @@ func listDatabaseCloudVMClusters(ctx context.Context, d *plugin.QueryData, h *pl
 			return nil, err
 		}
 
-		for _, infra := range response.Items {
-			d.StreamListItem(ctx, infra)
+		for _, vm := range response.Items {
+			d.StreamListItem(ctx, vm)
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit
 			if d.RowsRemaining(ctx) == 0 {

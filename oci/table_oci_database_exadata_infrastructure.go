@@ -231,6 +231,18 @@ func tableOciDatabaseExadataInfrastructure(_ context.Context) *plugin.Table {
 				Description: "Indicates whether CPS offline diagnostic report is enabled for this Exadata infrastructure. This will allow a customer to quickly check status themselves and fix problems on their end, saving time and frustration for both Oracle and the customer when they find the CPS in a disconnected state. You can enable offline diagnostic report during Exadata infrastructure provisioning. You can also disable or enable it at any time using the UpdateExadatainfrastructure API.",
 			},
 			{
+				Name:        "freeform_tags",
+				Description: "Free-form tags for this resource.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("FreeformTags"),
+			},
+			{
+				Name:        "defined_tags",
+				Description: "Defined tags for this resource.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("DefinedTags"),
+			},
+			{
 				Name:        "maintenance_window",
 				Type:        proto.ColumnType_JSON,
 				Description: "Maintenance Window information.",

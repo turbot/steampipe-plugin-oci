@@ -293,10 +293,22 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("VipIds"),
 			},
 			{
-				Name:        "datacollectionoptions",
+				Name:        "freeform_tags",
+				Description: "Free-form tags for this resource.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("FreeformTags"),
+			},
+			{
+				Name:        "defined_tags",
+				Description: "Defined tags for this resource.",
+				Type:        proto.ColumnType_JSON,
+				Transform:   transform.FromField("DefinedTags"),
+			},
+			{
+				Name:        "data_collection_options",
 				Description: "The data collection options of the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Datacollectionoptions"),
+				Transform:   transform.FromField("DataCollectionOptions"),
 			},
 			{
 				Name:        "iorm_config_cache",

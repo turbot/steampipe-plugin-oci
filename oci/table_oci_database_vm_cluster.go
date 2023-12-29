@@ -51,12 +51,6 @@ func tableOciDatabaseVMCluster(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("Id"),
 			},
 			{
-				Name:        "compartment_id",
-				Description: "The OCID of the compartment.",
-				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("CompartmentId"),
-			},
-			{
 				Name:        "last_patch_history_entry_id",
 				Description: "The OCID of the last patch history.",
 				Type:        proto.ColumnType_STRING,

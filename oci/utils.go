@@ -116,3 +116,23 @@ func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, 
 	regionName := oci_common.StringToRegion(types.SafeString(splittedID[3]))
 	return regionName, nil
 }
+
+func extractTags(freeformTags map[string]string, definedTags map[string]map[string]interface{}) map[string]interface{} {
+	tags := make(map[string]interface{})
+
+	if freeformTags != nil {
+		for k, v := range freeformTags {
+			tags[k] = v
+		}
+	}
+
+	if definedTags != nil {
+		for _, v := range definedTags {
+			for key, value := range v {
+				tags[key] = value
+			}
+		}
+	}
+
+	return tags
+}

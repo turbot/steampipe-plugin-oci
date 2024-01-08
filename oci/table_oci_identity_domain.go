@@ -149,7 +149,7 @@ func tableIdentityDomain(_ context.Context) *plugin.Table {
 
 			// Standard OCI columns
 			{
-				Name:        "tenant_id",
+				Name:        "compartment_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("CompartmentId"),

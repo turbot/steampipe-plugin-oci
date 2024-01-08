@@ -105,7 +105,7 @@ order by
   time_created;
 ```
 
-### Top 5 exadata infrastructures with max CPUs
+### List top 5 exadata infrastructures with max CPUs
 
 Discover the top 5 Exadata Infrastructures with maximum CPU power, perfect for high-performance workloads.
 

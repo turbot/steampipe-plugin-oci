@@ -38,7 +38,6 @@ from
   oci_identity_domain;
 ```
 
-
 ### List of Identity Domains that are not in Active state
 Discover the segments that consist of identity domain not currently in an active state. This is beneficial in identifying and managing inactive domains within your Oracle Cloud Infrastructure.
 
@@ -63,7 +62,6 @@ from
 where
   lifecycle_state <> 'ACTIVE';
 ```
-
 
 ### List of Identity Domains without application tag key
 Determine the areas in which identity domains lack an application tag key. This is useful for identifying potential gaps in your tagging strategy, helping to ensure all domains are properly categorized and managed.

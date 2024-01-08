@@ -180,23 +180,23 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 
 	// Check for additional filters
 	if equalQuals["diaplay_name"] != nil {
-		name := equalQuals["diaplay_name"].GetStringValue()
+		name := d.EqualsQualString("diaplay_name")
 		request.DisplayName = types.String(name)
 	}
 	if equalQuals["url"] != nil {
-		url := equalQuals["url"].GetStringValue()
+		url := d.EqualsQualString("url")
 		request.Url = types.String(url)
 	}
 	if equalQuals["home_region_url"] != nil {
-		homeRegionUrl := equalQuals["home_region_url"].GetStringValue()
+		homeRegionUrl := d.EqualsQualString("home_region_url")
 		request.HomeRegionUrl = types.String(homeRegionUrl)
 	}
 	if equalQuals["type"] != nil {
-		domainType := equalQuals["type"].GetStringValue()
+		domainType := d.EqualsQualString("type")
 		request.Type = types.String(domainType)
 	}
 	if equalQuals["license_type"] != nil {
-		licenseType := equalQuals["license_type"].GetStringValue()
+		licenseType := d.EqualsQualString("license_type")
 		request.Type = types.String(licenseType)
 	}
 	if equalQuals["is_hidden_on_login"] != nil {
@@ -205,7 +205,7 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		lifecycleState := d.EqualsQualString("lifecycle_state")
 		request.LifecycleState = identity.DomainLifecycleStateEnum(lifecycleState)
 	}
 

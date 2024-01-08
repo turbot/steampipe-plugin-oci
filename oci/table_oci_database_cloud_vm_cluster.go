@@ -260,7 +260,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "ssh_public_keys",
 				Description: "The public key portion of one or more key pairs used for SSH access to the cloud VM cluster.",
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.FromField("Clou"),
+				Transform:   transform.FromField("SshPublicKeys"),
 			},
 			{
 				Name:        "nsg_ids",

@@ -118,7 +118,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "last_update_history_entry_id",
-				Description: "The OCID of the last maintenance update history entry.",
+				Description: "The OCID of the last maintenance update history entry. This value is updated when a maintenance update starts.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("LastUpdateHistoryEntryId"),
 			},

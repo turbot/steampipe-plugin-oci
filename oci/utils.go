@@ -20,7 +20,7 @@ type nameSpace struct {
 	Value string
 }
 
-//// LIST FUNCTION
+// // LIST FUNCTION
 func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nameSpace, error) {
 	plugin.Logger(ctx).Trace("getNamespace")
 
@@ -115,4 +115,20 @@ func ociRegionName(_ context.Context, d *transform.TransformData) (interface{}, 
 	splittedID := strings.Split(id, ".")
 	regionName := oci_common.StringToRegion(types.SafeString(splittedID[3]))
 	return regionName, nil
+}
+
+func extractTags(freeformTags map[string]string, definedTags map[string]map[string]interface{}) map[string]interface{} {
+	tags := make(map[string]interface{})
+
+	for k, v := range freeformTags {
+		tags[k] = v
+	}
+
+	for _, v := range definedTags {
+		for key, value := range v {
+			tags[key] = value
+		}
+	}
+
+	return tags
 }

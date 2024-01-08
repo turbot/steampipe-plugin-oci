@@ -448,7 +448,7 @@ func getDatabaseCloudVmCluster(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, nil
 	}
 
-	id := d.EqualsQuals["id"].GetStringValue()
+	id := d. EqualsQualString("id")
 
 	// handle empty id in get call
 	if id == "" {

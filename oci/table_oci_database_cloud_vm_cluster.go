@@ -214,7 +214,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "license_model",
-				Description: "The Oracle license model that applies to the cloud VM cluster.",
+				Description: "The Oracle license model that applies to the cloud VM cluster. The default is LICENSE_INCLUDED.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("LicenseModel"),
 			},

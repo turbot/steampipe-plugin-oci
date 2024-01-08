@@ -244,7 +244,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "scan_listener_port_tcp",
-				Description: "The TCP Single Client Access Name (SCAN) port.",
+				Description: "The TCP Single Client Access Name (SCAN) port. The default port is 1521.",
 				Type:        proto.ColumnType_INT,
 				Transform:   transform.FromField("ScanListenerPortTcp"),
 			},

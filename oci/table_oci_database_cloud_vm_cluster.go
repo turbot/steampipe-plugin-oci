@@ -365,7 +365,7 @@ func listDatabaseCloudVMClusters(ctx context.Context, d *plugin.QueryData, h *pl
 	equalQuals := d.EqualsQuals
 
 	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
+	if equalQuals["compartment_id"] != nil && compartment != d.EqualsQualString("compartment_id") {
 		return nil, nil
 	}
 
@@ -386,17 +386,17 @@ func listDatabaseCloudVMClusters(ctx context.Context, d *plugin.QueryData, h *pl
 
 	// Check for additional filters
 	if equalQuals["display_name"] != nil {
-		dbName := equalQuals["display_name"].GetStringValue()
+		dbName := d.EqualsQualString("display_name")
 		request.DisplayName = types.String(dbName)
 	}
 
 	if equalQuals["cloud_exadata_infrastructure_id"] != nil {
-		dbName := equalQuals["cloud_exadata_infrastructure_id"].GetStringValue()
+		dbName := d.EqualsQualString("cloud_exadata_infrastructure_id")
 		request.CloudExadataInfrastructureId = types.String(dbName)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		lifecycleState := d.EqualsQualString("lifecycle_state")
 		if isValidCloudVMClusterSummaryLifecycleState(lifecycleState) {
 			request.LifecycleState = database.CloudVmClusterSummaryLifecycleStateEnum(lifecycleState)
 		} else {

@@ -196,7 +196,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "is_sparse_diskgroup_enabled",
-				Description: "If true, sparse disk group is configured for the cloud VM cluster.",
+				Description: "If true, sparse disk group is configured for the cloud VM cluster. If false, sparse disk group is not created.",
 				Type:        proto.ColumnType_BOOL,
 				Transform:   transform.FromField("IsSparseDiskgroupEnabled"),
 			},

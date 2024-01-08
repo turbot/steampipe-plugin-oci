@@ -252,6 +252,16 @@ func tableOciDatabaseExadataInfrastructure(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Description: "The list of contacts for the Exadata infrastructure.",
 			},
+			{
+				Name:        "dns_server",
+				Type:        proto.ColumnType_JSON,
+				Description: "The list of DNS server IP addresses. Maximum of 3 allowed.",
+			},
+			{
+				Name:        "ntp_server",
+				Type:        proto.ColumnType_JSON,
+				Description: "The list of NTP server IP addresses. Maximum of 3 allowed.",
+			},
 
 			// Steampipe standard columns
 			{
@@ -322,12 +332,12 @@ func listDatabaseExadataInfrastructures(ctx context.Context, d *plugin.QueryData
 
 	// Check for additional filters
 	if equalQuals["display_name"] != nil {
-		dbName := equalQuals["display_name"].GetStringValue()
+		dbName := d.EqualsQualString("display_name")
 		request.DisplayName = types.String(dbName)
 	}
 
 	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+		lifecycleState := d.EqualsQualString("lifecycle_state")
 		if isValidExadataInfrastructureSummaryLifecycleState(lifecycleState) {
 			request.LifecycleState = database.ExadataInfrastructureSummaryLifecycleStateEnum(lifecycleState)
 		} else {
@@ -379,7 +389,7 @@ func getDatabaseExadataInfrastructure(ctx context.Context, d *plugin.QueryData, 
 		return nil, nil
 	}
 
-	id := d.EqualsQuals["id"].GetStringValue()
+	id := d.EqualsQualString("id")
 
 	// handle empty id in get call
 	if id == "" {

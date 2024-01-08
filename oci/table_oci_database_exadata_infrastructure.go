@@ -138,7 +138,7 @@ func tableOciDatabaseExadataInfrastructure(_ context.Context) *plugin.Table {
 			{
 				Name:        "additional_compute_system_model",
 				Type:        proto.ColumnType_STRING,
-				Description: "Oracle Exadata System Model specification.",
+				Description: "Oracle Exadata System Model specification. The system model determines the amount of compute or storage server resources available for use.",
 			},
 			{
 				Name:        "cloud_control_plane_server1",

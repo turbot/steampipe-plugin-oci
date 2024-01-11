@@ -82,6 +82,26 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 				Transform:   transform.FromCamel(),
 			},
 			{
+				Name:        "kms_key_version_id",
+				Description: "The OCID of the key container version used in TDE operations.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "vault_id",
+				Description: "The OCID of the Oracle Cloud Infrastructure vault.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "sid_prefix",
+				Description: "Specifies a prefix for the Oracle SID of the database to be created.",
+				Type:        proto.ColumnType_STRING,
+			},
+			{
+				Name:        "is_cdb",
+				Description: "Specifies a prefix for the Oracle SID of the database to be created.",
+				Type:        proto.ColumnType_BOOL,
+			},
+			{
 				Name:        "db_home_id",
 				Description: "The OCID of the database home.",
 				Type:        proto.ColumnType_STRING,
@@ -145,6 +165,11 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 			{
 				Name:        "db_backup_config",
 				Description: "Database backup configuration details.",
+				Type:        proto.ColumnType_JSON,
+			},
+			{
+				Name:        "database_management_config",
+				Description: "The configuration of the Database Management service.",
 				Type:        proto.ColumnType_JSON,
 			},
 

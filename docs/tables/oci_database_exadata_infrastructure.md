@@ -1,6 +1,6 @@
 ---
 title: "Steampipe Table: oci_database_exadata_infrastructure - Query OCI Database Exadata Infrastructures using SQL"
-description: "Allows users to query OCI Database Pluggable Databases."
+description: "Allows users to query OCI Database Exadata Infrastructures."
 ---
 
 # Table: oci_database_exadata_infrastructure - Query OCI Database Exadata Infrastructures using SQL

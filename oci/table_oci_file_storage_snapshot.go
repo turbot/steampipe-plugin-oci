@@ -66,6 +66,12 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
 			{
+				Name:        "snapshot_time",
+				Description: "The date and time the snapshot was taken.",
+				Type:        proto.ColumnType_TIMESTAMP,
+				Transform:   transform.FromField("SnapshotTime.Time"),
+			},
+			{
 				Name:        "file_system_id",
 				Description: "The OCID of the file system from which the snapshot was created.",
 				Type:        proto.ColumnType_STRING,
@@ -76,6 +82,11 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 				Description: "An OCID identifying the parent from which this snapshot was cloned.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromField("ProvenanceId"),
+			},
+			{
+				Name:        "snapshot_type",
+				Description: "Specifies the generation type of the snapshot.",
+				Type:        proto.ColumnType_STRING,
 			},
 			{
 				Name:        "is_clone_source",

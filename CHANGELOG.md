@@ -1,3 +1,17 @@
+## v0.34.0 [2024-01-22]
+
+_What's new?_
+
+- New tables added
+  - [oci_identity_domain](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_domain) ([#587](https://github.com/turbot/steampipe-plugin-oci/pull/587))
+  - [oci_database_cloud_vm_cluster](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_database_cloud_vm_cluster) ([#583](https://github.com/turbot/steampipe-plugin-oci/pull/583))
+
+_Enhancements_
+
+- Added the `snapshot_time` and `snapshot_type` columns to `oci_file_storage_snapshot` table. ([#592](https://github.com/turbot/steampipe-plugin-oci/pull/592))
+- Added the `kms_key_version_id`, `vault_id`, `sid_prefix` and `is_cdb` columns to `oci_database_db` table. ([#591](https://github.com/turbot/steampipe-plugin-oci/pull/591))
+
+
 ## v0.33.0 [2023-12-12]
 
 _What's new?_

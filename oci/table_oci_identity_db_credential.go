@@ -63,7 +63,7 @@ func tableIdentityDBCredential(_ context.Context) *plugin.Table {
 				Name:        "time_expires",
 				Description: "Date and time when this credential will expire, in the format defined by RFC3339.",
 				Type:        proto.ColumnType_TIMESTAMP,
-				Transform:   transform.FromField("TimeCreated.Time").Transform(transform.NullIfZeroValue),
+				Transform:   transform.FromField("TimeExpires.Time").Transform(transform.NullIfZeroValue),
 			},
 			{
 				Name:        "lifecycle_state",

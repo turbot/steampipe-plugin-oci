@@ -135,6 +135,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_identity_availability_domain":                             tableIdentityAvailabilityDomain(ctx),
 			"oci_identity_compartment":                                     tableIdentityCompartment(ctx),
 			"oci_identity_customer_secret_key":                             tableIdentityCustomerSecretKey(ctx),
+			"oci_identity_db_credential":                                   tableIdentityDBCredential(ctx),
 			"oci_identity_domain":                                          tableIdentityDomain(ctx),
 			"oci_identity_dynamic_group":                                   tableIdentityDynamicGroup(ctx),
 			"oci_identity_group":                                           tableIdentityGroup(ctx),

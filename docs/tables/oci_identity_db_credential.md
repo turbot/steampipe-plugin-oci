@@ -75,7 +75,7 @@ where
 ```
 
 ### List credentials that are set to expire within the next 10 days
-Explore which users have the ability to log in to the console. This can be useful to identify potential security risks and enforce appropriate user permissions.
+Useful for system administrators, security teams, and compliance officers in managing and maintaining the health and security of their OCI (Oracle Cloud Infrastructure) environment.
 
 ```sql+postgres
 select

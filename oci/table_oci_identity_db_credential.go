@@ -104,6 +104,7 @@ func listIdentityDBCredentials(ctx context.Context, d *plugin.QueryData, h *plug
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
+		plugin.Logger(ctx).Error("oci_identity_db_credential.listIdentityDBCredentials", "session_error", err)
 		return nil, err
 	}
 
@@ -133,6 +134,7 @@ func listIdentityDBCredentials(ctx context.Context, d *plugin.QueryData, h *plug
 	for pagesLeft {
 		response, err := session.IdentityClient.ListDbCredentials(ctx, request)
 		if err != nil {
+			plugin.Logger(ctx).Error("oci_identity_db_credential.listIdentityDBCredentials", "api_error", err)
 			return nil, err
 		}
 

@@ -3,9 +3,9 @@ title: "Steampipe Table: oci_identity_db_credential - Query OCI Identity DB Cred
 description: "Allows users to query information about users DB credential in OCI Identity."
 ---
 
-# Table: oci_identity_db_credential - Query OCI Identity Users using SQL
+# Table: oci_identity_db_credential - Query OCI Identity DB Credential using SQL
 
-Oracle Cloud Infrastructure's Identity and Access Management (IAM) service lets you control who has access to your cloud resources. Identity DB credentials refer to the authentication details used to access Oracle databases securely within the Oracle Cloud Infrastructure. These credentials are part of the Oracle Cloud Infrastructure Identity and Access Management (IAM) service, which manages users, groups, and policies that control access to OCI resources. In the context of databases, these credentials
+Oracle Cloud Infrastructure's Identity and Access Management (IAM) service lets you control who has access to your cloud resources. Identity DB credentials refer to the authentication details used to access Oracle databases securely within the Oracle Cloud Infrastructure.
 
 ## Table Usage Guide
 
@@ -18,7 +18,6 @@ Discover the segments that highlight DB credential details. This allows for bett
 
 ```sql+postgres
 select
-  name,
   id,
   user_id,
   description,
@@ -31,7 +30,6 @@ from
 
 ```sql+sqlite
 select
-  name,
   id,
   user_id,
   description,
@@ -47,8 +45,7 @@ Explore which users in the Oracle Identity Cloud Service have multi-factor authe
 
 ```sql+postgres
 select
-  c.user_id,
-  c.db_credential_id,
+  c.id as db_credential_id,
   u.user_type,
   u.is_mfa_activated,
   u.email
@@ -56,20 +53,19 @@ from
   oci_identity_db_credential as c,
   oci_identity_user as u
 where
-  c.user_id = u.user_id
-  and user_type = 'IDCS';
+  c.user_id = u.id
+  and user_type = 'IDCS;
 ```
 
 ```sql+sqlite
 select
-  c.user_id,
-  c.db_credential_id,
+  c.id as db_credential_id,
   u.user_type,
   u.is_mfa_activated,
   u.email
 from
   oci_identity_db_credential as c
-  join oci_identity_user as u on c.user_id = u.user_id
+  join oci_identity_user as u on c.user_id = u.id
 where
   u.user_type = 'IDCS';
 ```

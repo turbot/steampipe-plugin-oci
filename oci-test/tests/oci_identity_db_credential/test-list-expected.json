@@ -1,0 +1,8 @@
+[
+  {
+    "description": "{{ output.description.value }}",
+    "id": "{{ output.credential_id.value }}",
+    "lifecycle_state": "{{ output.lifecycle_state.value }}",
+    "user_id": "{{ output.user_id.value }}"
+  }
+]

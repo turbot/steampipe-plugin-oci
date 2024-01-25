@@ -1,3 +1,10 @@
+## v0.35.0 [2024-01-25]
+
+_What's new?_
+
+- New tables added
+  - [oci_identity_db_credential](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_identity_db_credential) ([#596](https://github.com/turbot/steampipe-plugin-oci/pull/596))
+
 ## v0.34.0 [2024-01-22]
 
 _What's new?_

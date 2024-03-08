@@ -112,6 +112,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_autonomous_db_metric_storage_utilization":        tableOciDatabaseAutonomousDatabaseMetricStorageUtilization(ctx),
 			"oci_database_autonomous_db_metric_storage_utilization_daily":  tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationDaily(ctx),
 			"oci_database_autonomous_db_metric_storage_utilization_hourly": tableOciDatabaseAutonomousDatabaseMetricStorageUtilizationHourly(ctx),
+			"oci_database_cloud_exadata_infrastructure":                    tableOciDatabaseExadataInfrastructure(ctx),
 			"oci_database_cloud_vm_cluster":                                tableOciDatabaseCloudVMCluster(ctx),
 			"oci_database_db":                                              tableOciDatabase(ctx),
 			"oci_database_db_home":                                         tableOciDatabaseDBHome(ctx),

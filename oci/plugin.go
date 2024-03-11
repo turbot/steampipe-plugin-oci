@@ -116,6 +116,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_database_db":                                              tableOciDatabase(ctx),
 			"oci_database_db_home":                                         tableOciDatabaseDBHome(ctx),
 			"oci_database_db_system":                                       tableOciDatabaseDBSystem(ctx),
+			"oci_database_exadata_infrastructure":                          tableOciDatabaseExadataInfrastructure(ctx),
 			"oci_database_pluggable_database":                              tableOciPluggableDatabase(ctx),
 			"oci_database_software_image":                                  tableOciDatabaseSoftwareImage(ctx),
 			"oci_devops_project":                                           tableDevopsProject(ctx),

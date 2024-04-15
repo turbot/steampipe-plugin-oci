@@ -12,7 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -48,16 +48,16 @@ output "tenancy_ocid" {
 
 output "description" {
   depends_on = [oci_identity_dynamic_group.named_test_resource]
-  value = oci_identity_dynamic_group.named_test_resource.description
+  value      = oci_identity_dynamic_group.named_test_resource.description
 }
 
 output "freeform_tags" {
   depends_on = [oci_identity_dynamic_group.named_test_resource]
-  value = oci_identity_dynamic_group.named_test_resource.freeform_tags
+  value      = oci_identity_dynamic_group.named_test_resource.freeform_tags
 }
 
 output "resource_id" {
   depends_on = [oci_identity_dynamic_group.named_test_resource]
-  value = oci_identity_dynamic_group.named_test_resource.id
+  value      = oci_identity_dynamic_group.named_test_resource.id
 }
 

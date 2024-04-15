@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -43,11 +43,11 @@ resource "oci_ons_notification_topic" "named_test_ons_topic_resource" {
 
 resource "oci_devops_project" "named_test_resource" {
   #Required
-  name = var.resource_name
+  name           = var.resource_name
   compartment_id = var.tenancy_ocid
   notification_config {
-      #Required
-      topic_id = oci_ons_notification_topic.named_test_ons_topic_resource.id
+    #Required
+    topic_id = oci_ons_notification_topic.named_test_ons_topic_resource.id
   }
 
   #Optional
@@ -55,15 +55,15 @@ resource "oci_devops_project" "named_test_resource" {
 }
 
 resource "oci_devops_repository" "named_test_resource" {
-    #Required
-    name = var.resource_name
-    project_id = oci_devops_project.named_test_resource.id
-    repository_type = "HOSTED"
+  #Required
+  name            = var.resource_name
+  project_id      = oci_devops_project.named_test_resource.id
+  repository_type = "HOSTED"
 
-    #Optional
-    default_branch = "main"
-    description = "testing"
-    freeform_tags = {"bar-key"= "value"}
+  #Optional
+  default_branch = "main"
+  description    = "testing"
+  freeform_tags  = { "bar-key" = "value" }
 }
 
 output "reporting_region" {

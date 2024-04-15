@@ -12,7 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -38,10 +38,10 @@ provider "oci" {
 resource "oci_identity_domain" "named_test_resource" {
   #Required
   compartment_id = var.tenancy_ocid
-  description = var.domain_description
-  display_name = var.resource_name
-  home_region = var.region
-  license_type = "Free"
+  description    = var.domain_description
+  display_name   = var.resource_name
+  home_region    = var.region
+  license_type   = "Free"
 
   #Optional
   freeform_tags = { "Name" = var.resource_name }
@@ -60,25 +60,25 @@ output "tenancy_ocid" {
 
 output "freeform_tags" {
   depends_on = [oci_identity_domain.named_test_resource]
-  value = oci_identity_domain.named_test_resource.freeform_tags
+  value      = oci_identity_domain.named_test_resource.freeform_tags
 }
 
 output "resource_id" {
   depends_on = [oci_identity_domain.named_test_resource]
-  value = oci_identity_domain.named_test_resource.id
+  value      = oci_identity_domain.named_test_resource.id
 }
 
 output "license_type" {
   depends_on = [oci_identity_domain.named_test_resource]
-  value = oci_identity_domain.named_test_resource.license_type
+  value      = oci_identity_domain.named_test_resource.license_type
 }
 
 output "domain_description" {
   depends_on = [oci_identity_domain.named_test_resource]
-  value = oci_identity_domain.named_test_resource.description
+  value      = oci_identity_domain.named_test_resource.description
 }
 
 output "time_created" {
   depends_on = [oci_identity_domain.named_test_resource]
-  value = oci_identity_domain.named_test_resource.time_created
+  value      = oci_identity_domain.named_test_resource.time_created
 }

@@ -12,7 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCI credentials profile used for the test. Default is to use the default profile."
 }
 
@@ -35,10 +35,10 @@ resource "oci_identity_user" "named_test_resource" {
 }
 
 resource "oci_identity_db_credential" "named_test_resource" {
-    #Required
-    description = "testing"
-    password = "TurbotKolkata@123"
-    user_id = oci_identity_user.named_test_resource.id
+  #Required
+  description = "testing"
+  password    = "TurbotKolkata@123"
+  user_id     = oci_identity_user.named_test_resource.id
 }
 
 output "tenancy_ocid" {
@@ -50,7 +50,7 @@ output "user_id" {
 }
 
 output "credential_id" {
-  value = split("dbCredentials/",oci_identity_db_credential.named_test_resource.id)[1]
+  value = split("dbCredentials/", oci_identity_db_credential.named_test_resource.id)[1]
 }
 
 output "lifecycle_state" {

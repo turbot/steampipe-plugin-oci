@@ -12,7 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -46,19 +46,19 @@ resource "oci_core_subnet" "named_test_resource" {
 }
 
 resource "oci_streaming_stream_pool" "test_stream_pool" {
-    #Required
-    compartment_id = var.tenancy_ocid
-    name = var.resource_name
+  #Required
+  compartment_id = var.tenancy_ocid
+  name           = var.resource_name
 }
 
 resource "oci_streaming_stream" "test_stream" {
-    #Required
-    name = var.resource_name
-    partitions = var.stream_partitions
+  #Required
+  name       = var.resource_name
+  partitions = var.stream_partitions
 
-    #Optional
-    freeform_tags = {"Department"= "Finance"}
-    stream_pool_id = oci_streaming_stream_pool.test_stream_pool.id
+  #Optional
+  freeform_tags  = { "Department" = "Finance" }
+  stream_pool_id = oci_streaming_stream_pool.test_stream_pool.id
 }
 
 

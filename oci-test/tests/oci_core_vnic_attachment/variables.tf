@@ -6,7 +6,7 @@ variable "resource_name" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -63,11 +63,11 @@ data "local_file" "image" {
 resource "oci_core_network_security_group" "test_network_security_group" {
   compartment_id = var.tenancy_ocid
   vcn_id         = oci_core_vcn.test_vcn.id
-  display_name = var.resource_name
+  display_name   = var.resource_name
 }
 
 resource "oci_core_instance" "test_instance" {
-  depends_on = [null_resource.test_image]
+  depends_on          = [null_resource.test_image]
   availability_domain = var.oci_ad
   compartment_id      = var.tenancy_ocid
   display_name        = var.resource_name
@@ -79,7 +79,7 @@ resource "oci_core_instance" "test_instance" {
   }
 
   create_vnic_details {
-    subnet_id      = oci_core_subnet.test_subnet.id
+    subnet_id = oci_core_subnet.test_subnet.id
   }
 }
 
@@ -106,20 +106,20 @@ output "tenancy_ocid" {
 
 output "instance_id" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.instance_id 
+  value      = oci_core_vnic_attachment.named_test_resource.instance_id
 }
 
 output "resource_id" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.id
+  value      = oci_core_vnic_attachment.named_test_resource.id
 }
 
 output "state" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.state 
+  value      = oci_core_vnic_attachment.named_test_resource.state
 }
 
 output "vnic_id" {
   depends_on = [oci_core_vnic_attachment.named_test_resource]
-  value = oci_core_vnic_attachment.named_test_resource.vnic_id
+  value      = oci_core_vnic_attachment.named_test_resource.vnic_id
 }

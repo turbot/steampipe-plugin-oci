@@ -12,7 +12,7 @@ variable "config_file_profile" {
 
 variable "tenancy_ocid" {
   type        = string
-  default     = ""
+  default     = "ocid1.tenancy.oc1..aaaaaaaahnm7gleh5soecxzjetci3yjjnjqmfkr4po3hoz4p4h2q37cyljaq"
   description = "OCID of your tenancy."
 }
 
@@ -45,7 +45,7 @@ resource "oci_identity_group" "test_group" {
 }
 
 resource "oci_identity_policy" "named_test_resource" {
-  depends_on = [oci_identity_group.test_group]
+  depends_on     = [oci_identity_group.test_group]
   compartment_id = var.tenancy_ocid
   name           = var.resource_name
   description    = var.policy_description
@@ -68,7 +68,7 @@ output "tenancy_ocid" {
 
 output "policy_description" {
   depends_on = [oci_identity_group.test_group]
-  value = oci_identity_policy.named_test_resource.description
+  value      = oci_identity_policy.named_test_resource.description
 }
 
 output "policy_statements" {
@@ -79,15 +79,15 @@ output "policy_statements" {
 
 output "freeform_tags" {
   depends_on = [oci_identity_group.test_group]
-  value = oci_identity_policy.named_test_resource.freeform_tags
+  value      = oci_identity_policy.named_test_resource.freeform_tags
 }
 
 output "resource_id" {
   depends_on = [oci_identity_group.test_group]
-  value = oci_identity_policy.named_test_resource.id
+  value      = oci_identity_policy.named_test_resource.id
 }
 
 output "time_created" {
   depends_on = [oci_identity_group.test_group]
-  value = oci_identity_policy.named_test_resource.time_created
+  value      = oci_identity_policy.named_test_resource.time_created
 }

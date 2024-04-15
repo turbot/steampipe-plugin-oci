@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_application_migration_source",
@@ -23,7 +23,7 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 			Hydrate:    getApplicationMigrationSource,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listApplicationMigrationSources,
+			Hydrate:           listApplicationMigrationSources,
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
@@ -120,7 +120,7 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},

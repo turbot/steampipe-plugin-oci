@@ -27,7 +27,7 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 			Hydrate:    getDevopsProject,
 		},
 		List: &plugin.ListConfig{
-			Hydrate: listDevopsProjects,
+			Hydrate:           listDevopsProjects,
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 			KeyColumns: []*plugin.KeyColumn{
 				{
@@ -136,7 +136,7 @@ func tableDevopsProject(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -312,7 +312,7 @@ func devopsProjectTags(ctx context.Context, d *transform.TransformData) (interfa
 
 		}
 	}
-if systemTags != nil {
+	if systemTags != nil {
 		if tags == nil {
 			tags = map[string]interface{}{}
 		}

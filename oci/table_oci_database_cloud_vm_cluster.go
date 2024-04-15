@@ -348,7 +348,7 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		}),
@@ -448,7 +448,7 @@ func getDatabaseCloudVmCluster(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, nil
 	}
 
-	id := d. EqualsQualString("id")
+	id := d.EqualsQualString("id")
 
 	// handle empty id in get call
 	if id == "" {

@@ -133,7 +133,7 @@ func tableArtifactContainerRepository(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},

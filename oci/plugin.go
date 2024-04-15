@@ -23,6 +23,12 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		DefaultGetConfig: &plugin.GetConfig{
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
 		},
+		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
+			{
+				Name:    "tenant_id",
+				Hydrate: getTenantIdMemoized,
+			},
+		},
 		ConnectionConfigSchema: &plugin.ConnectionConfigSchema{
 			NewInstance: ConfigInstance,
 		},

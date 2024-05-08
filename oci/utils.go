@@ -152,20 +152,12 @@ func getTenantIdCacheKey(ctx context.Context, d *plugin.QueryData, h *plugin.Hyd
 
 func getTenantIdUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
 	plugin.Logger(ctx).Trace("getTenantId")
-	cacheKey := "getTenantId"
-
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
-		return cachedData.(string), nil
-	}
 
 	// Create Session
 	session, err := identityService(ctx, d)
 	if err != nil {
 		return nil, err
 	}
-
-	// cache tenant id for the session
-	d.ConnectionManager.Cache.Set(cacheKey, session.TenancyID)
 
 	return session.TenancyID, nil
 }

@@ -2,13 +2,14 @@ package oci
 
 import (
 	"context"
+	"strings"
+
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
-	"strings"
 )
 
 // TABLE DEFINITION
@@ -159,7 +160,7 @@ func tableCertificatesManagementCertificateAuthority(_ context.Context) *plugin.
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},

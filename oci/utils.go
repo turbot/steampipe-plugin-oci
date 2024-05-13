@@ -12,6 +12,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
 	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
+	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
@@ -131,4 +132,32 @@ func extractTags(freeformTags map[string]string, definedTags map[string]map[stri
 	}
 
 	return tags
+}
+
+// if the caching is required other than per connection, build a cache key for the call and use it in Memoize.
+var getTenantIdMemoized = plugin.HydrateFunc(getTenantIdUncached).Memoize(memoize.WithCacheKeyFunction(getTenantIdCacheKey))
+
+// declare a wrapper hydrate function to call the memoized function
+// - this is required when a memoized function is used for a column definition
+func getTenantId(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	return getTenantIdMemoized(ctx, d, h)
+}
+
+// Build a cache key for the call to getTenantId, including the region since this is a multi-region call.
+// Notably, this may be called WITHOUT a region. In that case we just share a cache for non-region data.
+func getTenantIdCacheKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	key := "getTenantId"
+	return key, nil
+}
+
+func getTenantIdUncached(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	plugin.Logger(ctx).Trace("getTenantId")
+
+	// Create Session
+	session, err := identityService(ctx, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return session.TenancyID, nil
 }

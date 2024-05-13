@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_adm_knowledge_base",
@@ -113,14 +113,14 @@ func tableAdmKnowledgeBase(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},
 	}
 }
 
-//// LIST FUNCTION
+// // LIST FUNCTION
 func listAdmKnowledgeBases(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	region := d.EqualsQualString(matrixKeyRegion)

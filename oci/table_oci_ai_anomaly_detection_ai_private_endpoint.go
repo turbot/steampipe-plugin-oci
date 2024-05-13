@@ -52,7 +52,7 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 				Description: "Private Reverse Connection Endpoint display name.",
 				Type:        proto.ColumnType_STRING,
 			},
-						{
+			{
 				Name:        "time_created",
 				Description: "Time that AI Private Endpoint was created.",
 				Type:        proto.ColumnType_TIMESTAMP,
@@ -120,7 +120,7 @@ func tableAiAnomalyDetectionAiPrivateEndpoint(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},

@@ -95,7 +95,7 @@ func tableAutoScalingPolicy(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},
@@ -122,7 +122,7 @@ func listAutoscalingAutoScalingPolicies(ctx context.Context, d *plugin.QueryData
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	configurationId := d.EqualsQualString("auto_scaling_configuration_id")
 	logger.Debug("listAutoscalingAutoScalingPolicies", "OCI_REGION", region)
-	
+
 	// Restrict API call for other configuration id if the configuration id is provided in where clause
 	if configurationId != "" && configurationId != *configuration.Id {
 		return nil, nil

@@ -12,7 +12,7 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
 )
 
-//// TABLE DEFINITION
+// // TABLE DEFINITION
 func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 	return &plugin.Table{
 		Name:             "oci_bds_bds_instance",
@@ -176,7 +176,7 @@ func tableBigDataServiceInstance(_ context.Context) *plugin.Table {
 				Name:        "tenant_id",
 				Description: ColumnDescriptionTenantId,
 				Type:        proto.ColumnType_STRING,
-				Hydrate:     plugin.HydrateFunc(getTenantId).WithCache(),
+				Hydrate:     getTenantId,
 				Transform:   transform.FromValue(),
 			},
 		},

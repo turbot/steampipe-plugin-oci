@@ -5,7 +5,7 @@
 
 _Enhancements_
 
-- The `tenant_id` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple OCI tenants. ([#564](https://github.com/turbot/steampipe-plugin-gcp/pull/564))
+- The `tenant_id` column has now been assigned as a connection key column across all the tables which facilitates more precise and efficient querying across multiple OCI tenants. ([#606](https://github.com/turbot/steampipe-plugin-oci/pull/606))
 - The Plugin and the Steampipe Anywhere binaries are now built with the `netgo` package. ([#614](https://github.com/turbot/steampipe-plugin-oci/pull/614))
 - Added the `version` flag to the plugin's Export tool. ([#65](https://github.com/turbot/steampipe-export/pull/65))
 

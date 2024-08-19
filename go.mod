@@ -1,14 +1,13 @@
 module github.com/turbot/steampipe-plugin-oci
 
 go 1.21.0
-
-toolchain go1.21.1
+toolchain go1.22.5
 
 require (
 	github.com/hashicorp/go-hclog v1.6.2
 	github.com/oracle/oci-go-sdk/v65 v65.28.0
 	github.com/turbot/go-kit v0.10.0-rc.0
-	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.1
+	github.com/turbot/steampipe-plugin-sdk/v5 v5.10.3
 )
 
 require (

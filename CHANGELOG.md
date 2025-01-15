@@ -2,7 +2,7 @@
 
 _Bug fixes_
 
-- Fixed the `Postgres 15 FDW Linux - ARM64` build of the plugin to correctly use `Postgres 15` instead of `Postgres 14`. ([#53](https://github.com/turbot/steampipe-workflows/pull/53))
+- Fixed an issue where the `Postgres 15 FDW Linux - ARM64` plugin build incorrectly used `Postgres 14` instead of `Postgres 15`. ([#53](https://github.com/turbot/steampipe-workflows/pull/53))
 
 ## v1.0.0 [2024-10-22]
 

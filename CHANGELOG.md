@@ -1,3 +1,9 @@
+## v1.0.1 [2025-01-15]
+
+_Bug fixes_
+
+- Fixed an issue where the `Postgres 15 FDW Linux - ARM64` plugin build incorrectly used `Postgres 14` instead of `Postgres 15`. ([#53](https://github.com/turbot/steampipe-workflows/pull/53))
+
 ## v1.0.0 [2024-10-22]
 
 There are no significant changes in this plugin version; it has been released to align with [Steampipe's v1.0.0](https://steampipe.io/changelog/steampipe-cli-v1-0-0) release. This plugin adheres to [semantic versioning](https://semver.org/#semantic-versioning-specification-semver), ensuring backward compatibility within each major version.

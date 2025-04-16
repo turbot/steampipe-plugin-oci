@@ -2,12 +2,12 @@ package oci
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -357,7 +357,7 @@ func getObjectStorageBucketObjectLifecycle(ctx context.Context, d *plugin.QueryD
 	response, err := session.ObjectStorageClient.GetObjectLifecyclePolicy(ctx, request)
 	if err != nil {
 		if ociErr, ok := err.(oci_common.ServiceError); ok {
-			if helpers.StringSliceContains([]string{"LifecyclePolicyNotFound"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
+			if slices.Contains([]string{"LifecyclePolicyNotFound"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
 				return nil, nil
 			}
 		}

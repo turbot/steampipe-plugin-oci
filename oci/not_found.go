@@ -2,10 +2,10 @@ package oci
 
 import (
 	"context"
+	"slices"
 	"strconv"
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
 
@@ -13,7 +13,7 @@ import (
 func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 	return func(err error) bool {
 		if ociErr, ok := err.(oci_common.ServiceError); ok {
-			return helpers.StringSliceContains(notFoundErrors, strconv.Itoa(ociErr.GetHTTPStatusCode()))
+			return slices.Contains(notFoundErrors, strconv.Itoa(ociErr.GetHTTPStatusCode()))
 		}
 		return false
 	}
@@ -25,7 +25,7 @@ func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
 func isNotFoundErrorCode(notFoundErrors []string) plugin.ErrorPredicateWithContext {
 	return func(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData, err error) bool {
 		if ociErr, ok := err.(oci_common.ServiceError); ok {
-			return helpers.StringSliceContains(notFoundErrors, ociErr.GetCode())
+			return slices.Contains(notFoundErrors, ociErr.GetCode())
 		}
 		return false
 	}

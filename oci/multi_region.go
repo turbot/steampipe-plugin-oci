@@ -3,12 +3,12 @@ package oci
 import (
 	"context"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/identity"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 )
@@ -145,7 +145,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 func getInvalidRegions(regions []string, ociRegions []string) []string {
 	invalidRegions := []string{}
 	for _, region := range regions {
-		if !helpers.StringSliceContains(ociRegions, region) {
+		if !slices.Contains(ociRegions, region) {
 			invalidRegions = append(invalidRegions, region)
 		}
 	}
@@ -198,7 +198,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 		}
 
 		for _, compartment := range response.Items {
-			if !helpers.StringSliceContains([]string{"CREATING", "DELETING", "DELETED"}, types.ToString(compartment.LifecycleState)) {
+			if !slices.Contains([]string{"CREATING", "DELETING", "DELETED"}, types.ToString(compartment.LifecycleState)) {
 				compartments = append(compartments, compartment)
 			}
 		}

@@ -4,13 +4,13 @@ import (
 	"context"
 	"math"
 	"math/rand"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/objectstorage"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/memoize"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -79,7 +79,7 @@ func getDefaultRetryPolicy(connection *plugin.Connection) *oci_common.RetryPolic
 	retryOnResponseCodes := func(r oci_common.OCIOperationResponse) bool {
 		if r.Response != nil && r.Response.HTTPResponse() != nil {
 			statusCode := strconv.Itoa(r.Response.HTTPResponse().StatusCode)
-			return (r.Error != nil && helpers.StringSliceContains([]string{"429", "500", "503"}, statusCode))
+			return (r.Error != nil && slices.Contains([]string{"429", "500", "503"}, statusCode))
 		}
 		return false
 	}

@@ -2,12 +2,12 @@ package oci
 
 import (
 	"context"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/keymanagement"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -195,7 +195,7 @@ func listKmsKeys(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData
 	vaultData := h.Item.(keymanagement.VaultSummary)
 
 	// skip the API call if vault is any of the below state
-	if helpers.StringSliceContains([]string{"CREATING", "DELETING", "DELETED", "RESTORING"}, types.ToString(vaultData.LifecycleState)) {
+	if slices.Contains([]string{"CREATING", "DELETING", "DELETED", "RESTORING"}, types.ToString(vaultData.LifecycleState)) {
 		return nil, nil
 	}
 

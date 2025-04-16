@@ -2,12 +2,12 @@ package oci
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
-	"github.com/turbot/go-kit/helpers"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -376,7 +376,7 @@ func getVnic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (i
 	if err != nil {
 		logger.Error("getVnic", "get_vnic_error", err)
 		if ociErr, ok := err.(common.ServiceError); ok {
-			if helpers.StringSliceContains([]string{"404"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
+			if slices.Contains([]string{"404"}, strconv.Itoa(ociErr.GetHTTPStatusCode())) {
 				return nil, nil
 			}
 		}

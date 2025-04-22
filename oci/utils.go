@@ -37,7 +37,9 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 	if err != nil {
 		return nil, err
 	}
-	request := objectstorage.GetNamespaceRequest{}
+	request := objectstorage.GetNamespaceRequest{
+		CompartmentId: &session.TenancyID,
+	}
 
 	response, err := session.ObjectStorageClient.GetNamespace(ctx, request)
 	if err != nil {

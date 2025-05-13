@@ -241,7 +241,7 @@ func getClusterNetwork(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 		return nil, err
 	}
 
-	return response, nil
+	return response.ClusterNetwork, nil
 }
 
 //// TRANSFORM FUNCTION

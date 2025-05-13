@@ -117,6 +117,7 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("LifecyleDetails"), // This need to be fix from SDK side.
 			},
 			{
 				Name:        "branch_count",

@@ -119,12 +119,12 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getContainer,
 			},
-			{
-				Name:        "additional_capabilities",
-				Description: "A list of additional configurable container capabilities.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getContainer,
-			},
+			// {
+			// 	Name:        "additional_capabilities",
+			// 	Description: "A list of additional configurable container capabilities.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getContainer,
+			// },
 			{
 				Name:        "volume_mounts",
 				Description: "List of the volume mounts.",

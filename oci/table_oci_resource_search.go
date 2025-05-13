@@ -60,11 +60,13 @@ func tableResourceSearch(_ context.Context) *plugin.Table {
 				Name:        "query",
 				Description: "The query based on which the search was done.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("query"),
 			},
 			{
 				Name:        "text",
 				Description: "The freeText based on which the search was done.",
 				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromQual("text"),
 			},
 			{
 				Name:        "identity_context",

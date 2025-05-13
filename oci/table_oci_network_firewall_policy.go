@@ -58,12 +58,12 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_TIMESTAMP,
 				Transform:   transform.FromField("TimeCreated.Time"),
 			},
-			{
-				Name:        "is_firewall_attached",
-				Description: "To determine if any Network Firewall is associated with this Network Firewall Policy.",
-				Type:        proto.ColumnType_BOOL,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
+			// {
+			// 	Name:        "is_firewall_attached",
+			// 	Description: "To determine if any Network Firewall is associated with this Network Firewall Policy.",
+			// 	Type:        proto.ColumnType_BOOL,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
 			{
 				Name:        "lifecycle_details",
 				Description: "A message describing the current state in more detail.",
@@ -74,48 +74,48 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Description: "The current state of the Network Firewall.",
 				Type:        proto.ColumnType_STRING,
 			},
-			{
-				Name:        "application_lists",
-				Description: "A mapping of strings to arrays of Application objects.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "decryption_profiles",
-				Description: "A mapping of strings to DecryptionProfile objects.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "decryption_rules",
-				Description: "List of Decryption Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "ip_address_lists",
-				Description: "Map defining IP address lists of the policy. The value of an entry is a list of IP addresses or prefixes in CIDR notation. The associated key is the identifier by which the IP address list is referenced.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "mapped_secrets",
-				Description: "A mapping of strings to MappedSecret objects.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "security_rules",
-				Description: "List of Security Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
-			{
-				Name:        "url_lists",
-				Description: "A mapping of strings to arrays of UrlPattern objects.",
-				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
-			},
+			// {
+			// 	Name:        "application_lists",
+			// 	Description: "A mapping of strings to arrays of Application objects.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "decryption_profiles",
+			// 	Description: "A mapping of strings to DecryptionProfile objects.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "decryption_rules",
+			// 	Description: "List of Decryption Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "ip_address_lists",
+			// 	Description: "Map defining IP address lists of the policy. The value of an entry is a list of IP addresses or prefixes in CIDR notation. The associated key is the identifier by which the IP address list is referenced.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "mapped_secrets",
+			// 	Description: "A mapping of strings to MappedSecret objects.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "security_rules",
+			// 	Description: "List of Security Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
+			// {
+			// 	Name:        "url_lists",
+			// 	Description: "A mapping of strings to arrays of UrlPattern objects.",
+			// 	Type:        proto.ColumnType_JSON,
+			// 	Hydrate:     getNetworkFirewallPolicy,
+			// },
 
 			// tags
 			{

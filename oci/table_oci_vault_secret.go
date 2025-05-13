@@ -287,7 +287,7 @@ func getVaultSecret(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateD
 		return nil, err
 	}
 
-	return response, nil
+	return response.Secret, nil
 }
 
 //// TRANSFORM FUNCTION

@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
-	github.com/oracle/oci-go-sdk/v65 v65.28.0
+	github.com/oracle/oci-go-sdk/v65 v65.90.0
 	github.com/turbot/go-kit v1.1.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.11.5
 )
@@ -80,6 +80,7 @@ require (
 	github.com/stevenle/topsort v0.2.0 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
+	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect

@@ -37,10 +37,10 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 					Name:    "id",
 					Require: plugin.Optional,
 				},
-				{
-					Name:    "is_analytics_cluster_attached",
-					Require: plugin.Optional,
-				},
+				// {
+				// 	Name:    "is_analytics_cluster_attached",
+				// 	Require: plugin.Optional,
+				// },
 				{
 					Name:    "is_heat_wave_cluster_attached",
 					Require: plugin.Optional,
@@ -130,11 +130,11 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 				Hydrate:     getMySQLDBSystem,
 				Transform:   transform.FromField("IpAddress"),
 			},
-			{
-				Name:        "is_analytics_cluster_attached",
-				Description: "If the DB System has an Analytics Cluster attached.",
-				Type:        proto.ColumnType_BOOL,
-			},
+			// {
+			// 	Name:        "is_analytics_cluster_attached",
+			// 	Description: "If the DB System has an Analytics Cluster attached.",
+			// 	Type:        proto.ColumnType_BOOL,
+			// },
 			{
 				Name:        "is_heat_wave_cluster_attached",
 				Description: "Whether the DB System has a HeatWave cluster attached.",
@@ -191,11 +191,11 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			},
 
 			// json fields
-			{
-				Name:        "analytics_cluster",
-				Description: "A summary of an Analytics Cluster.",
-				Type:        proto.ColumnType_JSON,
-			},
+			// {
+			// 	Name:        "analytics_cluster",
+			// 	Description: "A summary of an Analytics Cluster.",
+			// 	Type:        proto.ColumnType_JSON,
+			// },
 			{
 				Name:        "backup_policy",
 				Description: "BackupPolicy The Backup policy for the DB System.",
@@ -483,9 +483,9 @@ func buildMySQLDBSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.L
 	if equalQuals["id"] != nil {
 		request.DbSystemId = types.String(equalQuals["id"].GetStringValue())
 	}
-	if equalQuals["is_analytics_cluster_attached"] != nil {
-		request.IsAnalyticsClusterAttached = types.Bool(equalQuals["is_analytics_cluster_attached"].GetBoolValue())
-	}
+	// if equalQuals["is_analytics_cluster_attached"] != nil {
+	// 	request.IsAnalyticsClusterAttached = types.Bool(equalQuals["is_analytics_cluster_attached"].GetBoolValue())
+	// }
 	if equalQuals["is_heat_wave_cluster_attached"] != nil {
 		request.IsHeatWaveClusterAttached = types.Bool(equalQuals["is_heat_wave_cluster_attached"].GetBoolValue())
 	}

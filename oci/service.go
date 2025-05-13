@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/aianomalydetection"
 	"github.com/oracle/oci-go-sdk/v65/analytics"
 	"github.com/oracle/oci-go-sdk/v65/apigateway"
+
 	// "github.com/oracle/oci-go-sdk/v65/applicationmigration"
 	"github.com/oracle/oci-go-sdk/v65/artifacts"
 	"github.com/oracle/oci-go-sdk/v65/audit"
@@ -27,6 +28,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/certificates"
 	"github.com/oracle/oci-go-sdk/v65/certificatesmanagement"
 	"github.com/oracle/oci-go-sdk/v65/cloudguard"
+	"github.com/oracle/oci-go-sdk/v65/cloudmigrations"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	oci_common_auth "github.com/oracle/oci-go-sdk/v65/common/auth"
 	"github.com/oracle/oci-go-sdk/v65/containerengine"
@@ -67,49 +69,50 @@ type session struct {
 	ApiGatewayClient                      apigateway.ApiGatewayClient
 	ApplicationDependencyManagementClient adm.ApplicationDependencyManagementClient
 	// ApplicationMigrationClient            applicationmigration.ApplicationMigrationClient
-	ArtifactClient                        artifacts.ArtifactsClient
-	AuditClient                           audit.AuditClient
-	AutoScalingClient                     autoscaling.AutoScalingClient
-	BastionClient                         bastion.BastionClient
-	BdsClient                             bds.BdsClient
-	BlockstorageClient                    core.BlockstorageClient
-	BudgetClient                          budget.BudgetClient
-	CertificatesClient                    certificates.CertificatesClient
-	CertificatesManagementClient          certificatesmanagement.CertificatesManagementClient
-	CloudGuardClient                      cloudguard.CloudGuardClient
-	ComputeClient                         core.ComputeClient
-	ComputeManagementClient               core.ComputeManagementClient
-	ContainerEngineClient                 containerengine.ContainerEngineClient
-	ContainerInstancesClient              containerinstances.ContainerInstanceClient
-	DatabaseClient                        database.DatabaseClient
-	DevopsClient                          devops.DevopsClient
-	DnsClient                             dns.DnsClient
-	EventsClient                          events.EventsClient
-	FileStorageClient                     filestorage.FileStorageClient
-	FunctionsManagementClient             functions.FunctionsManagementClient
-	IdentityClient                        identity.IdentityClient
-	KmsManagementClient                   keymanagement.KmsManagementClient
-	KmsVaultClient                        keymanagement.KmsVaultClient
-	LoadBalancerClient                    loadbalancer.LoadBalancerClient
-	LoggingManagementClient               logging.LoggingManagementClient
-	LoggingSearchClient                   loggingsearch.LogSearchClient
-	MonitoringClient                      monitoring.MonitoringClient
-	MySQLBackupClient                     mysql.DbBackupsClient
-	MySQLChannelClient                    mysql.ChannelsClient
-	MySQLConfigurationClient              mysql.MysqlaasClient
-	MySQLDBSystemClient                   mysql.DbSystemClient
-	NetworkFirewallClient                 networkfirewall.NetworkFirewallClient
-	NetworkLoadBalancerClient             networkloadbalancer.NetworkLoadBalancerClient
-	NoSQLClient                           nosql.NosqlClient
-	NotificationControlPlaneClient        ons.NotificationControlPlaneClient
-	NotificationDataPlaneClient           ons.NotificationDataPlaneClient
-	ObjectStorageClient                   objectstorage.ObjectStorageClient
-	QueueAdminClient                      queue.QueueAdminClient
-	ResourceManagerClient                 resourcemanager.ResourceManagerClient
-	ResourceSearchClient                  resourcesearch.ResourceSearchClient
-	StreamAdminClient                     streaming.StreamAdminClient
-	VaultClient                           vault.VaultsClient
-	VirtualNetworkClient                  core.VirtualNetworkClient
+	ArtifactClient                 artifacts.ArtifactsClient
+	AuditClient                    audit.AuditClient
+	AutoScalingClient              autoscaling.AutoScalingClient
+	BastionClient                  bastion.BastionClient
+	BdsClient                      bds.BdsClient
+	BlockstorageClient             core.BlockstorageClient
+	BudgetClient                   budget.BudgetClient
+	CertificatesClient             certificates.CertificatesClient
+	CertificatesManagementClient   certificatesmanagement.CertificatesManagementClient
+	CloudGuardClient               cloudguard.CloudGuardClient
+	ComputeClient                  core.ComputeClient
+	ComputeManagementClient        core.ComputeManagementClient
+	ContainerEngineClient          containerengine.ContainerEngineClient
+	ContainerInstancesClient       containerinstances.ContainerInstanceClient
+	DatabaseClient                 database.DatabaseClient
+	DevopsClient                   devops.DevopsClient
+	DnsClient                      dns.DnsClient
+	EventsClient                   events.EventsClient
+	FileStorageClient              filestorage.FileStorageClient
+	FunctionsManagementClient      functions.FunctionsManagementClient
+	IdentityClient                 identity.IdentityClient
+	KmsManagementClient            keymanagement.KmsManagementClient
+	KmsVaultClient                 keymanagement.KmsVaultClient
+	LoadBalancerClient             loadbalancer.LoadBalancerClient
+	LoggingManagementClient        logging.LoggingManagementClient
+	LoggingSearchClient            loggingsearch.LogSearchClient
+	MonitoringClient               monitoring.MonitoringClient
+	MySQLBackupClient              mysql.DbBackupsClient
+	MySQLChannelClient             mysql.ChannelsClient
+	MySQLConfigurationClient       mysql.MysqlaasClient
+	MySQLDBSystemClient            mysql.DbSystemClient
+	NetworkFirewallClient          networkfirewall.NetworkFirewallClient
+	NetworkLoadBalancerClient      networkloadbalancer.NetworkLoadBalancerClient
+	NoSQLClient                    nosql.NosqlClient
+	NotificationControlPlaneClient ons.NotificationControlPlaneClient
+	NotificationDataPlaneClient    ons.NotificationDataPlaneClient
+	ObjectStorageClient            objectstorage.ObjectStorageClient
+	QueueAdminClient               queue.QueueAdminClient
+	ResourceManagerClient          resourcemanager.ResourceManagerClient
+	ResourceSearchClient           resourcesearch.ResourceSearchClient
+	StreamAdminClient              streaming.StreamAdminClient
+	VaultClient                    vault.VaultsClient
+	VirtualNetworkClient           core.VirtualNetworkClient
+	CloudMigrationsClient          cloudmigrations.MigrationClient
 }
 
 // admService returns the service client for OCI ADM service
@@ -2082,6 +2085,50 @@ func containerInstancesService(ctx context.Context, d *plugin.QueryData, region 
 	sess := &session{
 		TenancyID:                tenantId,
 		ContainerInstancesClient: client,
+	}
+
+	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// cloudMigrationsService returns the service client for OCI Cloud Migrations service
+func cloudMigrationsService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	// have we already created and cached the service?
+	serviceCacheKey := fmt.Sprintf("cloudmigrations-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	// get oci config info from steampipe connection
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("cloudMigrationsService", "error_getProvider", err)
+		return nil, err
+	}
+
+	// get cloudmigrations service client
+	client, err := cloudmigrations.NewMigrationClientWithConfigurationProvider(provider)
+	if err != nil {
+		logger.Error("cloudMigrationsService", "error_NewMigrationClientWithConfigurationProvider", err)
+		return nil, err
+	}
+
+	// get tenant ocid from provider
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		logger.Error("cloudMigrationsService", "error_TenancyOCID", err)
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID:             tenantId,
+		CloudMigrationsClient: client,
 	}
 
 	// save session in cache

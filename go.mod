@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/oracle/oci-go-sdk/v65 v65.28.0
-	github.com/turbot/go-kit v1.1.0
+	github.com/turbot/go-kit v1.3.0
 	github.com/turbot/steampipe-plugin-sdk/v5 v5.11.7
 )
 

@@ -98,18 +98,18 @@ func tableCoreVcn(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_JSON,
 				Transform:   transform.FromField("Ipv6PrivateCidrBlocks"),
 			},
-			// {
-			// 	Name:        "ipv6_cidr_block",
-			// 	Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
-			// 	Type:        proto.ColumnType_CIDR,
-			// 	Transform:   transform.FromField("Ipv6CidrBlock"),
-			// },
-			// {
-			// 	Name:        "ipv6_public_cidr_block",
-			// 	Description: "For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
-			// 	Type:        proto.ColumnType_STRING,
-			// 	Transform:   transform.FromField("Ipv6PublicCidrBlock"),
-			// },
+			{
+				Name:        "ipv6_cidr_block",
+				Description: "[DEPRECATED] For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's private IP address space.",
+				Type:        proto.ColumnType_CIDR,
+				Transform:   transform.FromField("Ipv6CidrBlock"),
+			},
+			{
+				Name:        "ipv6_public_cidr_block",
+				Description: "[DEPRECATED] For an IPv6-enabled VCN, this is the IPv6 CIDR block for the VCN's public IP address space.",
+				Type:        proto.ColumnType_STRING,
+				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
+			},
 			{
 				Name:        "vcn_domain_name",
 				Description: "The VCN's domain name, which consists of the VCN's DNS label, and the oraclevcn.com domain.",

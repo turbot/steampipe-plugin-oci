@@ -107,12 +107,12 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 				Type:        proto.ColumnType_CIDR,
 				Transform:   transform.FromField("Ipv6CidrBlock"),
 			},
-			// {
-			// 	Name:        "ipv6_public_cidr_block",
-			// 	Description: "For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's public IP address space.",
-			// 	Type:        proto.ColumnType_CIDR,
-			// 	Transform:   transform.FromField("Ipv6PublicCidrBlock"),
-			// },
+			{
+				Name:        "ipv6_public_cidr_block",
+				Description: "[DEPRECATED] For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's public IP address space.",
+				Type:        proto.ColumnType_CIDR,
+				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
+			},
 			{
 				Name:        "ipv6_virtual_router_ip",
 				Description: "For an IPv6-enabled subnet, this is the IPv6 address of the virtual router.",

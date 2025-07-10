@@ -109,7 +109,7 @@ func tableCoreSubnet(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "ipv6_public_cidr_block",
-				Description: "For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's public IP address space.",
+				Description: "[DEPRECATED] For an IPv6-enabled subnet, this is the IPv6 CIDR block for the subnet's public IP address space.",
 				Type:        proto.ColumnType_CIDR,
 				Transform:   transform.FromField("Ipv6PublicCidrBlock"),
 			},

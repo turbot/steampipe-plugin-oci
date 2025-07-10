@@ -63,6 +63,7 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Description: "To determine if any Network Firewall is associated with this Network Firewall Policy.",
 				Type:        proto.ColumnType_BOOL,
 				Hydrate:     getNetworkFirewallPolicy,
+				Transform:   transform.From(isFirewallAttached),
 			},
 			{
 				Name:        "lifecycle_details",
@@ -78,43 +79,50 @@ func tableNetworkFirewallPolicy(_ context.Context) *plugin.Table {
 				Name:        "application_lists",
 				Description: "A mapping of strings to arrays of Application objects.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyApplications,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "decryption_profiles",
 				Description: "A mapping of strings to DecryptionProfile objects.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyDecryptionProfiles,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "decryption_rules",
 				Description: "List of Decryption Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyDecryptionRules,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "ip_address_lists",
 				Description: "Map defining IP address lists of the policy. The value of an entry is a list of IP addresses or prefixes in CIDR notation. The associated key is the identifier by which the IP address list is referenced.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyAddresses,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "mapped_secrets",
 				Description: "A mapping of strings to MappedSecret objects.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyMappedSecrets,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "security_rules",
 				Description: "List of Security Rules defining the behavior of the policy. The first rule with a matching condition determines the action taken upon network traffic.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicySecurityRules,
+				Transform:   transform.FromValue(),
 			},
 			{
 				Name:        "url_lists",
 				Description: "A mapping of strings to arrays of UrlPattern objects.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getNetworkFirewallPolicy,
+				Hydrate:     listNetworkFirewallPolicyURLs,
+				Transform:   transform.FromValue(),
 			},
 
 			// tags
@@ -268,6 +276,420 @@ func getNetworkFirewallPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 	return response.NetworkFirewallPolicy, nil
 }
 
+func listNetworkFirewallPolicyApplications(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyApplications", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyApplications", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListApplicationsRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var applications []networkfirewall.ApplicationSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListApplications(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyApplications", "api_error", err)
+			return nil, err
+		}
+		applications = append(applications, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return applications, nil
+}
+
+func listNetworkFirewallPolicyDecryptionProfiles(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionProfiles", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionProfiles", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListDecryptionProfilesRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var decryptionProfiles []networkfirewall.DecryptionProfileSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListDecryptionProfiles(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionProfiles", "api_error", err)
+			return nil, err
+		}
+		decryptionProfiles = append(decryptionProfiles, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return decryptionProfiles, nil
+}
+
+func listNetworkFirewallPolicyDecryptionRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionRules", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionRules", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListDecryptionRulesRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+
+	var decryptionRules []networkfirewall.DecryptionRuleSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListDecryptionRules(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyDecryptionRules", "api_error", err)
+			return nil, err
+		}
+		decryptionRules = append(decryptionRules, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return decryptionRules, nil
+}
+
+func listNetworkFirewallPolicyMappedSecrets(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyMappedSecrets", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyMappedSecrets", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListMappedSecretsRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var mappedSecrets []networkfirewall.MappedSecretSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListMappedSecrets(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyMappedSecrets", "api_error", err)
+			return nil, err
+		}
+		mappedSecrets = append(mappedSecrets, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return mappedSecrets, nil
+}
+
+func listNetworkFirewallPolicySecurityRules(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicySecurityRules", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicySecurityRules", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListSecurityRulesRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var securityRules []networkfirewall.SecurityRuleSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListSecurityRules(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicySecurityRules", "api_error", err)
+			return nil, err
+		}
+		securityRules = append(securityRules, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return securityRules, nil
+}
+
+func listNetworkFirewallPolicyAddresses(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyAddresses", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyAddresses", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListAddressListsRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var addressLists []networkfirewall.AddressListSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListAddressLists(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyAddresses", "api_error", err)
+			return nil, err
+		}
+		addressLists = append(addressLists, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return addressLists, nil
+}
+
+func listNetworkFirewallPolicyURLs(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	region := d.EqualsQualString(matrixKeyRegion)
+	compartment := d.EqualsQualString(matrixKeyCompartment)
+	logger.Debug("oci_network_firewall_policy.listNetworkFirewallPolicyURLs", "Compartment", compartment, "OCI_REGION", region)
+
+	var id string
+	if h.Item != nil {
+		switch h.Item.(type) {
+		case networkfirewall.NetworkFirewallPolicySummary:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
+		case networkfirewall.NetworkFirewallPolicy:
+			id = *h.Item.(networkfirewall.NetworkFirewallPolicy).Id
+		}
+	} else {
+		id = d.EqualsQuals["id"].GetStringValue()
+		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+			return nil, nil
+		}
+	}
+
+	// handle empty id in get call
+	if id == "" {
+		return nil, nil
+	}
+
+	// Create Session
+	session, err := networkFirewallService(ctx, d, region)
+	if err != nil {
+		logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyURLs", "connection_error", err)
+		return nil, err
+	}
+
+	request := networkfirewall.ListUrlListsRequest{
+		NetworkFirewallPolicyId: types.String(id),
+		RequestMetadata: common.RequestMetadata{
+			RetryPolicy: getDefaultRetryPolicy(d.Connection),
+		},
+	}
+
+	var urlLists []networkfirewall.UrlListSummary
+	pagesLeft := true
+	for pagesLeft {
+		response, err := session.NetworkFirewallClient.ListUrlLists(ctx, request)
+		if err != nil {
+			logger.Error("oci_network_firewall_policy.listNetworkFirewallPolicyURLs", "api_error", err)
+			return nil, err
+		}
+		urlLists = append(urlLists, response.Items...)
+		if response.OpcNextPage != nil {
+			request.Page = response.OpcNextPage
+		} else {
+			pagesLeft = false
+		}
+	}
+
+	return urlLists, nil
+}
+
 //// TRANSFORM FUNCTION
 
 func networkFirewallPolicyTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
@@ -307,6 +729,16 @@ func networkFirewallPolicyTags(_ context.Context, d *transform.TransformData) (i
 	}
 
 	return tags, nil
+}
+
+func isFirewallAttached(_ context.Context, d *transform.TransformData) (interface{}, error) {
+	firewallPolicy := d.HydrateItem.(networkfirewall.NetworkFirewallPolicy)
+
+	if firewallPolicy.AttachedNetworkFirewallCount != nil && *firewallPolicy.AttachedNetworkFirewallCount > 0 {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 // Build additional filters

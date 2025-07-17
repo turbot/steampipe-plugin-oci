@@ -69,7 +69,7 @@ func tableBudget(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "target_compartment_id",
-				Description: "This is DEPRECATED. For backwards compatability, the property will be populated when targetType is COMPARTMENT AND targets contains EXACT ONE target compartment ocid. For all other scenarios, this property will be left empty.",
+				Description: "[DEPRECATED] For backwards compatability, the property will be populated when targetType is COMPARTMENT AND targets contains EXACT ONE target compartment ocid. For all other scenarios, this property will be left empty.",
 				Type:        proto.ColumnType_STRING,
 				Transform:   transform.FromCamel(),
 			},

@@ -41,6 +41,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_ai_anomaly_detection_project":                             tableAiAnomalyDetectionProject(ctx),
 			"oci_analytics_instance":                                       tableAnalyticsInstance(ctx),
 			"oci_apigateway_api":                                           tableApiGatewayApi(ctx),
+			"oci_application_migration_migration":                          tableApplicationMigrationMigration(ctx),
+			"oci_application_migration_source":                             tableApplicationMigrationSource(ctx),
 			"oci_artifacts_container_image_signature":                      tableArtifactContainerImageSignature(ctx),
 			"oci_artifacts_container_image":                                tableArtifactContainerImage(ctx),
 			"oci_artifacts_container_repository":                           tableArtifactContainerRepository(ctx),

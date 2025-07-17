@@ -5,7 +5,7 @@ description: "Allows users to query data related to migrations in Oracle Cloud I
 
 # Table: oci_application_migration_migration - Query OCI Application Migration Service Migrations using SQL
 
-**Deprecated. Use [azuread_group](https://hub.steampipe.io/plugins/turbot/azuread/tables/azuread_group) instead.**
+**Deprecated. Use [oci_cloud_migrations_migration](https://hub.steampipe.io/plugins/turbot/oci/tables/oci_cloud_migrations_migration) instead.**
 
 Oracle Cloud Infrastructure's Application Migration Service simplifies the migration of applications from on-premise data centers or other clouds to Oracle Cloud Infrastructure. It supports a wide range of source applications, including Java EE, Oracle WebLogic Server, Oracle SOA Suite, and more. The service provides a comprehensive solution for migrating applications, databases, and associated configurations.
 

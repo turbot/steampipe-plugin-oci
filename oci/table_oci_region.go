@@ -23,13 +23,11 @@ func tableIdentityRegion(_ context.Context) *plugin.Table {
 				Name:        "name",
 				Description: "The name of the region.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Name"),
 			},
 			{
 				Name:        "key",
 				Description: "The key of the region.",
 				Type:        proto.ColumnType_STRING,
-				Transform:   transform.FromField("Key"),
 			},
 			{
 				Name:        "is_home_region",

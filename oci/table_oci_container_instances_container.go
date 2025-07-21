@@ -121,7 +121,7 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "additional_capabilities",
-				Description: "A list of additional configurable container capabilities.",
+				Description: "[DEPRECATED] A list of additional configurable container capabilities.",
 				Type:        proto.ColumnType_JSON,
 				Hydrate:     getContainer,
 			},

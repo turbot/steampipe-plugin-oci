@@ -38,10 +38,6 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 					Require: plugin.Optional,
 				},
 				{
-					Name:    "is_analytics_cluster_attached",
-					Require: plugin.Optional,
-				},
-				{
 					Name:    "is_heat_wave_cluster_attached",
 					Require: plugin.Optional,
 				},
@@ -132,7 +128,7 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			},
 			{
 				Name:        "is_analytics_cluster_attached",
-				Description: "If the DB System has an Analytics Cluster attached.",
+				Description: "[DEPRECATED] If the DB System has an Analytics Cluster attached.",
 				Type:        proto.ColumnType_BOOL,
 			},
 			{
@@ -193,7 +189,7 @@ func tableMySQLDBSystem(_ context.Context) *plugin.Table {
 			// json fields
 			{
 				Name:        "analytics_cluster",
-				Description: "A summary of an Analytics Cluster.",
+				Description: "[DEPRECATED] A summary of an Analytics Cluster.",
 				Type:        proto.ColumnType_JSON,
 			},
 			{
@@ -482,9 +478,6 @@ func buildMySQLDBSystemFilters(equalQuals plugin.KeyColumnEqualsQualMap) mysql.L
 	}
 	if equalQuals["id"] != nil {
 		request.DbSystemId = types.String(equalQuals["id"].GetStringValue())
-	}
-	if equalQuals["is_analytics_cluster_attached"] != nil {
-		request.IsAnalyticsClusterAttached = types.Bool(equalQuals["is_analytics_cluster_attached"].GetBoolValue())
 	}
 	if equalQuals["is_heat_wave_cluster_attached"] != nil {
 		request.IsHeatWaveClusterAttached = types.Bool(equalQuals["is_heat_wave_cluster_attached"].GetBoolValue())

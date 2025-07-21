@@ -2,11 +2,8 @@ package oci
 
 import (
 	"context"
-	"strings"
+	"errors"
 
-	"github.com/oracle/oci-go-sdk/v65/applicationmigration"
-	"github.com/oracle/oci-go-sdk/v65/common"
-	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin/transform"
@@ -15,13 +12,8 @@ import (
 // // TABLE DEFINITION
 func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 	return &plugin.Table{
-		Name:             "oci_application_migration_source",
-		Description:      "OCI Application Migration Source",
-		DefaultTransform: transform.FromCamel(),
-		Get: &plugin.GetConfig{
-			KeyColumns: plugin.SingleColumn("id"),
-			Hydrate:    getApplicationMigrationSource,
-		},
+		Name:        "oci_application_migration_source",
+		Description: "[DEPRECATED] OCI Application Migration Source",
 		List: &plugin.ListConfig{
 			Hydrate:           listApplicationMigrationSources,
 			ShouldIgnoreError: isNotFoundError([]string{"404"}),
@@ -87,7 +79,6 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 				Name:        "source_details",
 				Description: "Details of the source.",
 				Type:        proto.ColumnType_JSON,
-				Hydrate:     getApplicationMigrationSource,
 			},
 			{
 				Name:        "type",
@@ -100,7 +91,6 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 				Name:        "tags",
 				Description: ColumnDescriptionTags,
 				Type:        proto.ColumnType_JSON,
-				Transform:   transform.From(applicationMigrationSourceTags),
 			},
 			{
 				Name:        "title",
@@ -130,158 +120,6 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listApplicationMigrationSources(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := d.EqualsQualString(matrixKeyRegion)
-	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_application_migration_source.listApplicationMigrationSources", "Compartment", compartment, "OCI_REGION", region)
-
-	equalQuals := d.EqualsQuals
-	// Return nil, if given compartment_id doesn't match
-	if equalQuals["compartment_id"] != nil && compartment != equalQuals["compartment_id"].GetStringValue() {
-		return nil, nil
-	}
-
-	// Create Session
-	session, err := applicationMigrationService(ctx, d, region)
-	if err != nil {
-		logger.Error("oci_application_migration_source.listApplicationMigrationSources", "connection_error", err)
-		return nil, err
-	}
-
-	//Build request parameters
-	request := buildApplicationMigrationSourceFilters(equalQuals)
-	request.CompartmentId = types.String(compartment)
-	request.Limit = types.Int(100)
-	request.RequestMetadata = common.RequestMetadata{
-		RetryPolicy: getDefaultRetryPolicy(d.Connection),
-	}
-
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < int64(*request.Limit) {
-			request.Limit = types.Int(int(*limit))
-		}
-	}
-
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.ApplicationMigrationClient.ListSources(ctx, request)
-		if err != nil {
-			logger.Error("oci_application_migration_source.listApplicationMigrationSources", "api_error", err)
-			return nil, err
-		}
-		for _, respItem := range response.Items {
-			d.StreamListItem(ctx, respItem)
-
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
-			}
-		}
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
-		} else {
-			pagesLeft = false
-		}
-	}
-
+	err := errors.New("The oci_application_migration_source table has been deprecated and removed, please use oci_cloud_migrations_migration/oci_cloud_migrations_migration_asset table instead.")
 	return nil, err
-}
-
-//// HYDRATE FUNCTION
-
-func getApplicationMigrationSource(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (interface{}, error) {
-	logger := plugin.Logger(ctx)
-	region := d.EqualsQualString(matrixKeyRegion)
-	compartment := d.EqualsQualString(matrixKeyCompartment)
-	logger.Debug("oci_application_migration_source.getApplicationMigrationSource", "Compartment", compartment, "OCI_REGION", region)
-
-	var id string
-	if h.Item != nil {
-		id = *h.Item.(applicationmigration.SourceSummary).Id
-	} else {
-		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
-			return nil, nil
-		}
-	}
-
-	// handle empty id in get call
-	if id == "" {
-		return nil, nil
-	}
-
-	// Create Session
-
-	session, err := applicationMigrationService(ctx, d, region)
-	if err != nil {
-		logger.Error("oci_application_migration_source.getApplicationMigrationSource", "connection_error", err)
-		return nil, err
-	}
-
-	request := applicationmigration.GetSourceRequest{
-		SourceId: types.String(id),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(d.Connection),
-		},
-	}
-
-	response, err := session.ApplicationMigrationClient.GetSource(ctx, request)
-	if err != nil {
-		logger.Error("oci_application_migration_source.getApplicationMigrationSource", "api_error", err)
-		return nil, err
-	}
-	return response.Source, nil
-}
-
-//// TRANSFORM FUNCTION
-
-func applicationMigrationSourceTags(_ context.Context, d *transform.TransformData) (interface{}, error) {
-	var freeformTags map[string]string
-	var definedTags map[string]map[string]interface{}
-	switch d.HydrateItem.(type) {
-	case applicationmigration.Source:
-		obj := d.HydrateItem.(applicationmigration.Source)
-		freeformTags = obj.FreeformTags
-		definedTags = obj.DefinedTags
-	case applicationmigration.SourceSummary:
-		obj := d.HydrateItem.(applicationmigration.SourceSummary)
-		freeformTags = obj.FreeformTags
-		definedTags = obj.DefinedTags
-	}
-
-	var tags map[string]interface{}
-	if freeformTags != nil {
-		tags = map[string]interface{}{}
-		for k, v := range freeformTags {
-			tags[k] = v
-		}
-	}
-	if definedTags != nil {
-		if tags == nil {
-			tags = map[string]interface{}{}
-		}
-		for _, v := range definedTags {
-			for key, value := range v {
-				tags[key] = value
-			}
-
-		}
-	}
-	return tags, nil
-}
-
-// Build additional filters
-func buildApplicationMigrationSourceFilters(equalQuals plugin.KeyColumnEqualsQualMap) applicationmigration.ListSourcesRequest {
-	request := applicationmigration.ListSourcesRequest{}
-
-	if equalQuals["display_name"] != nil {
-		request.DisplayName = types.String(equalQuals["display_name"].GetStringValue())
-
-	}
-	if equalQuals["lifecycle_state"] != nil {
-		request.LifecycleState = applicationmigration.ListSourcesLifecycleStateEnum(equalQuals["lifecycle_state"].GetStringValue())
-	}
-
-	return request
 }

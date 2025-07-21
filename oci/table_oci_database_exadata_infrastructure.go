@@ -199,6 +199,7 @@ func tableOciDatabaseExadataInfrastructure(_ context.Context) *plugin.Table {
 				Name:        "maintenance_slo_status",
 				Type:        proto.ColumnType_STRING,
 				Description: "A field to capture ‘Maintenance SLO Status’ for the Exadata infrastructure with values ‘OK’, ‘DEGRADED’. Default is ‘OK’ when the infrastructure is provisioned.",
+				Transform:   transform.FromField("MaintenanceSLOStatus"),
 			},
 			{
 				Name:        "storage_server_version",

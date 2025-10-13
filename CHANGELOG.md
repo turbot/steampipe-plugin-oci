@@ -1,3 +1,10 @@
+## v1.2.0 [2025-10-13]
+
+_Dependencies_
+
+- Recompiled plugin with Go version `1.24`. ([#662](https://github.com/turbot/steampipe-plugin-oci/pull/662))
+- Recompiled plugin with [steampipe-plugin-sdk v5.13.1](https://github.com/turbot/steampipe-plugin-sdk/blob/develop/CHANGELOG.md#v5131-2025-09-25) that addresses critical and high vulnerabilities in dependent packages. ([#672](https://github.com/turbot/steampipe-plugin-oci/pull/672))
+
 ## v1.1.0 [2025-04-17]
 
 _Dependencies_

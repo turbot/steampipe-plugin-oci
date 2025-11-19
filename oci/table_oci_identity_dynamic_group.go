@@ -122,56 +122,85 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 		return nil, err
 	}
 
-	// The OCID of the tenancy containing the compartment.
-	request := identity.ListDynamicGroupsRequest{
-		CompartmentId: &session.TenancyID,
-		Limit:         types.Int(1000),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(d.Connection),
-		},
+	// Get all compartments to query dynamic groups from each
+	// Dynamic groups are scoped to identity domains, but querying from all compartments
+	// ensures we capture groups from all domains (default and non-default)
+	compartments, err := listAllCompartments(ctx, d)
+	if err != nil {
+		return nil, err
 	}
 
-	// Check for additional filters
-	if equalQuals["name"] != nil {
-		name := equalQuals["name"].GetStringValue()
-		request.Name = types.String(name)
-	}
+	// Track dynamic groups we've already seen to avoid duplicates
+	seenDynamicGroups := make(map[string]bool)
 
-	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
-		request.LifecycleState = identity.DynamicGroupLifecycleStateEnum(lifecycleState)
-	}
-
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < int64(*request.Limit) {
-			request.Limit = types.Int(int(*limit))
-		}
-	}
-
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.IdentityClient.ListDynamicGroups(ctx, request)
-		if err != nil {
-			return nil, err
+	// Query dynamic groups from each compartment
+	for _, compartment := range compartments {
+		compartmentId := compartment.Id
+		if compartmentId == nil {
+			continue
 		}
 
-		for _, dynamicGroup := range response.Items {
-			d.StreamListItem(ctx, dynamicGroup)
+		request := identity.ListDynamicGroupsRequest{
+			CompartmentId: compartmentId,
+			Limit:         types.Int(1000),
+			RequestMetadata: common.RequestMetadata{
+				RetryPolicy: getDefaultRetryPolicy(d.Connection),
+			},
+		}
 
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
+		// Check for additional filters
+		if equalQuals["name"] != nil {
+			name := equalQuals["name"].GetStringValue()
+			request.Name = types.String(name)
+		}
+
+		if equalQuals["lifecycle_state"] != nil {
+			lifecycleState := equalQuals["lifecycle_state"].GetStringValue()
+			request.LifecycleState = identity.DynamicGroupLifecycleStateEnum(lifecycleState)
+		}
+
+		limit := d.QueryContext.Limit
+		if d.QueryContext.Limit != nil {
+			if *limit < int64(*request.Limit) {
+				request.Limit = types.Int(int(*limit))
 			}
 		}
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
-		} else {
-			pagesLeft = false
+
+		pagesLeft := true
+		for pagesLeft {
+			response, err := session.IdentityClient.ListDynamicGroups(ctx, request)
+			if err != nil {
+				// Log error but continue with other compartments
+				plugin.Logger(ctx).Warn("listIdentityDynamicGroups", "ListDynamicGroupsError", err, "CompartmentId", *compartmentId)
+				break
+			}
+
+			for _, dynamicGroup := range response.Items {
+				// Skip if we've already seen this dynamic group (by ID)
+				if dynamicGroup.Id != nil {
+					groupId := *dynamicGroup.Id
+					if seenDynamicGroups[groupId] {
+						continue
+					}
+					seenDynamicGroups[groupId] = true
+				}
+
+				d.StreamListItem(ctx, dynamicGroup)
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if d.RowsRemaining(ctx) == 0 {
+					return nil, nil
+				}
+			}
+			if response.OpcNextPage != nil {
+				request.Page = response.OpcNextPage
+			} else {
+				pagesLeft = false
+			}
 		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS

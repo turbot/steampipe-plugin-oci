@@ -169,76 +169,104 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		return nil, err
 	}
 
-	// The OCID of the tenancy containing the compartment.
-	request := identity.ListDomainsRequest{
-		CompartmentId: &session.TenancyID,
-		Limit:         types.Int(1000),
-		RequestMetadata: common.RequestMetadata{
-			RetryPolicy: getDefaultRetryPolicy(d.Connection),
-		},
+	// Get all compartments to query domains from each
+	compartments, err := listAllCompartments(ctx, d)
+	if err != nil {
+		return nil, err
 	}
 
-	// Check for additional filters
-	if equalQuals["diaplay_name"] != nil {
-		name := d.EqualsQualString("diaplay_name")
-		request.DisplayName = types.String(name)
-	}
-	if equalQuals["url"] != nil {
-		url := d.EqualsQualString("url")
-		request.Url = types.String(url)
-	}
-	if equalQuals["home_region_url"] != nil {
-		homeRegionUrl := d.EqualsQualString("home_region_url")
-		request.HomeRegionUrl = types.String(homeRegionUrl)
-	}
-	if equalQuals["type"] != nil {
-		domainType := d.EqualsQualString("type")
-		request.Type = types.String(domainType)
-	}
-	if equalQuals["license_type"] != nil {
-		licenseType := d.EqualsQualString("license_type")
-		request.Type = types.String(licenseType)
-	}
-	if equalQuals["is_hidden_on_login"] != nil {
-		isLoginHidden := equalQuals["is_hidden_on_login"].GetBoolValue()
-		request.IsHiddenOnLogin = types.Bool(isLoginHidden)
-	}
+	// Track domains we've already seen to avoid duplicates
+	seenDomains := make(map[string]bool)
 
-	if equalQuals["lifecycle_state"] != nil {
-		lifecycleState := d.EqualsQualString("lifecycle_state")
-		request.LifecycleState = identity.DomainLifecycleStateEnum(lifecycleState)
-	}
-
-	limit := d.QueryContext.Limit
-	if d.QueryContext.Limit != nil {
-		if *limit < int64(*request.Limit) {
-			request.Limit = types.Int(int(*limit))
-		}
-	}
-
-	pagesLeft := true
-	for pagesLeft {
-		response, err := session.IdentityClient.ListDomains(ctx, request)
-		if err != nil {
-			return nil, err
+	// Query domains from each compartment
+	for _, compartment := range compartments {
+		compartmentId := compartment.Id
+		if compartmentId == nil {
+			continue
 		}
 
-		for _, group := range response.Items {
-			d.StreamListItem(ctx, group)
+		// The OCID of the compartment containing the domain.
+		request := identity.ListDomainsRequest{
+			CompartmentId: compartmentId,
+			Limit:         types.Int(1000),
+			RequestMetadata: common.RequestMetadata{
+				RetryPolicy: getDefaultRetryPolicy(d.Connection),
+			},
+		}
 
-			// Context can be cancelled due to manual cancellation or the limit has been hit
-			if d.RowsRemaining(ctx) == 0 {
-				return nil, nil
+		// Check for additional filters
+		if equalQuals["diaplay_name"] != nil {
+			name := d.EqualsQualString("diaplay_name")
+			request.DisplayName = types.String(name)
+		}
+		if equalQuals["url"] != nil {
+			url := d.EqualsQualString("url")
+			request.Url = types.String(url)
+		}
+		if equalQuals["home_region_url"] != nil {
+			homeRegionUrl := d.EqualsQualString("home_region_url")
+			request.HomeRegionUrl = types.String(homeRegionUrl)
+		}
+		if equalQuals["type"] != nil {
+			domainType := d.EqualsQualString("type")
+			request.Type = types.String(domainType)
+		}
+		if equalQuals["license_type"] != nil {
+			licenseType := d.EqualsQualString("license_type")
+			request.Type = types.String(licenseType)
+		}
+		if equalQuals["is_hidden_on_login"] != nil {
+			isLoginHidden := equalQuals["is_hidden_on_login"].GetBoolValue()
+			request.IsHiddenOnLogin = types.Bool(isLoginHidden)
+		}
+
+		if equalQuals["lifecycle_state"] != nil {
+			lifecycleState := d.EqualsQualString("lifecycle_state")
+			request.LifecycleState = identity.DomainLifecycleStateEnum(lifecycleState)
+		}
+
+		limit := d.QueryContext.Limit
+		if d.QueryContext.Limit != nil {
+			if *limit < int64(*request.Limit) {
+				request.Limit = types.Int(int(*limit))
 			}
 		}
-		if response.OpcNextPage != nil {
-			request.Page = response.OpcNextPage
-		} else {
-			pagesLeft = false
+
+		pagesLeft := true
+		for pagesLeft {
+			response, err := session.IdentityClient.ListDomains(ctx, request)
+			if err != nil {
+				// Log error but continue with other compartments
+				plugin.Logger(ctx).Warn("listDomains", "ListDomainsError", err, "CompartmentId", *compartmentId)
+				break
+			}
+
+			for _, domain := range response.Items {
+				// Skip if we've already seen this domain (by ID)
+				if domain.Id != nil {
+					domainId := *domain.Id
+					if seenDomains[domainId] {
+						continue
+					}
+					seenDomains[domainId] = true
+				}
+
+				d.StreamListItem(ctx, domain)
+
+				// Context can be cancelled due to manual cancellation or the limit has been hit
+				if d.RowsRemaining(ctx) == 0 {
+					return nil, nil
+				}
+			}
+			if response.OpcNextPage != nil {
+				request.Page = response.OpcNextPage
+			} else {
+				pagesLeft = false
+			}
 		}
 	}
 
-	return nil, err
+	return nil, nil
 }
 
 //// HYDRATE FUNCTIONS

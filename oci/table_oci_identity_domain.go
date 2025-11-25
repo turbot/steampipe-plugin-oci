@@ -195,8 +195,8 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 
 		// Check for additional filters
-		if equalQuals["diaplay_name"] != nil {
-			name := d.EqualsQualString("diaplay_name")
+		if equalQuals["display_name"] != nil {
+			name := d.EqualsQualString("display_name")
 			request.DisplayName = types.String(name)
 		}
 		if equalQuals["url"] != nil {

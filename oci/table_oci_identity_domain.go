@@ -213,7 +213,7 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 		}
 		if equalQuals["license_type"] != nil {
 			licenseType := d.EqualsQualString("license_type")
-			request.Type = types.String(licenseType)
+			request.LicenseType = types.String(licenseType)
 		}
 		if equalQuals["is_hidden_on_login"] != nil {
 			isLoginHidden := equalQuals["is_hidden_on_login"].GetBoolValue()

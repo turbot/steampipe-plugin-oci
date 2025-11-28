@@ -171,7 +171,7 @@ func listIdentityDynamicGroups(ctx context.Context, d *plugin.QueryData, _ *plug
 			response, err := session.IdentityClient.ListDynamicGroups(ctx, request)
 			if err != nil {
 				// Log error but continue with other compartments
-				plugin.Logger(ctx).Warn("listIdentityDynamicGroups", "ListDynamicGroupsError", err, "CompartmentId", *compartmentId)
+				plugin.Logger(ctx).Error("listIdentityDynamicGroups", "ListDynamicGroupsError", err, "CompartmentId", *compartmentId)
 				break
 			}
 

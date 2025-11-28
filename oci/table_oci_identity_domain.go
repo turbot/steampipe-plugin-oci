@@ -237,7 +237,7 @@ func listDomains(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData
 			response, err := session.IdentityClient.ListDomains(ctx, request)
 			if err != nil {
 				// Log error but continue with other compartments
-				plugin.Logger(ctx).Warn("listDomains", "ListDomainsError", err, "CompartmentId", *compartmentId)
+				plugin.Logger(ctx).Error("listDomains", "ListDomainsError", err, "CompartmentId", *compartmentId)
 				break
 			}
 

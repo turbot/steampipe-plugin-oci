@@ -199,6 +199,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 			"oci_service_catalog_private_application":                      tableOciServiceCatalogPrivateApplication(ctx),
 			"oci_streaming_stream":                                         tableOciStreamingStream(ctx),
 			"oci_vault_secret":                                             tableVaultSecret(ctx),
+			"oci_waf_network_address_list":                                tableWafNetworkAddressList(ctx),
+			"oci_waf_web_app_firewall":                                    tableWafWebAppFirewall(ctx),
+			"oci_waf_web_app_firewall_policy":                             tableWafWebAppFirewallPolicy(ctx),
 		},
 	}
 	return p

@@ -57,6 +57,7 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/servicecatalog"
 	"github.com/oracle/oci-go-sdk/v65/streaming"
 	"github.com/oracle/oci-go-sdk/v65/vault"
+	"github.com/oracle/oci-go-sdk/v65/waf"
 	"github.com/turbot/go-kit/types"
 	"github.com/turbot/steampipe-plugin-sdk/v5/connection"
 	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
@@ -113,6 +114,7 @@ type session struct {
 	VaultClient                           vault.VaultsClient
 	VirtualNetworkClient                  core.VirtualNetworkClient
 	CloudMigrationsClient                 cloudmigrations.MigrationClient
+	WafClient                             waf.WafClient
 }
 
 // admService returns the service client for OCI ADM service
@@ -2455,6 +2457,43 @@ func serviceCatalogService(ctx context.Context, d *plugin.QueryData, region stri
 	}
 
 	// save session in cache
+	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+
+	return sess, nil
+}
+
+// wafService returns the service client for OCI WAF service
+func wafService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
+	logger := plugin.Logger(ctx)
+
+	serviceCacheKey := fmt.Sprintf("waf-%s", region)
+	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+		return cachedData.(*session), nil
+	}
+
+	ociConfig := GetConfig(d.Connection)
+
+	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	if err != nil {
+		logger.Error("wafService", "getProvider.Error", err)
+		return nil, err
+	}
+
+	client, err := waf.NewWafClientWithConfigurationProvider(provider)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantId, err := provider.TenancyOCID()
+	if err != nil {
+		return nil, err
+	}
+
+	sess := &session{
+		TenancyID: tenantId,
+		WafClient: client,
+	}
+
 	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
 
 	return sess, nil

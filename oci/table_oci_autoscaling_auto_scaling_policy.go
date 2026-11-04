@@ -192,7 +192,7 @@ func getAutoscalingAutoScalingPolicy(ctx context.Context, d *plugin.QueryData, h
 	logger.Debug("oci_autoscaling_auto_scaling_policy.getAutoscalingAutoScalingPolicy", "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

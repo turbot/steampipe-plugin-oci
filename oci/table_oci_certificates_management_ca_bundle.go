@@ -185,7 +185,7 @@ func getCertificatesManagementCaBundle(ctx context.Context, d *plugin.QueryData,
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificates_management_ca_bundle.getCertificatesManagementCaBundle", "Compartment", compartment, "OCI_REGION", region)
 
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

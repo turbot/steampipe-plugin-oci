@@ -189,7 +189,7 @@ func getIdentityTagNamespace(ctx context.Context, d *plugin.QueryData, h *plugin
 	logger.Debug("oci.getIdentityTagNamespace", "Compartment", compartment)
 
 	// Restrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

@@ -386,7 +386,7 @@ func getDatabaseExadataInfrastructure(ctx context.Context, d *plugin.QueryData, 
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

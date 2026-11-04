@@ -233,7 +233,7 @@ func getCertificatesManagementCertificateAuthority(ctx context.Context, d *plugi
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificates_management_certificate_authority.getCertificatesManagementCertificateAuthority", "Compartment", compartment, "OCI_REGION", region)
-	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

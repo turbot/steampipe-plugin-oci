@@ -239,7 +239,7 @@ func getArtifactContainerImage(ctx context.Context, d *plugin.QueryData, h *plug
 		id = *h.Item.(artifacts.ContainerImageSummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

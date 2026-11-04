@@ -200,7 +200,7 @@ func getAiAnomalyDetectionAiPrivateEndpoint(ctx context.Context, d *plugin.Query
 		id = *h.Item.(aianomalydetection.AiPrivateEndpointSummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

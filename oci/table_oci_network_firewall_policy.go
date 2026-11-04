@@ -244,7 +244,7 @@ func getNetworkFirewallPolicy(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = *h.Item.(networkfirewall.NetworkFirewallPolicySummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -292,7 +292,7 @@ func listNetworkFirewallPolicyApplications(ctx context.Context, d *plugin.QueryD
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -351,7 +351,7 @@ func listNetworkFirewallPolicyDecryptionProfiles(ctx context.Context, d *plugin.
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -410,7 +410,7 @@ func listNetworkFirewallPolicyDecryptionRules(ctx context.Context, d *plugin.Que
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -470,7 +470,7 @@ func listNetworkFirewallPolicyMappedSecrets(ctx context.Context, d *plugin.Query
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -529,7 +529,7 @@ func listNetworkFirewallPolicySecurityRules(ctx context.Context, d *plugin.Query
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -588,7 +588,7 @@ func listNetworkFirewallPolicyAddresses(ctx context.Context, d *plugin.QueryData
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}
@@ -647,7 +647,7 @@ func listNetworkFirewallPolicyURLs(ctx context.Context, d *plugin.QueryData, h *
 		}
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

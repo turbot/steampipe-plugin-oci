@@ -295,7 +295,7 @@ func getObjectStorageBucket(ctx context.Context, d *plugin.QueryData, h *plugin.
 	} else {
 		bucketName = d.EqualsQuals["name"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

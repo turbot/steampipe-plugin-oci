@@ -227,7 +227,7 @@ func getNetworkFirewall(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 		id = *h.Item.(networkfirewall.NetworkFirewallSummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

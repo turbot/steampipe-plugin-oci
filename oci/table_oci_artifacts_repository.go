@@ -189,7 +189,7 @@ func getArtifactRepository(ctx context.Context, d *plugin.QueryData, h *plugin.H
 
 	id := d.EqualsQuals["id"].GetStringValue()
 
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

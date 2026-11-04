@@ -205,7 +205,7 @@ func getDnsTsigKey(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateDa
 	logger.Debug("oci.getDnsTsigKey", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 	var id string

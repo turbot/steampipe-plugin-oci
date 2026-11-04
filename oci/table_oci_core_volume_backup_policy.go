@@ -188,7 +188,7 @@ func getCoreVolumeBackupPolicy(ctx context.Context, d *plugin.QueryData, _ *plug
 	logger.Debug("core.getCoreVolumeBackupPolicy", "Compartment", compartment, "OCI_REGION", matrixRegion)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

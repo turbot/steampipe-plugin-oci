@@ -214,7 +214,7 @@ func getArtifactContainerRepository(ctx context.Context, d *plugin.QueryData, h 
 		id = *h.Item.(artifacts.ContainerRepositorySummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

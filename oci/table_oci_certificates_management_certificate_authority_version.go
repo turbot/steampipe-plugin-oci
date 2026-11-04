@@ -194,7 +194,7 @@ func getCertificatesManagementCertificateAuthorityVersion(ctx context.Context, d
 	logger.Debug("oci_certificates_management_certificate_authority_version.getCertificatesManagementCertificateAuthorityVersion", "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

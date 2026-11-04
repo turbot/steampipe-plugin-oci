@@ -240,12 +240,12 @@ func getCertificatesManagementCertificate(ctx context.Context, d *plugin.QueryDa
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificates_management_certificate.getCertificatesManagementCertificate", "Compartment", compartment, "OCI_REGION", region)
-	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

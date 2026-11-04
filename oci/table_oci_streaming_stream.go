@@ -243,7 +243,7 @@ func getStreamingStream(ctx context.Context, d *plugin.QueryData, h *plugin.Hydr
 	} else {
 
 		// Restrict the api call to only root compartment
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 		id = d.EqualsQuals["id"].GetStringValue()

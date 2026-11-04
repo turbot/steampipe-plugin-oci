@@ -182,7 +182,7 @@ func getCertificatesManagementAssociation(ctx context.Context, d *plugin.QueryDa
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_certificates_management_association.getCertificatesManagementAssociation", "Compartment", compartment, "OCI_REGION", region)
 
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

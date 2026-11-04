@@ -198,7 +198,7 @@ func getAiAnomalyDetectionDataAsset(ctx context.Context, d *plugin.QueryData, h 
 		id = *h.Item.(aianomalydetection.DataAssetSummary).Id
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

@@ -168,7 +168,7 @@ func listMySQLConfigurations(ctx context.Context, d *plugin.QueryData, _ *plugin
 	}
 
 	// Restrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 
@@ -227,7 +227,7 @@ func getMySQLConfiguration(ctx context.Context, d *plugin.QueryData, h *plugin.H
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

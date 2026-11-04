@@ -237,7 +237,7 @@ func getCoreCustomImage(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydr
 	logger.Debug("getCoreCustomImage", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

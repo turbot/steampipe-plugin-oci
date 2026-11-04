@@ -302,7 +302,7 @@ func getVnicAttachment(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger.Trace("getVnicAttachment", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 	id := d.EqualsQuals["id"].GetStringValue()
@@ -346,7 +346,7 @@ func getVnic(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData) (i
 		vnicId = *h.Item.(core.VnicAttachment).VnicId
 	} else {
 		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 

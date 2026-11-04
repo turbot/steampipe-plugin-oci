@@ -240,7 +240,7 @@ func getDnsZone(ctx context.Context, d *plugin.QueryData, h *plugin.HydrateData)
 	logger.Debug("oci.getDnsZone", "Compartment", compartment)
 
 	// Rstrict the api call to only root compartment
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 	var id string

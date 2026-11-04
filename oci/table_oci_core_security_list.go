@@ -205,7 +205,7 @@ func getCoreSecurityList(ctx context.Context, d *plugin.QueryData, _ *plugin.Hyd
 	logger.Debug("oci.getCoreSecurityList", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

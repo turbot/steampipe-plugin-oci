@@ -277,7 +277,7 @@ func getBootVolume(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDa
 	logger.Debug("oci.getBootVolume", "Compartment", compartment, "OCI_zone", zone)
 
 	// Restrict the api call to only root compartment and one zone/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") || !strings.HasSuffix(zone, "AD-1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") || !strings.HasSuffix(zone, "AD-1") {
 		return nil, nil
 	}
 

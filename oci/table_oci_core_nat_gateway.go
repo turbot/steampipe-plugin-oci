@@ -213,7 +213,7 @@ func getCoreNatGateway(ctx context.Context, d *plugin.QueryData, _ *plugin.Hydra
 	logger.Debug("oci.getCoreNatGateway", "Compartment", compartment, "OCI_REGION", region)
 
 	// Rstrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

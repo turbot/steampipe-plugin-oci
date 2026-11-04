@@ -183,7 +183,7 @@ func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugi
 		id = *h.Item.(core.InstanceConfigurationSummary).Id
 	} else {
 		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 

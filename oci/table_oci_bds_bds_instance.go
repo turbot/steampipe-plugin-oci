@@ -250,7 +250,7 @@ func getBigDataServiceInstance(ctx context.Context, d *plugin.QueryData, h *plug
 	region := d.EqualsQualString(matrixKeyRegion)
 	compartment := d.EqualsQualString(matrixKeyCompartment)
 	logger.Debug("oci_bds_bds_instance.getBigDataServiceInstance", "Compartment", compartment, "OCI_REGION", region)
-	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if h.Item == nil && !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

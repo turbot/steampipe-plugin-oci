@@ -232,7 +232,7 @@ func getArtifactGenericArtifact(ctx context.Context, d *plugin.QueryData, h *plu
 	logger.Debug("oci_artifacts_generic_artifact.getArtifactGenericArtifact", "Compartment", compartment, "OCI_REGION", region)
 
 	id := d.EqualsQuals["id"].GetStringValue()
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

@@ -124,7 +124,7 @@ func getCertificateAuthorityBundle(ctx context.Context, d *plugin.QueryData, h *
 	logger.Debug("oci_certificates_authority_bundle.getCertificateAuthorityBundle", "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 

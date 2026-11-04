@@ -217,7 +217,7 @@ func getAutoScalingConfiguration(ctx context.Context, d *plugin.QueryData, h *pl
 	logger.Debug("getAutoScalingConfiguration", "Compartment", compartment, "OCI_REGION", region)
 
 	// Restrict the api call to only root compartment/ per region
-	if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+	if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 		return nil, nil
 	}
 
@@ -228,7 +228,7 @@ func getAutoScalingConfiguration(ctx context.Context, d *plugin.QueryData, h *pl
 	} else {
 		id = d.EqualsQuals["id"].GetStringValue()
 		// Restrict the api call to only root compartment/ per region
-		if !strings.HasPrefix(compartment, "ocid1.tenancy.oc1") {
+		if !strings.HasPrefix(compartment, "ocid1.tenancy") {
 			return nil, nil
 		}
 	}

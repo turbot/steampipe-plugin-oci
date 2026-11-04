@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
-	"github.com/turbot/steampipe-plugin-sdk/v5/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
 // function which returns an ErrorPredicate for OCI API calls

@@ -1,3 +1,17 @@
+## v1.3.0 [2026-11-04]
+
+_Enhancements_
+
+- Updated the `Get` hydrate calls across numerous tables to return results in non-OC1 realms (for example, government and other commercial realms) by removing the hardcoded `ocid1.tenancy.oc1` root compartment prefix check. ([#704](https://github.com/turbot/steampipe-plugin-oci/pull/704)) (Thanks [@sbalmos](https://github.com/sbalmos) for the contribution!)
+
+_Dependencies_
+
+- Recompiled plugin with [steampipe-plugin-sdk v6.1.0](https://github.com/turbot/steampipe-plugin-sdk/blob/v6.1.0/CHANGELOG.md#v610-2026-08-18) that fixes data races in the in-process query execution path. Note that a failed scan on the in-process path now returns an error instead of silently returning empty results. ([#705](https://github.com/turbot/steampipe-plugin-oci/pull/705))
+- Recompiled plugin with Go version `1.26`. ([#683](https://github.com/turbot/steampipe-plugin-oci/pull/683))
+- Bumped `github.com/klauspost/compress` from `1.17.2` to `1.18.7`. ([#702](https://github.com/turbot/steampipe-plugin-oci/pull/702))
+- Bumped `golang.org/x/crypto` to `0.58.0`.
+- Bumped `google.golang.org/grpc` from `1.66.0` to `1.83.1`. ([#698](https://github.com/turbot/steampipe-plugin-oci/pull/698))
+
 ## v1.2.1 [2025-11-28]
 
 _Bug fixes_

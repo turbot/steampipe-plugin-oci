@@ -19,9 +19,11 @@ func tableCoreImage(_ context.Context) *plugin.Table {
 		Name:        "oci_core_image",
 		Description: "OCI Core Image",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"404", "400"}),
-			Hydrate:           getCoreImage,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404", "400"}),
+			},
+			Hydrate: getCoreImage,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listCoreImages,

@@ -21,8 +21,10 @@ func tableOciDatabaseCloudVMCluster(_ context.Context) *plugin.Table {
 			Hydrate:    getDatabaseCloudVmCluster,
 		},
 		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listDatabaseCloudVMClusters,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			Hydrate: listDatabaseCloudVMClusters,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

@@ -23,8 +23,10 @@ func tableOciStreamingStream(_ context.Context) *plugin.Table {
 			Hydrate:    getStreamingStream,
 		},
 		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listStreamingStreams,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			Hydrate: listStreamingStreams,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

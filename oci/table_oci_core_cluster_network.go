@@ -19,9 +19,11 @@ func tableCoreClusterNetwork(_ context.Context) *plugin.Table {
 		Name:        "oci_core_cluster_network",
 		Description: "OCI Core Cluster Network",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getClusterNetwork,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400"}),
+			},
+			Hydrate: getClusterNetwork,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listClusterNetworks,

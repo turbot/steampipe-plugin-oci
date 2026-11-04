@@ -23,9 +23,11 @@ func tableOciDatabase(_ context.Context) *plugin.Table {
 			Hydrate:    getDatabase,
 		},
 		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			ParentHydrate:     listDatabaseDBHomes,
-			Hydrate:           listDatabases,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			ParentHydrate: listDatabaseDBHomes,
+			Hydrate:       listDatabases,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

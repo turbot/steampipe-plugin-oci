@@ -19,9 +19,11 @@ func tableFileStorageSnapshot(_ context.Context) *plugin.Table {
 		Name:        "oci_file_storage_snapshot",
 		Description: "OCI File Storage Snapshot",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getFileStorageSnapshot,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400"}),
+			},
+			Hydrate: getFileStorageSnapshot,
 		},
 		List: &plugin.ListConfig{
 			Hydrate:       listFileStorageSnapshots,

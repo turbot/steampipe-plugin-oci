@@ -22,7 +22,7 @@ func tableCertificatesManagementCaBundle(_ context.Context) *plugin.Table {
 			KeyColumns: plugin.SingleColumn("id"),
 			Hydrate:    getCertificatesManagementCaBundle,
 			IgnoreConfig: &plugin.IgnoreConfig{
-				ShouldIgnoreError: isNotFoundError([]string{"InvalidParameter", "404"}),
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"InvalidParameter", "404"}),
 			},
 		},
 		List: &plugin.ListConfig{

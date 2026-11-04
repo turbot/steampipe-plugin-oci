@@ -15,8 +15,10 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 		Name:        "oci_application_migration_source",
 		Description: "[DEPRECATED] OCI Application Migration Source",
 		List: &plugin.ListConfig{
-			Hydrate:           listApplicationMigrationSources,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate: listApplicationMigrationSources,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",
@@ -120,6 +122,6 @@ func tableApplicationMigrationSource(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listApplicationMigrationSources(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	err := errors.New("The oci_application_migration_source table has been deprecated and removed, please use oci_cloud_migrations_migration/oci_cloud_migrations_migration_asset table instead.")
+	err := errors.New("the oci_application_migration_source table has been deprecated and removed, please use oci_cloud_migrations_migration/oci_cloud_migrations_migration_asset table instead")
 	return nil, err
 }

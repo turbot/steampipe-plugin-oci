@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/oracle/oci-go-sdk/v65/common"
 	oci_common "github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/core"
 	"github.com/turbot/go-kit/types"
@@ -20,9 +19,11 @@ func tableCoreInstanceConfiguration(_ context.Context) *plugin.Table {
 		Name:        "oci_core_instance_configuration",
 		Description: "OCI Core Instance Configuration",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getInstanceConfiguration,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400"}),
+			},
+			Hydrate: getInstanceConfiguration,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listInstanceConfigurations,
@@ -134,7 +135,7 @@ func listInstanceConfigurations(ctx context.Context, d *plugin.QueryData, _ *plu
 		CompartmentId: types.String(compartment),
 		Limit:         types.Int(1000),
 	}
-	request.RequestMetadata = common.RequestMetadata{
+	request.RequestMetadata = oci_common.RequestMetadata{
 		RetryPolicy: getDefaultRetryPolicy(d.Connection),
 	}
 
@@ -208,7 +209,7 @@ func getInstanceConfiguration(ctx context.Context, d *plugin.QueryData, h *plugi
 
 	request := core.GetInstanceConfigurationRequest{
 		InstanceConfigurationId: types.String(id),
-		RequestMetadata: common.RequestMetadata{
+		RequestMetadata: oci_common.RequestMetadata{
 			RetryPolicy: getDefaultRetryPolicy(d.Connection),
 		},
 	}

@@ -19,9 +19,11 @@ func tableOnsSubscription(_ context.Context) *plugin.Table {
 		Name:        "oci_ons_subscription",
 		Description: "OCI Ons Subscription",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
-			Hydrate:           getOnsSubscription,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400", "404"}),
+			},
+			Hydrate: getOnsSubscription,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listOnsSubscriptions,

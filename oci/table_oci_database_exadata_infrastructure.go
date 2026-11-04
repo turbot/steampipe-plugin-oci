@@ -21,8 +21,10 @@ func tableOciDatabaseExadataInfrastructure(_ context.Context) *plugin.Table {
 			Hydrate:    getDatabaseExadataInfrastructure,
 		},
 		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listDatabaseExadataInfrastructures,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			Hydrate: listDatabaseExadataInfrastructures,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

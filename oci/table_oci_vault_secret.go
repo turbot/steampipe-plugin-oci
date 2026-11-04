@@ -19,9 +19,11 @@ func tableVaultSecret(_ context.Context) *plugin.Table {
 		Name:        "oci_vault_secret",
 		Description: "OCI Vault Secret",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			Hydrate:           getVaultSecret,
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getVaultSecret,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400", "404"}),
+			},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listVaultSecrets,

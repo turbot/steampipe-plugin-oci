@@ -26,8 +26,10 @@ func tableDevopsRepository(_ context.Context) *plugin.Table {
 			Hydrate:    getRepository,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listRepositories,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate: listRepositories,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 			// Since we were encountering errors when retrieving results by passing the project_id as an input parameter, we have decided to remove it from the optional key qualifiers.
 			KeyColumns: []*plugin.KeyColumn{
 				{

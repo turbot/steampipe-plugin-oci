@@ -20,9 +20,11 @@ func tableOciContainerEngineCluster(_ context.Context) *plugin.Table {
 		Name:        "oci_containerengine_cluster",
 		Description: "OCI Container Engine Cluster",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           getContainerEngineCluster,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			Hydrate: getContainerEngineCluster,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listContainerEngineClusters,

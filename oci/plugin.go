@@ -21,7 +21,9 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             pluginName,
 		DefaultTransform: transform.FromGo(),
 		DefaultGetConfig: &plugin.GetConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 		},
 		ConnectionKeyColumns: []plugin.ConnectionKeyColumn{
 			{

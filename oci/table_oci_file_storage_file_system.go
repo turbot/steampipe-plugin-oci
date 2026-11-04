@@ -19,9 +19,11 @@ func tableFileStorageFileSystem(_ context.Context) *plugin.Table {
 		Name:        "oci_file_storage_file_system",
 		Description: "OCI File Storage File System",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getFileStorageFileSystem,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400"}),
+			},
+			Hydrate: getFileStorageFileSystem,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listFileStorageFileSystems,

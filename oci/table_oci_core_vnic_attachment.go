@@ -25,8 +25,10 @@ func tableCoreVnicAttachment(_ context.Context) *plugin.Table {
 			Hydrate:    getVnicAttachment,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listVnicAttachments,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate: listVnicAttachments,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "availability_domain",

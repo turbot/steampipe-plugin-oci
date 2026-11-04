@@ -19,8 +19,10 @@ func tableLoggingSearch(_ context.Context) *plugin.Table {
 		Name:        "oci_logging_search",
 		Description: "OCI Logging Search",
 		List: &plugin.ListConfig{
-			Hydrate:           listLoggingSearch,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate: listLoggingSearch,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:       "timestamp",
@@ -169,8 +171,8 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	if timeEnd == nil {
 		timeEnd = &common.SDKTime{Time: (time.Now())}
 	}
-	request.SearchLogsDetails.TimeStart = timeStart
-	request.SearchLogsDetails.TimeEnd = timeEnd
+	request.TimeStart = timeStart
+	request.TimeEnd = timeEnd
 	var searchQuery string
 	if d.EqualsQualString("search_query") == "" {
 		log_group_name := d.EqualsQualString("log_group_name")
@@ -188,7 +190,7 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 	} else {
 		searchQuery = d.EqualsQualString("search_query")
 	}
-	request.SearchLogsDetails.SearchQuery = types.String(searchQuery)
+	request.SearchQuery = types.String(searchQuery)
 
 	request.Limit = types.Int(1000)
 	request.RequestMetadata = common.RequestMetadata{
@@ -208,7 +210,7 @@ func listLoggingSearch(ctx context.Context, d *plugin.QueryData, h *plugin.Hydra
 		if err != nil {
 			return nil, err
 		}
-		for _, result := range response.SearchResponse.Results {
+		for _, result := range response.Results {
 			d.StreamListItem(ctx, LoggingSearch{*result.Data, region})
 
 			// Context can be cancelled due to manual cancellation or the limit has been hit

@@ -9,9 +9,10 @@ import (
 	"github.com/turbot/steampipe-plugin-sdk/v6/plugin"
 )
 
-// function which returns an ErrorPredicate for OCI API calls
-func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicate {
-	return func(err error) bool {
+// function which returns an ErrorPredicateWithContext for OCI API calls,
+// matching on the HTTP status code
+func isNotFoundError(notFoundErrors []string) plugin.ErrorPredicateWithContext {
+	return func(_ context.Context, _ *plugin.QueryData, _ *plugin.HydrateData, err error) bool {
 		if ociErr, ok := err.(oci_common.ServiceError); ok {
 			return slices.Contains(notFoundErrors, strconv.Itoa(ociErr.GetHTTPStatusCode()))
 		}

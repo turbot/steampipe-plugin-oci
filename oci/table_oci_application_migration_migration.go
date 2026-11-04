@@ -149,6 +149,6 @@ func tableApplicationMigrationMigration(_ context.Context) *plugin.Table {
 //// LIST FUNCTION
 
 func listApplicationMigrationMigrations(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
-	err := errors.New("The oci_application_migration_migration table has been deprecated and removed, please use oci_cloud_migrations_migration table instead.")
+	err := errors.New("the oci_application_migration_migration table has been deprecated and removed, please use oci_cloud_migrations_migration table instead")
 	return nil, err
 }

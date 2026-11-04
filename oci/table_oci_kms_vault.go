@@ -19,9 +19,11 @@ func tableKmsVault(_ context.Context) *plugin.Table {
 		Name:        "oci_kms_vault",
 		Description: "OCI KMS Vault",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			Hydrate:           getKmsVault,
-			ShouldIgnoreError: isNotFoundError([]string{"400", "404"}),
+			KeyColumns: plugin.SingleColumn("id"),
+			Hydrate:    getKmsVault,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400", "404"}),
+			},
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listKmsVaults,

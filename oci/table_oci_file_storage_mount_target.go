@@ -19,9 +19,11 @@ func tableFileStorageMountTarget(_ context.Context) *plugin.Table {
 		Name:        "oci_file_storage_mount_target",
 		Description: "OCI File Storage Mount Target",
 		Get: &plugin.GetConfig{
-			KeyColumns:        plugin.SingleColumn("id"),
-			ShouldIgnoreError: isNotFoundError([]string{"400"}),
-			Hydrate:           getFileStorageMountTarget,
+			KeyColumns: plugin.SingleColumn("id"),
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"400"}),
+			},
+			Hydrate: getFileStorageMountTarget,
 		},
 		List: &plugin.ListConfig{
 			Hydrate: listFileStorageMountTargets,

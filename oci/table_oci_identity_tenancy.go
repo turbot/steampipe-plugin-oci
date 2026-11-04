@@ -22,8 +22,10 @@ func tableIdentityTenancy(_ context.Context) *plugin.Table {
 		},
 		HydrateConfig: []plugin.HydrateConfig{
 			{
-				Func:              getRetentionPeriod,
-				ShouldIgnoreError: isNotFoundError([]string{"404"}),
+				Func: getRetentionPeriod,
+				IgnoreConfig: &plugin.IgnoreConfig{
+					ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+				},
 			},
 		},
 		Columns: commonColumnsForAllResource([]*plugin.Column{

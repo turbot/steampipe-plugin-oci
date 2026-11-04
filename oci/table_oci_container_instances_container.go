@@ -26,8 +26,10 @@ func tableContainerInstancesContainer(_ context.Context) *plugin.Table {
 			Hydrate:    getContainer,
 		},
 		List: &plugin.ListConfig{
-			Hydrate:           listContainers,
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
+			Hydrate: listContainers,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

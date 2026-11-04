@@ -251,11 +251,11 @@ func listMonitoringMetricStatistics(ctx context.Context, d *plugin.QueryData, gr
 				Namespace:      &namespace,
 				MetricName:     &metricName,
 				Average:        datapoint.Value,
-				Maximum:        getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsMax),
-				Minimum:        getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsMin),
+				Maximum:        getStatisticForColumnByTimestamp(datapoint.Timestamp.UTC(), *item.CompartmentId, metricDetailsMax),
+				Minimum:        getStatisticForColumnByTimestamp(datapoint.Timestamp.UTC(), *item.CompartmentId, metricDetailsMin),
 				Timestamp:      &datapoint.Timestamp.Time,
-				SampleCount:    getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsCount),
-				Sum:            getStatisticForColumnByTimestamp(datapoint.Timestamp.Time.UTC(), *item.CompartmentId, metricDetailsSum),
+				SampleCount:    getStatisticForColumnByTimestamp(datapoint.Timestamp.UTC(), *item.CompartmentId, metricDetailsCount),
+				Sum:            getStatisticForColumnByTimestamp(datapoint.Timestamp.UTC(), *item.CompartmentId, metricDetailsSum),
 				Metadata:       item.Metadata,
 				Region:         region,
 			})
@@ -282,7 +282,7 @@ func filterMetricStatistic(metricStatistic monitoring.SummarizeMetricsDataRespon
 func getStatisticForColumnByTimestamp(timestamp time.Time, compartmentId string, metricData []MetricData) *float64 {
 	var value *float64
 	for _, t := range metricData {
-		if *t.Timestamp == timestamp && compartmentId == *t.CompartmentId {
+		if t.Timestamp.Equal(timestamp) && compartmentId == *t.CompartmentId {
 			value = t.PointValue
 			break
 		}

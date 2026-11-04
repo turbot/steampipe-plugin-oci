@@ -21,8 +21,10 @@ func tableOciPluggableDatabase(_ context.Context) *plugin.Table {
 			Hydrate:    getPluggableDatabase,
 		},
 		List: &plugin.ListConfig{
-			ShouldIgnoreError: isNotFoundError([]string{"404"}),
-			Hydrate:           listDatabasePluggableDatabases,
+			IgnoreConfig: &plugin.IgnoreConfig{
+				ShouldIgnoreErrorFunc: isNotFoundError([]string{"404"}),
+			},
+			Hydrate: listDatabasePluggableDatabases,
 			KeyColumns: []*plugin.KeyColumn{
 				{
 					Name:    "compartment_id",

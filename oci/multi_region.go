@@ -53,7 +53,7 @@ func BuildCompartmentList(ctx context.Context, d *plugin.QueryData) []map[string
 	// cache compartment matrix
 	cacheKey := "CompartmentList"
 
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
@@ -72,7 +72,7 @@ func BuildCompartmentList(ctx context.Context, d *plugin.QueryData) []map[string
 		matrix[i] = map[string]interface{}{matrixKeyCompartment: *compartment.Id}
 	}
 	// set CompartmentList cache
-	d.ConnectionManager.Cache.Set(cacheKey, matrix)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, matrix)
 
 	return matrix
 }
@@ -82,7 +82,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 	// cache compartment region matrix
 	cacheKey := "CompartmentRegionList"
 
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
@@ -123,7 +123,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 		}
 
 		// set CompartmentRegionList cache
-		d.ConnectionManager.Cache.Set(cacheKey, matrix)
+		_ = d.ConnectionCache.Set(ctx, cacheKey, matrix)
 		return matrix
 	}
 
@@ -137,7 +137,7 @@ func BuildCompartementRegionList(ctx context.Context, d *plugin.QueryData) []map
 	}
 
 	// set CompartmentRegionList cache
-	d.ConnectionManager.Cache.Set(cacheKey, defaultMatrix)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, defaultMatrix)
 
 	return defaultMatrix
 }
@@ -160,7 +160,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 	}
 
 	serviceCacheKey := "listAllCompartments"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.([]identity.Compartment), nil
 	}
 
@@ -211,7 +211,7 @@ func listAllCompartments(ctx context.Context, d *plugin.QueryData) ([]identity.C
 	}
 
 	// save compartments in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, compartments)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, compartments)
 
 	return compartments, err
 }
@@ -281,7 +281,7 @@ func listAllzones(ctx context.Context, d *plugin.QueryData) ([]zoneInfo, error) 
 // BuildCompartmentZonalList :: return a list of matrix items, one per zone-compartment specified in the connection config
 func BuildCompartementZonalList(ctx context.Context, d *plugin.QueryData) []map[string]interface{} {
 	cacheKey := "CompartmentZonalList"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.([]map[string]interface{})
 	}
 
@@ -317,7 +317,7 @@ func BuildCompartementZonalList(ctx context.Context, d *plugin.QueryData) []map[
 	}
 
 	// set CompartmentZonalList cache
-	d.ConnectionManager.Cache.Set(cacheKey, matrix)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, matrix)
 
 	return matrix
 }
@@ -335,7 +335,7 @@ func getRegionFromEnvVar() string {
 
 func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	cacheKey := "getCloudGuardConfiguration"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.(cloudguard.Configuration), nil
 	}
 
@@ -358,7 +358,7 @@ func getCloudGuardConfiguration(ctx context.Context, d *plugin.QueryData, _ *plu
 	}
 
 	// set response cache
-	d.ConnectionManager.Cache.Set(cacheKey, response.Configuration)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, response.Configuration)
 
 	return response.Configuration, nil
 }
@@ -368,7 +368,7 @@ func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string
 	logger := plugin.Logger(ctx)
 
 	cacheKey := "OciRegionList"
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.([]string), nil
 	}
 
@@ -395,7 +395,7 @@ func listOciAvailableRegions(ctx context.Context, d *plugin.QueryData) ([]string
 		regionNames = append(regionNames, *region.Name)
 	}
 
-	d.ConnectionManager.Cache.Set(cacheKey, regionNames)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, regionNames)
 
 	return regionNames, nil
 }

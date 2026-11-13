@@ -121,14 +121,14 @@ func admService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("adm-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("admService", "getProvider.Error", err)
 		return nil, err
@@ -151,7 +151,7 @@ func admService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 
@@ -163,14 +163,14 @@ func aiAnomalyDetectionService(ctx context.Context, d *plugin.QueryData, region 
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("aianomalydetection-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("aiAnomalyDetectionService", "getProvider.Error", err)
 		return nil, err
@@ -194,7 +194,7 @@ func aiAnomalyDetectionService(ctx context.Context, d *plugin.QueryData, region 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -205,14 +205,14 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("apigateway-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("apiGatewayService", "error_getProvider", err)
 		return nil, err
@@ -238,7 +238,7 @@ func apiGatewayService(ctx context.Context, d *plugin.QueryData, region string) 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -248,14 +248,14 @@ func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("artifact-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("artifactService", "error_getProvider", err)
 		return nil, err
@@ -281,7 +281,7 @@ func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -290,14 +290,14 @@ func artifactService(ctx context.Context, d *plugin.QueryData, region string) (*
 func auditService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 
 	serviceCacheKey := fmt.Sprintf("audit-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, "", ociConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func auditService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -331,14 +331,14 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("autoscaling-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("autoScalingService", "getProvider.Error", err)
 		return nil, err
@@ -360,7 +360,7 @@ func autoScalingService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -371,14 +371,14 @@ func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("bigdata-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("bdsService", "getProvider.Error", err)
 		return nil, err
@@ -400,7 +400,7 @@ func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -409,14 +409,14 @@ func bdsService(ctx context.Context, d *plugin.QueryData, region string) (*sessi
 func identityService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 
 	serviceCacheKey := fmt.Sprintf("identity-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, "", ociConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +439,7 @@ func identityService(ctx context.Context, d *plugin.QueryData) (*session, error)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -450,14 +450,14 @@ func devOpsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("devops-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("devOpsService", "getProvider.Error", err)
 		return nil, err
@@ -479,7 +479,7 @@ func devOpsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -490,14 +490,14 @@ func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region st
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("identityregional-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("identityServiceRegional", "getProvider.Error", err)
 		return nil, err
@@ -519,7 +519,7 @@ func identityServiceRegional(ctx context.Context, d *plugin.QueryData, region st
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -530,14 +530,14 @@ func loggingManagementService(ctx context.Context, d *plugin.QueryData, region s
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("loggingmanagement-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("loggingManagementService", "getProvider.Error", err)
 		return nil, err
@@ -559,7 +559,7 @@ func loggingManagementService(ctx context.Context, d *plugin.QueryData, region s
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -570,14 +570,14 @@ func loggingSearchService(ctx context.Context, d *plugin.QueryData, region strin
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("loggingsearch-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("loggingSearchService", "getProvider.Error", err)
 		return nil, err
@@ -599,7 +599,7 @@ func loggingSearchService(ctx context.Context, d *plugin.QueryData, region strin
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -610,14 +610,14 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("blockstorage-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("coreBlockStorageService", "getProvider.Error", err)
 		return nil, err
@@ -639,7 +639,7 @@ func coreBlockStorageService(ctx context.Context, d *plugin.QueryData, region st
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -650,14 +650,14 @@ func containerEngineService(ctx context.Context, d *plugin.QueryData, region str
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("containerengine-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("containerEngineService", "getProvider.Error", err)
 		return nil, err
@@ -679,7 +679,7 @@ func containerEngineService(ctx context.Context, d *plugin.QueryData, region str
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -690,14 +690,14 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("events-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("eventsService", "getProvider.Error", err)
 		return nil, err
@@ -719,7 +719,7 @@ func eventsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -730,14 +730,14 @@ func devopsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("devops-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("devopsService", "getProvider.Error", err)
 		return nil, err
@@ -759,7 +759,7 @@ func devopsService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -770,14 +770,14 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("filestorage-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("fileStorageService", "getProvider.Error", err)
 		return nil, err
@@ -798,7 +798,7 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -807,14 +807,14 @@ func fileStorageService(ctx context.Context, d *plugin.QueryData, region string)
 func functionsManagementService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("functionsmanagement-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("functionsManagementService", "getProvider.Error", err)
 		return nil, err
@@ -836,7 +836,7 @@ func functionsManagementService(ctx context.Context, d *plugin.QueryData, region
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -847,14 +847,14 @@ func networkFirewallService(ctx context.Context, d *plugin.QueryData, region str
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("networkFirewall-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("networkFirewallService", "getProvider.Error", err)
 		return nil, err
@@ -878,7 +878,7 @@ func networkFirewallService(ctx context.Context, d *plugin.QueryData, region str
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -889,12 +889,12 @@ func kmsManagementService(ctx context.Context, d *plugin.QueryData, region strin
 
 	// Cache the connection at vault level
 	serviceCacheKey := fmt.Sprintf("keymanagement-%s-%s", region, endpoint)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("kmsManagementService", "getProvider.Error", err)
 		return nil, err
@@ -913,7 +913,7 @@ func kmsManagementService(ctx context.Context, d *plugin.QueryData, region strin
 		KmsManagementClient: client,
 	}
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 	return sess, nil
 }
 
@@ -921,14 +921,14 @@ func kmsManagementService(ctx context.Context, d *plugin.QueryData, region strin
 func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("vault-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("kmsVaultService", "getProvider.Error", err)
 		return nil, err
@@ -950,7 +950,7 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -959,14 +959,14 @@ func kmsVaultService(ctx context.Context, d *plugin.QueryData, region string) (*
 func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("loadbalancer-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("loadBalancerService", "getProvider.Error", err)
 		return nil, err
@@ -988,7 +988,7 @@ func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -997,14 +997,14 @@ func loadBalancerService(ctx context.Context, d *plugin.QueryData, region string
 func objectStorageService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("objectstorage-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("objectStorageService", "getProvider.Error", err)
 		return nil, err
@@ -1026,7 +1026,7 @@ func objectStorageService(ctx context.Context, d *plugin.QueryData, region strin
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1037,14 +1037,14 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("notificationcontrolplane-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("onsNotificationControlPlaneService", "getProvider.Error", err)
 		return nil, err
@@ -1068,7 +1068,7 @@ func onsNotificationControlPlaneService(ctx context.Context, d *plugin.QueryData
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1079,14 +1079,14 @@ func onsNotificationDataPlaneService(ctx context.Context, d *plugin.QueryData, r
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("notificationdataplane-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("notificationDataPlaneService", "getProvider.Error", err)
 		return nil, err
@@ -1110,7 +1110,7 @@ func onsNotificationDataPlaneService(ctx context.Context, d *plugin.QueryData, r
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1121,14 +1121,14 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("computeregional-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("coreComputeServiceRegional", "getProvider.Error", err)
 		return nil, err
@@ -1152,7 +1152,7 @@ func coreComputeService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1163,14 +1163,14 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("computemanagement-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("coreComputeManagementService", "getProvider.Error", err)
 		return nil, err
@@ -1194,7 +1194,7 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1203,14 +1203,14 @@ func coreComputeManagementService(ctx context.Context, d *plugin.QueryData, regi
 func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("virtualnetwork-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("coreVirtualNetworkService", "getProvider.Error", err)
 		return nil, err
@@ -1232,7 +1232,7 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1241,13 +1241,13 @@ func coreVirtualNetworkService(ctx context.Context, d *plugin.QueryData, region 
 func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("cloudguard-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("cloudGuardService", "getProvider.Error", err)
 		return nil, err
@@ -1269,7 +1269,7 @@ func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1278,14 +1278,14 @@ func cloudGuardService(ctx context.Context, d *plugin.QueryData, region string) 
 func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("dns-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, "", ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, "", ociConfig)
 	if err != nil {
 		logger.Error("DNSService", "getProvider.Error", err)
 		return nil, err
@@ -1307,7 +1307,7 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1316,14 +1316,14 @@ func dnsService(ctx context.Context, d *plugin.QueryData) (*session, error) {
 func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("database-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("databaseService", "getProvider.Error", err)
 		return nil, err
@@ -1345,7 +1345,7 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1354,14 +1354,14 @@ func databaseService(ctx context.Context, d *plugin.QueryData, region string) (*
 func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("budget-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("budgetService", "getProvider.Error", err)
 		return nil, err
@@ -1383,7 +1383,7 @@ func budgetService(ctx context.Context, d *plugin.QueryData, region string) (*se
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1394,14 +1394,14 @@ func certificatesManagementService(ctx context.Context, d *plugin.QueryData, reg
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("certificatesmanagement-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("certificatesManagementService", "getProvider.Error", err)
 		return nil, err
@@ -1425,7 +1425,7 @@ func certificatesManagementService(ctx context.Context, d *plugin.QueryData, reg
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1436,14 +1436,14 @@ func certificatesService(ctx context.Context, d *plugin.QueryData, region string
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("certificates-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("certificatesService", "getProvider.Error", err)
 		return nil, err
@@ -1467,7 +1467,7 @@ func certificatesService(ctx context.Context, d *plugin.QueryData, region string
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1476,14 +1476,14 @@ func certificatesService(ctx context.Context, d *plugin.QueryData, region string
 func monitoringService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("monitoring-%s", "region")
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("monitoringService", "getProvider.Error", err)
 		return nil, err
@@ -1505,7 +1505,7 @@ func monitoringService(ctx context.Context, d *plugin.QueryData, region string) 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1514,14 +1514,14 @@ func monitoringService(ctx context.Context, d *plugin.QueryData, region string) 
 func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("mysqlchannel-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("mySQLChannelService", "getProvider.Error", err)
 		return nil, err
@@ -1543,7 +1543,7 @@ func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1552,14 +1552,14 @@ func mySQLChannelService(ctx context.Context, d *plugin.QueryData, region string
 func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("mysqldbsystem-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("mySQLDBSystem", "getProvider.Error", err)
 		return nil, err
@@ -1581,7 +1581,7 @@ func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region strin
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1590,14 +1590,14 @@ func mySQLDBSystemService(ctx context.Context, d *plugin.QueryData, region strin
 func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("nosql-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("noSQLDatabaseService", "getProvider.Error", err)
 		return nil, err
@@ -1619,7 +1619,7 @@ func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region strin
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1628,14 +1628,14 @@ func noSQLDatabaseService(ctx context.Context, d *plugin.QueryData, region strin
 func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("mysqlbackup-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("mySQLBackupService", "getProvider.Error", err)
 		return nil, err
@@ -1657,7 +1657,7 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1666,14 +1666,14 @@ func mySQLBackupService(ctx context.Context, d *plugin.QueryData, region string)
 func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("mysqlconfiguration-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("mySQLBackupService", "getProvider.Error", err)
 		return nil, err
@@ -1695,7 +1695,7 @@ func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1704,14 +1704,14 @@ func mySQLConfigurationService(ctx context.Context, d *plugin.QueryData, region 
 func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("networkloadbalancer-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("networkLoadBalancerService", "getProvider.Error", err)
 		return nil, err
@@ -1733,7 +1733,7 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1742,14 +1742,14 @@ func networkLoadBalancerService(ctx context.Context, d *plugin.QueryData, region
 func queueService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("queue-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("queueService", "getProvider.Error", err)
 		return nil, err
@@ -1771,7 +1771,7 @@ func queueService(ctx context.Context, d *plugin.QueryData, region string) (*ses
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1780,14 +1780,14 @@ func queueService(ctx context.Context, d *plugin.QueryData, region string) (*ses
 func resourceSearchService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("resourcesearch-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("resourceSearchService", "getProvider.Error", err)
 		return nil, err
@@ -1809,7 +1809,7 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1817,14 +1817,14 @@ func resourceSearchService(ctx context.Context, d *plugin.QueryData, region stri
 func resourceManagerService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("resourcemanager-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("resourceManagerService", "getProvider.Error", err)
 		return nil, err
@@ -1846,7 +1846,7 @@ func resourceManagerService(ctx context.Context, d *plugin.QueryData, region str
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1855,14 +1855,14 @@ func resourceManagerService(ctx context.Context, d *plugin.QueryData, region str
 func streamAdminService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("streamadmin-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("resourceSearchService", "getProvider.Error", err)
 		return nil, err
@@ -1884,7 +1884,7 @@ func streamAdminService(ctx context.Context, d *plugin.QueryData, region string)
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1893,14 +1893,14 @@ func streamAdminService(ctx context.Context, d *plugin.QueryData, region string)
 func vaultService(ctx context.Context, d *plugin.QueryData, region string) (*session, error) {
 	logger := plugin.Logger(ctx)
 	serviceCacheKey := fmt.Sprintf("vaultService-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("vaultService", "getProvider.Error", err)
 		return nil, err
@@ -1922,7 +1922,7 @@ func vaultService(ctx context.Context, d *plugin.QueryData, region string) (*ses
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1933,14 +1933,14 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("analytics-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("analyticsService", "getProvider.Error", err)
 		return nil, err
@@ -1964,7 +1964,7 @@ func analyticsService(ctx context.Context, d *plugin.QueryData, region string) (
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -1975,14 +1975,14 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("bastion-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("bastionService", "getProvider.Error", err)
 		return nil, err
@@ -2006,7 +2006,7 @@ func bastionService(ctx context.Context, d *plugin.QueryData, region string) (*s
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -2017,14 +2017,14 @@ func containerInstancesService(ctx context.Context, d *plugin.QueryData, region 
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("containerinstances-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("containerInstancesService", "getProvider.Error", err)
 		return nil, err
@@ -2046,7 +2046,7 @@ func containerInstancesService(ctx context.Context, d *plugin.QueryData, region 
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
@@ -2057,14 +2057,14 @@ func cloudMigrationsService(ctx context.Context, d *plugin.QueryData, region str
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("cloudmigrations-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("cloudMigrationsService", "error_getProvider", err)
 		return nil, err
@@ -2090,17 +2090,17 @@ func cloudMigrationsService(ctx context.Context, d *plugin.QueryData, region str
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }
 
 // get the configuration provider for the OCI plugin connection to intract with API's
-func getProvider(_ context.Context, d *connection.Manager, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
+func getProvider(ctx context.Context, d *connection.ConnectionCache, region string, config ociConfig) (oci_common.ConfigurationProvider, error) {
 
 	cacheKey := "getProvider"
 	// if provider is already cached, return it
-	if cachedData, ok := d.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.Get(ctx, cacheKey); ok {
 		return cachedData.(oci_common.ConfigurationProvider), nil
 	}
 
@@ -2136,7 +2136,7 @@ func getProvider(_ context.Context, d *connection.Manager, region string, config
 	}
 
 	// save provider in cache
-	d.Cache.Set(cacheKey, provider)
+	_ = d.Set(ctx, cacheKey, provider)
 
 	return provider, nil
 }
@@ -2421,14 +2421,14 @@ func serviceCatalogService(ctx context.Context, d *plugin.QueryData, region stri
 
 	// have we already created and cached the service?
 	serviceCacheKey := fmt.Sprintf("servicecatalog-%s", region)
-	if cachedData, ok := d.ConnectionManager.Cache.Get(serviceCacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, serviceCacheKey); ok {
 		return cachedData.(*session), nil
 	}
 
 	// get oci config info from steampipe connection
 	ociConfig := GetConfig(d.Connection)
 
-	provider, err := getProvider(ctx, d.ConnectionManager, region, ociConfig)
+	provider, err := getProvider(ctx, d.ConnectionCache, region, ociConfig)
 	if err != nil {
 		logger.Error("serviceCatalogService", "getProvider.Error", err)
 		return nil, err
@@ -2455,7 +2455,7 @@ func serviceCatalogService(ctx context.Context, d *plugin.QueryData, region stri
 	}
 
 	// save session in cache
-	d.ConnectionManager.Cache.Set(serviceCacheKey, sess)
+	_ = d.ConnectionCache.Set(ctx, serviceCacheKey, sess)
 
 	return sess, nil
 }

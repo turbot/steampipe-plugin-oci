@@ -28,7 +28,7 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 	cacheKey := "ObjectStorageNamespace"
 
 	// check if the namespace is already saved in cache
-	if cachedData, ok := d.ConnectionManager.Cache.Get(cacheKey); ok {
+	if cachedData, ok := d.ConnectionCache.Get(ctx, cacheKey); ok {
 		return cachedData.(*nameSpace), nil
 	}
 
@@ -48,7 +48,7 @@ func getNamespace(ctx context.Context, d *plugin.QueryData, region string) (*nam
 	name := &nameSpace{
 		Value: *response.Value,
 	}
-	d.ConnectionManager.Cache.Set(cacheKey, name)
+	_ = d.ConnectionCache.Set(ctx, cacheKey, name)
 
 	return name, err
 }
